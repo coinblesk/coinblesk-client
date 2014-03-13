@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <Preference android:title="@string/pref_title_payout_rule" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="ch.uzh.csg.mbps.client.settings.SettingPayOutRulesActivity"
+            android:targetPackage="ch.uzh.csg.mbps.client" />
+    </Preference>
+    
+    <CheckBoxPreference 
+        android:defaultValue="false"
+        android:key="include_fee"
+        android:summary="@string/pref_description_include_fee"
+        android:title="@string/pref_title_include_fee"/>
+    
+     <EditTextPreference
+        android:defaultValue="@string/pref_fee_amount"
+        android:dependency="include_fee"
+        android:inputType="number"
+        android:key="fee_amount"
+        android:maxLength="2"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_fee_amount" />
+</PreferenceScreen>

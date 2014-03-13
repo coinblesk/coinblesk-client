@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/action_warning" 
+        android:title="@string/action_warning" 
+        android:showAsAction="always" 
+        android:visible="true"
+        android:icon="@drawable/ic_alerts_and_states_warning" android:enabled="true"></item>
+
+</menu>

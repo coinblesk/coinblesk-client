@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg2"
+   viewBox="0 0 383.84627 345.18906"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   width="100%"
+   height="100%"
+   sodipodi:docname="pay_payment.svg"
+   inkscape:export-filename="/home/draft/git/mbps_client/client/images/pay_payment.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300">
+  <defs
+     id="defs3039" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1429"
+     inkscape:window-height="868"
+     id="namedview3037"
+     showgrid="false"
+     inkscape:zoom="1.4593652"
+     inkscape:cx="286.13919"
+     inkscape:cy="186.75134"
+     inkscape:window-x="3435"
+     inkscape:window-y="24"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <metadata
+     id="metadata3035">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title></dc:title>
+        <dc:date>2010-03-18T19:16:23</dc:date>
+        <dc:description>arrow, bend, black, clip art, clipart, corner, </dc:description>
+        <dc:source>http://openclipart.org/detail/32383/arrow-by-comeinandburn</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>comeinandburn</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>arrow</rdf:li>
+            <rdf:li>bend</rdf:li>
+            <rdf:li>black</rdf:li>
+            <rdf:li>clip art</rdf:li>
+            <rdf:li>clipart</rdf:li>
+            <rdf:li>corner</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer2"
+     transform="matrix(-0.83847526,0,0,1.0003306,524.17046,-337.93082)"
+     style="fill:#500000;fill-opacity:1;stroke:#480000;stroke-opacity:1">
+    <path
+       id="rect2872"
+       d="m 275.41578,338.2769 -106.30718,79.44397 101.89718,78.59797 1.375,-44.28497 c 0,0 58.60505,4.72832 88.70511,31.48068 30.10005,26.75237 26.26566,97.35932 26.26566,97.35932 l 81.39541,0 C 461.02702,507.72712 451.2,456.27298 407.16108,425.6532 363.12217,395.03342 273.97978,386.06387 273.97978,386.06387 z"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccczcczcc"
+       style="fill:#500000;fill-opacity:1;stroke:#480000;stroke-opacity:1"
+       inkscape:export-filename="/home/draft/git/mbps_client/client/images/pay_payment.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+  </g>
+  <path
+     style="fill:none;stroke:#500000;stroke-width:60;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     d="M 30.079901,183.713 29.394672,315.69835 309.86042,315.18906 308.78846,176.50883"
+     id="path3043"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="cccc" />
+</svg>

@@ -1,0 +1,13 @@
+package ch.uzh.csg.mbps.client;
+
+/**
+ * This interface is used to return a response to / to notify a caller once an
+ * asynchronous task is completed.
+ * 
+ * @param <T> generic placeholder for the returned type
+ */
+public interface IAsyncTaskCompleteListener<T> {
+
+	public void onTaskComplete(T response);
+
+}

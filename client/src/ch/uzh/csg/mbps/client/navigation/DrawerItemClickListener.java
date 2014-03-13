@@ -1,0 +1,206 @@
+package ch.uzh.csg.mbps.client.navigation;
+
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Toast;
+import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
+import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
+import ch.uzh.csg.mbps.client.LoginActivity;
+import ch.uzh.csg.mbps.client.MainActivity;
+import ch.uzh.csg.mbps.client.R;
+import ch.uzh.csg.mbps.client.payment.PayInActivity;
+import ch.uzh.csg.mbps.client.payment.PayOutActivity;
+import ch.uzh.csg.mbps.client.profile.AccountProfileActivity;
+import ch.uzh.csg.mbps.client.request.ReadRequestTask;
+import ch.uzh.csg.mbps.client.request.RequestTask;
+import ch.uzh.csg.mbps.client.request.SignInRequestTask;
+import ch.uzh.csg.mbps.client.request.SignOutRequestTask;
+import ch.uzh.csg.mbps.client.settings.SettingsActivity;
+import ch.uzh.csg.mbps.client.util.ClientController;
+import ch.uzh.csg.mbps.client.util.Constants;
+import ch.uzh.csg.mbps.client.util.InternalStorageXML;
+import ch.uzh.csg.mbps.client.util.TimeHandler;
+import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
+import ch.uzh.csg.mbps.responseobject.ReadAccountTransferObject;
+
+/**
+ * This class represents the navigation drawer. The methods from
+ * {@link AbstractAsyncActivity} are not inherited but overridden.
+ */
+public class DrawerItemClickListener extends AbstractAsyncActivity implements OnItemClickListener, IAsyncTaskCompleteListener<CustomResponseObject> {
+	private View view;
+	private ProgressDialog dialog;
+
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		selectItem(parent, position);
+	}
+	
+	/**
+	 * Swaps fragments to guide through views from main view {@link MainActvity}
+	 */
+	private void selectItem(View view, int position) {
+		this.view = view;
+		switch (position) {
+		case 0:
+			// Profile
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), AccountProfileActivity.class));
+			break;
+		case 1:
+			// Pay In
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), PayInActivity.class));
+			break;
+		case 2:
+			// Pay Out
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), PayOutActivity.class));
+			break;
+		case 3:
+			// Settings
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), SettingsActivity.class));
+			break;
+		case 4:
+			// Connect to Server
+			launchConnectionRequest();
+			break;
+		case 5:
+			// Sign out
+			launchSignOut();
+			break;
+		default:
+			break;
+		}
+	}
+	
+	private void launchConnectionRequest() {
+		if (!ClientController.isOnline()) {
+			showLoadingProgressDialog();
+			RequestTask signIn = new SignInRequestTask(this, ClientController.getUser());
+			signIn.execute();
+		} else {
+			displayResponse(view.getContext().getResources().getString(R.string.already_connected_to_server));
+		}
+	}
+	
+	private void launchSignOut() {
+		if (ClientController.isOnline()) {
+			if(!TimeHandler.getInstance().determineIfLessThanFiveSecondsLeft()){
+				launchSignOutRequest();
+			}else{
+				// Dismiss session
+				TimeHandler.getInstance().terminateSession();
+				updateClientControllerAndFinish();
+				displayResponse(view.getContext().getResources().getString(R.string.session_expired));
+			}
+		} else {
+			updateClientControllerAndFinish();
+		}
+	}
+	
+	private void launchSignOutRequest() {
+		showLoadingProgressDialog();
+		RequestTask signOut = new SignOutRequestTask(this);		
+		signOut.execute();
+	}
+	
+	public void onTaskComplete(CustomResponseObject response) {
+		if (response.isSuccessful()) {
+			if (response.getReadAccountTO() != null) {
+				dismissProgressDialog();
+				updateClientController(response.getReadAccountTO());
+			} else if (response.getType() == Type.LOGIN) {
+				RequestTask read = new ReadRequestTask(this);
+				read.execute();
+			} else if (response.getType() == Type.LOGOUT) {
+				TimeHandler.getInstance().terminateSession();
+				updateClientControllerAndFinish();
+			}
+		} else if (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+			dismissProgressDialog();
+			displayResponse(response.getMessage());
+		} else {
+			dismissProgressDialog();
+			displayResponse(response.getMessage());
+		}
+	}
+	
+	private void updateClientController(ReadAccountTransferObject rato) {
+		String username = ClientController.getUser().getUsername();
+		String password = ClientController.getUser().getPassword();
+		ClientController.setUser(password, username, rato.getUserAccount(), view.getContext());
+		ClientController.setOnlineMode(true);
+
+		launchActivity(MainActivity.class);
+	}
+	
+	private void updateClientControllerAndFinish() {
+		InternalStorageXML.writeUserAccountIntoFile(this.view.getContext().getApplicationContext());
+		dismissProgressDialog();
+		ClientController.clear();
+		launchActivity( LoginActivity.class);
+	}
+	
+	/**
+	 * Starts a new activity. The method is called only for guiding to another
+	 * activity.
+	 * 
+	 * @param <T>
+	 *            generic placeholder for the passed parameter
+	 * @param classActvity
+	 *            The class of the activity which will be started.
+	 */
+	public <T> void launchActivity(Class<T> classActivity){
+		Intent intent = new Intent(this.view.getContext().getApplicationContext(), classActivity);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS );
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		this.finish();
+		this.view.getContext().startActivity(intent);
+	}
+
+	/**
+	 * This method is a placeholder for the toast but much simpler to use. See
+	 * {@link AbstractAsyncActivity}
+	 * 
+	 * @param response
+	 *            The message which is shown in a toast call.
+	 */
+	public void displayResponse(String response) {
+		Toast.makeText(this.view.getContext().getApplicationContext(), response, Toast.LENGTH_LONG).show();
+	}
+	
+	/**
+	 * Starts the progress dialog. As long dialog is running other touch actions
+	 * are ignored.
+	 */
+	public void showLoadingProgressDialog() {
+		if (dialog == null) {
+			dialog = new ProgressDialog(this.view.getRootView().getContext());
+			dialog.setCancelable(false);
+			dialog.setIndeterminate(true);
+		}
+
+		dialog.setMessage(view.getContext().getResources().getString(R.string.loading_progress_dialog));
+		
+		/*
+		 * Runs an UI thread to show the 
+		 * loading progress over another view. 
+		 */
+		runOnUiThread(new Runnable(){
+            public void run() {
+            	dialog.show();
+                }});    
+	}
+
+	public void dismissProgressDialog() {
+		try {
+			if (dialog != null) {
+				dialog.dismiss();
+			} 
+		} catch (Exception e) {}
+	}
+
+}

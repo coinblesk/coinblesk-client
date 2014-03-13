@@ -1,0 +1,56 @@
+package ch.uzh.csg.mbps.client.util;
+
+
+/**
+ * Class for saving static constants of MBPS.
+ */
+public class Constants {
+	public static final String BASE_URI = "http://bitcoin.csg.uzh.ch/server";
+	public static final String BASE_URI_SSL = "https://bitcoin.csg.uzh.ch/server";
+//	public static final String BASE_URI = "http://10.0.2.2:8080/mbps-server";
+//	public static final String BASE_URI_SSL = "https://10.0.2.2:8443/mbps-server";
+	
+	public static final long RESUME_TIMEOUT = 10 * 1000; 
+	public static final long BUYER_ACK_TIMEOUT = 3 * 1000; // in ms
+	public static final int CLIENT_READ_TIMEOUT = 5000; // in ms
+	public static final int CLIENT_CONNECTION_TIMEOUT = 5000; // in ms
+	public static final long CLIENT_SESSION_TIMEOUT = 10*60*1000; //10 minutes
+	public static final long CLIENT_CHECK_TIME_INTERVAL = 15 * 1000;
+	
+	public static final String CONNECTION_ERROR = "Could not establish connection to server! Try again later.";
+	public static final String REST_CLIENT_ERROR = "Could not establish connection to server! Try again later.";
+	
+	/*
+	 * When a remote NFC device wants to talk to your service, it sends a
+	 * so-called "SELECT AID" APDU as defined in the ISO/IEC 7816-4
+	 * specification.
+	 */
+	public static final byte[] CLA_INS_P1_P2 = { 0x00, (byte) 0xA4, 0x04, 0x00 };
+	public static final byte[] AID_MBPS = { (byte) 0xF0, (byte) 0xF0, 0x07, 0x77, (byte) 0xFF, 0x55, 0x11 };
+	public static final byte[] AID_MBPS_RESUME = { (byte) 0xF0, (byte) 0xF0, 0x07, 0x77, (byte) 0xFF, 0x55, 0x12 };
+	
+	public static final byte[] READ_BINARY = new byte[]{0, (byte)0xb0,0,0,1};
+	
+	public static final String BTC = "-1";
+	public static final String MILI_BTC = "0";
+	public static final String MICRO_BTC = "1";
+	
+	public static final String EMAIL_IS_VALID_FALSE ="E-Mail address is not valid!";
+	public static final String FIELDS_NOT_EMPTY_FALSE = "Please fill out all fields!";
+	public static final String IS_PASSWORD_LENGTH_VALID_FALSE = "Password has an invalid form! Please insert a password with a length of 4 until 20 characters!";
+	public static final String IS_USERNAME_VALID_FALSE = "Username has an invalid form!\nOnly letters and numbers with a minimum length of 4 charcters are excepted!.";
+	public static final String IS_TERM_OF_USE_ACCEPTED_FALSE = "Please read and accept the term of use!";
+	public static final String PASSWORD_ARE_EQUAL_FALSE = "The entered passwords do not match, please try again!";
+	public static final String USERNAME_PATTERN = "^[A-Za-z0-9_-]{3,25}$";
+	public static final String TIME_SESSION_EXPIRED = "Time is expired";
+	public static final String NO_COOKIE_STORED = "No Cookie stored!";
+	
+	//minimum value for payouts
+	public static final String MIN_VALUE_PAYOUT = "0.0001";
+
+	
+	public static final int SCALE_CHF = 2;
+	public static final int SCALE_BTC = 8;
+	
+
+}

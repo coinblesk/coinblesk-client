@@ -1,0 +1,130 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".PayOutActivity" >
+    
+    <TextView
+        android:id="@+id/payOut_Balance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/payOut_BalanceText"
+        android:layout_alignParentRight="true" />
+
+    <TextView
+        android:id="@+id/payOut_BalanceCHF"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/payOut_Balance"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <EditText
+        android:id="@+id/payOut_Amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/PayOut_AmountText"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/payOut_BalanceText"
+        android:ems="10"
+        android:inputType="numberDecimal" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/payOut_AmountCHF"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/payOut_Amount"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/payOut_AddressText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/payOut_AmountCHF"
+        android:layout_marginTop="0dp"
+        android:text="@string/payOut_AddressText" />
+
+    <EditText
+        android:id="@+id/payOut_Address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/payOut_AddressText"
+        android:layout_alignParentRight="true"
+        android:hint="@string/payOut_Address"
+        android:layout_below="@+id/payOut_AddressText"
+        android:layout_marginTop="5dp"
+        android:ems="10" />
+
+    <Button
+        android:id="@+id/payOut_payOutButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/buttonHeight"
+        android:layout_alignRight="@+id/payOut_Address"
+        android:layout_below="@+id/payOut_Address"
+        android:layout_marginTop="5dp"
+        android:text="@string/payOut_payOut" />
+
+    <TextView
+        android:id="@+id/PayOut_AmountText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/payOut_AddressText"
+        android:layout_below="@+id/payOut_BalanceCHF"
+        android:layout_marginTop="15dp"
+        android:text="@string/PayOut_AmountText" />
+
+    <TextView
+        android:id="@+id/payOut_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/payOut_title"
+        android:textSize="54sp"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/payOut_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/payOut_title"
+        android:text="@string/payOut_info"
+        android:textColor="#1e5db2" />
+
+    <TextView
+        android:id="@+id/payOut_BalanceText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/payOut_AddressText"
+        android:layout_below="@+id/payout_exchangeRateText"
+        android:layout_marginTop="15dp"
+        android:text="@string/payOut_BalanceText" />
+
+    <TextView
+        android:id="@+id/payout_exchangeRateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/payOut_info"
+        android:layout_below="@+id/payOut_info"
+        android:layout_marginTop="18dp"
+        android:text="@string/payout_exchangeRateText" />
+    
+    <TextView
+        android:id="@+id/payout_exchangeRate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/payout_exchangeRateText"
+        android:layout_alignParentRight="true" />
+
+</RelativeLayout>

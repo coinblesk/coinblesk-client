@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Name of App -->
+    <string name="app_name">MBPS</string>
+
+    <!-- Name of Activities -->
+    <string name="title_activity_login">MBPS</string>
+    <string name="title_activity_reset_password">MBPS - Passwort zurücksetzen</string>
+    <string name="title_activity_registration">MBPS - Registrierung</string>
+    <string name="title_activity_main">MBPS - Konto</string>
+    <string name="title_activity_history">MBPS - Verlauf</string>
+    <string name="title_activity_pay_payment">MBPS - BTC senden</string>
+    <string name="title_activity_receive_payment">MBPS - BTC empfangen</string>
+    <string name="title_activity_pay_in">MBPS - BTC Einzahlen</string>
+    <string name="title_activity_pay_out">MBPS - BTC Auszahlen</string>
+    <string name="title_activity_profile_account">MBPS - Profil</string>
+    <string name="title_activity_edit_email_account_profile">MBPS - Emailadresse ändern</string>
+    <string name="title_activity_edit_passwotrd_account_profile">MBPS - Passwort ändern</string>
+    <string name="title_activity_about">MBPS - Über</string>
+    <string name="title_activity_setting_pay_out_rules">MBPS - Auszahlungs Regeln</string>
+
+    <!-- Login Strings -->
+    <string name="loginUsernameEditText">Benutzername</string>
+    <string name="loginPasswordEditText">Passwort</string>
+    <string name="loginPasswordOrUsernameForgottenTextView">Passwort/Benutzername vergessen</string>
+    <string name="loginSignUpBtn">Registrieren</string>
+    <string name="loginSignInBtn">Anmelden</string>
+    <string name="enter_username_password">Bitte geben Sie Benutzername und Passwort ein</string>
+    <string name="establish_internet_connection">Bitte schalten Sie die Internetverbindung ein um fortzufahren.</string>
+    <string name="invalid_password">Falsches Passwort.</string>
+
+    <!-- Reset Password Activity -->
+    <string name="resetPW_descriptionTextView">Um Ihr Passwort zurückzusetzen geben Sie bitte ihre registrierte Email Adresse ein und klicken Sie auf "Passwort zurücksetzen".</string>
+    <string name="resetPW_emailEditText">Email Adresse eingeben</string>
+    <string name="resetPW_resetButton">Passwort zurücksetzen</string>
+
+    <!-- Registration Strings -->
+    <string name="signUpEditUsernameText">Benutzername</string>
+    <string name="signUpEditEmailText">Email Adresse</string>
+    <string name="signUpEditPasswordText">Passwort</string>
+    <string name="signUpEditConfirmPasswordText">Passwort bestätigen</string>
+    <string name="signUpTermOfUseTextView">AGB lesen</string>
+    <string name="signUpCheckBox">Ich stimme den AGBs zu</string>
+    <string name="signUpAgreeBtn">Registrieren</string>
+    <!-- Popup Window -->
+    <string name="termOfUseTitleView">Allgemeine Geschäfts- und Nutzungsbedingungen</string>
+    <string name="termOfUseTextView">Diese Applikation wurde als Teil eines Masterprojektes am Institut für Informatik an der 
+        Universität Zürich entwickelt.\nWir übernehmen keine Verantwortung für den Verlust Ihrer Bitcoins im Falle eines Systems / Hardware Fehlers 
+        oder bei böswilligem Einfluss durch Dritte. Bitte seien Sie sich bewusst, dass diese Applikation immer noch im Beta-Stadium ist und Fehler 
+        auftreten können.
+        \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics
+         </string>
+    <string name="termOfUseImageCloseBtn">AGBs schliessen</string>
+    <string name="createAccountSuccessful">Bestätigung der Registrierung</string>
+
+    <!-- Main View Strings -->
+    <string name="mainActivityTextView">Kontostand</string>
+    <string name="receiveButton">Bitcoins Empfangen</string>
+    <string name="payButton">Bitcoins Senden</string>
+    <string name="historyButton">Verlauf</string>
+    <!-- Drawer Navigation -->
+    <string-array name="drawerItems_array">
+        <item>Benutzerprofil</item>
+        <item>Einzahlen</item>
+        <item>Auszahlen</item>
+        <item>Einstellungen</item>
+        <item>Mit Server verbinden</item>
+        <item>Abmelden</item>
+    </string-array>
+    <string name="session_expired">Session ist abgelaufen!</string>
+
+    <string name="unexcepted_error">Ein unerwarteter Fehler trat auf. Bitte versuchen Sie es erneut.</string>
+
+    <!-- History Strings -->
+    <string name="recent_payments">Letzte Transaktionen</string>
+    <string name="history_activity_no_transactions_text">Es wurde noch keine Transaktionen getätigt.</string>
+    <string name="history_activity_get_by_email">Klicken Sie um eine komplette Liste all ihrer Transaktionen als Email zu erhalten.</string>
+    <string-array name="history_filter">
+        <item>Transaktionen</item>
+        <item>Einzahlungen</item>
+    	<item>Auszahlungen</item>
+	</string-array>
+
+    <!-- Abstract Payment -->
+    <string name="payment_failure">Transaktion fehlgeschlagen</string>
+    <string name="payment_success">Transaktion erfolgreich</string>
+
+    <!-- Pay Payment Strings -->
+    <string name="payPayment_exchangeRate">Wechselkurs:</string>
+    <string name="payPayment_balanceDescription">Kontostand:</string>
+    <string name="payPayment_paymentDescription">Bitte überprüfen Sie Benutzername und Betrag um die Überweisung zu bestätigen oder zurückzuweisen.</string>
+    <string name="payPayment_pay">Bezahlen</string>
+    <string name="payPayment_usernameTitle">An:</string>
+    <string name="payPayment_amountBTCTitle">Betrag:</string>
+    <string name="payPayment_accept">Akzeptieren</string>
+    <string name="payPayment_reject">Zurückweisen</string>
+    <string name="payPayment_toggleText">Automatisch alle Zahlungen akzeptieren</string>
+
+    <!-- Receive Payment Strings -->
+    <string name="receivePayment_charge">BTC empfangen</string>
+    <string name="receivePayment_exchangeRate">Wechselkurs</string>
+    <string name="receivePayment_enter">Betrag in </string>
+    <string name="receivePayment_currency">Währung:</string>
+    <string name="receivePayment_amount_hint">Betrag eingeben durch klicken</string>
+    <string name="no_connection_server">Keine Serververbindung!\nSie sind im Offline-Modus.</string>
+
+    <!-- Spinner currency -->
+    <string name="textView_currency">Währung</string>
+
+    <!-- PayIn Strings -->
+    <string name="payIn_title">Einzahlen</string>
+    <string name="payIn_instruction">Bitte überweisen Sie ihre Bitcoins an die folgende BTC-Adresse. Sobald die Überweisung im BTC-Netzwerk 6x bestätigt ist wird der Betrag ihrem Konto gutgeschrieben. Dies dauert ungefähr eine Stunde.</string>
+    <string name="payIn_copy">In Zwischenablage kopieren</string>
+    <string name="copy_clipboard">Adresse in Zwischenablage gespeichert</string>
+    <string name="payIn_sendMail">Adresse als Email erhalten</string>
+
+    <!-- PayOut Strings -->
+    <string name="setting_payOut_balance_title">Kontostand Limite in Bitcoins</string>
+    <string name="setting_payOut_balance_Value">Mindestbetrag ist 0.0001 BTC</string>
+    <string name="setting_payOut_day_title">Tage auswählen</string>
+    <string name="setting_payOut_day_monday">Montag</string>
+    <string name="setting_payOut_day_tuesday">Dienstag</string>
+    <string name="setting_payOut_day_wednesday">Mittwoch</string>
+    <string name="setting_payOut_day_thursday">Donnerstag</string>
+    <string name="setting_payOut_day_friday">Freitag</string>
+    <string name="setting_payOut_day_saturday">Samstag</string>
+    <string name="setting_payOut_day_sunday">Sonntag</string>
+    <string name="setting_payOut_time_title">Zeit auswählen</string>
+    <string name="payOut_title">Auszahlen</string>
+    <string name="payOut_info">Info: Bitte klicken Sie sich um über den Minimalbetrag und Gebühren zu informieren.</string>
+    <string name="payOut_BalanceText">Aktueller Kontostand: </string>
+    <string name="PayOut_AmountText">Betrag: </string>
+    <string name="payOut_AddressText">BTC-Adresse: </string>
+    <string name="payOut_Address">Bitte BTC-Adresse hier eingeben&#8230;</string>
+    <string name="payOut_payOut">Auszahlung durchführen</string>
+    <string name="payout_exchangeRateText">Wechselkurs </string>
+    <string name="fill_necessary_fields">Bitte alle benötigten Fehler ausfüllen.</string>
+    <!-- Payou out Rules -->
+    <string name="insert_payout_address">Bitte Auszahlungs-Adresse eingeben!</string>
+    <string name="insert_min_amount">Bitte eine Kontostand-Limite von mindesetens 0.0001 BTC eingeben!</string>
+    <string name="at_least_one_day">Bite mindestens einen Tag auswählen!</string>
+    <string name="at_least_one_time">Bitte mindestens eine Zeit auswählen!</string>
+    <string name="defined_rules_title">"Auszahlungs Regeln"</string>
+    <string name="defined_successfully">Regeln wurden erfolgreich erstellt</string>
+    <string name="reset_pay_out_rules">Auszahlungs-Regeln zurückgesetzt</string>
+    <string name="display_day_time_rule">Tag/Zeit Regel </string>
+    <string name="display_address">Auszahlungs-Adresse: </string>
+    <string name="display_time">Zeit: </string>
+    <string name="display_sunday">Tag: Sonntag - </string>
+    <string name="display_monday">Tag: Montag - </string>
+    <string name="display_tuesday">Tag: Dienstag - </string>
+    <string name="display_wednesday">Tag: Mittwoch - </string>
+    <string name="display_thursday">Tag: Donnerstag - </string>
+    <string name="display_friday">Tag: Freitag - </string>
+    <string name="display_saturday">Tag: Samstag - </string>
+    <string name="display_default_day">Tag - </string>
+    <string name="display_balance_rule">Kontostand Regel</string>
+    <string name="display_balance">Kontostand: </string>
+    <!-- Payout Rule on item select -->
+    <string name="display_time_slots">Sie können nicht mehr als 4 Zeiten auswählen!</string>
+    <string name="display_already_selected">Diese Zeit wurde bereits ausgewählt!</string>
+
+    <!-- Popup Window -->
+    <string name="feeAGBTitleView">Information Mindestgebühr</string>
+    <string name="feeAGBTextView">Um die Aufnahme Ihrer Transaktion in die Bitcoin-Blockkette sicherzustellen, wird eine Gebühr zu ihrem Auszahlungs-Betrag dazugerechnet.\nDiese Gebühr ist momentan 0.0001BTC. </string>
+    <string name="feeAGBImageCloseBtn">Information schliessen</string>
+
+    <!-- Spinner -->
+    <string-array name="settingPayOut_array">
+        <item>Kontostand</item>
+        <item>Tag/Zeit</item>
+    </string-array>
+
+    <string name="spinner_simple_textView">Regel</string>
+    <string name="settingPayOut_addressTitle">Auszahlungs-Adresse eingeben:</string>
+    <string name="settingPayOut_addressInput">Bitcoin Adresse</string>
+    <string name="settingPayOut_ruleTitle">Regel auswählen:</string>
+    <string name="settingPayOut_store_Btn">Speichern</string>
+    <string name="settingPayOut_created_rules_Title">Momentane Regeln:</string>
+    <string name="settingPayOut_reset_Btn">Zurücksetzen</string>
+
+    <!-- User Profile Strings -->
+    <string name="profileUsernameTitle">Benutzername:</string>
+    <string name="profileUsernameText"></string>
+    <string name="profileEmailTitle">E-Mail:</string>
+    <string name="profileEmailText"></string>
+    <string name="profileEditEmailBtn">Email-Adresse bearbeiten</string>
+    <string name="profilePasswordTitle">Passwort</string>
+    <string name="profileEditPasswordBtn">Passwort ändern</string>
+    <string name="profileEditDeletedUserAccountBtn">Benutzeraccount löschen</string>
+    <string name="delete_dialog_title">Löschen bestätigen</string>
+    <string name="delete_dialog_message">Sind sie sicher, dass Sie ihren Account löschen wollen?</string>
+
+    <!-- Update Account Strings -->
+    <!-- E-Mail -->
+    <string name="updateEmailTextView">Email-Adresse ändern:</string>
+    <string name="updateEmailBtn">Änderungen speichern</string>
+    <string name="email_address_invalid">Diese Email-Adresse ist ungültig. Bitte korrekt eingeben.</string>
+    <string name="same_email_address">Die neue Emailadresse muss sich von der alten unterscheiden. Bitte erneut versuchen.</string>
+    <!-- Password -->
+    <string name="updatePasswordTextView">Bitte ein neues Passwort eingeben:</string>
+    <string name="updatePasswordEditText">Passwort</string>
+    <string name="updatePasswordConfirmTextView">Passwort bestätigen:</string>
+    <string name="updatePasswordConfirmEditText">Passwort bestätigen</string>
+    <string name="updatePasswordBtn">Änderungen speichern</string>
+
+    <!-- Icon & other Strings -->
+    <string name="action_settings">Einstellungen</string>
+    <string name="drawer_open">Seitennavigation öffnen</string>
+    <string name="drawer_close">Seitennavigation schliessen</string>
+    <string name="action_warning">Keine Serververbindung! Verbinden Sie sich durch klicken von "Mit Server verbinden" in der Seitennavigation.</string>
+    <string name="date_time_set">Setzen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_yes">Ja</string>
+    <string name="dialog_no">Nein</string>
+    <string name="stored_username"></string>
+    <!-- Async Abstract Activity -->
+    <string name="loading_progress_dialog">Laden. Bitte warten&#8230;</string>
+    <!-- Drawer Navigation -->
+    <string name="already_connected_to_server">Bereits mit Netzwerk verbunden!</string>
+
+    <!-- APDU SERVICE -->
+    <string name="aiddescription">ch.uzh.csg.mbps</string>
+    <string name="servicedesc">MBPS Nfc</string>
+
+    <!-- About Text -->
+    <string name="about_text">
+       Diese Applikation wurde als Teil eines Masterprojektes am Institut für Informatik an der 
+       Universität Zürich entwickelt.\nWir übernehmen keine Verantwortung für den Verlust Ihrer Bitcoins im Falle eines Systems / Hardware Fehlers 
+       oder bei böswilligem Einfluss durch Dritte. Bitte seien Sie sich bewusst, dass diese Applikation immer noch im Beta-Stadium ist und Fehler 
+       auftreten können.\n\nKontakt: bitcoin@ifi.uzh.ch\n
+       \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics
+   </string>
+    <!-- Calculator Dialog -->
+    <string name="enter_total">Enter</string>
+    <string name="all_clear">AC</string>
+
+</resources>

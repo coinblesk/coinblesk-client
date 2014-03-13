@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Name of App -->
+    <string name="app_name">MBPS</string>
+
+    <!-- Name of Activities -->
+    <string name="title_activity_login">MBPS</string>
+    <string name="title_activity_reset_password">MBPS - Reset Password</string>
+    <string name="title_activity_registration">MBPS - Registration</string>
+    <string name="title_activity_main">MBPS - Account</string>
+    <string name="title_activity_history">MBPS - History</string>
+    <string name="title_activity_pay_payment">MBPS - Pay</string>
+    <string name="title_activity_receive_payment">MBPS - Receive</string>
+    <string name="title_activity_pay_in">MBPS - Pay In</string>
+    <string name="title_activity_pay_out">MBPS - Pay Out</string>
+    <string name="title_activity_profile_account">MBPS - Profile</string>
+    <string name="title_activity_edit_email_account_profile">MBPS - Update E-Mail</string>
+    <string name="title_activity_edit_passwotrd_account_profile">MBPS - Update Password</string>
+    <string name="title_activity_about">MBPS - About</string>
+    <string name="title_activity_setting_pay_out_rules">MBPS - Pay out Rules</string>
+
+    <!-- Login Strings -->
+    <string name="loginUsernameEditText">Enter your username</string>
+    <string name="loginPasswordEditText">Enter your password</string>
+    <string name="loginPasswordOrUsernameForgottenTextView">Forgot username or password</string>
+    <string name="loginSignUpBtn">Sign up</string>
+    <string name="loginSignInBtn">Sign in</string>
+    <string name="enter_username_password">Please enter a username and a password</string>
+    <string name="establish_internet_connection">Please establish a internet connection to proceed.</string>
+    <string name="invalid_password">Invalid password</string>
+
+    <!-- Reset Password Activity -->
+    <string name="resetPW_descriptionTextView">To reset your password please insert your registrated Email address below and click Reset</string>
+    <string name="resetPW_emailEditText">Enter your e-mail address</string>
+    <string name="resetPW_resetButton">Reset Password</string>
+
+    <!-- Registration Strings -->
+    <string name="signUpEditUsernameText">Enter your username</string>
+    <string name="signUpEditEmailText">Enter your e-mail address</string>
+    <string name="signUpEditPasswordText">Enter your password</string>
+    <string name="signUpEditConfirmPasswordText">Confirm your password</string>
+    <string name="signUpTermOfUseTextView">Read term and conditions</string>
+    <string name="signUpCheckBox">I agree to the term of Service</string>
+    <string name="signUpAgreeBtn">Sign up</string>
+    <!-- Popup Window -->
+    <string name="termOfUseTitleView">Terms and Conditions</string>
+    <string name="termOfUseTextView">This application was developed as part of a Master Project at the Institute for 
+        Informatics at the University of Zurich (Switzerland).\nWe do not take any responsibility for a loss of your Bitcoins
+         in case of a system/hardware failure or by malicious thirdparty influence. Please be aware that this application is 
+         still in its Beta Stadium and failures may occur.
+         \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics
+         </string>
+    <string name="termOfUseImageCloseBtn">Close terms of use</string>
+    <string name="createAccountSuccessful">Registration confirmation</string>
+
+    <!-- Main View Strings -->
+    <string name="mainActivityTextView">Balance</string>
+    <string name="receiveButton">Receive</string>
+    <string name="payButton">Pay</string>
+    <string name="historyButton">History</string>
+    <!-- Drawer Navigation -->
+    <string-array name="drawerItems_array">
+        <item>User Profile</item>
+        <item>Pay In</item>
+        <item>Pay Out</item>
+        <item>Settings</item>
+        <item>Connect to Server</item>
+        <item>Sign out</item>
+    </string-array>
+    <string name="session_expired">Session expired!</string>
+
+    <string name="unexcepted_error">An unexpected error occurred. Please try again</string>
+
+    <!-- History Strings -->
+    <string name="recent_payments">Recent Payments</string>
+    <string name="history_activity_no_transactions_text">There are no transactions to display.</string>
+    <string name="history_activity_get_by_email">Click to receive the complete list of transactions by email.</string>
+    <string-array name="history_filter">
+        <item>Transaction</item>
+        <item>Pay In</item>
+    	<item>Pay Out</item>
+	</string-array>
+    
+    <!-- Abstract Payment -->
+    <string name="payment_failure">Payment failed</string>
+    <string name="payment_success">Payment was successful</string>
+
+    <!-- Pay Payment Strings -->
+    <string name="payPayment_exchangeRate">Exchange Rate:</string>
+    <string name="payPayment_balanceDescription">Balance:</string>
+    <string name="payPayment_paymentDescription">Please check the username and the amount to accept/reject the payment.</string>
+    <string name="payPayment_pay">Pay</string>
+    <string name="payPayment_usernameTitle">To:</string>
+    <string name="payPayment_amountBTCTitle">Amount:</string>
+    <string name="payPayment_accept">Accept</string>
+    <string name="payPayment_reject">Reject</string>
+    <string name="payPayment_toggleText">Accept automatically</string>
+
+    <!-- Receive Payment Strings -->
+    <string name="receivePayment_charge">Receive</string>
+    <string name="receivePayment_exchangeRate">Exchange Rate</string>
+    <string name="receivePayment_enter">Enter amount in</string>
+    <string name="receivePayment_currency">Currency:</string>
+    <string name="receivePayment_amount_hint">Tip to enter amount</string>
+    <string name="no_connection_server">No connection to server!\nYou are in offline mode.</string>
+
+    <!-- Spinner currency -->
+    <string name="textView_currency">currency</string>
+
+    <!-- PayIn Strings -->
+    <string name="payIn_title">Pay In</string>
+    <string name="payIn_instruction">Please submit your bitcoins to the following address. As soon as the incoming payment is verified we update your account balance. This takes approximately 1 hour.</string>
+    <string name="payIn_copy">Copy To Clipboard</string>
+    <string name="copy_clipboard">Address copied to clipboard</string>
+    <string name="payIn_sendMail">Send to Email</string>
+
+    <!-- PayOut Strings -->
+    <string name="setting_payOut_balance_title">Balance limit in Bitcoins</string>
+    <string name="setting_payOut_balance_Value">Min. Value is at 0.0001 BTC</string>
+    <string name="setting_payOut_day_title">Select Days</string>
+    <string name="setting_payOut_day_monday">Monday</string>
+    <string name="setting_payOut_day_tuesday">Tuesday</string>
+    <string name="setting_payOut_day_wednesday">Wednesday</string>
+    <string name="setting_payOut_day_thursday">Thursday</string>
+    <string name="setting_payOut_day_friday">Friday</string>
+    <string name="setting_payOut_day_saturday">Saturday</string>
+    <string name="setting_payOut_day_sunday">Sunday</string>
+    <string name="setting_payOut_time_title">Select Time</string>
+    <string name="payOut_title">Pay Out</string>
+    <string name="payOut_info">Info: Please click to inform about minimum transaction amounts and fees.</string>
+    <string name="payOut_BalanceText">Current Balance:</string>
+    <string name="PayOut_AmountText">PayOut Amount</string>
+    <string name="payOut_AddressText">PayOut Address:</string>
+    <string name="payOut_Address">Please insert address here</string>
+    <string name="payOut_payOut">Pay Out</string>
+    <string name="payout_exchangeRateText">Exchange Rate</string>
+    <string name="fill_necessary_fields">Please fill out all necessary fields.</string>
+    <!-- Payou out Rules -->
+    <string name="insert_payout_address">Please insert a pay out address!</string>
+    <string name="insert_min_amount">Please insert a balance amount with a minimum of 0.0001 BTC!</string>
+    <string name="at_least_one_day">Please select at least one day for a pay out!</string>
+    <string name="at_least_one_time">Please select at least a time for a pay out!</string>
+    <string name="defined_rules_title">"Payout Rules"</string>
+    <string name="defined_successfully">Rules have beend defined successfully</string>
+    <string name="reset_pay_out_rules">Rules have been reset</string>
+    <string name="display_day_time_rule">Day and Time rule</string>
+    <string name="display_address">Pay out address: </string>
+    <string name="display_time">Time: </string>
+    <string name="display_sunday">Day: Sunday - </string>
+    <string name="display_monday">Day: Monday - </string>
+    <string name="display_tuesday">Day: Tuesday - </string>
+    <string name="display_wednesday">Day: Wednesday - </string>
+    <string name="display_thursday">Day: Thursday - </string>
+    <string name="display_friday">Day: Friday - </string>
+    <string name="display_saturday">Day: Saturday - </string>
+    <string name="display_default_day">Day - </string>
+    <string name="display_balance_rule">Balance rule</string>
+    <string name="display_balance">Balance: </string>
+    <!-- Payout Rule on item select -->
+    <string name="display_time_slots">You can\'t define more than four time slots!</string>
+    <string name="display_already_selected">This time is already selected!</string>
+
+    <!-- Popup Window -->
+    <string name="feeAGBTitleView">Information minium fee amount</string>
+    <string name="feeAGBTextView">To make sure your transaction will be implemented in the Bitcoin chain a fee is charged on top of your payout amount.\nThis fee is currently 0.0001BTC. </string>
+    <string name="feeAGBImageCloseBtn">Close Information</string>
+
+    <!-- Spinner -->
+    <string-array name="settingPayOut_array">
+        <item>Balance</item>
+        <item>Day and Time</item>
+    </string-array>
+
+    <string name="spinner_simple_textView">Rule</string>
+    <string name="settingPayOut_addressTitle">Insert payout address:</string>
+    <string name="settingPayOut_addressInput">Bitcoin address</string>
+    <string name="settingPayOut_ruleTitle">Select Rule:</string>
+    <string name="settingPayOut_store_Btn">Save</string>
+    <string name="settingPayOut_created_rules_Title">Existing Rules:</string>
+    <string name="settingPayOut_reset_Btn">Reset</string>
+
+    <!-- User Profile Strings -->
+    <string name="profileUsernameTitle">Username:</string>
+    <string name="profileUsernameText"></string>
+    <string name="profileEmailTitle">E-Mail:</string>
+    <string name="profileEmailText"></string>
+    <string name="profileEditEmailBtn">Edit your e-mail address</string>
+    <string name="profilePasswordTitle">Password</string>
+    <string name="profileEditPasswordBtn">Change your password</string>
+    <string name="profileEditDeletedUserAccountBtn">Delete Account</string>
+    <string name="delete_dialog_title">Confirm delete</string>
+    <string name="delete_dialog_message">Are you sure to delete your user account?</string>
+
+    <!-- Update Account Strings -->
+    <!-- E-Mail -->
+    <string name="updateEmailTextView">Change e-mail address:</string>
+    <string name="updateEmailBtn">Submit Change</string>
+    <string name="email_address_invalid">This email address is invalid! Please enter again</string>
+    <string name="same_email_address">The new email address has to be different! Please try again</string>
+    <!-- Password -->
+    <string name="updatePasswordTextView">Please insert a new password:</string>
+    <string name="updatePasswordEditText">password</string>
+    <string name="updatePasswordConfirmTextView">Please confirm the password:</string>
+    <string name="updatePasswordConfirmEditText">confirmpassword</string>
+    <string name="updatePasswordBtn">Submit Change</string>
+
+    <!-- Icon & other Strings -->
+    <string name="action_settings">Settings</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="action_warning">No connection! Connect by selecting "Connect to Server"</string>
+    <string name="date_time_set">Set</string>
+    <string name="cancel">Cancel</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
+    <string name="stored_username"></string>
+    <!-- Async Abstract Activity -->
+    <string name="loading_progress_dialog">Loading. Please wait&#8230;</string>
+    <!-- Drawer Navigation -->
+    <string name="already_connected_to_server">You are already connected!</string>
+
+    <!-- APDU SERVICE -->
+    <string name="aiddescription">ch.uzh.csg.mbps</string>
+    <string name="servicedesc">MBPS Nfc</string>
+
+    <!-- About Text -->
+    <string name="about_text">This application was developed as part of a Master Project at the Institute for 
+        Informatics at the University of Zurich (Switzerland).\nWe do not take any responsibility for a loss of your Bitcoins
+         in case of a system/hardware failure or by malicious thirdparty influence. Please be aware that this application is 
+         still in its Beta Stadium and failures may occur.\n\n
+         Contact: bitcoin@ifi.uzh.ch\n
+         \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics</string>
+   
+    <!-- Calculator Dialog -->
+    <string name="enter_total">Enter</string>
+    <string name="all_clear">AC</string>
+
+</resources>
