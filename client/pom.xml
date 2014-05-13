@@ -56,8 +56,15 @@
 			<artifactId>mbps-shared-resources</artifactId>
 			<version>1.0.1</version>
 		</dependency>
+
+		<!-- QR Code Scanner -->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>android-integration</artifactId>
+			<version>3.0.1</version>
+		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<finalName>${project.artifactId}</finalName>
 		<pluginManagement>

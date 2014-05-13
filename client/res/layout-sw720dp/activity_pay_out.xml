@@ -28,11 +28,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/PayOut_AmountText"
-        android:layout_alignParentRight="true"
+        android:layout_toLeftOf="@+id/payout_ButtonAll"
         android:layout_toRightOf="@+id/payOut_BalanceText"
         android:ems="10"
         android:inputType="numberDecimal" >
-
         <requestFocus />
     </EditText>
 
@@ -58,17 +57,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/payOut_AddressText"
-        android:layout_alignParentRight="true"
-        android:hint="@string/payOut_Address"
         android:layout_below="@+id/payOut_AddressText"
         android:layout_marginTop="5dp"
-        android:ems="10" />
+        android:layout_toLeftOf="@+id/payout_ButtonScanQR"
+        android:ems="10"
+        android:hint="@string/payOut_Address" />
 
     <Button
         android:id="@+id/payOut_payOutButton"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:layout_alignRight="@+id/payOut_Address"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/payOut_Address"
         android:layout_marginTop="5dp"
         android:text="@string/payOut_payOut" />
@@ -79,7 +78,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/payOut_AddressText"
         android:layout_below="@+id/payOut_BalanceCHF"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="28dp"
         android:text="@string/PayOut_AmountText" />
 
     <TextView
@@ -97,7 +96,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginTop="10dp"
         android:layout_below="@+id/payOut_title"
         android:text="@string/payOut_info"
         android:textColor="#1e5db2" />
@@ -126,5 +124,23 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/payout_exchangeRateText"
         android:layout_alignParentRight="true" />
+
+    <Button
+        android:id="@+id/payout_ButtonAll"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/payOut_Amount"
+        android:layout_alignParentRight="true"
+        android:text="@string/payOut_ButtonAll" />
+
+    <Button
+        android:id="@+id/payout_ButtonScanQR"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/payOut_Address"
+        android:layout_alignParentRight="true"
+        android:text="@string/payOut_ButtonScanQRText" />
 
 </RelativeLayout>

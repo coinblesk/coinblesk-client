@@ -2,21 +2,18 @@ package ch.uzh.csg.mbps.client.payment;
 
 import java.math.BigDecimal;
 
-import android.content.Context;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
 import ch.uzh.csg.mbps.client.CurrencyViewHandler;
@@ -40,15 +37,16 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 	public static BigDecimal exchangeRate;
 	private BigDecimal payOutAmount;
 	private MenuItem menuWarning;
-	private PopupWindow popupWindow;
 	private Button acceptBtn;
+	private Button allBtn;
+	private Button scanQRButton;
 	private EditText payoutAmount;
 	private EditText payoutAddress;
 	
-	private TextView feeAGB;
 	private TextView btcBalance;
 	private TextView chfBalance;
 	private TextView chfAmount;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +64,10 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 		chfAmount = (TextView) findViewById(R.id.payOut_AmountCHF);
 		
 		acceptBtn = (Button) findViewById(R.id.payOut_payOutButton);
+		allBtn = (Button) findViewById(R.id.payout_ButtonAll);
 		payoutAmount = (EditText) findViewById(R.id.payOut_Amount);
 		payoutAddress = (EditText) findViewById(R.id.payOut_Address);
-		feeAGB = (TextView) findViewById(R.id.payOut_info);
+		scanQRButton = (Button) findViewById(R.id.payout_ButtonScanQR );
 		
 		initClickListener();
 		
@@ -115,7 +114,21 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 				}
 	  		}
 	  	});  
+		
+		scanQRButton.setOnClickListener(new View.OnClickListener() {
+	  		public void onClick(View v) {
+	  			scanQRAction();
+	  		}
 
+	  	});  
+		
+	  	allBtn.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				payoutAmount.setText(ClientController.getUser().getBalance().toString());
+				payOutAmount = ClientController.getUser().getBalance();
+			}
+		});  
+		
 	  	payoutAmount.addTextChangedListener(new TextWatcher() {
 	  		/*
 	  		 * Listener to update the inserted amount of bitcoin
@@ -137,13 +150,13 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {	
 			}
-		});
-	  	
-	  	feeAGB.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				showPopupWindow();
-			}
-		});
+		});	  	
+	}
+    
+    
+	private void scanQRAction() {
+		IntentIntegrator integrator = new IntentIntegrator(this);
+		integrator.initiateScan();
 	}
     
 	private void launchPayOutRequest() {
@@ -201,21 +214,20 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 	}
 	
 	/**
-	 * Popup window to inform the user about the fee. 
+	 * Catches Result from Barcode-Scanner and sets PayOut address.
 	 */
-	private void showPopupWindow(){	
-		LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		ViewGroup group= (ViewGroup) findViewById(R.id.feeAGBPayOut);
-		View layout = inflater.inflate(R.layout.activity_fee_popup_window_layout, group);
-		popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
-		popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
-		
-		final ImageButton closeBtn = (ImageButton) layout.findViewById(R.id.feeAGBImageCloseBtn);
-		closeBtn.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				popupWindow.dismiss();
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		  IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+		  if (scanResult != null) {
+			String result = scanResult.getContents();
+			try {
+				if (result.substring(0, 8).equalsIgnoreCase("bitcoin:")){
+					String btcAddress = result.substring(8, 42);
+					payoutAddress.setText(btcAddress);
+				}
+			} catch (Exception e) {
+				displayResponse(getResources().getString(R.string.payOut_NoQRCode));
 			}
-		});
-	}
-	
+		  }
+		}
 }

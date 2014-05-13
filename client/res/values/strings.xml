@@ -128,14 +128,18 @@
     <string name="setting_payOut_day_sunday">Sunday</string>
     <string name="setting_payOut_time_title">Select Time</string>
     <string name="payOut_title">Pay Out</string>
-    <string name="payOut_info">Info: Please click to inform about minimum transaction amounts and fees.</string>
+    <string name="payOut_info">Info: To make sure your pay out will be accepted and implemented in the blockchain, a fee of currently 0.0001 BTC is deducted.</string>
     <string name="payOut_BalanceText">Current Balance:</string>
     <string name="PayOut_AmountText">PayOut Amount</string>
     <string name="payOut_AddressText">PayOut Address:</string>
-    <string name="payOut_Address">Please insert address here</string>
+    <string name="payOut_Address">Enter Bitcoin Address</string>
     <string name="payOut_payOut">Pay Out</string>
     <string name="payout_exchangeRateText">Exchange Rate</string>
     <string name="fill_necessary_fields">Please fill out all necessary fields.</string>
+    <string name="payOut_ButtonAll">All</string>   
+    <string name="payOut_ButtonScanQRText">Scan QR</string> 
+    <string name="payOut_NoQRCode">Bitcoin address could not be scanned.</string> 
+    
     <!-- Payou out Rules -->
     <string name="insert_payout_address">Please insert a pay out address!</string>
     <string name="insert_min_amount">Please insert a balance amount with a minimum of 0.0001 BTC!</string>
@@ -160,11 +164,6 @@
     <!-- Payout Rule on item select -->
     <string name="display_time_slots">You can\'t define more than four time slots!</string>
     <string name="display_already_selected">This time is already selected!</string>
-
-    <!-- Popup Window -->
-    <string name="feeAGBTitleView">Information minium fee amount</string>
-    <string name="feeAGBTextView">To make sure your transaction will be implemented in the Bitcoin chain a fee is charged on top of your payout amount.\nThis fee is currently 0.0001BTC. </string>
-    <string name="feeAGBImageCloseBtn">Close Information</string>
 
     <!-- Spinner -->
     <string-array name="settingPayOut_array">

@@ -128,7 +128,7 @@
     <string name="setting_payOut_day_sunday">Sonntag</string>
     <string name="setting_payOut_time_title">Zeit auswählen</string>
     <string name="payOut_title">Auszahlen</string>
-    <string name="payOut_info">Info: Bitte klicken Sie sich um über den Minimalbetrag und Gebühren zu informieren.</string>
+    <string name="payOut_info">Info: Um sicherzugehen dass ihre Auszahlung akzeptiert und in die Blockchain aufgenommen wird, verwenden wir eine Gebühr von momentan 0.0001 BTC.</string>
     <string name="payOut_BalanceText">Aktueller Kontostand: </string>
     <string name="PayOut_AmountText">Betrag: </string>
     <string name="payOut_AddressText">BTC-Adresse: </string>
@@ -136,6 +136,11 @@
     <string name="payOut_payOut">Auszahlung durchführen</string>
     <string name="payout_exchangeRateText">Wechselkurs </string>
     <string name="fill_necessary_fields">Bitte alle benötigten Fehler ausfüllen.</string>
+    <string name="payOut_ButtonAll">Max</string> 
+    <string name="payOut_ButtonScanQRText">Scan QR</string> 
+    <string name="payOut_NoQRCode">Bitcoin Adresse konnte nicht gescannt werden.</string> 
+    
+    
     <!-- Payou out Rules -->
     <string name="insert_payout_address">Bitte Auszahlungs-Adresse eingeben!</string>
     <string name="insert_min_amount">Bitte eine Kontostand-Limite von mindesetens 0.0001 BTC eingeben!</string>
@@ -160,11 +165,6 @@
     <!-- Payout Rule on item select -->
     <string name="display_time_slots">Sie können nicht mehr als 4 Zeiten auswählen!</string>
     <string name="display_already_selected">Diese Zeit wurde bereits ausgewählt!</string>
-
-    <!-- Popup Window -->
-    <string name="feeAGBTitleView">Information Mindestgebühr</string>
-    <string name="feeAGBTextView">Um die Aufnahme Ihrer Transaktion in die Bitcoin-Blockkette sicherzustellen, wird eine Gebühr zu ihrem Auszahlungs-Betrag dazugerechnet.\nDiese Gebühr ist momentan 0.0001BTC. </string>
-    <string name="feeAGBImageCloseBtn">Information schliessen</string>
 
     <!-- Spinner -->
     <string-array name="settingPayOut_array">
