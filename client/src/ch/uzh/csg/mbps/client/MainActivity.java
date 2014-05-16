@@ -2,18 +2,25 @@ package ch.uzh.csg.mbps.client;
 
 import java.math.BigDecimal;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener;
 import ch.uzh.csg.mbps.client.payment.PayPaymentActivity;
@@ -44,6 +51,8 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
     private Button historyBtn;
     public static BigDecimal exchangeRate;
     private RequestTask getExchangeRate;
+    private PopupWindow popupWindow;
+    private Boolean isFirstTime;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,6 +72,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
         CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), balance, getApplicationContext());
         initClickListener();
         checkOnlineModeAndProceed();
+                
     }
 
 	@Override
@@ -203,6 +213,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 			launchRequest();
 		} else {
 			receivePaymentBtn.setEnabled(false);
+			showPopupWindow();
 		}
 	}
     
@@ -218,6 +229,39 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			reload(getIntent());
 			invalidateOptionsMenu();
+		}
+		showPopupWindow();
+	}
+    
+	private void showPopupWindow(){	
+
+		if(isFirstTime == null){
+			SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+			boolean defaultValue = true;
+			isFirstTime = sharedPref.getBoolean(getString(R.string.sharedPreferences_isFirstTime), defaultValue);
+		}
+		
+		if (isFirstTime){
+			LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			ViewGroup group = (ViewGroup) findViewById(R.id.nfc_instruction_popup);
+			View layout = inflater.inflate(R.layout.activity_popup_nfc_instructions, group);
+			popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
+			popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
+		
+			final Button closeBtn = (Button) layout.findViewById(R.id.nfc_instruction_close_button);
+			closeBtn.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					popupWindow.dismiss();
+				}
+			});
+			
+			isFirstTime = false;
+			
+			//write to shared preferences
+			SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+			SharedPreferences.Editor editor = sharedPref.edit();
+			editor.putBoolean(getString(R.string.sharedPreferences_isFirstTime), false);
+			editor.commit();
 		}
 	}
 	

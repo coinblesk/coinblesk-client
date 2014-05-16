@@ -1,0 +1,112 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nfc_instruction_popup"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".PopupNfcInstructionsActivity" >
+
+    <GridLayout
+        android:id="@+id/nfc_instruction_popup_header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:columnCount="2"
+        android:gravity="right"
+        android:orientation="vertical"
+        android:background="#F2d6f0f9"
+        android:padding="10dip" >
+
+        <TextView
+            android:id="@+id/nfc_instruction_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_gravity="left|top"
+            android:layout_row="0"
+            android:text="@string/firstTimeInfo_title"
+            android:textStyle="bold"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    </GridLayout>
+
+    <ScrollView
+        android:id="@+id/nfc_instruction_scrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/nfc_instruction_popup_header"
+        android:background="#F2d6f0f9"
+        android:padding="10dip" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/nfc_instruction_back_to_back"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/firstTimeInfo_instruction_backToBack"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/nfc_instruction_back_to_back_explanation"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/firstTimeInfo_instruction_backToBack_explanation" />
+
+            <ImageView
+                android:id="@+id/nfc_instructions_image_back_to_back"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center"
+                android:src="@drawable/nfc_instruction_mobiles" />
+
+            <TextView
+                android:id="@+id/nfc_instruction_or"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:text="@string/firstTimeInfo_instruction_or"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/nfc_instruction_text_acr"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/firstTimeInfo_instruction_acr"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/nfc_instructions_image_acr"
+             	android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/nfc_instruction_acr" />
+             
+            <Button
+            android:id="@+id/nfc_instruction_close_button"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_gravity="right|top"
+            android:layout_marginTop="10dp"
+            android:adjustViewBounds="true"
+            android:text="@string/firstTimeInfo_instruction_close"
+            android:gravity="center" />
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

@@ -235,5 +235,16 @@
     <!-- Calculator Dialog -->
     <string name="enter_total">Enter</string>
     <string name="all_clear">AC</string>
+    
+    <!-- FirstTimeInformation Dialog -->
+    <string name="firstTimeInfo_title">Information NFC Handling</string>
+    <string name="firstTimeInfo_instruction_backToBack">Back to Back</string>
+    <string name="firstTimeInfo_instruction_backToBack_explanation">(Gap 0&#8211;2cm)</string>
+    <string name="firstTimeInfo_instruction_or">OR</string>
+    <string name="firstTimeInfo_instruction_acr">Put smartphone onto NFC device</string>
+    <string name="firstTimeInfo_instruction_close">Close Information</string>
+    
+    <!-- Shared Preferences-->
+    <string name="sharedPreferences_isFirstTime">isFirstTime</string>
 
 </resources>
