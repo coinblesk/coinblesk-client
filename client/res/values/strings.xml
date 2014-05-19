@@ -49,39 +49,42 @@
         Informatics at the University of Zurich (Switzerland).\nWe do not take any responsibility for a loss of your Bitcoins
          in case of a system/hardware failure or by malicious thirdparty influence. Please be aware that this application is 
          still in its Beta Stadium and failures may occur.
-         \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics
-         </string>
+         \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics</string>
     <string name="termOfUseImageCloseBtn">Close terms of use</string>
     <string name="createAccountSuccessful">Registration confirmation</string>
 
     <!-- Main View Strings -->
     <string name="mainActivityTextView">Balance</string>
-    <string name="receiveButton">Receive</string>
-    <string name="payButton">Pay</string>
-    <string name="historyButton">History</string>
+    <string name="payButton">Create new transaction</string>
+    <string name="last5TransactionsTitle">Your last 5 transactions:</string>
+    
     <!-- Drawer Navigation -->
     <string-array name="drawerItems_array">
         <item>User Profile</item>
-        <item>Pay In</item>
-        <item>Pay Out</item>
+        <item>Create new Transaction</item>
+        <item>Transaction History</item>
         <item>Settings</item>
-        <item>Connect to Server</item>
+        <item>Top Up</item>
+        <item>Pay out to BTC address</item>
+        <item>Reconnect to Server</item>
+        <item>Help</item>
         <item>Sign out</item>
     </string-array>
-    <string name="session_expired">Session expired!</string>
 
+    <string name="session_expired">Session expired!</string>
     <string name="unexcepted_error">An unexpected error occurred. Please try again</string>
 
     <!-- History Strings -->
     <string name="recent_payments">Recent Payments</string>
     <string name="history_activity_no_transactions_text">There are no transactions to display.</string>
     <string name="history_activity_get_by_email">Click to receive the complete list of transactions by email.</string>
+
     <string-array name="history_filter">
         <item>Transaction</item>
         <item>Pay In</item>
-    	<item>Pay Out</item>
-	</string-array>
-    
+        <item>Pay Out</item>
+    </string-array>
+
     <!-- Abstract Payment -->
     <string name="payment_failure">Payment failed</string>
     <string name="payment_success">Payment was successful</string>
@@ -136,10 +139,10 @@
     <string name="payOut_payOut">Pay Out</string>
     <string name="payout_exchangeRateText">Exchange Rate</string>
     <string name="fill_necessary_fields">Please fill out all necessary fields.</string>
-    <string name="payOut_ButtonAll">All</string>   
-    <string name="payOut_ButtonScanQRText">Scan QR</string> 
-    <string name="payOut_NoQRCode">Bitcoin address could not be scanned.</string> 
-    
+    <string name="payOut_ButtonAll">All</string>
+    <string name="payOut_ButtonScanQRText">Scan QR</string>
+    <string name="payOut_NoQRCode">Bitcoin address could not be scanned.</string>
+
     <!-- Payou out Rules -->
     <string name="insert_payout_address">Please insert a pay out address!</string>
     <string name="insert_min_amount">Please insert a balance amount with a minimum of 0.0001 BTC!</string>
@@ -231,11 +234,11 @@
          still in its Beta Stadium and failures may occur.\n\n
          Contact: bitcoin@ifi.uzh.ch\n
          \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics</string>
-   
+
     <!-- Calculator Dialog -->
     <string name="enter_total">Enter</string>
     <string name="all_clear">AC</string>
-    
+
     <!-- FirstTimeInformation Dialog -->
     <string name="firstTimeInfo_title">Information NFC Handling</string>
     <string name="firstTimeInfo_instruction_backToBack">Back to Back</string>
@@ -243,8 +246,16 @@
     <string name="firstTimeInfo_instruction_or">OR</string>
     <string name="firstTimeInfo_instruction_acr">Put smartphone onto NFC device</string>
     <string name="firstTimeInfo_instruction_close">Close Information</string>
-    
-    <!-- Shared Preferences-->
+
+    <!-- Shared Preferences -->
     <string name="sharedPreferences_isFirstTime">isFirstTime</string>
+    <string name="title_activity_choose_payment">Chose Payment Method</string>
+    <string name="hello_world">Hello world!</string>
+    
+     <!-- Choose Payment Method-->
+    <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
+    <string name="choosePayment_requestPaymentBtnText">Request Bitcoins</string>
+    <string name="choosePayment_requestPaymentNoNfcBtnText">Send Bitcoins \n directly to known receiver \n (without NFC contact)</string>
+    
 
 </resources>

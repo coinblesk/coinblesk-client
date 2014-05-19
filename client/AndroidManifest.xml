@@ -5,22 +5,22 @@
     android:versionName="v1.0" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.NFC" />
+    <!-- <uses-permission android:name="android.permission.NFC" /> -->
 
     <uses-sdk
         android:minSdkVersion="19"
         android:targetSdkVersion="19" />
 
-    <uses-feature
+    <!--
+         <uses-feature
         android:name="android.hardware.nfc"
         android:required="true" />
-
+    -->
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Holo.Light" >
-
         <activity
             android:name="ch.uzh.csg.mbps.client.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -28,6 +28,7 @@
             android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -59,8 +60,7 @@
                 android:value="ch.uzh.csg.mbps.client.MainActivity" />
         </activity>
         <!-- Navigation Drawer -->
-        <activity 
-            android:name="ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener">            
+        <activity android:name="ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener" >
         </activity>
         <!-- Profile -->
         <activity
@@ -139,8 +139,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.uzh.csg.mbps.client.settings.SettingsActivity" />
         </activity>
-        
-        <service
+
+        <!--
+             <service
             android:name="ch.uzh.csg.mbps.client.payment.nfc.CustomHostApduService"
             android:exported="true"
             android:permission="android.permission.BIND_NFC_SERVICE" >
@@ -152,6 +153,15 @@
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/apduservice" />
         </service>
+        -->
+        <activity
+            android:name="ch.uzh.csg.mbps.client.ChoosePaymentActivity"
+            android:label="@string/title_activity_choose_payment"
+            android:parentActivityName="ch.uzh.csg.mbps.client.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

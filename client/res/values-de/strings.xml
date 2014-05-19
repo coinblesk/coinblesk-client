@@ -56,16 +56,20 @@
 
     <!-- Main View Strings -->
     <string name="mainActivityTextView">Kontostand</string>
-    <string name="receiveButton">Bitcoins Empfangen</string>
-    <string name="payButton">Bitcoins Senden</string>
-    <string name="historyButton">Verlauf</string>
+    <string name="payButton">Neue Transaktion erstellen</string>
+    <string name="last5TransactionsTitle">Ihre letzten 5 Transaktionen:</string>
+    
+    
     <!-- Drawer Navigation -->
     <string-array name="drawerItems_array">
         <item>Benutzerprofil</item>
-        <item>Einzahlen</item>
-        <item>Auszahlen</item>
+        <item>Neue Transaktion erstellen</item>
+        <item>Verlauf Transaktionen</item>
         <item>Einstellungen</item>
+        <item>Konto aufladen</item>
+        <item>Auszahlen an BTC Adresse</item>
         <item>Mit Server verbinden</item>
+		<item>Hilfe</item>
         <item>Abmelden</item>
     </string-array>
     <string name="session_expired">Session ist abgelaufen!</string>
@@ -247,5 +251,10 @@
     
     <!-- Shared Preferences-->
     <string name="sharedPreferences_isFirstTime"></string>
+    
+    <!-- Choose Payment Method-->
+    <string name="choosePayment_sendPaymentBtnText">Bitcoins Senden</string>
+    <string name="choosePayment_requestPaymentBtnText">Bitcoins Verlangen</string>
+    <string name="choosePayment_requestPaymentNoNfcBtnText">Bitcoins Senden \n direkt an bekannten Empfänger \n (ohne NFC Kontakt)</string>
 
 </resources>

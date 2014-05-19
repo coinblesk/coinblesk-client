@@ -23,8 +23,6 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener;
-import ch.uzh.csg.mbps.client.payment.PayPaymentActivity;
-import ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
@@ -46,9 +44,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
     private CharSequence mTitle;
     private MenuItem menuWarning;
     private BigDecimal balance;
-    private Button receivePaymentBtn;
-    private Button payPaymentBtn;
-    private Button historyBtn;
+    private Button createNewTransactionBtn;
     public static BigDecimal exchangeRate;
     private RequestTask getExchangeRate;
     private PopupWindow popupWindow;
@@ -65,9 +61,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
         initializeDrawer();
         readServerPublicKey();
         
-        receivePaymentBtn = (Button) findViewById(R.id.receiveButton);
-        payPaymentBtn = (Button) findViewById(R.id.payButton);
-        historyBtn = (Button) findViewById(R.id.historyButton);
+        createNewTransactionBtn = (Button) findViewById(R.id.createNewTransactionButton);
         
         CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), balance, getApplicationContext());
         initClickListener();
@@ -177,25 +171,10 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	}
     
     private void initClickListener() {
-
-		receivePaymentBtn.setOnClickListener(new View.OnClickListener() {
+		createNewTransactionBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				handleAsyncTask();
-				launchActivity(MainActivity.this, ReceivePaymentActivity.class);
-			}
-		});
-
-		payPaymentBtn.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				handleAsyncTask();
-				launchActivity(MainActivity.this, PayPaymentActivity.class);
-			}
-		});
-
-		historyBtn.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				handleAsyncTask();
-				launchActivity(MainActivity.this, HistoryActivity.class);
+				launchActivity(MainActivity.this, ChoosePaymentActivity.class);
 			}
 		});
 		
@@ -212,7 +191,8 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		if (ClientController.isOnline()) {
 			launchRequest();
 		} else {
-			receivePaymentBtn.setEnabled(false);
+			//TODO simon: adapt offline mode to ChoosePaymentActivity
+//			receivePaymentBtn.setEnabled(false);
 			showPopupWindow();
 		}
 	}

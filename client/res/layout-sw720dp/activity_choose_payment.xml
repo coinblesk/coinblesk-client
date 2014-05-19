@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="ch.uzh.csg.mbps.client.ChoosePaymentActivity"
+    tools:ignore="MergeRootFrame" >
+    
+        <Button
+            android:id="@+id/choosePayment_sendPaymentBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:drawableBottom="@drawable/ic_pay_payment"
+            android:text="@string/choosePayment_sendPaymentBtnText" />
+
+        <Button
+            android:id="@+id/choosePayment_requestPaymentBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:drawableBottom="@drawable/ic_receive_payment"
+            android:text="@string/choosePayment_requestPaymentBtnText" />
+
+        <Button
+            android:id="@+id/choosePayment_requestPaymentNoNfcBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:drawableBottom="@drawable/ic_pay_payment"
+            android:text="@string/choosePayment_requestPaymentNoNfcBtnText" />
+
+</LinearLayout>
+

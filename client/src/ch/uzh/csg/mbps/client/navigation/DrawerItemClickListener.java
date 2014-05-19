@@ -7,6 +7,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
+import ch.uzh.csg.mbps.client.ChoosePaymentActivity;
+import ch.uzh.csg.mbps.client.HistoryActivity;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.LoginActivity;
 import ch.uzh.csg.mbps.client.MainActivity;
@@ -50,23 +52,35 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), AccountProfileActivity.class));
 			break;
 		case 1:
-			// Pay In
-			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), PayInActivity.class));
+			// Create New Transaction
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), ChoosePaymentActivity.class));
 			break;
 		case 2:
-			// Pay Out
-			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), PayOutActivity.class));
+			// History
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), HistoryActivity.class));
 			break;
 		case 3:
 			// Settings
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), SettingsActivity.class));
 			break;
 		case 4:
-			// Connect to Server
-			launchConnectionRequest();
+			// Pay In
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), PayInActivity.class));
 			break;
 		case 5:
-			// Sign out
+			// Pay Out
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), PayOutActivity.class));
+			break;
+		case 6:
+			// Reconnect to Server
+			launchConnectionRequest();
+			break;
+		case 7:
+			// Help
+			
+			break;
+		case 8:
+			// Sign Out
 			launchSignOut();
 			break;
 		default:
