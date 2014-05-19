@@ -55,25 +55,27 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/mainActivity_lastTransactions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/mainActivity_lastTransactionsTitle"
-                android:layout_marginTop="10dp" />
+            <LinearLayout
+                android:id="@+id/mainActivity_history"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/mainActivity_lastTransactionsTitle" >
+            </LinearLayout>
 
             <Button
                 android:id="@+id/createNewTransactionButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/mainActivity_lastTransactions"
+                android:layout_below="@+id/mainActivity_history"
+                android:layout_marginTop="10dp"
                 android:drawableLeft="@drawable/ic_pay_payment"
                 android:gravity="center"
                 android:text="@string/payButton" />
         </RelativeLayout>
-    </ScrollView> <!-- The navigation drawer -->
-
+    </ScrollView> 
+    
+    <!-- The navigation drawer -->
     <ListView
         android:id="@+id/left_drawer"
         android:layout_width="240dp"
