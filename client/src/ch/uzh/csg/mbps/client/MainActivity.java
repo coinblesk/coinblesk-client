@@ -71,17 +71,12 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 		initializeDrawer();
 		readServerPublicKey();
-		createNewTransactionBtn = (Button) findViewById(R.id.createNewTransactionButton);
+		initializeGui();
 		
-		ImageView nfcActivity = (ImageView) findViewById(R.id.mainActivity_nfcIcon);
-		nfcActivity.setBackgroundResource(R.drawable.nfc_animation);
-		nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
-		nfcActivityAnimation.start();
-
-		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getUser().getBalance(), getApplicationContext());
 		initClickListener();
 		checkOnlineModeAndProceed();
 	}
+
 
 	@Override
 	public void onResume(){
@@ -172,6 +167,17 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
+	}
+
+	private void initializeGui() {
+		createNewTransactionBtn = (Button) findViewById(R.id.createNewTransactionButton);
+		//create animated nfc activity image
+		ImageView nfcActivity = (ImageView) findViewById(R.id.mainActivity_nfcIcon);
+		nfcActivity.setBackgroundResource(R.drawable.nfc_animation);
+		nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
+		nfcActivityAnimation.start();
+		
+		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getUser().getBalance(), getApplicationContext());
 	}
 
 	private void readServerPublicKey() {

@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -32,7 +30,6 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	// constant to determine which sub-activity returns
 	private static final int REQUEST_CODE = 1;
 	
-	private AutoCompleteTextView autoCompleteUsername;	
 	private String username;
 	private String password;
 	private Button signInBtn;
@@ -67,17 +64,19 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 		
 		SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
 		String storedUsername = sharedPref.getString(getString(R.string.stored_username), "");
-		autoCompleteUsername = (AutoCompleteTextView) findViewById(R.id.loginUsernameEditText);
-		String [] usernames = new String[]{storedUsername};
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, usernames);
-		autoCompleteUsername.setAdapter(adapter);
-		
+		EditText usernameEditText = (EditText) findViewById(R.id.loginUsernameEditText);
+		usernameEditText.setText(storedUsername);
+		if(!storedUsername.isEmpty()){
+			username = storedUsername;
+			EditText password = (EditText) findViewById(R.id.loginPasswordEditText);
+			password.requestFocus();
+		}
 	}
 
 	private void initClickListener() {
     	signInBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				username = ((AutoCompleteTextView) findViewById(R.id.loginUsernameEditText)).getText().toString();
+				username = ((EditText) findViewById(R.id.loginUsernameEditText)).getText().toString();
 				password = ((EditText) findViewById(R.id.loginPasswordEditText)).getText().toString();
 				
 				if (username.isEmpty() || password.isEmpty())

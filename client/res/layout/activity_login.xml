@@ -9,32 +9,21 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".LoginActivity" >
 
-    <RelativeLayout
-        android:id="@+id/loginLayoutEditText"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-
-        <AutoCompleteTextView
+        <EditText
             android:id="@+id/loginUsernameEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="75dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="50dp"
             android:background="#fff"
-            android:ems="10"
             android:hint="@string/loginUsernameEditText"
             android:inputType="textEmailAddress" />
 
         <EditText
             android:id="@+id/loginPasswordEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/loginUsernameEditText"
+            android:layout_height="35dp"
             android:layout_marginTop="35dp"
             android:background="#fff"
-            android:ems="10"
             android:hint="@string/loginPasswordEditText"
             android:inputType="textPassword" />
 
@@ -42,29 +31,22 @@
             android:id="@+id/loginPasswordOrUsernameForgottenTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/loginPasswordEditText"
             android:layout_marginTop="19dp"
             android:text="@string/loginPasswordOrUsernameForgottenTextView"
             android:textColor="#1e5db2" />
 
         <Button
-            android:id="@+id/loginSignUpBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/loginSignInBtn"
-            android:layout_marginTop="24dp"
-            android:text="@string/loginSignUpBtn" />
-
-        <Button
             android:id="@+id/loginSignInBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/loginPasswordOrUsernameForgottenTextView"
             android:layout_marginTop="24dp"
             android:text="@string/loginSignInBtn" />
-    </RelativeLayout>
+        
+        <Button
+            android:id="@+id/loginSignUpBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/loginSignUpBtn" />
 
 </LinearLayout>
