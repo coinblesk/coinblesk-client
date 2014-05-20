@@ -39,7 +39,7 @@
                 android:id="@+id/mainActivity_balanceCHF"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp" />
+                android:textSize="@dimen/textSizeBig" />
 
             <TextView
                 android:id="@+id/mainActivity_lastTransactionsTitle"
@@ -47,6 +47,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="@string/last5TransactionsTitle"
+                android:visibility="invisible"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textStyle="bold" />
 

@@ -223,16 +223,19 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 	public void onTaskComplete(CustomResponseObject response) {
 		dismissProgressDialog();
+		TextView lastTransactionsTitle = (TextView) findViewById(R.id.mainActivity_lastTransactionsTitle);
 		if (response.isSuccessful()) {
 			exchangeRate = new BigDecimal(response.getMessage());
 			ClientController.getUser().setBalance(response.getReadAccountTO().getUserAccount().getBalance());
 			ArrayList<AbstractHistory> transactions = extractLast5Transactions(response.getGetHistoryTO());
 
 			//update gui
+			lastTransactionsTitle.setVisibility(View.VISIBLE);
 			createHistoryViews(transactions);
 			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getUser().getBalance());
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			reload(getIntent());
+			lastTransactionsTitle.setVisibility(View.INVISIBLE);
 			invalidateOptionsMenu();
 		}
 		showPopupWindow();

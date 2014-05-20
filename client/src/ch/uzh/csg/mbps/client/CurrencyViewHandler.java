@@ -35,7 +35,7 @@ public class CurrencyViewHandler {
 	 */
 	public static void setToCHF(TextView textView, BigDecimal exchangeRate, BigDecimal amountBtc) {
 		BigDecimal chf = amountBtc.multiply(exchangeRate);
-		textView.setText(CurrencyFormatter.formatChf(chf) + " CHF");
+		textView.setText("(" + CurrencyFormatter.formatChf(chf) + " CHF" + ")");
 	}
 	
 	/**
