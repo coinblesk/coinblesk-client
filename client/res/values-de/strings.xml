@@ -57,7 +57,7 @@
     <string name="mainActivityTextView">Kontoübersicht</string>
     <string name="payButton">Neue Transaktion erstellen</string>
     <string name="last5TransactionsTitle">Ihre letzten 5 Transaktionen:</string>
-    <string name="mainActivity_processTransactionTitle">Process Transaction</string>
+    <string name="mainActivity_processTransactionTitle">Transaktion ausführen</string>
     <string name="mainActivity_processTransactionInstruction">(Geräte zusammenhalten um bereits eingeleitete Transaktion zu verarbeiten)</string>
     <string name="mainActivity_or">ODER</string>
     

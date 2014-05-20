@@ -1,0 +1,15 @@
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item android:drawable="@drawable/ic_nfc_activity1" android:duration="1000" />
+    <item android:drawable="@drawable/ic_nfc_activity2" android:duration="600" />
+    <item android:drawable="@drawable/ic_nfc_activity3" android:duration="300" />
+    <item android:drawable="@drawable/ic_nfc_activity4" android:duration="500" />
+    <item android:drawable="@drawable/ic_nfc_activity3" android:duration="300" />
+    <item android:drawable="@drawable/ic_nfc_activity2" android:duration="500" />
+    <item android:drawable="@drawable/ic_nfc_activity3" android:duration="300" />
+    <item android:drawable="@drawable/ic_nfc_activity4" android:duration="500" />
+    <item android:drawable="@drawable/ic_nfc_activity3" android:duration="300" />
+    <item android:drawable="@drawable/ic_nfc_activity2" android:duration="500" />
+    <item android:drawable="@drawable/ic_nfc_activity3" android:duration="300" />
+    <item android:drawable="@drawable/ic_nfc_activity4" android:duration="1000" />
+</animation-list>

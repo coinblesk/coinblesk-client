@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -24,6 +25,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -59,6 +61,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	private RequestTask getMainActivityValues;
 	private PopupWindow popupWindow;
 	private Boolean isFirstTime;
+	AnimationDrawable nfcActivityAnimation;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +72,11 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		initializeDrawer();
 		readServerPublicKey();
 		createNewTransactionBtn = (Button) findViewById(R.id.createNewTransactionButton);
+		
+		ImageView nfcActivity = (ImageView) findViewById(R.id.mainActivity_nfcIcon);
+		nfcActivity.setBackgroundResource(R.drawable.nfc_animation);
+		nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
+		nfcActivityAnimation.start();
 
 		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getUser().getBalance(), getApplicationContext());
 		initClickListener();
@@ -202,11 +210,13 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	}
 
 	private void launchRequest() {
+		showLoadingProgressDialog();
 		getMainActivityValues = new MainActivityRequestTask(this);
 		getMainActivityValues.execute();
 	}
 
 	public void onTaskComplete(CustomResponseObject response) {
+		dismissProgressDialog();
 		if (response.isSuccessful()) {
 			exchangeRate = new BigDecimal(response.getMessage());
 			ClientController.getUser().setBalance(response.getReadAccountTO().getUserAccount().getBalance());
@@ -222,6 +232,16 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		showPopupWindow();
 	}
 
+	/**
+	 * Sort HistoryTransactions received from server according to timestamp and
+	 * return.
+	 * 
+	 * @param GetHistoryTransferObject
+	 *            hto which includes {@link HistoryTransaction}s,
+	 *            {@link HistoryPayInTransaction}s and
+	 *            {@link HistoryPayOutTransaction}s
+	 * @return ArrayList<AbstractHistory>
+	 */
 	private ArrayList<AbstractHistory> extractLast5Transactions(GetHistoryTransferObject hto) {
 		ArrayList<HistoryTransaction> transactionHistory = hto.getTransactionHistory();
 		ArrayList<HistoryPayInTransaction> payInTransactionHistory = hto.getPayInTransactionHistory();
