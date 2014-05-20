@@ -3,9 +3,12 @@
     tools:context="ch.uzh.csg.mbps.client.ChoosePayment" >
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/action_settings"/>
+        android:id="@+id/action_warning"
+        android:enabled="true"
+        android:icon="@drawable/ic_alerts_and_states_warning"
+        android:orderInCategory="200"
+        android:showAsAction="always"
+        android:title="@string/action_warning"
+        android:visible="true"/>
 
 </menu>
