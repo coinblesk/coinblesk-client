@@ -61,7 +61,6 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 		protected int getCode() {
 			return i;
 		}
-		
 	}
 	
 	private Filter filter = Filter.TX;
@@ -73,7 +72,13 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 		setScreenOrientation();
 		
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		int filterValue = 0;
+		Bundle b = getIntent().getExtras();
+		if(b!=null)
+			filterValue = b.getInt("filter");
+
 		setupSpinner();
+		filterSpinner.setSelection(filterValue);
 	}
 
 	@Override
@@ -143,8 +148,6 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 			}
 			
 		});
-		
-		filterSpinner.setSelection(0);
 	}
     
 	/**

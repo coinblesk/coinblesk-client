@@ -49,17 +49,19 @@
         Universität Zürich entwickelt.\nWir übernehmen keine Verantwortung für den Verlust Ihrer Bitcoins im Falle eines Systems / Hardware Fehlers 
         oder bei böswilligem Einfluss durch Dritte. Bitte seien Sie sich bewusst, dass diese Applikation immer noch im Beta-Stadium ist und Fehler 
         auftreten können.
-        \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics
-         </string>
+        \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics</string>
     <string name="termOfUseImageCloseBtn">AGBs schliessen</string>
     <string name="createAccountSuccessful">Bestätigung der Registrierung</string>
 
     <!-- Main View Strings -->
-    <string name="mainActivityTextView">Kontostand</string>
+    <string name="mainActivityTextView">Kontoübersicht</string>
     <string name="payButton">Neue Transaktion erstellen</string>
     <string name="last5TransactionsTitle">Ihre letzten 5 Transaktionen:</string>
+    <string name="mainActivity_processTransactionTitle">Process Transaction</string>
+    <string name="mainActivity_processTransactionInstruction">(Geräte zusammenhalten um bereits eingeleitete Transaktion zu verarbeiten)</string>
+    <string name="mainActivity_or">ODER</string>
     
-    
+
     <!-- Drawer Navigation -->
     <string-array name="drawerItems_array">
         <item>Benutzerprofil</item>
@@ -69,22 +71,23 @@
         <item>Konto aufladen</item>
         <item>Auszahlen an BTC Adresse</item>
         <item>Mit Server verbinden</item>
-		<item>Hilfe</item>
+        <item>Hilfe</item>
         <item>Abmelden</item>
     </string-array>
-    <string name="session_expired">Session ist abgelaufen!</string>
 
+    <string name="session_expired">Session ist abgelaufen!</string>
     <string name="unexcepted_error">Ein unerwarteter Fehler trat auf. Bitte versuchen Sie es erneut.</string>
 
     <!-- History Strings -->
     <string name="recent_payments">Letzte Transaktionen</string>
     <string name="history_activity_no_transactions_text">Es wurde noch keine Transaktionen getätigt.</string>
     <string name="history_activity_get_by_email">Klicken Sie um eine komplette Liste all ihrer Transaktionen als Email zu erhalten.</string>
+
     <string-array name="history_filter">
         <item>Transaktionen</item>
         <item>Einzahlungen</item>
-    	<item>Auszahlungen</item>
-	</string-array>
+        <item>Auszahlungen</item>
+    </string-array>
 
     <!-- Abstract Payment -->
     <string name="payment_failure">Transaktion fehlgeschlagen</string>
@@ -140,11 +143,10 @@
     <string name="payOut_payOut">Auszahlung durchführen</string>
     <string name="payout_exchangeRateText">Wechselkurs </string>
     <string name="fill_necessary_fields">Bitte alle benötigten Fehler ausfüllen.</string>
-    <string name="payOut_ButtonAll">Max</string> 
-    <string name="payOut_ButtonScanQRText">Scan QR</string> 
-    <string name="payOut_NoQRCode">Bitcoin Adresse konnte nicht gescannt werden.</string> 
-    
-    
+    <string name="payOut_ButtonAll">Max</string>
+    <string name="payOut_ButtonScanQRText">Scan QR</string>
+    <string name="payOut_NoQRCode">Bitcoin Adresse konnte nicht gescannt werden.</string>
+
     <!-- Payou out Rules -->
     <string name="insert_payout_address">Bitte Auszahlungs-Adresse eingeben!</string>
     <string name="insert_min_amount">Bitte eine Kontostand-Limite von mindesetens 0.0001 BTC eingeben!</string>
@@ -230,17 +232,16 @@
     <string name="servicedesc">MBPS Nfc</string>
 
     <!-- About Text -->
-    <string name="about_text">
-       Diese Applikation wurde als Teil eines Masterprojektes am Institut für Informatik an der 
+    <string name="about_text">       Diese Applikation wurde als Teil eines Masterprojektes am Institut für Informatik an der 
        Universität Zürich entwickelt.\nWir übernehmen keine Verantwortung für den Verlust Ihrer Bitcoins im Falle eines Systems / Hardware Fehlers 
        oder bei böswilligem Einfluss durch Dritte. Bitte seien Sie sich bewusst, dass diese Applikation immer noch im Beta-Stadium ist und Fehler 
        auftreten können.\n\nKontakt: bitcoin@ifi.uzh.ch\n
-       \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics
-   </string>
+       \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics	</string>
+	
     <!-- Calculator Dialog -->
     <string name="enter_total">Enter</string>
     <string name="all_clear">AC</string>
-    
+
     <!-- FirstTimeInformation Dialog -->
     <string name="firstTimeInfo_title">Information NFC Handhabung</string>
     <string name="firstTimeInfo_instruction_backToBack">Rückseite an Rückseite</string>
@@ -248,11 +249,11 @@
     <string name="firstTimeInfo_instruction_or">ODER</string>
     <string name="firstTimeInfo_instruction_acr">Mobiltelefon auf NFC-Gerät legen</string>
     <string name="firstTimeInfo_instruction_close">Information schliessen</string>
-    
-    <!-- Shared Preferences-->
+
+    <!-- Shared Preferences -->
     <string name="sharedPreferences_isFirstTime"></string>
-    
-    <!-- Choose Payment Method-->
+
+    <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Bitcoins Senden</string>
     <string name="choosePayment_requestPaymentBtnText">Bitcoins Verlangen</string>
     <string name="choosePayment_requestPaymentNoNfcBtnText">Bitcoins Senden \n direkt an bekannten Empfänger \n (ohne NFC Kontakt)</string>

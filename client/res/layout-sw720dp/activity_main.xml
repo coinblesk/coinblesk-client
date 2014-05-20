@@ -13,11 +13,12 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin" >
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/mainActivityFragementLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="1" >
+            android:columnCount="1"
+            android:orientation="vertical" >
 
             <TextView
                 android:id="@+id/mainActivityTextViewTitle"
@@ -32,16 +33,12 @@
                 android:id="@+id/mainActivityTextViewBTCs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/mainActivityTextViewTitle"
                 android:textSize="35sp" />
 
             <TextView
                 android:id="@+id/mainActivity_balanceCHF"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/mainActivityTextViewBTCs"
                 android:layout_marginTop="10dp"
                 android:textSize="20sp" />
 
@@ -49,31 +46,77 @@
                 android:id="@+id/mainActivity_lastTransactionsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/mainActivity_balanceCHF"
                 android:layout_marginTop="10dp"
                 android:text="@string/last5TransactionsTitle"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textStyle="bold" />
 
+            <LinearLayout
+                android:id="@+id/mainActivity_history"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dip"
+                android:layout_marginTop="10dp"
+                android:background="#FF000000" />
+
             <TextView
-                android:id="@+id/mainActivity_lastTransactions"
-                android:layout_width="wrap_content"
+                android:id="@+id/mainActivity_processTransactionTitle"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/mainActivity_lastTransactionsTitle"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text="@string/mainActivity_processTransactionTitle"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#33b5e5"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/mainActivity_nfcIcon"
+                android:layout_width="fill_parent"
+                android:layout_height="150dp"
+                android:gravity="center"
+                android:src="@drawable/ic_nfc_activity" />
+            
+             <TextView
+                android:id="@+id/mainActivity_processTransactionInstruction"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/mainActivity_processTransactionInstruction"
                 android:layout_marginTop="10dp" />
+            
+            <TextView
+                android:id="@+id/mainActivity_or"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/mainActivity_or"
+                android:textStyle="bold"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_marginTop="10dp" />
+            
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dip"
+                android:layout_marginTop="10dp"
+                android:background="#FF000000" />
 
             <Button
                 android:id="@+id/createNewTransactionButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/buttonHeight"
-                android:layout_below="@+id/mainActivity_lastTransactions"
                 android:layout_marginTop="15dp"
-                android:drawableLeft="@drawable/ic_pay_payment"
                 android:gravity="center"
+                android:textColor="#33b5e5"
+                android:textStyle="bold"
+                android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="@string/payButton" />
-        </RelativeLayout>
+        </LinearLayout>
     </ScrollView> <!-- The navigation drawer -->
 
     <ListView

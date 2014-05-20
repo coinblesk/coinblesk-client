@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -132,7 +133,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	 * 
 	 * @see http://developer.android.com/training/implementing-navigation/nav-drawer.html
 	 */
-	 private void initializeDrawer() {
+	private void initializeDrawer() {
 		mDrawerItems = getResources().getStringArray(R.array.drawerItems_array);
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout_activity_main);
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -163,150 +164,171 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
-	 }
+	}
 
-	 private void readServerPublicKey() {
-		 try {
-			 String serverPK = InternalStorageXML.readPublicKeyFromFile(getApplicationContext());
-			 ClientController.setServerPublicKey(serverPK);
-		 } catch (Exception e) {
-			 displayResponse(getResources().getString(R.string.unexcepted_error));
-		 }
-	 }
+	private void readServerPublicKey() {
+		try {
+			String serverPK = InternalStorageXML.readPublicKeyFromFile(getApplicationContext());
+			ClientController.setServerPublicKey(serverPK);
+		} catch (Exception e) {
+			displayResponse(getResources().getString(R.string.unexcepted_error));
+		}
+	}
 
-	 private void initClickListener() {
-		 createNewTransactionBtn.setOnClickListener(new View.OnClickListener() {
-			 public void onClick(View v) {
-				 handleAsyncTask();
-				 launchActivity(MainActivity.this, ChoosePaymentActivity.class);
-			 }
-		 });
-	 }
+	private void initClickListener() {
+		createNewTransactionBtn.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				handleAsyncTask();
+				launchActivity(MainActivity.this, ChoosePaymentActivity.class);
+			}
+		});
+	}
 
-	 private void handleAsyncTask(){
-		 if(ClientController.isOnline() && !getMainActivityValues.equals(AsyncTask.Status.FINISHED)){
-			 getMainActivityValues.cancel(true);
-		 }
-	 }
+	private void handleAsyncTask(){
+		if(ClientController.isOnline() && !getMainActivityValues.equals(AsyncTask.Status.FINISHED)){
+			getMainActivityValues.cancel(true);
+		}
+	}
 
-	 private void checkOnlineModeAndProceed() {
-		 CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.mainActivity_balanceCHF));
-		 if (ClientController.isOnline()) {
-			 launchRequest();
-		 } else {
-			 //TODO simon: adapt offline mode to ChoosePaymentActivity
-			 //			receivePaymentBtn.setEnabled(false);
-			 showPopupWindow();
-		 }
-	 }
+	private void checkOnlineModeAndProceed() {
+		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.mainActivity_balanceCHF));
+		if (ClientController.isOnline()) {
+			launchRequest();
+		} else {
+			//TODO simon: adapt offline mode to ChoosePaymentActivity
+			//			receivePaymentBtn.setEnabled(false);
+			showPopupWindow();
+		}
+	}
 
-	 private void launchRequest() {
-		 getMainActivityValues = new MainActivityRequestTask(this);
-		 getMainActivityValues.execute();
-	 }
+	private void launchRequest() {
+		getMainActivityValues = new MainActivityRequestTask(this);
+		getMainActivityValues.execute();
+	}
 
-	 public void onTaskComplete(CustomResponseObject response) {
-		 if (response.isSuccessful()) {
-			 exchangeRate = new BigDecimal(response.getMessage());
-			 ClientController.getUser().setBalance(response.getReadAccountTO().getUserAccount().getBalance());
-			 ArrayList<AbstractHistory> transactions = extractLast5Transactions(response.getGetHistoryTO());
+	public void onTaskComplete(CustomResponseObject response) {
+		if (response.isSuccessful()) {
+			exchangeRate = new BigDecimal(response.getMessage());
+			ClientController.getUser().setBalance(response.getReadAccountTO().getUserAccount().getBalance());
+			ArrayList<AbstractHistory> transactions = extractLast5Transactions(response.getGetHistoryTO());
 
-			 //update gui
-			 createHistoryViews(transactions);
-			 CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getUser().getBalance());
-		 } else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
-			 reload(getIntent());
-			 invalidateOptionsMenu();
-		 }
-		 showPopupWindow();
-	 }
+			//update gui
+			createHistoryViews(transactions);
+			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getUser().getBalance());
+		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+			reload(getIntent());
+			invalidateOptionsMenu();
+		}
+		showPopupWindow();
+	}
 
-	 private ArrayList<AbstractHistory> extractLast5Transactions(GetHistoryTransferObject hto) {
-		 ArrayList<HistoryTransaction> transactionHistory = hto.getTransactionHistory();
-		 ArrayList<HistoryPayInTransaction> payInTransactionHistory = hto.getPayInTransactionHistory();
-		 ArrayList<HistoryPayOutTransaction> payOutTransactionHistory = hto.getPayOutTransactionHistory();
+	private ArrayList<AbstractHistory> extractLast5Transactions(GetHistoryTransferObject hto) {
+		ArrayList<HistoryTransaction> transactionHistory = hto.getTransactionHistory();
+		ArrayList<HistoryPayInTransaction> payInTransactionHistory = hto.getPayInTransactionHistory();
+		ArrayList<HistoryPayOutTransaction> payOutTransactionHistory = hto.getPayOutTransactionHistory();
 
-		 ArrayList<AbstractHistory> history = new ArrayList<AbstractHistory>();
-		 history.addAll(transactionHistory);
-		 history.addAll(payInTransactionHistory);
-		 history.addAll(payOutTransactionHistory);
-		 Collections.sort(history, new CustomComparator());
+		ArrayList<AbstractHistory> history = new ArrayList<AbstractHistory>();
+		history.addAll(transactionHistory);
+		history.addAll(payInTransactionHistory);
+		history.addAll(payOutTransactionHistory);
+		Collections.sort(history, new CustomComparator());
 
-		 return history;
-	 }
+		return history;
+	}
 
-	 private class CustomComparator implements Comparator<AbstractHistory> {
-		 public int compare(AbstractHistory o1, AbstractHistory o2) {
-			 return o1.getTimestamp().compareTo(o2.getTimestamp());
-		 }
-	 }
+	private class CustomComparator implements Comparator<AbstractHistory> {
+		public int compare(AbstractHistory o1, AbstractHistory o2) {
+			return o1.getTimestamp().compareTo(o2.getTimestamp());
+		}
+	}
 
-	 private void createHistoryViews(ArrayList<AbstractHistory> history) {
-		 LinearLayout linearLayout = (LinearLayout)findViewById(R.id.mainActivity_history);
-		 linearLayout.removeAllViews();
+	private void createHistoryViews(ArrayList<AbstractHistory> history) {
+		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.mainActivity_history);
+		linearLayout.removeAllViews();
 
-		 for(int i = history.size()-1;i>=history.size()-5;i--){
-			 TextView tView = new TextView(getApplicationContext());
-			 tView.setGravity(Gravity.LEFT);
-			 tView.setTextColor(Color.BLACK);
-			 int drawable = getImage(history.get(i));
-			 tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
-			 tView.setText(history.get(i).toString());
-			 tView.setClickable(true);
-			 tView.setOnClickListener(new View.OnClickListener() {
-				 public void onClick(View v) {
-					 handleAsyncTask();
-					 launchActivity(MainActivity.this, HistoryActivity.class);
-				 }
-			 });
-			 linearLayout.addView(tView);
-		 }
-	 }
+		for(int i = history.size()-1;i>=history.size()-5;i--){
+			TextView tView = new TextView(getApplicationContext());
+			tView.setGravity(Gravity.LEFT);
+			tView.setTextColor(Color.BLACK);
+			int drawable = getImage(history.get(i));
+			final int historyFilterValue = getHistoryCode(history.get(i));
+			tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
+			tView.setText(history.get(i).toString());
+			tView.setClickable(true);
+			tView.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					handleAsyncTask();
+					Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+					Bundle b = new Bundle();
+					b.putInt("filter", historyFilterValue);
+					intent.putExtras(b);
+					startActivity(intent);
+				}
+			});
+			linearLayout.addView(tView);
+		}
+	}
 
-	 private int getImage(AbstractHistory history) {
-		 if(history instanceof HistoryTransaction){
-			 if(((HistoryTransaction) history).getSeller().equals(ClientController.getUser().getUsername())){
-				 return R.drawable.ic_receive_payment;
-			 }else{
-				 return R.drawable.ic_pay_payment;
-			 }
-		 }else if(history instanceof HistoryPayInTransaction){
-			 return R.drawable.ic_pay_in;
-		 }else if(history instanceof HistoryPayOutTransaction){
-			 return R.drawable.ic_pay_out;
-		 }
-		 return 0;
-	 }
+	private int getImage(AbstractHistory history) {
+		if(history instanceof HistoryTransaction){
+			if(((HistoryTransaction) history).getSeller().equals(ClientController.getUser().getUsername())){
+				return R.drawable.ic_receive_payment;
+			}else{
+				return R.drawable.ic_pay_payment;
+			}
+		}else if(history instanceof HistoryPayInTransaction){
+			return R.drawable.ic_pay_in;
+		}else if(history instanceof HistoryPayOutTransaction){
+			return R.drawable.ic_pay_out;
+		}
+		return 0;
+	}
+	
+	private int getHistoryCode(AbstractHistory history) {
+		if(history instanceof HistoryTransaction){
+			if(((HistoryTransaction) history).getSeller().equals(ClientController.getUser().getUsername())){
+				return 0;
+			}else{
+				return 0;
+			}
+		}else if(history instanceof HistoryPayInTransaction){
+			return 1;
+		}else if(history instanceof HistoryPayOutTransaction){
+			return 2;
+		}
+		return 0;
+	}
+	
 
-	 private void showPopupWindow(){	
-		 if(isFirstTime == null){
-			 SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-			 boolean defaultValue = true;
-			 isFirstTime = sharedPref.getBoolean(getString(R.string.sharedPreferences_isFirstTime), defaultValue);
-		 }
+	private void showPopupWindow(){	
+		if(isFirstTime == null){
+			SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+			boolean defaultValue = true;
+			isFirstTime = sharedPref.getBoolean(getString(R.string.sharedPreferences_isFirstTime), defaultValue);
+		}
 
-		 if (isFirstTime){
-			 LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			 ViewGroup group = (ViewGroup) findViewById(R.id.nfc_instruction_popup);
-			 View layout = inflater.inflate(R.layout.activity_popup_nfc_instructions, group);
-			 popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
-			 popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
+		if (isFirstTime){
+			LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			ViewGroup group = (ViewGroup) findViewById(R.id.nfc_instruction_popup);
+			View layout = inflater.inflate(R.layout.activity_popup_nfc_instructions, group);
+			popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
+			popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
 
-			 final Button closeBtn = (Button) layout.findViewById(R.id.nfc_instruction_close_button);
-			 closeBtn.setOnClickListener(new OnClickListener() {
-				 public void onClick(View v) {
-					 popupWindow.dismiss();
-				 }
-			 });
+			final Button closeBtn = (Button) layout.findViewById(R.id.nfc_instruction_close_button);
+			closeBtn.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					popupWindow.dismiss();
+				}
+			});
 
-			 isFirstTime = false;
+			isFirstTime = false;
 
-			 //write to shared preferences
-			 SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-			 SharedPreferences.Editor editor = sharedPref.edit();
-			 editor.putBoolean(getString(R.string.sharedPreferences_isFirstTime), false);
-			 editor.commit();
-		 }
-	 }
+			//write to shared preferences
+			SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+			SharedPreferences.Editor editor = sharedPref.edit();
+			editor.putBoolean(getString(R.string.sharedPreferences_isFirstTime), false);
+			editor.commit();
+		}
+	}
 
 }
