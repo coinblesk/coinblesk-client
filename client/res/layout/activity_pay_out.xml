@@ -98,7 +98,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/payOut_title"
         android:text="@string/payOut_info"
-        android:textColor="#1e5db2" />
+        android:textColor="#33b5e5" />
 
     <TextView
         android:id="@+id/payOut_BalanceText"
