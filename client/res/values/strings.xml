@@ -100,8 +100,8 @@
     <string name="payPayment_pay">Pay</string>
     <string name="payPayment_usernameTitle">To:</string>
     <string name="payPayment_amountBTCTitle">Amount:</string>
-    <string name="payPayment_accept">Accept</string>
-    <string name="payPayment_reject">Reject</string>
+    <string name="payPayment_accept">Accept Payment</string>
+    <string name="payPayment_reject">Reject Payment</string>
     <string name="payPayment_toggleText">Accept automatically</string>
 
     <!-- Receive Payment Strings -->

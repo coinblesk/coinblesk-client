@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,6 +8,9 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     tools:context=".PayPaymentActivity" >
 
+    <RelativeLayout 
+        android:layout_width="match_parent"
+    	android:layout_height="wrap_content" >
     <TextView
         android:id="@+id/payPayment_title"
         android:layout_width="wrap_content"
@@ -70,11 +73,12 @@
         android:layout_alignParentLeft="true"
         android:layout_marginTop="25dp"
         android:textSize="15sp"
+        android:textColor="#33b5e5"
         android:text="@string/payPayment_paymentDescription" />
     
     <TextView
         android:id="@+id/switchText"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView1"
         android:layout_alignParentLeft="true"
@@ -99,6 +103,7 @@
         android:layout_alignParentLeft="true"
         android:layout_marginTop="15dp"
         android:textSize="18sp" 
+        android:textStyle="bold"
         android:text="@string/payPayment_usernameTitle" />
      
     <TextView
@@ -119,6 +124,7 @@
         android:layout_alignParentLeft="true"
         android:layout_marginTop="15dp"
         android:textSize="18sp" 
+        android:textStyle="bold"
         android:text="@string/payPayment_amountBTCTitle" />
     
     <TextView
@@ -141,7 +147,7 @@
     
     <Button
         android:id="@+id/payPayment_accept"
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_below="@+id/payPayment_amountBTCTitle"
         android:layout_alignParentLeft="true"
@@ -151,13 +157,22 @@
 
     <Button
         android:id="@+id/payPayment_reject"
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_alignBaseline="@+id/payPayment_accept"
-        android:layout_alignBottom="@+id/payPayment_accept"
-        android:layout_toRightOf="@+id/payPayment_accept"
-        android:layout_marginLeft="45dp"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/payPayment_accept"
+        android:layout_alignParentLeft="true"
         android:text="@string/payPayment_reject"
         android:textSize="20sp" />
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@+id/payPayment_title"
+        android:gravity="right"
+        android:src="@drawable/ic_pay_payment" />
     
 </RelativeLayout>
+</ScrollView>
