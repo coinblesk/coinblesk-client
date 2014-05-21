@@ -121,6 +121,8 @@
     <string name="payIn_copy">In Zwischenablage kopieren</string>
     <string name="copy_clipboard">Adresse in Zwischenablage gespeichert</string>
     <string name="payIn_sendMail">Adresse als Email erhalten</string>
+    <string name="payIn_addressTitle">Bitcoin Adresse:</string>
+    
 
     <!-- PayOut Strings -->
     <string name="setting_payOut_balance_title">Kontostand Limite in Bitcoins</string>

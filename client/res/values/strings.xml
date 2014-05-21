@@ -121,6 +121,7 @@
     <string name="payIn_copy">Copy To Clipboard</string>
     <string name="copy_clipboard">Address copied to clipboard</string>
     <string name="payIn_sendMail">Send to Email</string>
+    <string name="payIn_addressTitle">Bitcoin Address:</string>
 
     <!-- PayOut Strings -->
     <string name="setting_payOut_balance_title">Balance limit in Bitcoins</string>
