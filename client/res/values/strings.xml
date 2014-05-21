@@ -5,20 +5,21 @@
     <string name="app_name">MBPS</string>
 
     <!-- Name of Activities -->
-    <string name="title_activity_login">MBPS</string>
+    <string name="title_activity_login">Login</string>
     <string name="title_activity_reset_password">MBPS - Reset Password</string>
     <string name="title_activity_registration">MBPS - Registration</string>
-    <string name="title_activity_main">MBPS - Account</string>
-    <string name="title_activity_history">MBPS - History</string>
-    <string name="title_activity_pay_payment">MBPS - Pay</string>
-    <string name="title_activity_receive_payment">MBPS - Receive</string>
-    <string name="title_activity_pay_in">MBPS - Pay In</string>
-    <string name="title_activity_pay_out">MBPS - Pay Out</string>
-    <string name="title_activity_profile_account">MBPS - Profile</string>
-    <string name="title_activity_edit_email_account_profile">MBPS - Update E-Mail</string>
-    <string name="title_activity_edit_passwotrd_account_profile">MBPS - Update Password</string>
-    <string name="title_activity_about">MBPS - About</string>
-    <string name="title_activity_setting_pay_out_rules">MBPS - Pay out Rules</string>
+    <string name="title_activity_main">Account Overview</string>
+    <string name="title_activity_history">History</string>
+    <string name="title_activity_pay_payment">Pay</string>
+    <string name="title_activity_receive_payment">Receive</string>
+    <string name="title_activity_pay_in">Pay In</string>
+    <string name="title_activity_pay_out">Pay Out</string>
+    <string name="title_activity_profile_account">Profile</string>
+    <string name="title_activity_edit_email_account_profile">Update E-Mail</string>
+    <string name="title_activity_edit_passwotrd_account_profile">Update Password</string>
+    <string name="title_activity_about">About</string>
+    <string name="title_activity_setting_pay_out_rules">Pay out Rules</string>
+    <string name="title_activity_choose_payment">Chose Payment Method</string>
 
     <!-- Login Strings -->
     <string name="loginUsernameEditText">Enter your username</string>
@@ -49,7 +50,7 @@
         Informatics at the University of Zurich (Switzerland).\nWe do not take any responsibility for a loss of your Bitcoins
          in case of a system/hardware failure or by malicious thirdparty influence. Please be aware that this application is 
          still in its Beta Stadium and failures may occur.
-         \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics</string>
+         \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics	</string>
     <string name="termOfUseImageCloseBtn">Close terms of use</string>
     <string name="createAccountSuccessful">Registration confirmation</string>
 
@@ -225,6 +226,9 @@
     <string name="loading_progress_dialog">Loading. Please wait&#8230;</string>
     <!-- Drawer Navigation -->
     <string name="already_connected_to_server">You are already connected!</string>
+    
+    <!-- Menu information -->
+    <string name="optionMenu_offlineModeHint">You are in offline mode. To reconnect open menu and click &quot;Reconnect to server&quot;.</string>
 
     <!-- APDU SERVICE -->
     <string name="aiddescription">ch.uzh.csg.mbps</string>
@@ -252,7 +256,6 @@
 
     <!-- Shared Preferences -->
     <string name="sharedPreferences_isFirstTime">isFirstTime</string>
-    <string name="title_activity_choose_payment">Chose Payment Method</string>
     <string name="hello_world">Hello world!</string>
     
      <!-- Choose Payment Method-->

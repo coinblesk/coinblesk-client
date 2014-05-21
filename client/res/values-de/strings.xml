@@ -5,20 +5,20 @@
     <string name="app_name">MBPS</string>
 
     <!-- Name of Activities -->
-    <string name="title_activity_login">MBPS</string>
-    <string name="title_activity_reset_password">MBPS - Passwort zurücksetzen</string>
-    <string name="title_activity_registration">MBPS - Registrierung</string>
-    <string name="title_activity_main">MBPS - Konto</string>
-    <string name="title_activity_history">MBPS - Verlauf</string>
-    <string name="title_activity_pay_payment">MBPS - BTC senden</string>
-    <string name="title_activity_receive_payment">MBPS - BTC empfangen</string>
-    <string name="title_activity_pay_in">MBPS - BTC Einzahlen</string>
-    <string name="title_activity_pay_out">MBPS - BTC Auszahlen</string>
-    <string name="title_activity_profile_account">MBPS - Profil</string>
-    <string name="title_activity_edit_email_account_profile">MBPS - Emailadresse ändern</string>
-    <string name="title_activity_edit_passwotrd_account_profile">MBPS - Passwort ändern</string>
-    <string name="title_activity_about">MBPS - Über</string>
-    <string name="title_activity_setting_pay_out_rules">MBPS - Auszahlungs Regeln</string>
+    <string name="title_activity_login">Login</string>
+    <string name="title_activity_reset_password">Passwort zurücksetzen</string>
+    <string name="title_activity_registration">Registrierung</string>
+    <string name="title_activity_main">Konto</string>
+    <string name="title_activity_history">Verlauf</string>
+    <string name="title_activity_pay_payment">BTC senden</string>
+    <string name="title_activity_receive_payment">BTC empfangen</string>
+    <string name="title_activity_pay_in">BTC Einzahlen</string>
+    <string name="title_activity_pay_out">BTC Auszahlen</string>
+    <string name="title_activity_profile_account">Profil</string>
+    <string name="title_activity_edit_email_account_profile">Emailadresse ändern</string>
+    <string name="title_activity_edit_passwotrd_account_profile">Passwort ändern</string>
+    <string name="title_activity_about">Über MBPS</string>
+    <string name="title_activity_setting_pay_out_rules">Auszahlungs Regeln</string>
 
     <!-- Login Strings -->
     <string name="loginUsernameEditText">Benutzername</string>
@@ -226,6 +226,9 @@
     <string name="loading_progress_dialog">Laden. Bitte warten&#8230;</string>
     <!-- Drawer Navigation -->
     <string name="already_connected_to_server">Bereits mit Netzwerk verbunden!</string>
+    
+    <!-- Menu information -->
+    <string name="optionMenu_offlineModeHint">Sie sind im Offline Modus. Um sich zum Server zu verbinden klicken Sie im Menü auf &quot;Mit Server verbinden&quot;.</string>
 
     <!-- APDU SERVICE -->
     <string name="aiddescription">ch.uzh.csg.mbps</string>
