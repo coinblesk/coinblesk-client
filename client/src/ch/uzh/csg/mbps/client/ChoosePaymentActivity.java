@@ -1,15 +1,17 @@
 package ch.uzh.csg.mbps.client;
 
-import ch.uzh.csg.mbps.client.payment.PayPaymentActivity;
-import ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity;
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.widget.Button;
+import ch.uzh.csg.mbps.client.payment.PayPaymentActivity;
+import ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity;
+import ch.uzh.csg.mbps.client.util.ClientController;
 
-public class ChoosePaymentActivity extends Activity {
+public class ChoosePaymentActivity extends AbstractAsyncActivity {
+	private MenuItem menuWarning;
 	private Button requestPaymentBtn;
 	private Button sendPaymentBtn;
 	private Button requestPaymentNoNfcBtn;
@@ -58,14 +60,22 @@ public class ChoosePaymentActivity extends Activity {
 			}
 		});
 	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		menuWarning = menu.findItem(R.id.action_warning);
+		invalidateOptionsMenu();
+		return true;
+	}
 
-	/**
-	 * Launchs a new activity.
-	 * @param activity
-	 * @param classActvity
-	 */
-	private <T> void launchActivity(Activity activity, Class<T> classActvity) {
-		Intent intent = new Intent(activity, classActvity);
-		startActivity(intent);
+	@Override
+	public void invalidateOptionsMenu() {
+		if(menuWarning != null){
+			if(ClientController.isOnline()) {
+				menuWarning.setVisible(false);
+			} else {
+				menuWarning.setVisible(true);
+			}
+		}
 	}
 }
