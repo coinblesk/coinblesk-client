@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -51,6 +52,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private EditText receiveAmount;
 	private TextView descriptionOfInputUnit;
 	private SharedPreferences settings;
+	AnimationDrawable nfcActivityAnimation;
 	
 	protected static final String INPUT_UNIT_CHF = "CHF";
 
@@ -183,6 +185,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			public void onDismiss(DialogInterface dialog) {
 				receiveAmount.setText(inputValueCalculator.toString());
 				refreshCurrencyTextViews();
+				
+				//show nfc instructions
+				findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.VISIBLE);;
+				//create animated nfc activity image
+				ImageView nfcActivity = (ImageView) findViewById(R.id.receivePayment_nfcIcon);
+				nfcActivity.setBackgroundResource(R.drawable.nfc_animation);
+				nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
+				nfcActivityAnimation.start();
 			}
 		});
 	}

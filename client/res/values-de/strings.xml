@@ -105,8 +105,8 @@
     <string name="payPayment_toggleText">Automatisch alle Zahlungen akzeptieren</string>
 
     <!-- Receive Payment Strings -->
-    <string name="receivePayment_charge">BTC empfangen</string>
-    <string name="receivePayment_exchangeRate">Wechselkurs</string>
+    <string name="receivePayment_charge">Verlangen</string>
+    <string name="receivePayment_exchangeRate">Wechselkurs: </string>
     <string name="receivePayment_enter">Betrag in </string>
     <string name="receivePayment_currency">Währung:</string>
     <string name="receivePayment_amount_hint">Betrag eingeben durch klicken</string>
@@ -223,7 +223,10 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Ja</string>
     <string name="dialog_no">Nein</string>
-    <string name="stored_username"></string>
+    <string name="informationTextColor">#33b5e5</string>
+    <string name="establishNfcConnectionInfo">Erstellen Sie nun den NFC Kontakt (Geräte zusammenhalten)</string>
+    
+
     <!-- Async Abstract Activity -->
     <string name="loading_progress_dialog">Laden. Bitte warten&#8230;</string>
     <!-- Drawer Navigation -->
@@ -256,6 +259,7 @@
     <string name="firstTimeInfo_instruction_close">Information schliessen</string>
 
     <!-- Shared Preferences -->
+    <string name="stored_username"></string>
     <string name="sharedPreferences_isFirstTime"></string>
 
     <!-- Choose Payment Method -->
