@@ -66,7 +66,7 @@ public class CalculatorDialog extends Dialog implements DialogInterface {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.dialog_calculator);
 
-		this.setTitle("Please enter amount:");
+		this.setTitle(this.getContext().getResources().getString(R.string.calcDialog_title));
 		
 		calcDialogDisplay = (EditText) findViewById(R.id.calc_dialog_display);
 		enterTotal = (TextView) findViewById(R.id.enter_total);
