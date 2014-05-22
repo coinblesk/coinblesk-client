@@ -3,7 +3,6 @@ package ch.uzh.csg.mbps.client;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.widget.Button;
 import ch.uzh.csg.mbps.client.payment.PayPaymentActivity;
