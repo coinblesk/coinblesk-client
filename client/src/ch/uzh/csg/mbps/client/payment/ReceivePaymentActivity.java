@@ -170,7 +170,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				double percentage = 1 + ((double) Integer.valueOf(percentageStr))/100;
 				amountBTC = amountBTC.multiply(new BigDecimal(percentage)).setScale(Constants.SCALE_BTC, RoundingMode.HALF_UP) ;
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_BTCIncFee), amountBTC, getApplicationContext());
-				((TextView)findViewById(R.id.receivePayment_BTCIncFeeText)).setText("Incl Fee of " + percentageStr +"%");				
+				((TextView)findViewById(R.id.receivePayment_BTCIncFeeText)).setText("(" + getResources().getString(R.string.receivePayment_fee) + " " +  percentageStr +"%)");				
 			} catch(NumberFormatException e){
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_BTCIncFee), BigDecimal.ZERO, getApplicationContext());
 			}

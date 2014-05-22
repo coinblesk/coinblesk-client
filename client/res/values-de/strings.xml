@@ -8,7 +8,7 @@
     <string name="title_activity_login">Login</string>
     <string name="title_activity_reset_password">Passwort zurücksetzen</string>
     <string name="title_activity_registration">Registrierung</string>
-    <string name="title_activity_main">Konto</string>
+    <string name="title_activity_main">Kontoübersicht</string>
     <string name="title_activity_history">Verlauf</string>
     <string name="title_activity_pay_payment">BTC senden</string>
     <string name="title_activity_receive_payment">BTC empfangen</string>
@@ -111,6 +111,8 @@
     <string name="receivePayment_currency">Währung:</string>
     <string name="receivePayment_amount_hint">Betrag eingeben durch klicken</string>
     <string name="no_connection_server">Keine Serververbindung!\nSie sind im Offline-Modus.</string>
+    <string name="receivePayment_fee">Inklusive Gebühr von </string>
+    
 
     <!-- Spinner currency -->
     <string name="textView_currency">Währung</string>
