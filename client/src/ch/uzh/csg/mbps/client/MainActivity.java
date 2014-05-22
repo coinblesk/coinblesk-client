@@ -223,9 +223,9 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		if (ClientController.isOnline()) {
 			launchRequest();
 		} else {
-			showPopupWindow();
 			createNewTransactionBtn.setEnabled(false);
 		}
+		showFirstTimeInformation();
 	}
 
 	private void launchRequest() {
@@ -251,7 +251,6 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 			lastTransactionsTitle.setVisibility(View.INVISIBLE);
 			invalidateOptionsMenu();
 		}
-		showPopupWindow();
 	}
 
 	/**
@@ -342,7 +341,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	}
 	
 
-	private void showPopupWindow(){	
+	private void showFirstTimeInformation(){	
 		if(isFirstTime == null){
 			SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
 			boolean defaultValue = true;
@@ -352,9 +351,14 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		if (isFirstTime){
 			LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			ViewGroup group = (ViewGroup) findViewById(R.id.nfc_instruction_popup);
-			View layout = inflater.inflate(R.layout.activity_popup_nfc_instructions, group);
+			final View layout = inflater.inflate(R.layout.activity_popup_nfc_instructions, group);
 			popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
-			popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
+			
+			layout.post(new Runnable() {
+				   public void run() {
+				     popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
+				   }
+				});
 
 			final Button closeBtn = (Button) layout.findViewById(R.id.nfc_instruction_close_button);
 			closeBtn.setOnClickListener(new OnClickListener() {
