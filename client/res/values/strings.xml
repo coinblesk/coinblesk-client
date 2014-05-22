@@ -223,7 +223,9 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
-    <string name="establishNfcConnectionInfo">Erstellen Sie nun den NFC Kontakt (Geräte zusammenhalten)</string>
+    <string name="establishNfcConnectionInfo">Establish now NFC connection (Hold devices together)</string>
+    <string name="nfc_in_progress_dialog">Payment in progress - Keep NFC connection</string>
+    
     
     <!-- Async Abstract Activity -->
     <string name="loading_progress_dialog">Loading. Please wait&#8230;</string>

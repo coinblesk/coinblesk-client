@@ -227,6 +227,7 @@
     <string name="dialog_no">Nein</string>
     <string name="informationTextColor">#33b5e5</string>
     <string name="establishNfcConnectionInfo">Erstellen Sie nun den NFC Kontakt (Geräte zusammenhalten)</string>
+    <string name="nfc_in_progress_dialog">Zahlung wird ausgeführt - NFC Kontakt halten</string>
     
 
     <!-- Async Abstract Activity -->

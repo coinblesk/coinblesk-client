@@ -186,7 +186,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		createNewTransactionBtn = (Button) findViewById(R.id.createNewTransactionButton);
 		//create animated nfc activity image
 		ImageView nfcActivity = (ImageView) findViewById(R.id.mainActivity_nfcIcon);
-		nfcActivity.setBackgroundResource(R.drawable.nfc_animation);
+		nfcActivity.setBackgroundResource(R.drawable.animation_nfc);
 		nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
 		nfcActivityAnimation.start();
 		

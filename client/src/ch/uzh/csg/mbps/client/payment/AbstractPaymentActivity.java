@@ -1,6 +1,7 @@
 package ch.uzh.csg.mbps.client.payment;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
@@ -27,7 +28,10 @@ public abstract class AbstractPaymentActivity extends AbstractAsyncActivity {
 	private boolean requestedToActivateNfc = false;
 	
 	private CustomDialogFragment lastDialog = null;
-	
+	private ProgressDialog progressDialog;
+	private boolean destroyed = false;
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -81,6 +85,12 @@ public abstract class AbstractPaymentActivity extends AbstractAsyncActivity {
 		
 		if (isSeller)
 			nfcTransceiver.enable(this, nfcAdapter);
+	}
+	
+	@Override
+	public void onDestroy(){
+		super.onDestroy();
+		destroyed = true;
 	}
 	
 	@Override
@@ -176,4 +186,28 @@ public abstract class AbstractPaymentActivity extends AbstractAsyncActivity {
 		lastDialog = showDialog(title, icon, message);
 	}
 	
+	/**
+	 * Starts the progress dialog. As long as the dialog is running other touch
+	 * actions are ignored.
+	 */
+	public void showNfcInProgressDialog() {
+		if (progressDialog == null) {
+			progressDialog = new ProgressDialog(this);
+			progressDialog.setCancelable(false);
+			progressDialog.setIndeterminate(true);
+			progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.animation_nfc_in_progress));
+		}
+		
+		progressDialog.setMessage(getResources().getString(R.string.nfc_in_progress_dialog));
+		progressDialog.show();
+	}
+
+	/**
+	 * Closes the progress dialog. 
+	 */
+	public void dismissNfcInProgressDialog() {
+		if (progressDialog != null && !destroyed) {
+			progressDialog.dismiss();
+		}
+	}
 }

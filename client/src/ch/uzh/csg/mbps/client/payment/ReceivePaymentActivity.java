@@ -190,7 +190,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.VISIBLE);;
 				//create animated nfc activity image
 				ImageView nfcActivity = (ImageView) findViewById(R.id.receivePayment_nfcIcon);
-				nfcActivity.setBackgroundResource(R.drawable.nfc_animation);
+				nfcActivity.setBackgroundResource(R.drawable.animation_nfc);
 				nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
 				nfcActivityAnimation.start();
 			}
