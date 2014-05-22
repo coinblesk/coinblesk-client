@@ -77,7 +77,8 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 			break;
 		case 7:
 			// Help
-			
+			MainActivity.isFirstTime = true;
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), MainActivity.class));
 			break;
 		case 8:
 			// Sign Out

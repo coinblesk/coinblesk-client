@@ -78,7 +78,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/payOut_AddressText"
         android:layout_below="@+id/payOut_BalanceCHF"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="30dp"
         android:text="@string/PayOut_AmountText" />
 
     <TextView

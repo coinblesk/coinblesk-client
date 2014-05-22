@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -60,7 +61,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	public static BigDecimal exchangeRate;
 	private RequestTask getMainActivityValues;
 	private PopupWindow popupWindow;
-	private Boolean isFirstTime;
+	public static Boolean isFirstTime;
 	AnimationDrawable nfcActivityAnimation;
 
 	@Override
@@ -116,6 +117,13 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		menuWarning = menu.findItem(R.id.action_warning);
+		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			//TODO simon: put to superclass?
+			public boolean onMenuItemClick(MenuItem item) {
+				displayResponse(getResources().getString(R.string.optionMenu_offlineModeHint));
+				return false;
+			}
+		});
 		invalidateOptionsMenu();
 		return true;
 	}
@@ -129,6 +137,11 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 				menuWarning.setVisible(true);
 			}
 		}
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+	  super.onSaveInstanceState(savedInstanceState);
 	}
 
 	/**
