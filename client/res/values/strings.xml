@@ -5,7 +5,7 @@
     <string name="app_name">MBPS</string>
 
     <!-- Name of Activities -->
-    <string name="title_activity_login">Login</string>
+    <string name="title_activity_login">MBPS</string>
     <string name="title_activity_reset_password">MBPS - Reset Password</string>
     <string name="title_activity_registration">MBPS - Registration</string>
     <string name="title_activity_main">Account Overview</string>
@@ -19,7 +19,7 @@
     <string name="title_activity_edit_passwotrd_account_profile">Update Password</string>
     <string name="title_activity_about">About</string>
     <string name="title_activity_setting_pay_out_rules">Pay out Rules</string>
-    <string name="title_activity_choose_payment">Chose Payment Method</string>
+    <string name="title_activity_choose_payment">Choose Payment Method</string>
 
     <!-- Login Strings -->
     <string name="loginUsernameEditText">Enter your username</string>
@@ -61,7 +61,7 @@
     <string name="mainActivity_processTransactionTitle">Process Transaction</string>
     <string name="mainActivity_processTransactionInstruction">(Hold devices together to process transaction initiated by counterparty)</string>
     <string name="mainActivity_or">OR</string>
-    
+
     <!-- Drawer Navigation -->
     <string-array name="drawerItems_array">
         <item>User Profile</item>
@@ -112,6 +112,9 @@
     <string name="receivePayment_amount_hint">Tip to enter amount</string>
     <string name="no_connection_server">No connection to server!\nYou are in offline mode.</string>
     <string name="receivePayment_fee">Including fee of</string>
+    
+    <!-- Send Payment Strings -->
+    <string name="sendPayment_title">Send</string>
 
     <!-- Spinner currency -->
     <string name="textView_currency">currency</string>
@@ -225,13 +228,12 @@
     <string name="dialog_no">No</string>
     <string name="establishNfcConnectionInfo">Establish now NFC connection (Hold devices together)</string>
     <string name="nfc_in_progress_dialog">Payment in progress - Keep NFC connection</string>
-    
-    
+
     <!-- Async Abstract Activity -->
     <string name="loading_progress_dialog">Loading. Please wait&#8230;</string>
     <!-- Drawer Navigation -->
     <string name="already_connected_to_server">You are already connected!</string>
-    
+
     <!-- Menu information -->
     <string name="optionMenu_offlineModeHint">You are in offline mode. To reconnect open menu and click &quot;Reconnect to server&quot;.</string>
 
@@ -262,11 +264,12 @@
     <!-- Shared Preferences -->
     <string name="sharedPreferences_isFirstTime">isFirstTime</string>
     <string name="stored_username"></string>
-    
-     <!-- Choose Payment Method-->
+
+    <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
     <string name="choosePayment_requestPaymentBtnText">Request Bitcoins</string>
     <string name="choosePayment_requestPaymentNoNfcBtnText">Send Bitcoins \n directly to known receiver \n (without NFC contact)</string>
-    
+    <string name="title_activity_send_payment">SendPaymentActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

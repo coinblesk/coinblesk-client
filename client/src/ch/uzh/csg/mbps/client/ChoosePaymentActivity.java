@@ -1,11 +1,11 @@
 package ch.uzh.csg.mbps.client;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import ch.uzh.csg.mbps.client.payment.PayPaymentActivity;
 import ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity;
 import ch.uzh.csg.mbps.client.util.ClientController;
 
@@ -40,21 +40,22 @@ public class ChoosePaymentActivity extends AbstractAsyncActivity {
 
 		requestPaymentBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				//				handleAsyncTask();
-				launchActivity(ChoosePaymentActivity.this, ReceivePaymentActivity.class);
+				Intent intent = new Intent(ChoosePaymentActivity.this, ReceivePaymentActivity.class);
+				intent.putExtra("isSend", false);
+				startActivity(intent);
 			}
 		});
 
 		sendPaymentBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				//				handleAsyncTask();
-				launchActivity(ChoosePaymentActivity.this, PayPaymentActivity.class);
+				Intent intent = new Intent(ChoosePaymentActivity.this, ReceivePaymentActivity.class);
+				intent.putExtra("isSend", true);
+				startActivity(intent);
 			}
 		});
 
 		requestPaymentNoNfcBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				//				handleAsyncTask();
 				launchActivity(ChoosePaymentActivity.this, HistoryActivity.class);
 			}
 		});

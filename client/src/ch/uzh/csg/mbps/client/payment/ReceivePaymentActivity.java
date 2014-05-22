@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
@@ -37,7 +38,7 @@ import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
 /**
- * This is the UI to receive a payment - i.e. to be the seller in a transaction.
+ * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
  */
 public class ReceivePaymentActivity extends AbstractPaymentActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
 	private MenuItem menuWarning;
@@ -86,6 +87,17 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		spinner.setSelection(0);
 		
 		refreshCurrencyTextViews();
+		
+		//adapt view for actively sending instead of requesting bitcoins
+		Intent myIntent = getIntent(); // gets the previously created intent
+		boolean isSend = myIntent.getBooleanExtra("isSend", false); 
+		if(isSend){
+			TextView title = (TextView) findViewById(R.id.receivePayment_title);
+			title.setText(getResources().getString(R.string.sendPayment_title));
+			ImageView logo = (ImageView) findViewById(R.id.receivePayment_logo);
+			logo.setImageResource(R.drawable.ic_pay_payment);
+			getActionBar().setTitle(getResources().getString(R.string.title_activity_send_payment));   
+		}
 	}
 
 	@Override
