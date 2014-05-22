@@ -184,6 +184,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 	private void initializeGui() {
 		createNewTransactionBtn = (Button) findViewById(R.id.createNewTransactionButton);
+		
 		//create animated nfc activity image
 		ImageView nfcActivity = (ImageView) findViewById(R.id.mainActivity_nfcIcon);
 		nfcActivity.setBackgroundResource(R.drawable.animation_nfc);
@@ -222,9 +223,8 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		if (ClientController.isOnline()) {
 			launchRequest();
 		} else {
-			//TODO simon: adapt offline mode to ChoosePaymentActivity
-			//			receivePaymentBtn.setEnabled(false);
 			showPopupWindow();
+			createNewTransactionBtn.setEnabled(false);
 		}
 	}
 

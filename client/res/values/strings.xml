@@ -109,7 +109,7 @@
     <string name="receivePayment_exchangeRate">Exchange Rate: </string>
     <string name="receivePayment_enter">Enter amount in</string>
     <string name="receivePayment_currency">Currency:</string>
-    <string name="receivePayment_amount_hint">Tip to enter amount</string>
+    <string name="receivePayment_amount_hint">Enter amount</string>
     <string name="no_connection_server">No connection to server!\nYou are in offline mode.</string>
     <string name="receivePayment_fee">Including fee of</string>
     

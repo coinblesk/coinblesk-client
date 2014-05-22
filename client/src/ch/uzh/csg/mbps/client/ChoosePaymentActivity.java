@@ -26,6 +26,15 @@ public class ChoosePaymentActivity extends AbstractAsyncActivity {
 
 		initClickListener();
 
+		checkOnlineModeAndProceed();
+	}
+
+	private void checkOnlineModeAndProceed() {
+		if(!ClientController.isOnline()){
+			requestPaymentBtn.setEnabled(false);
+			sendPaymentBtn.setEnabled(false);
+			requestPaymentNoNfcBtn.setEnabled(false);
+		}
 	}
 
 	@Override
