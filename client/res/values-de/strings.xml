@@ -10,9 +10,9 @@
     <string name="title_activity_registration">Registrierung</string>
     <string name="title_activity_main">Kontoübersicht</string>
     <string name="title_activity_history">Verlauf</string>
-    <string name="title_activity_pay_payment">BTC senden</string>
+    <string name="title_activity_pay_payment">Bezahlen</string>
     <string name="title_activity_receive_payment">BTC verlangen</string>
-    <string name="title_activity_send_payment">BTC verlangen</string>
+    <string name="title_activity_send_payment">BTC senden</string>
     <string name="title_activity_pay_in">BTC Einzahlen</string>
     <string name="title_activity_pay_out">BTC Auszahlen</string>
     <string name="title_activity_profile_account">Profil</string>
@@ -118,6 +118,9 @@
     
     <!-- Send Payment Strings -->
     <string name="sendPayment_title">Senden</string>
+    <string name="sendPayment_enterUsernameReceiver">Benutzername Empfänger eingeben</string>
+    <string name="sendPayment_sendButton">Senden</string>
+    
 
     <!-- Spinner currency -->
     <string name="textView_currency">Währung</string>

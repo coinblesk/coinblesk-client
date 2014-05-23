@@ -65,7 +65,7 @@ public class ChoosePaymentActivity extends AbstractAsyncActivity {
 
 		requestPaymentNoNfcBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				launchActivity(ChoosePaymentActivity.this, HistoryActivity.class);
+				launchActivity(ChoosePaymentActivity.this, SendPaymentActivity.class);
 			}
 		});
 	}

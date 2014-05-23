@@ -45,9 +45,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private String[] strings = { "Swiss", "Bitcoins" };
 	private int arr_images[] = { R.drawable.ic_swiss_currency_light, R.drawable.ic_bitcoin_currency_light };
 	protected CalculatorDialog newFragment;
-	protected static BigDecimal inputValueCalculator = BigDecimal.ZERO;
 	protected static BigDecimal amountBTC = BigDecimal.ZERO;
-	protected static String inputUnit;
 	protected static BigDecimal inputUnitValue = BigDecimal.ZERO;
 	private BigDecimal exchangeRate;
 	private EditText receiveAmount;
@@ -64,7 +62,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		setContentView(R.layout.activity_receive_payment);
 		setScreenOrientation();
 		
-		inputUnit = INPUT_UNIT_CHF;
+		Constants.inputUnit = INPUT_UNIT_CHF;
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		exchangeRate = BigDecimal.ZERO;
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -155,7 +153,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	private void refreshCurrencyTextViews() {
 		amountBTC = BigDecimal.ZERO;
-		if (inputUnit.equals(INPUT_UNIT_CHF)) {
+		if (Constants.inputUnit.equals(INPUT_UNIT_CHF)) {
 			try {
 				BigDecimal amountChf = CurrencyFormatter.getBigDecimalChf(receiveAmount.getText().toString());
 				inputUnitValue = amountChf;
@@ -195,7 +193,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		newFragment.setOnDismissListener(new OnDismissListener() {
 			
 			public void onDismiss(DialogInterface dialog) {
-				receiveAmount.setText(inputValueCalculator.toString());
+				receiveAmount.setText(Constants.inputValueCalculator.toString());
 				refreshCurrencyTextViews();
 				
 				//show nfc instructions
@@ -253,11 +251,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 			if (pos == 0)
-				inputUnit = INPUT_UNIT_CHF;
+				Constants.inputUnit = INPUT_UNIT_CHF;
 			else
-				inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
+				Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
 			
-			descriptionOfInputUnit.setText(inputUnit);
+			descriptionOfInputUnit.setText(Constants.inputUnit);
 			refreshCurrencyTextViews();
 		}
 

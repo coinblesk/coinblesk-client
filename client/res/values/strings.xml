@@ -11,7 +11,8 @@
     <string name="title_activity_main">Account Overview</string>
     <string name="title_activity_history">History</string>
     <string name="title_activity_pay_payment">Pay</string>
-    <string name="title_activity_receive_payment">Receive</string>
+    <string name="title_activity_receive_payment">Request Bitcoins</string>
+    <string name="title_activity_send_payment">Send Bitcoins</string>
     <string name="title_activity_pay_in">Pay In</string>
     <string name="title_activity_pay_out">Pay Out</string>
     <string name="title_activity_profile_account">Profile</string>
@@ -115,6 +116,9 @@
     
     <!-- Send Payment Strings -->
     <string name="sendPayment_title">Send</string>
+    <string name="sendPayment_enterUsernameReceiver">Enter Username Receiver</string>
+    <string name="sendPayment_sendButton">Send</string>
+    
 
     <!-- Spinner currency -->
     <string name="textView_currency">currency</string>
@@ -270,7 +274,5 @@
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
     <string name="choosePayment_requestPaymentBtnText">Request Bitcoins</string>
     <string name="choosePayment_requestPaymentNoNfcBtnText">Send Bitcoins \n directly to known receiver \n (without NFC contact)</string>
-    <string name="title_activity_send_payment">SendPaymentActivity</string>
-    <string name="hello_world">Hello world!</string>
 
 </resources>

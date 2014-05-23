@@ -12,6 +12,7 @@ import ch.uzh.csg.mbps.client.payment.nfc.messages.PaymentMessage;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.TransactionRequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
+import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
@@ -43,7 +44,7 @@ public class TransactionHandler {
 		tx.setAmount(ReceivePaymentActivity.amountBTC);
 		tx.setSellerUsername(user.getUsername());
 		tx.setTransactionNrSeller(user.getTransactionNumber());
-		if (ReceivePaymentActivity.inputUnit.equals(ReceivePaymentActivity.INPUT_UNIT_CHF)) {
+		if (Constants.inputUnit.equals(ReceivePaymentActivity.INPUT_UNIT_CHF)) {
 			tx.setInputCurrency(ReceivePaymentActivity.INPUT_UNIT_CHF);
 			tx.setAmountInputCurrency(ReceivePaymentActivity.inputUnitValue);
 		} else {

@@ -1,14 +1,16 @@
 package ch.uzh.csg.mbps.client.util;
 
+import java.math.BigDecimal;
+
 
 /**
  * Class for saving static constants of MBPS.
  */
 public class Constants {
-	public static final String BASE_URI = "http://bitcoin.csg.uzh.ch/server";
-	public static final String BASE_URI_SSL = "https://bitcoin.csg.uzh.ch/server";
-//	public static final String BASE_URI = "http://10.0.2.2:8080/mbps-server";
-//	public static final String BASE_URI_SSL = "https://10.0.2.2:8443/mbps-server";
+//	public static final String BASE_URI = "http://bitcoin.csg.uzh.ch/server";
+//	public static final String BASE_URI_SSL = "https://bitcoin.csg.uzh.ch/server";
+	public static final String BASE_URI = "http://bitcoin-clone.csg.uzh.ch/server";
+	public static final String BASE_URI_SSL = "http://bitcoin-clone.csg.uzh.ch/server";
 	
 	public static final long RESUME_TIMEOUT = 10 * 1000; 
 	public static final long BUYER_ACK_TIMEOUT = 3 * 1000; // in ms
@@ -52,5 +54,7 @@ public class Constants {
 	public static final int SCALE_CHF = 2;
 	public static final int SCALE_BTC = 8;
 	
+	public static BigDecimal inputValueCalculator = BigDecimal.ZERO;
+	public static String inputUnit = "CHF";
 
 }

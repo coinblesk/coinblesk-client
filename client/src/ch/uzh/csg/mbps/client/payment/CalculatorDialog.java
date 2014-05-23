@@ -103,23 +103,23 @@ public class CalculatorDialog extends Dialog implements DialogInterface {
 				}
 
 				try {
-					if(ReceivePaymentActivity.inputUnit.equals(ReceivePaymentActivity.INPUT_UNIT_CHF)){
-						ReceivePaymentActivity.inputValueCalculator = CurrencyFormatter.getBigDecimalChf(calculatedValues);						
+					if(Constants.inputUnit.equals(ReceivePaymentActivity.INPUT_UNIT_CHF)){
+						Constants.inputValueCalculator = CurrencyFormatter.getBigDecimalChf(calculatedValues);						
 					}
 					else{
 						SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getContext());
 						String bitcoinUnit = settings.getString("bitcoin_list", "");
 						if(bitcoinUnit.equals(Constants.MILI_BTC)){
-							ReceivePaymentActivity.inputValueCalculator = new BigDecimal(calculatedValues).setScale(5, RoundingMode.HALF_UP);
+							Constants.inputValueCalculator = new BigDecimal(calculatedValues).setScale(5, RoundingMode.HALF_UP);
 						}
 						else if (bitcoinUnit.equals(Constants.MICRO_BTC)){
-							ReceivePaymentActivity.inputValueCalculator = new BigDecimal(calculatedValues).setScale(2, RoundingMode.HALF_UP);
+							Constants.inputValueCalculator = new BigDecimal(calculatedValues).setScale(2, RoundingMode.HALF_UP);
 						}else{							
-							ReceivePaymentActivity.inputValueCalculator = CurrencyFormatter.getBigDecimalBtc(calculatedValues);
+							Constants.inputValueCalculator = CurrencyFormatter.getBigDecimalBtc(calculatedValues);
 						}
 					}
 				} catch (Exception e) {
-					ReceivePaymentActivity.inputValueCalculator = BigDecimal.ZERO;
+					Constants.inputValueCalculator = BigDecimal.ZERO;
 				}
 				CalculatorDialog.this.dismiss();
 			}
