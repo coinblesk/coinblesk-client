@@ -185,9 +185,11 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	
 	private void launchMainActivity(){
 		storeUsernameIntoSharedPref();
-		
-		launchActivity(LoginActivity.this, MainActivity.class);
-		super.finish();
+		Intent intent = new Intent(this, MainActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(intent);
+		finish();
 	}
 	
 	/**

@@ -168,13 +168,10 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 	 */
 	public <T> void launchActivity(Class<T> classActivity){
 		Intent intent = new Intent(this.view.getContext().getApplicationContext(), classActivity);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS );
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		this.finish();
 		this.view.getContext().startActivity(intent);
+		finish();
 	}
 
 	/**

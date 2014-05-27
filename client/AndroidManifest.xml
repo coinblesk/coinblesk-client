@@ -5,16 +5,15 @@
     android:versionName="v1.0" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-   <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.NFC" />
 
     <uses-sdk
         android:minSdkVersion="19"
         android:targetSdkVersion="19" />
 
-<uses-feature
+    <uses-feature
         android:name="android.hardware.nfc"
         android:required="true" />
-
 
     <application
         android:allowBackup="true"
@@ -24,7 +23,8 @@
         <activity
             android:name="ch.uzh.csg.mbps.client.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/title_activity_login" >
+            android:label="@string/title_activity_login"
+            android:noHistory="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -139,7 +139,7 @@
                 android:value="ch.uzh.csg.mbps.client.settings.SettingsActivity" />
         </activity>
 
-             <service
+        <service
             android:name="ch.uzh.csg.mbps.client.payment.nfc.CustomHostApduService"
             android:exported="true"
             android:permission="android.permission.BIND_NFC_SERVICE" >
@@ -150,7 +150,8 @@
             <meta-data
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/apduservice" />
-        </service>
+        </service>
+
         <activity
             android:name="ch.uzh.csg.mbps.client.ChoosePaymentActivity"
             android:label="@string/title_activity_choose_payment"
