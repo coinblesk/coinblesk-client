@@ -73,7 +73,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		initializeDrawer();
 		readServerPublicKey();
 		initializeGui();
-		
+
 		initClickListener();
 		checkOnlineModeAndProceed();
 	}
@@ -138,10 +138,10 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 			}
 		}
 	}
-	
+
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
-	  super.onSaveInstanceState(savedInstanceState);
+		super.onSaveInstanceState(savedInstanceState);
 	}
 
 	/**
@@ -184,13 +184,13 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 	private void initializeGui() {
 		createNewTransactionBtn = (Button) findViewById(R.id.createNewTransactionButton);
-		
+
 		//create animated nfc activity image
 		ImageView nfcActivity = (ImageView) findViewById(R.id.mainActivity_nfcIcon);
 		nfcActivity.setBackgroundResource(R.drawable.animation_nfc);
 		nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
 		nfcActivityAnimation.start();
-		
+
 		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getUser().getBalance(), getApplicationContext());
 	}
 
@@ -243,8 +243,10 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 			ArrayList<AbstractHistory> transactions = extractLast5Transactions(response.getGetHistoryTO());
 
 			//update gui
-			lastTransactionsTitle.setVisibility(View.VISIBLE);
-			createHistoryViews(transactions);
+			if(! transactions.isEmpty()){
+				lastTransactionsTitle.setVisibility(View.VISIBLE);
+				createHistoryViews(transactions);
+			}
 			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getUser().getBalance());
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			reload(getIntent());
@@ -324,7 +326,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		}
 		return 0;
 	}
-	
+
 	private int getHistoryCode(AbstractHistory history) {
 		if(history instanceof HistoryTransaction){
 			if(((HistoryTransaction) history).getSeller().equals(ClientController.getUser().getUsername())){
@@ -339,7 +341,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		}
 		return 0;
 	}
-	
+
 
 	private void showFirstTimeInformation(){	
 		if(isFirstTime == null){
@@ -353,12 +355,12 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 			ViewGroup group = (ViewGroup) findViewById(R.id.nfc_instruction_popup);
 			final View layout = inflater.inflate(R.layout.activity_popup_nfc_instructions, group);
 			popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
-			
+
 			layout.post(new Runnable() {
-				   public void run() {
-				     popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
-				   }
-				});
+				public void run() {
+					popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
+				}
+			});
 
 			final Button closeBtn = (Button) layout.findViewById(R.id.nfc_instruction_close_button);
 			closeBtn.setOnClickListener(new OnClickListener() {
