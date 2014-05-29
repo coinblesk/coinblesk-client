@@ -272,7 +272,9 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		transaction.setAmount(amountBTC);
 		transaction.setAmountInputCurrency(inputUnitValue);
 		transaction.setBuyerUsername(ClientController.getUser().getUsername());
+		//TODO: simon: get receiver-username from edittext or addressbook
 		String receiverUsername = receiverUsernameEditText.getText().toString();
+		
 		transaction.setSellerUsername(receiverUsername);
 		transaction.setInputCurrency(Constants.inputUnit);
 		SignedObject signedTransactionBuyer;
