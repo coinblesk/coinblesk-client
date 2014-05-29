@@ -113,12 +113,14 @@
     <string name="receivePayment_amount_hint">Enter amount</string>
     <string name="no_connection_server">No connection to server!\nYou are in offline mode.</string>
     <string name="receivePayment_fee">Including fee of</string>
+    <string name="receivePayment_balanceTitle">Balance:</string>
+    
     
     <!-- Send Payment Strings -->
     <string name="sendPayment_title">Send</string>
     <string name="sendPayment_enterUsernameReceiver">Enter Username Receiver</string>
     <string name="sendPayment_sendButton">Send</string>
-    
+    <string name="sendPayment_balanceTitle">Balance:</string>
 
     <!-- Spinner currency -->
     <string name="textView_currency">currency</string>

@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity;
+import ch.uzh.csg.mbps.client.payment.SendPaymentActivity;
 import ch.uzh.csg.mbps.client.util.ClientController;
 
 public class ChoosePaymentActivity extends AbstractAsyncActivity {

@@ -43,13 +43,30 @@
         android:layout_marginLeft="5dp"
         android:layout_alignBottom="@id/receivePayment_exchangeRateTitle"
         android:layout_toRightOf="@id/receivePayment_exchangeRateTitle" />
+    
+    <TextView
+            android:id="@+id/receivePayment_balanceTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/receivePayment_exchangeRateTitle"
+            android:layout_marginTop="15dp"
+            android:text="@string/receivePayment_balanceTitle" />
+
+        <TextView
+            android:id="@+id/receivePayment_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/receivePayment_balanceTitle"
+            android:layout_marginLeft="5dp"
+            android:layout_alignLeft="@+id/exchangeRate" />
 
     <TextView
         android:id="@+id/receivePayment_currencyText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@id/exchangeRate"
+        android:layout_below="@id/receivePayment_balanceTitle"
         android:layout_marginTop="15dp"
         android:text="@string/receivePayment_currency" />
 

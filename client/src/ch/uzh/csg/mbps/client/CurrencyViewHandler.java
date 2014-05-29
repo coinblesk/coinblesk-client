@@ -39,6 +39,19 @@ public class CurrencyViewHandler {
 	}
 	
 	/**
+	 * The swiss currency is represented in decimal format with an precision of
+	 * two digits. Returns a string to represent a bitcoin amount in CHF.
+	 * 
+	 * @param exchangeRate The rate of one bitcoin in relation to CHF.
+	 * @param amountBtc  The amount to transform to CHF.
+	 * @return the given bitcoin amount represented in CHF.
+	 */
+	public static String amountInCHF(BigDecimal exchangeRate, BigDecimal amountBtc) {
+		BigDecimal chf = amountBtc.multiply(exchangeRate);
+		return CurrencyFormatter.formatChf(chf) + " CHF";
+	}
+	
+	/**
 	 * The bitcoin balance of a user is represented in decimal format with an
 	 * precision of eight digits. The bitcoin balance can be shown in three
 	 * different units.

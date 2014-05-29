@@ -115,11 +115,13 @@
     <string name="receivePayment_amount_hint">Betrag eingeben</string>
     <string name="no_connection_server">Keine Serververbindung!\nSie sind im Offline-Modus.</string>
     <string name="receivePayment_fee">Inklusive Gebühr von </string>
+    <string name="receivePayment_balanceTitle">Kontostand:</string>
     
     <!-- Send Payment Strings -->
     <string name="sendPayment_title">Senden</string>
     <string name="sendPayment_enterUsernameReceiver">Benutzername Empfänger eingeben</string>
     <string name="sendPayment_sendButton">Senden</string>
+    <string name="sendPayment_balanceTitle">Kontostand:</string>
     
 
     <!-- Spinner currency -->

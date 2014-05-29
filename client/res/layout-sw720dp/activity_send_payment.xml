@@ -166,7 +166,7 @@
             <Button
                 android:id="@+id/sendPayment_sendButton"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/buttonHeight"
                 android:layout_marginTop="10dp"
                 android:text="@string/sendPayment_sendButton" />
         </LinearLayout>

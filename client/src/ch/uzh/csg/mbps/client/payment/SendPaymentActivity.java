@@ -1,4 +1,4 @@
-package ch.uzh.csg.mbps.client;
+package ch.uzh.csg.mbps.client.payment;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,8 +26,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import ch.uzh.csg.mbps.client.payment.CalculatorDialog;
-import ch.uzh.csg.mbps.client.payment.TransactionHandler;
+import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
+import ch.uzh.csg.mbps.client.CurrencyViewHandler;
+import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
+import ch.uzh.csg.mbps.client.MainActivity;
+import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.TransactionRequestTask;
@@ -131,6 +134,9 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			if(response.getType().equals(Type.EXCHANGE_RATE)){
 				exchangeRate = new BigDecimal(response.getMessage());
 				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.sendPayment_exchangeRate));
+				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), ClientController.getUser().getBalance(), getBaseContext());
+				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
+				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, ClientController.getUser().getBalance()) + ")");
 			}
 			else if (response.getType().equals(Type.OTHER)){
 				//TODO simon: show successful payment notification
