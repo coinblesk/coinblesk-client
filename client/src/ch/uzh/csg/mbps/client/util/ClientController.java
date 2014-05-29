@@ -1,8 +1,12 @@
 package ch.uzh.csg.mbps.client.util;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.model.UserAccount;
 
@@ -121,6 +125,19 @@ public class ClientController {
 	public static void setUserBalance(BigDecimal balance, Context context) {
 		user.setBalance(balance);
 		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
+	}
+	
+	public static Set<String> getAddressbook(Context context){
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+		Set<String> addressBook = preferences.getStringSet("addressBook", new HashSet<String>());
+		return addressBook;
+	}
+	
+	public static void setAddressbook(Set<String> addressBook, Context context){
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor editor = preferences.edit();
+		editor.putStringSet("addressBook", addressBook);
+		editor.commit();
 	}
 	
 }

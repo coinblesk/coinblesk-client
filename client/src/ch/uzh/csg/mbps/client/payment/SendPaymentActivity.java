@@ -3,7 +3,11 @@ package ch.uzh.csg.mbps.client.payment;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.SignedObject;
+import java.util.Set;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -58,8 +62,9 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	private SharedPreferences settings;
 	AnimationDrawable nfcActivityAnimation;
 	private Button sendButton;
-	private EditText receiverUsernameEditText;
-	
+	private Button addressBookButton;
+	public static EditText receiverUsernameEditText;
+
 	protected static final String INPUT_UNIT_CHF = "CHF";
 
 	@Override
@@ -67,17 +72,16 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_send_payment);
 		setScreenOrientation();
-		
+
 		Constants.inputUnit = INPUT_UNIT_CHF;
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		exchangeRate = BigDecimal.ZERO;
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
-		
 
 		launchRequest();
 		setUpGui();
 		refreshCurrencyTextViews();
-		
+
 	}
 
 	@Override
@@ -118,7 +122,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			getExchangeRate.execute();
 		}
 	}
-	
+
 	protected void launchTransactionRequest(CreateTransactionTransferObject ctto) {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
@@ -126,8 +130,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			transactionRequest.execute();
 		}
 	}
-	
-	
+
 	public void onTaskComplete(CustomResponseObject response) {
 		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
 		if (response.isSuccessful()) {
@@ -173,7 +176,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.sendPayment_CHFinBTC), exchangeRate, amountBTC);
 			}
 		}
-		
+
 		//Check if the user defined a fee on the received amount of bitcoin.
 		if(settings.getBoolean("include_fee", false)){
 			String percentageStr = settings.getString("fee_amount", "pref_fee_amount");
@@ -192,7 +195,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		calculatorDialogFragment = new CalculatorDialog(this);
 		calculatorDialogFragment.show();
 		calculatorDialogFragment.setOnDismissListener(new OnDismissListener() {
-			
+
 			public void onDismiss(DialogInterface dialog) {
 				sendAmount.setText(Constants.inputValueCalculator.toString());
 				refreshCurrencyTextViews();
@@ -201,7 +204,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	}
 
 	private class MyAdapter extends ArrayAdapter<String> {
-		
+
 		public MyAdapter(Context context, int textViewResourceId, String[] objects) {
 			super(context, textViewResourceId, objects);
 		}
@@ -221,14 +224,14 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			View row = inflater.inflate(R.layout.spinner_currency, parent, false);
 			TextView label = (TextView) row.findViewById(R.id.textView_currency);
 			label.setText(currencies[position]);
-			
+
 			ImageView icon = (ImageView) row.findViewById(R.id.image_currency);
 			icon.setImageResource(arr_images[position]);
 
 			return row;
 		}
 	}
-	
+
 	private OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
 
 		public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -236,16 +239,16 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				Constants.inputUnit = INPUT_UNIT_CHF;
 			else
 				Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
-			
+
 			descriptionOfInputUnit.setText(Constants.inputUnit);
 			refreshCurrencyTextViews();
 		}
 
 		public void onNothingSelected(AdapterView<?> parent) {
 		}
-		
+
 	};
-	
+
 	private void setUpGui(){
 		sendAmount = (EditText) findViewById(R.id.sendPayment_amountText);
 		sendAmount.setOnClickListener(new OnClickListener() {
@@ -254,24 +257,32 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			}
 		});
 		sendAmount.setFocusable(false);
-		
+
 		descriptionOfInputUnit = (TextView)findViewById(R.id.sendPayment_enterAmountIn);
-		
+		receiverUsernameEditText = (EditText)findViewById(R.id.sendPayment_enterReceiver);
+
 		Spinner spinner = (Spinner) findViewById(R.id.sendPayment_currencySpinner);
 		spinner.setAdapter(new MyAdapter(this, R.layout.spinner_currency, currencies));
 		spinner.setOnItemSelectedListener(spinnerListener);
 		spinner.setSelection(0);
-		
-		receiverUsernameEditText = (EditText)findViewById(R.id.sendPayment_enterReceiver);
-		
+
 		sendButton = (Button)findViewById(R.id.sendPayment_sendButton);
 		sendButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				createTransaction();
 			}
 		});
+
+		addressBookButton = (Button)findViewById(R.id.sendPayment_addressBookButton);
+		addressBookButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				AddressBookDialog dialog = new AddressBookDialog();
+				dialog.show(getFragmentManager(), "sendPaymentActivity");
+			}
+		});
+
 	}
-	
+
 	public void createTransaction(){
 		//TODO simon: refactor after jeton updated transaction handling
 		Transaction transaction = new Transaction();
@@ -280,7 +291,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		transaction.setBuyerUsername(ClientController.getUser().getUsername());
 		//TODO: simon: get receiver-username from edittext or addressbook
 		String receiverUsername = receiverUsernameEditText.getText().toString();
-		
+
 		transaction.setSellerUsername(receiverUsername);
 		transaction.setInputCurrency(Constants.inputUnit);
 		SignedObject signedTransactionBuyer;
@@ -294,5 +305,22 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			e.printStackTrace();
 		}
 	}
-	
+
+	public static class AddressBookDialog extends DialogFragment {
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			Set<String> receiverEntries = ClientController.getAddressbook(this.getActivity());
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder.setTitle("Select Receiver");
+			final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
+
+			builder.setItems(cs, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					SendPaymentActivity.receiverUsernameEditText.setText(cs[which].toString());
+				}
+			});
+			return builder.create();
+		}
+	}
+
 }

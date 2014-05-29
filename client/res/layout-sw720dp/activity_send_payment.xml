@@ -62,8 +62,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/sendPayment_balanceTitle"
-            android:layout_marginLeft="5dp"
-            android:layout_alignLeft="@+id/sendPayment_exchangeRate" />
+            android:layout_alignLeft="@+id/sendPayment_exchangeRate"
+            android:layout_marginLeft="5dp" />
 
         <TextView
             android:id="@+id/sendPayment_currencyText"
@@ -131,45 +131,31 @@
             android:layout_marginLeft="5dp"
             android:layout_toRightOf="@+id/sendPayment_BTCIncFee" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <EditText
+            android:id="@+id/sendPayment_enterReceiver"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/sendPayment_addressBookButton"
             android:layout_below="@+id/sendPayment_CHFinBTC"
-            android:layout_marginTop="20dp"
-            android:gravity="center"
-            android:orientation="vertical" >
+            android:hint="@string/sendPayment_enterUsernameReceiver" />
+        
+         <Button
+            android:id="@+id/sendPayment_addressBookButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/sendPayment_enterReceiver"
+            android:layout_alignParentRight="true"
+            android:text="Addressbook" />
 
-            <Spinner
-                android:id="@+id/sendPayment_receiverSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:entries="@array/drawerItems_array"
-                android:prompt="@string/loginUsernameEditText" />
-
-            <TextView
-                android:id="@+id/sendPayment_or"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:text="@string/mainActivity_or"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/sendPayment_enterReceiver"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:hint="@string/sendPayment_enterUsernameReceiver" />
-
-            <Button
-                android:id="@+id/sendPayment_sendButton"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:layout_marginTop="10dp"
-                android:text="@string/sendPayment_sendButton" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/sendPayment_sendButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/buttonHeight"
+            android:layout_below="@+id/sendPayment_enterReceiver"
+            android:layout_marginTop="10dp"
+            android:text="@string/sendPayment_sendButton" />
     </RelativeLayout>
 
 </ScrollView>

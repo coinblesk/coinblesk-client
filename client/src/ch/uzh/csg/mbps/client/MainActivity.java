@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.content.Context;
 import android.content.Intent;
@@ -77,6 +79,14 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 		initClickListener();
 		checkOnlineModeAndProceed();
+		
+		//TODO delete, only for testing, remove when implemented addressbook functionalities
+		Set<String> addressBook = new HashSet<String>();
+		addressBook.add("hans");
+		addressBook.add("peter");
+		addressBook.add("MensaBinz");
+		
+		ClientController.setAddressbook(addressBook, this);
 	}
 
 
