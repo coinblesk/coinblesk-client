@@ -36,6 +36,7 @@ import ch.uzh.csg.mbps.client.request.MainActivityRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
+import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
 import ch.uzh.csg.mbps.client.util.InternalStorageXML;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
@@ -248,6 +249,8 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 				createHistoryViews(transactions);
 			}
 			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getUser().getBalance());
+			TextView balanceTv = (TextView) findViewById(R.id.mainActivity_balanceCHF);
+			balanceTv.append(" (1 BTC = " + CurrencyFormatter.formatChf(exchangeRate) + " CHF)");
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			reload(getIntent());
 			lastTransactionsTitle.setVisibility(View.INVISIBLE);
