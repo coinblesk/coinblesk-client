@@ -45,8 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/receivePayment_exchangeRateTitle"
-            android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@id/receivePayment_exchangeRateTitle" />
+            android:layout_alignLeft="@+id/TextView01" />
 
         <TextView
             android:id="@+id/receivePayment_balanceTitle"
@@ -62,8 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/receivePayment_balanceTitle"
-            android:layout_marginLeft="5dp"
-            android:layout_alignLeft="@+id/exchangeRate" />
+            android:layout_alignLeft="@+id/TextView01" />
 
         <TextView
             android:id="@+id/receivePayment_currencyText"

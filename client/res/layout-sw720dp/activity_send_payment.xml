@@ -45,8 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/sendPayment_exchangeRateTitle"
-            android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@id/sendPayment_exchangeRateTitle" />
+            android:layout_alignLeft="@+id/sendPayment_currencyDescription" />
 
         <TextView
             android:id="@+id/sendPayment_balanceTitle"
@@ -62,8 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/sendPayment_balanceTitle"
-            android:layout_alignLeft="@+id/sendPayment_exchangeRate"
-            android:layout_marginLeft="5dp" />
+            android:layout_alignLeft="@+id/sendPayment_currencyDescription"/>
 
         <TextView
             android:id="@+id/sendPayment_currencyText"
