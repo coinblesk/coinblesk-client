@@ -1,8 +1,9 @@
 package ch.uzh.csg.mbps.client.util;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -129,15 +130,27 @@ public class ClientController {
 	
 	public static Set<String> getAddressbook(Context context){
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-		Set<String> addressBook = preferences.getStringSet("addressBook", new HashSet<String>());
+		Set<String> addressBook = new TreeSet<String>(new Comparator<String>() {
+		    public int compare(String o1, String o2) {
+		        return o1.toLowerCase().compareTo(o2.toLowerCase());
+		    }
+		});
+		addressBook.addAll(preferences.getStringSet("addressBook", new TreeSet<String>()));
 		return addressBook;
 	}
 	
-	public static void setAddressbook(Set<String> addressBook, Context context){
+	public static void addAddressbookEntry(Context context, String username){
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor editor = preferences.edit();
+		Set<String> addressBook = new TreeSet<String>(new Comparator<String>() {
+			public int compare(String o1, String o2) {
+		        return o1.toLowerCase().compareTo(o2.toLowerCase());
+		    }
+		});
+		addressBook.addAll(preferences.getStringSet("addressBook", new TreeSet<String>()));
+		addressBook.add(username);
 		editor.putStringSet("addressBook", addressBook);
 		editor.commit();
 	}
-	
 }
+

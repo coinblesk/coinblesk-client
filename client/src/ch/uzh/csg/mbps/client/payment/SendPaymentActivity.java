@@ -296,7 +296,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		transaction.setInputCurrency(Constants.inputUnit);
 		SignedObject signedTransactionBuyer;
 		try {
-			displayResponse("button clicked");
 			//TODO simon: adapt TransactionHandler etc
 			signedTransactionBuyer = TransactionHandler.signPayment(transaction);
 			CreateTransactionTransferObject ctto = new CreateTransactionTransferObject(null, signedTransactionBuyer);
