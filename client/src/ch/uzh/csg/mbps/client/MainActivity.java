@@ -34,6 +34,7 @@ import android.widget.TextView;
 import ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener;
 import ch.uzh.csg.mbps.client.request.MainActivityRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
+import ch.uzh.csg.mbps.client.util.AddressBook;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
@@ -79,11 +80,12 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		checkOnlineModeAndProceed();
 		
 		//TODO delete, only for testing, remove when implemented addressbook functionalities
-		ClientController.addAddressbookEntry(this,"Zeno");
-		ClientController.addAddressbookEntry(this,"Hans");
-		ClientController.addAddressbookEntry(this,"Alberich");
-		ClientController.addAddressbookEntry(this,"beda55@hans.ch");
-		ClientController.addAddressbookEntry(this,"Konstantin");
+		AddressBook.addAddressBookEntry(this,"Zeno");
+		AddressBook.addAddressBookEntry(this,"Hans");
+		AddressBook.addAddressBookEntry(this,"Alberich");
+		AddressBook.addAddressBookEntry(this,"beda55@hans.ch");
+		AddressBook.addAddressBookEntry(this,"Konstantin");
+		AddressBook.addTrustedAddressBookEntry(this, "Hans");
 		
 	}
 

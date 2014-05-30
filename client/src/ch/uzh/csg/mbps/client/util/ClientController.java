@@ -127,30 +127,5 @@ public class ClientController {
 		user.setBalance(balance);
 		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
 	}
-	
-	public static Set<String> getAddressbook(Context context){
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-		Set<String> addressBook = new TreeSet<String>(new Comparator<String>() {
-		    public int compare(String o1, String o2) {
-		        return o1.toLowerCase().compareTo(o2.toLowerCase());
-		    }
-		});
-		addressBook.addAll(preferences.getStringSet("addressBook", new TreeSet<String>()));
-		return addressBook;
-	}
-	
-	public static void addAddressbookEntry(Context context, String username){
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-		SharedPreferences.Editor editor = preferences.edit();
-		Set<String> addressBook = new TreeSet<String>(new Comparator<String>() {
-			public int compare(String o1, String o2) {
-		        return o1.toLowerCase().compareTo(o2.toLowerCase());
-		    }
-		});
-		addressBook.addAll(preferences.getStringSet("addressBook", new TreeSet<String>()));
-		addressBook.add(username);
-		editor.putStringSet("addressBook", addressBook);
-		editor.commit();
-	}
 }
 

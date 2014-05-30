@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -38,6 +39,7 @@ import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.TransactionRequestTask;
+import ch.uzh.csg.mbps.client.util.AddressBook;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
@@ -308,7 +310,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	public static class AddressBookDialog extends DialogFragment {
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			Set<String> receiverEntries = ClientController.getAddressbook(this.getActivity());
+			Set<String> receiverEntries = AddressBook.getAddressBook(this.getActivity());
 			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 			builder.setTitle("Select Receiver");
 			final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
@@ -316,6 +318,12 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			builder.setItems(cs, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					SendPaymentActivity.receiverUsernameEditText.setText(cs[which].toString());
+					if(AddressBook.isTrusted(getActivity(), cs[which].toString())){
+						SendPaymentActivity.receiverUsernameEditText.setBackgroundColor(Color.GREEN);
+					}
+					else {
+						SendPaymentActivity.receiverUsernameEditText.setBackgroundColor(Color.TRANSPARENT);
+					}
 				}
 			});
 			return builder.create();
