@@ -75,30 +75,37 @@
                 android:textColor="#33b5e5"
                 android:textStyle="bold" />
 
-            <ImageView
-                android:id="@+id/mainActivity_nfcIcon"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:gravity="center" />
-            
-             <TextView
-                android:id="@+id/mainActivity_processTransactionInstruction"
+            <LinearLayout
+                android:id="@+id/mainActivity_nfcAnimationLayout"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/mainActivity_processTransactionInstruction"
-                android:layout_marginTop="10dp" />
-            
+                android:orientation="vertical" >
+
+                <ImageView
+                    android:id="@+id/mainActivity_nfcIcon"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/mainActivity_processTransactionInstruction"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text="@string/mainActivity_processTransactionInstruction" />
+
             <TextView
                 android:id="@+id/mainActivity_or"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:gravity="center"
                 android:text="@string/mainActivity_or"
-                android:textStyle="bold"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:layout_marginTop="10dp" />
-            
+                android:textStyle="bold" />
+
             <View
                 android:layout_width="fill_parent"
                 android:layout_height="1dip"
@@ -110,10 +117,10 @@
                 android:layout_height="@dimen/buttonHeight"
                 android:layout_marginTop="15dp"
                 android:gravity="center"
-                android:textColor="#33b5e5"
-                android:textStyle="bold"
+                android:text="@string/payButton"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/payButton" />
+                android:textColor="#33b5e5"
+                android:textStyle="bold" />
         </LinearLayout>
     </ScrollView> <!-- The navigation drawer -->
 
