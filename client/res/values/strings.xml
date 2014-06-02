@@ -148,15 +148,16 @@
     <string name="payOut_title">Pay Out</string>
     <string name="payOut_info">Info: To make sure your pay out will be accepted and implemented in the blockchain, a fee of currently 0.0001 BTC is deducted.</string>
     <string name="payOut_BalanceText">Current Balance:</string>
-    <string name="PayOut_AmountText">PayOut Amount</string>
+    <string name="PayOut_AmountText">PayOut Amount:</string>
     <string name="payOut_AddressText">PayOut Address:</string>
     <string name="payOut_Address">Enter Bitcoin Address</string>
     <string name="payOut_payOut">Pay Out</string>
-    <string name="payout_exchangeRateText">Exchange Rate</string>
+    <string name="payout_exchangeRateText">Exchange Rate:</string>
     <string name="fill_necessary_fields">Please fill out all necessary fields.</string>
     <string name="payOut_ButtonAll">All</string>
     <string name="payOut_ButtonScanQRText">Scan QR</string>
     <string name="payOut_NoQRCode">Bitcoin address could not be scanned.</string>
+    <string name="payOut_enterAmount">Enter amount</string>
 
     <!-- Payou out Rules -->
     <string name="insert_payout_address">Please insert a pay out address!</string>

@@ -155,11 +155,13 @@
     <string name="payOut_AddressText">BTC-Adresse: </string>
     <string name="payOut_Address">Bitte BTC-Adresse hier eingeben&#8230;</string>
     <string name="payOut_payOut">Auszahlung durchführen</string>
-    <string name="payout_exchangeRateText">Wechselkurs </string>
+    <string name="payout_exchangeRateText">Wechselkurs: </string>
     <string name="fill_necessary_fields">Bitte alle benötigten Fehler ausfüllen.</string>
     <string name="payOut_ButtonAll">Max</string>
     <string name="payOut_ButtonScanQRText">Scan QR</string>
     <string name="payOut_NoQRCode">Bitcoin Adresse konnte nicht gescannt werden.</string>
+        <string name="payOut_enterAmount">Betrag eingeben</string>
+    
 
     <!-- Payou out Rules -->
     <string name="insert_payout_address">Bitte Auszahlungs-Adresse eingeben!</string>
