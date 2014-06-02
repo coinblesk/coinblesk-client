@@ -251,7 +251,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		if (response.isSuccessful()) {
 			exchangeRate = new BigDecimal(response.getMessage());
 			ClientController.getUser().setBalance(response.getReadAccountTO().getUserAccount().getBalance());
-			ArrayList<AbstractHistory> transactions = extractLast5Transactions(response.getGetHistoryTO());
+			ArrayList<AbstractHistory> transactions = extractLastFewTransactions(response.getGetHistoryTO());
 
 			//update gui
 			if(! transactions.isEmpty()){
@@ -278,7 +278,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	 *            {@link HistoryPayOutTransaction}s
 	 * @return ArrayList<AbstractHistory>
 	 */
-	private ArrayList<AbstractHistory> extractLast5Transactions(GetHistoryTransferObject hto) {
+	private ArrayList<AbstractHistory> extractLastFewTransactions(GetHistoryTransferObject hto) {
 		ArrayList<HistoryTransaction> transactionHistory = hto.getTransactionHistory();
 		ArrayList<HistoryPayInTransaction> payInTransactionHistory = hto.getPayInTransactionHistory();
 		ArrayList<HistoryPayOutTransaction> payOutTransactionHistory = hto.getPayOutTransactionHistory();
@@ -302,7 +302,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.mainActivity_history);
 		linearLayout.removeAllViews();
 
-		for(int i = history.size()-1;i>=history.size()-5;i--){
+		for(int i = history.size()-1;i>=history.size()-3;i--){
 			TextView tView = new TextView(getApplicationContext());
 			tView.setGravity(Gravity.LEFT);
 			tView.setTextColor(Color.BLACK);

@@ -58,7 +58,7 @@
     <!-- Main View Strings -->
     <string name="mainActivityTextView">Account Overview</string>
     <string name="payButton">Create new transaction</string>
-    <string name="last5TransactionsTitle">Your last 5 transactions:</string>
+    <string name="last5TransactionsTitle">Your last 3 transactions:</string>
     <string name="mainActivity_processTransactionTitle">Process Transaction</string>
     <string name="mainActivity_processTransactionInstruction">(Hold devices together to process transaction initiated by counterparty)</string>
     <string name="mainActivity_or">OR</string>
