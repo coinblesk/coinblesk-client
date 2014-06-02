@@ -40,7 +40,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 	private Button acceptBtn;
 	private Button allBtn;
 	private Button scanQRButton;
-	private EditText payoutAmount;
+	private EditText payoutAmountEditText;
 	private EditText payoutAddress;
 	
 	private TextView btcBalance;
@@ -65,7 +65,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 		
 		acceptBtn = (Button) findViewById(R.id.payOut_payOutButton);
 		allBtn = (Button) findViewById(R.id.payout_ButtonAll);
-		payoutAmount = (EditText) findViewById(R.id.payOut_Amount);
+		payoutAmountEditText = (EditText) findViewById(R.id.payOut_Amount);
 		payoutAddress = (EditText) findViewById(R.id.payOut_Address);
 		scanQRButton = (Button) findViewById(R.id.payout_ButtonScanQR );
 		
@@ -124,19 +124,20 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 		
 	  	allBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				payoutAmount.setText(ClientController.getUser().getBalance().toString());
+				BigDecimal amount = CurrencyViewHandler.getBTCAmountInDefinedUnit(ClientController.getUser().getBalance(), getApplicationContext());
+				payoutAmountEditText.setText(CurrencyFormatter.formatBTC(amount));
 				payOutAmount = ClientController.getUser().getBalance();
 			}
 		});  
 		
-	  	payoutAmount.addTextChangedListener(new TextWatcher() {
+	  	payoutAmountEditText.addTextChangedListener(new TextWatcher() {
 	  		/*
 	  		 * Listener to update the inserted amount of bitcoin
 	  		 * and the exchange rate to swiss currency. 
 	  		 */
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				try {
-					BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(payoutAmount.getText().toString());
+					BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(payoutAmountEditText.getText().toString());
 					payOutAmount = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
 					
 					CurrencyViewHandler.setToCHF(chfAmount, exchangeRate, payOutAmount);
@@ -160,9 +161,9 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 	}
     
 	private void launchPayOutRequest() {
-		if (!payoutAmount.getText().toString().isEmpty() && !payoutAddress.getText().toString().isEmpty()) {
+		if (!payoutAmountEditText.getText().toString().isEmpty() && !payoutAddress.getText().toString().isEmpty()) {
 			showLoadingProgressDialog();
-			BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(payoutAmount.getText().toString());
+			BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(payoutAmountEditText.getText().toString());
 			payOutAmount = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
 			
 			PayOutTransaction pot = new PayOutTransaction(ClientController.getUser().getId(), payOutAmount, payoutAddress.getText().toString());
@@ -199,7 +200,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 				CurrencyViewHandler.setBTC(btcBalance, ClientController.getUser().getBalance(), getApplicationContext());
 				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getUser().getBalance());
 				chfAmount.setText("");
-				payoutAmount.setText("");
+				payoutAmountEditText.setText("");
 			}
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			exchangeRate = BigDecimal.ZERO;

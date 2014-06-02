@@ -65,17 +65,7 @@ public class CurrencyViewHandler {
 	 *            preferences.
 	 */
 	public static void setBTC(TextView textView, BigDecimal amountBtc, Context context) {
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-		String bitcoinUnit = settings.getString("bitcoin_list", "");
-		BigDecimal factor;
-		if (bitcoinUnit.equals(Constants.MICRO_BTC)) {
-			factor = new BigDecimal("1000000");
-		} else if (bitcoinUnit.equals(Constants.MILI_BTC)) {
-			factor = new BigDecimal("1000");
-		} else {
-			factor = new BigDecimal("1");
-		}
-		BigDecimal amount = factor.multiply(amountBtc).setScale(Constants.SCALE_BTC, RoundingMode.HALF_UP);
+		BigDecimal amount = getBTCAmountInDefinedUnit(amountBtc, context);
 		textView.setText(CurrencyFormatter.formatBTC(amount) + " " + getBitcoinUnit(context));
 	}
 	
@@ -162,6 +152,28 @@ public class CurrencyViewHandler {
 	 */
 	public static void clearTextView(TextView view){
 		view.setText("");
+	}
+	
+	/**
+	 * Returns the amount of BTC in the corresponding defined bitcoin unit.
+	 * 
+	 * @param amountBtc in Bitcoin
+	 * @param context Application context.
+	 * @return amount BTC converted to the unit defined in usersettings
+	 */
+	public static BigDecimal getBTCAmountInDefinedUnit(BigDecimal amountBtc, Context context) {
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+		String bitcoinUnit = settings.getString("bitcoin_list", "");
+		BigDecimal factor;
+		if (bitcoinUnit.equals(Constants.MICRO_BTC)) {
+			factor = new BigDecimal("1000000");
+		} else if (bitcoinUnit.equals(Constants.MILI_BTC)) {
+			factor = new BigDecimal("1000");
+		} else {
+			factor = new BigDecimal("1");
+		}
+		BigDecimal amount = factor.multiply(amountBtc).setScale(Constants.SCALE_BTC, RoundingMode.HALF_UP);
+		return amount;
 	}
 	
 }
