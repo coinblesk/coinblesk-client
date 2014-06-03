@@ -7,6 +7,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
+import ch.uzh.csg.mbps.client.AddressBookActivity;
 import ch.uzh.csg.mbps.client.ChoosePaymentActivity;
 import ch.uzh.csg.mbps.client.HistoryActivity;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
@@ -72,15 +73,19 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), PayOutActivity.class));
 			break;
 		case 6:
+			// Address Book
+			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), AddressBookActivity.class));
+			break;
+		case 7:
 			// Reconnect to Server
 			launchConnectionRequest();
 			break;
-		case 7:
+		case 8:
 			// Help
 			MainActivity.isFirstTime = true;
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), MainActivity.class));
 			break;
-		case 8:
+		case 9:
 			// Sign Out
 			launchSignOut();
 			break;

@@ -39,7 +39,7 @@ import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.TransactionRequestTask;
-import ch.uzh.csg.mbps.client.util.AddressBook;
+import ch.uzh.csg.mbps.client.util.AddressBookUtility;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
@@ -310,7 +310,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	public static class AddressBookDialog extends DialogFragment {
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			Set<String> receiverEntries = AddressBook.getAddressBook(this.getActivity());
+			Set<String> receiverEntries = AddressBookUtility.getAddressBook(this.getActivity());
 			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 			builder.setTitle("Select Receiver");
 			final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
@@ -318,7 +318,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			builder.setItems(cs, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					SendPaymentActivity.receiverUsernameEditText.setText(cs[which].toString());
-					if(AddressBook.isTrusted(getActivity(), cs[which].toString())){
+					if(AddressBookUtility.isTrusted(getActivity(), cs[which].toString())){
 						SendPaymentActivity.receiverUsernameEditText.setBackgroundColor(Color.GREEN);
 					}
 					else {

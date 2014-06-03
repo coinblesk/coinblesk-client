@@ -73,6 +73,7 @@
         <item>Einstellungen</item>
         <item>Konto aufladen</item>
         <item>Auszahlen an BTC Adresse</item>
+        <item>Adressbuch</item>
         <item>Mit Server verbinden</item>
         <item>Hilfe</item>
         <item>Abmelden</item>
@@ -284,4 +285,10 @@
     <string name="choosePayment_requestPaymentBtnText">Bitcoins Verlangen</string>
     <string name="choosePayment_requestPaymentNoNfcBtnText">Bitcoins Senden \n direkt an bekannten Empfänger \n (ohne NFC Kontakt)</string>
 
+    <!-- Address Book Strings -->
+    <string name="addressBook_title">Adressbuch</string>
+    <string name="addressBook_addContactsButton">Kontakt hinzufügen</string>
+    <string name="addressBook_removeAllUntrustedButton">Alle nicht favorisierten Kontakte entfernen</string>
+    <string name="addressBook_dialogTitle">Wollen Sie wirklich den folgenden Kontakt von Ihrem Adressbuch entfernen?</string>
+    <string name="addressBook_dialogText"></string>
 </resources>

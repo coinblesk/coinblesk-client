@@ -11,7 +11,7 @@ import android.preference.PreferenceManager;
 /**
  * AddressBook is responsible for handling usernames of known and trusted users.
  */
-public class AddressBook {
+public class AddressBookUtility {
 	
 	/**
 	 * Returns an alphabetically ordered Set<String> with all usernames stored
@@ -53,6 +53,51 @@ public class AddressBook {
 	}
 	
 	/**
+	 * Removes an entry (username) from the address book of known users.
+	 * 
+	 * @param context Application Context
+	 * @param username to remove
+	 */
+	public static void removeAddressBookEntry(Context context, String username){
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor editor = preferences.edit();
+		Set<String> addressBook = new TreeSet<String>(new Comparator<String>() {
+			public int compare(String o1, String o2) {
+		        return o1.toLowerCase().compareTo(o2.toLowerCase());
+		    }
+		});
+		addressBook.addAll(preferences.getStringSet("addressBook", new TreeSet<String>()));
+		addressBook.remove(username);
+		editor.putStringSet("addressBook", addressBook);
+		editor.commit();
+		//delete also trusted address book entry if available
+		removeTrustedAddressBookEntry(context, username);
+	}
+	
+	/**
+	 * Removes all entries from address book which are not trusted.
+	 * 
+	 * @param context Application Context
+	 */
+	public static void removeAllUntrustedAddressBookEntries(Context context){
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor editor = preferences.edit();
+		Set<String> addressBook = new TreeSet<String>(new Comparator<String>() {
+			public int compare(String o1, String o2) {
+		        return o1.toLowerCase().compareTo(o2.toLowerCase());
+		    }
+		});
+		addressBook.addAll(preferences.getStringSet("addressBook", new TreeSet<String>()));
+		Set<String> trustedAddressBook = preferences.getStringSet("trustedAddressBook", new TreeSet<String>());
+		Set<String> addressesToRemove = preferences.getStringSet("addressBook", new TreeSet<String>());
+		addressesToRemove.removeAll(trustedAddressBook);
+		addressBook.removeAll(addressesToRemove);
+		
+		editor.putStringSet("addressBook", addressBook);
+		editor.commit();
+	}
+	
+	/**
 	 * Returns an alphabetically ordered Set<String> with all usernames of trusted users stored
 	 * in the trusted address book.
 	 * 
@@ -86,6 +131,26 @@ public class AddressBook {
 		});
 		trustedAddressBook.addAll(preferences.getStringSet("trustedAddressBook", new TreeSet<String>()));
 		trustedAddressBook.add(username);
+		editor.putStringSet("trustedAddressBook", trustedAddressBook);
+		editor.commit();
+	}
+	
+	/**
+	 * Removes an entry (username) from the address book of trusted users.
+	 * 
+	 * @param context (Application Context)
+	 * @param username to remove
+	 */
+	public static void removeTrustedAddressBookEntry(Context context, String username){
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor editor = preferences.edit();
+		Set<String> trustedAddressBook = new TreeSet<String>(new Comparator<String>() {
+			public int compare(String o1, String o2) {
+		        return o1.toLowerCase().compareTo(o2.toLowerCase());
+		    }
+		});
+		trustedAddressBook.addAll(preferences.getStringSet("trustedAddressBook", new TreeSet<String>()));
+		trustedAddressBook.remove(username);
 		editor.putStringSet("trustedAddressBook", trustedAddressBook);
 		editor.commit();
 	}

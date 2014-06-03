@@ -71,6 +71,7 @@
         <item>Settings</item>
         <item>Top Up</item>
         <item>Pay out to BTC address</item>
+        <item>Address Book</item>
         <item>Reconnect to Server</item>
         <item>Help</item>
         <item>Sign out</item>
@@ -114,8 +115,7 @@
     <string name="no_connection_server">No connection to server!\nYou are in offline mode.</string>
     <string name="receivePayment_fee">Including fee of</string>
     <string name="receivePayment_balanceTitle">Balance:</string>
-    
-    
+
     <!-- Send Payment Strings -->
     <string name="sendPayment_title">Send</string>
     <string name="sendPayment_enterUsernameReceiver">Enter Username Receiver</string>
@@ -277,5 +277,14 @@
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
     <string name="choosePayment_requestPaymentBtnText">Request Bitcoins</string>
     <string name="choosePayment_requestPaymentNoNfcBtnText">Send Bitcoins \n directly to known receiver \n (without NFC contact)</string>
+    <string name="title_activity_address_book">AddressBookActivity</string>
+    <string name="hello_world">Hello world!</string>
 
+    <!-- Address Book Strings -->
+    <string name="addressBook_title">Address Book</string>
+    <string name="addressBook_addContactsButton">Add Contact</string>
+    <string name="addressBook_removeAllUntrustedButton">Remove all untrusted contacts</string>
+    <string name="addressBook_dialogTitle">Do you really want to delete the following contact from your address book?</string>
+    <string name="addressBook_dialogText"></string>
+    
 </resources>
