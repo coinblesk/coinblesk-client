@@ -21,6 +21,7 @@
     <string name="title_activity_about">Über MBPS</string>
     <string name="title_activity_setting_pay_out_rules">Auszahlungs Regeln</string>
     <string name="title_activity_choose_payment">Zahlungsweise auswählen</string>
+    <string name="title_activity_address_book">Adressbuch</string>
     
 
     <!-- Login Strings -->
@@ -123,6 +124,8 @@
     <string name="sendPayment_enterUsernameReceiver">Benutzername Empfänger eingeben</string>
     <string name="sendPayment_sendButton">Senden</string>
     <string name="sendPayment_balanceTitle">Kontostand:</string>
+    <string name="sendPayment_selectReceiver">Empfänger auswählen</string>
+    
     
 
     <!-- Spinner currency -->

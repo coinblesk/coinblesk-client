@@ -21,6 +21,7 @@
     <string name="title_activity_about">About</string>
     <string name="title_activity_setting_pay_out_rules">Pay out Rules</string>
     <string name="title_activity_choose_payment">Choose Payment Method</string>
+    <string name="title_activity_address_book">Address Book</string>
 
     <!-- Login Strings -->
     <string name="loginUsernameEditText">Enter your username</string>
@@ -121,6 +122,7 @@
     <string name="sendPayment_enterUsernameReceiver">Enter Username Receiver</string>
     <string name="sendPayment_sendButton">Send</string>
     <string name="sendPayment_balanceTitle">Balance:</string>
+    <string name="sendPayment_selectReceiver">Select receiver</string>
 
     <!-- Spinner currency -->
     <string name="textView_currency">currency</string>
@@ -277,8 +279,6 @@
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
     <string name="choosePayment_requestPaymentBtnText">Request Bitcoins</string>
     <string name="choosePayment_requestPaymentNoNfcBtnText">Send Bitcoins \n directly to known receiver \n (without NFC contact)</string>
-    <string name="title_activity_address_book">AddressBookActivity</string>
-    <string name="hello_world">Hello world!</string>
 
     <!-- Address Book Strings -->
     <string name="addressBook_title">Address Book</string>

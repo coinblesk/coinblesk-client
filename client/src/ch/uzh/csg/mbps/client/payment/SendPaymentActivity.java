@@ -308,11 +308,12 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	}
 
 	public static class AddressBookDialog extends DialogFragment {
+		//TODO simon: change view to show also trusted/untrusted images
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			Set<String> receiverEntries = AddressBookUtility.getAddressBook(this.getActivity());
 			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-			builder.setTitle("Select Receiver");
+			builder.setTitle(R.string.sendPayment_selectReceiver);
 			final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
 
 			builder.setItems(cs, new DialogInterface.OnClickListener() {

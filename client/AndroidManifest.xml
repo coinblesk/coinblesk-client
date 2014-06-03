@@ -11,7 +11,8 @@
         android:minSdkVersion="19"
         android:targetSdkVersion="19" />
 
-   <uses-feature
+
+          <uses-feature
         android:name="android.hardware.nfc"
         android:required="true" />
 
@@ -111,8 +112,8 @@
         <activity
             android:name="ch.uzh.csg.mbps.client.payment.PayOutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="stateHidden"
-            android:label="@string/title_activity_pay_out" >
+            android:label="@string/title_activity_pay_out"
+            android:windowSoftInputMode="stateHidden" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.uzh.csg.mbps.client.MainActivity" />
@@ -140,7 +141,8 @@
                 android:value="ch.uzh.csg.mbps.client.settings.SettingsActivity" />
         </activity>
 
-         <service
+        
+        <service
             android:name="ch.uzh.csg.mbps.client.payment.nfc.CustomHostApduService"
             android:exported="true"
             android:permission="android.permission.BIND_NFC_SERVICE" >
@@ -151,7 +153,8 @@
             <meta-data
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/apduservice" />
-        </service> 
+        </service>
+     
 
         <activity
             android:name="ch.uzh.csg.mbps.client.ChoosePaymentActivity"
@@ -169,6 +172,14 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.uzh.csg.mbps.client.ChoosePaymentActivity" />
+        </activity>
+        <activity
+            android:name="ch.uzh.csg.mbps.client.AddressBookActivity"
+            android:label="@string/title_activity_address_book"
+            android:parentActivityName="ch.uzh.csg.mbps.client.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.uzh.csg.mbps.client.MainActivity" />
         </activity>
     </application>
 
