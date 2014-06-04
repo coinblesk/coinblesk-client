@@ -127,12 +127,12 @@ public class AddressBookActivity extends Activity {
 					if (AddressBookUtility.isTrusted(getApplicationContext(), username)){
 						AddressBookUtility.removeTrustedAddressBookEntry(getApplicationContext(), username);
 						trusted.setImageResource(R.drawable.ic_not_starred);
-						showToast("Removed from trusted contacts.");
+						showToast(getString(R.string.addressBook_removeContact));
 					}
 					else{
 						AddressBookUtility.addTrustedAddressBookEntry(getApplicationContext(), username);
 						trusted.setImageResource(R.drawable.ic_starred);
-						showToast("Marked as trusted contact.");
+						showToast(getString(R.string.addressBook_addContact));
 					}
 				}
 			});

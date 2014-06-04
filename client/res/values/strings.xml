@@ -285,6 +285,7 @@
     <string name="addressBook_addContactsButton">Add Contact</string>
     <string name="addressBook_removeAllUntrustedButton">Remove all untrusted contacts</string>
     <string name="addressBook_dialogTitle">Do you really want to delete the following contact from your address book?</string>
-    <string name="addressBook_dialogText"></string>
+    <string name="addressBook_removeContact">Contact removed from trusted contacts.</string>
+    <string name="addressBook_addContact">Contact added to trusted contacts.</string>
     
 </resources>

@@ -293,5 +293,7 @@
     <string name="addressBook_addContactsButton">Kontakt hinzufügen</string>
     <string name="addressBook_removeAllUntrustedButton">Alle nicht favorisierten Kontakte entfernen</string>
     <string name="addressBook_dialogTitle">Wollen Sie wirklich den folgenden Kontakt von Ihrem Adressbuch entfernen?</string>
-    <string name="addressBook_dialogText"></string>
+    <string name="addressBook_removeContact">Kontakt von bevorzugten Kontakten entfernt.</string>
+    <string name="addressBook_addContact">Kontakt zu bevorzugten Kontakten hinzugefügt.</string>
+    
 </resources>
