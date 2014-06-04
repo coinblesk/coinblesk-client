@@ -93,7 +93,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			TextView title = (TextView) findViewById(R.id.receivePayment_title);
 			title.setText(getResources().getString(R.string.sendPayment_title));
 			ImageView logo = (ImageView) findViewById(R.id.receivePayment_logo);
-			logo.setImageResource(R.drawable.ic_pay_payment);
+			logo.setImageResource(R.drawable.ic_pay_payment_big);
 			getActionBar().setTitle(getResources().getString(R.string.title_activity_send_payment));   
 		}
 	}
