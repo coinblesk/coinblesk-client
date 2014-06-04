@@ -10,25 +10,28 @@
         <Button
             android:id="@+id/choosePayment_sendPaymentBtn"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="120dp"
             android:layout_marginTop="10dp"
-            android:drawableBottom="@drawable/ic_pay_payment"
+            android:drawableRight="@drawable/ic_pay_payment_big"
+            android:drawableLeft="@drawable/ic_nfc_small"
             android:text="@string/choosePayment_sendPaymentBtnText" />
 
         <Button
             android:id="@+id/choosePayment_requestPaymentBtn"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="120dp"
             android:layout_marginTop="10dp"
-            android:drawableBottom="@drawable/ic_receive_payment"
+            android:drawableRight="@drawable/ic_receive_payment_big"
+            android:drawableLeft="@drawable/ic_nfc_small"
             android:text="@string/choosePayment_requestPaymentBtnText" />
 
         <Button
             android:id="@+id/choosePayment_requestPaymentNoNfcBtn"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="120dp"
             android:layout_marginTop="10dp"
-            android:drawableBottom="@drawable/ic_pay_payment"
+            android:drawableRight="@drawable/ic_pay_payment_big"
+            android:drawableLeft="@drawable/ic_online"
             android:text="@string/choosePayment_requestPaymentNoNfcBtnText" />
 
 </LinearLayout>

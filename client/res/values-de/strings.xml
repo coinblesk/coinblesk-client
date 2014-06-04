@@ -286,7 +286,7 @@
     <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Bitcoins Senden</string>
     <string name="choosePayment_requestPaymentBtnText">Bitcoins Verlangen</string>
-    <string name="choosePayment_requestPaymentNoNfcBtnText">Bitcoins Senden \n direkt an bekannten Empfänger \n (ohne NFC Kontakt)</string>
+    <string name="choosePayment_requestPaymentNoNfcBtnText">Bitcoins direkt an bekannten Empfänger senden\n(ohne NFC Kontakt)</string>
 
     <!-- Address Book Strings -->
     <string name="addressBook_title">Adressbuch</string>
