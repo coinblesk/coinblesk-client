@@ -172,7 +172,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignBottom="@+id/payPayment_title"
         android:gravity="right"
-        android:src="@drawable/ic_pay_payment" />
+        android:src="@drawable/ic_pay_payment_big" />
     
 </RelativeLayout>
 </ScrollView>
