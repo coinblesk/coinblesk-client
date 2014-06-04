@@ -29,6 +29,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
@@ -291,11 +293,10 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		transaction.setAmount(amountBTC);
 		transaction.setAmountInputCurrency(inputUnitValue);
 		transaction.setBuyerUsername(ClientController.getUser().getUsername());
-		//TODO: simon: get receiver-username from edittext or addressbook
 		String receiverUsername = receiverUsernameEditText.getText().toString();
-
 		transaction.setSellerUsername(receiverUsername);
 		transaction.setInputCurrency(Constants.inputUnit);
+		
 		SignedObject signedTransactionBuyer;
 		try {
 			//TODO simon: adapt TransactionHandler etc
@@ -307,26 +308,51 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		}
 	}
 
+	/**
+	 * Creates a dialog which shows all entries from addressbook. Selected item
+	 * will be written to SendPaymentActivity.receiverUsernameEditText.
+	 * 
+	 */
 	public static class AddressBookDialog extends DialogFragment {
-		//TODO simon: change view to show also trusted/untrusted images
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			Set<String> receiverEntries = AddressBookUtility.getAddressBook(this.getActivity());
-			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-			builder.setTitle(R.string.sendPayment_selectReceiver);
 			final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
 
-			builder.setItems(cs, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					SendPaymentActivity.receiverUsernameEditText.setText(cs[which].toString());
-					if(AddressBookUtility.isTrusted(getActivity(), cs[which].toString())){
-						SendPaymentActivity.receiverUsernameEditText.setBackgroundColor(Color.GREEN);
-					}
-					else {
-						SendPaymentActivity.receiverUsernameEditText.setBackgroundColor(Color.TRANSPARENT);
-					}
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder.setTitle(R.string.sendPayment_selectReceiver);
+
+			ScrollView scrollView = new ScrollView(getActivity().getApplicationContext());
+			LinearLayout linearLayout = new LinearLayout(getActivity().getApplicationContext());
+			linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+			for(int i=0; i < cs.length; i++){
+				final TextView entry = new TextView(getActivity().getApplicationContext());
+				final String username = cs[i].toString();
+
+				entry.setGravity(android.view.Gravity.CENTER_VERTICAL);
+				entry.setPadding(0, 0, 0, 10);
+				entry.setTextColor(Color.BLACK);
+				entry.setText(username);
+				if (AddressBookUtility.isTrusted(getActivity().getApplicationContext(), username)) {
+					entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null,null,null);
+				} else{
+					entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null,null,null);
 				}
-			});
+				
+				entry.setClickable(true);
+				entry.setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						SendPaymentActivity.receiverUsernameEditText.setText(username);
+						dismiss();
+					}
+				});
+				
+				linearLayout.addView(entry);
+			}
+			scrollView.addView(linearLayout);
+			builder.setView(scrollView);
+			
 			return builder.create();
 		}
 	}
