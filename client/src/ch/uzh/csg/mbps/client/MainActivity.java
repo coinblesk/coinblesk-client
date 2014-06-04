@@ -34,7 +34,6 @@ import android.widget.TextView;
 import ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener;
 import ch.uzh.csg.mbps.client.request.MainActivityRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
-import ch.uzh.csg.mbps.client.util.AddressBookUtility;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
@@ -78,30 +77,6 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 		initClickListener();
 		checkOnlineModeAndProceed();
-		
-		//TODO delete, only for testing, remove when implemented addressbook functionalities
-		AddressBookUtility.addAddressBookEntry(this,"Zeno");
-		AddressBookUtility.addAddressBookEntry(this,"Hans");
-		AddressBookUtility.addAddressBookEntry(this,"Alberich");
-		AddressBookUtility.addAddressBookEntry(this,"beda55@hans.ch");
-		AddressBookUtility.addAddressBookEntry(this,"Konstantin");
-		AddressBookUtility.addAddressBookEntry(this, "zans1");
-		AddressBookUtility.addAddressBookEntry(this, "kans2");
-		AddressBookUtility.addAddressBookEntry(this, "Hans3");
-		AddressBookUtility.addAddressBookEntry(this, "Hans4");
-		AddressBookUtility.addAddressBookEntry(this, "Hans5");
-		AddressBookUtility.addAddressBookEntry(this, "Hans6");
-		AddressBookUtility.addAddressBookEntry(this, "Hans7");
-		AddressBookUtility.addAddressBookEntry(this, "Hans8");
-		AddressBookUtility.addAddressBookEntry(this, "Hans9");
-		AddressBookUtility.addAddressBookEntry(this, "Hans0");
-		AddressBookUtility.addAddressBookEntry(this, "Hans11");
-		AddressBookUtility.addAddressBookEntry(this, "Hans12");
-		AddressBookUtility.addAddressBookEntry(this, "Hans13");
-		AddressBookUtility.addAddressBookEntry(this, "Hans14");
-		AddressBookUtility.addAddressBookEntry(this, "Hans15");
-		AddressBookUtility.addAddressBookEntry(this, "Hans16");
-		AddressBookUtility.addAddressBookEntry(this, "Hans17");
 		
 	}
 
