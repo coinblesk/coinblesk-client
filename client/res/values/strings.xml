@@ -287,5 +287,9 @@
     <string name="addressBook_dialogTitle">Do you really want to delete the following contact from your address book?</string>
     <string name="addressBook_removeContact">Contact removed from trusted contacts.</string>
     <string name="addressBook_addContact">Contact added to trusted contacts.</string>
+        <string name="addressBook_addContact_save">Save</string>
+    <string name="addressBook_addContact_cancel">Cancel</string>
+    <string name="addressBook_addContact_title">Save new contact</string>
+    <string name="addressBook_addContact_message">Please enter the username of the contact you would like to save:</string>
     
 </resources>

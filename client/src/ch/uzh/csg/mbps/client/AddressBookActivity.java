@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -70,10 +71,28 @@ public class AddressBookActivity extends Activity {
 	private void setUpGui() {
 		Button addContact = (Button) findViewById(R.id.addressBook_addButton);
 		addContact.setOnClickListener(new OnClickListener() {
-			
+	
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				
+				AlertDialog.Builder alert = new AlertDialog.Builder(v.getContext());
+				alert.setTitle(getString(R.string.addressBook_addContact_title));
+				alert.setMessage(getString(R.string.addressBook_addContact_message));
+
+				final EditText input = new EditText(v.getContext());
+				alert.setView(input);
+
+				alert.setPositiveButton(getString(R.string.addressBook_addContact_save), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+				  String username = input.getText().toString();
+				  AddressBookUtility.addAddressBookEntry(getApplicationContext(), username);
+				  createAddressBookEntries();
+				  }
+				});
+				alert.setNegativeButton(getString(R.string.addressBook_addContact_cancel), new DialogInterface.OnClickListener() {
+				  public void onClick(DialogInterface dialog, int whichButton) {
+				    // Dialog canceled
+				  }
+				});
+				alert.show();
 			}
 		});
 		
