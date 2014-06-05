@@ -10,9 +10,8 @@ import ch.uzh.csg.mbps.client.payment.nfc.CommUtils.Message;
 import ch.uzh.csg.mbps.client.payment.nfc.messages.PaymentMessage;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
+import ch.uzh.csg.mbps.customserialization.security.KeyHandler;
 import ch.uzh.csg.mbps.model.Transaction;
-import ch.uzh.csg.mbps.util.KeyHandler;
-import ch.uzh.csg.mbps.util.Serializer;
 
 /**
  * This class handles the messages coming from the seller and returns the
@@ -66,64 +65,65 @@ public class BuyerRole {
 	
 
 	private PaymentMessage proceed(byte[] bytes, Handler protocolHandler) {
-		switch (state) {
-		case START:
-			Log.d(TAG, "Start payment");
-			//receiving payment request from seller
-			try {
-				transactionRequest = Serializer.deserialize(bytes);
-				Message m = CommUtils.Message.PAYMENT_UPDATE_GUI_AMOUNT;
-				protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
-				
-				state = State.WAIT_FOR_USER_CONFIRMATION;
-				return new PaymentMessage(PaymentMessage.WAIT_WITH_ANSWER, null);
-			} catch (Exception e) {
-				return handleUnexpectedError(protocolHandler, e);
-			}
-		case WAIT_FOR_USER_CONFIRMATION:
-			String s = new String(bytes);
-			Log.d(TAG, "wait for user confirmation: " + s);
-			if (s.equals(CommUtils.Message.PAYMENT_ACCEPT_PRESSED.toString())) {
-				try {
-					SignedObject signedTransaction = TransactionHandler.signPayment(transactionRequest);
-					state = State.WAIT_FOR_TRANSACTION_CONFIRMATION;
-					return new PaymentMessage(PaymentMessage.PROCEED, Serializer.serialize(signedTransaction));
-				} catch (Exception e) {
-					return handleUnexpectedError(protocolHandler, e);
-				}
-			} else {
-				state = State.END;
-				Message m = CommUtils.Message.PAYMENT_ERROR_BUYER_REJECTED;
-				protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
-				
-				String s1 = String.format(CommUtils.Message.PAYMENT_ERROR_BUYER_REJECTED.getMessage(), ClientController.getUser().getUsername(), CurrencyFormatter.formatBTC(transactionRequest.getAmount()));
-				return new PaymentMessage(PaymentMessage.ERROR, s1.getBytes());
-			}
-		case WAIT_FOR_TRANSACTION_CONFIRMATION:
-			Log.d(TAG, "wait for transaction confirmation");
-			try {
-				SignedObject signedForBuyer = Serializer.deserialize(bytes);
-				PublicKey serverPublicKey = KeyHandler.decodePublicKey(ClientController.getServerPublicKey());
-				
-				boolean verified = KeyHandler.verifyObject(signedForBuyer, serverPublicKey);
-				Transaction tx = KeyHandler.retrieveTransaction(signedForBuyer);
-				
-				if (verified && tx.equals(transactionRequest)) {
-					state = State.END;
-					Message m = CommUtils.Message.PAYMENT_SUCCESS_BUYER;
-					protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
-					System.err.println("send ACK back!!");
-					return new PaymentMessage(PaymentMessage.PROCEED, "ACK".getBytes());
-				} else {
-					return handleUnexpectedError(protocolHandler, new RuntimeException("error in WAIT_FOR_TRANSACTION_CONFIRMATION"));
-				}
-			} catch (Exception e) {
-				return handleUnexpectedError(protocolHandler, e);
-			}
-		case END:
-			Log.d(TAG, "We finished, nothing to do here.");
-			break;
-		}
+		//TODO jeton: refactor
+//		switch (state) {
+//		case START:
+//			Log.d(TAG, "Start payment");
+//			//receiving payment request from seller
+//			try {
+//				transactionRequest = Serializer.deserialize(bytes);
+//				Message m = CommUtils.Message.PAYMENT_UPDATE_GUI_AMOUNT;
+//				protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
+//				
+//				state = State.WAIT_FOR_USER_CONFIRMATION;
+//				return new PaymentMessage(PaymentMessage.WAIT_WITH_ANSWER, null);
+//			} catch (Exception e) {
+//				return handleUnexpectedError(protocolHandler, e);
+//			}
+//		case WAIT_FOR_USER_CONFIRMATION:
+//			String s = new String(bytes);
+//			Log.d(TAG, "wait for user confirmation: " + s);
+//			if (s.equals(CommUtils.Message.PAYMENT_ACCEPT_PRESSED.toString())) {
+//				try {
+//					SignedObject signedTransaction = TransactionHandler.signPayment(transactionRequest);
+//					state = State.WAIT_FOR_TRANSACTION_CONFIRMATION;
+//					return new PaymentMessage(PaymentMessage.PROCEED, Serializer.serialize(signedTransaction));
+//				} catch (Exception e) {
+//					return handleUnexpectedError(protocolHandler, e);
+//				}
+//			} else {
+//				state = State.END;
+//				Message m = CommUtils.Message.PAYMENT_ERROR_BUYER_REJECTED;
+//				protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
+//				
+//				String s1 = String.format(CommUtils.Message.PAYMENT_ERROR_BUYER_REJECTED.getMessage(), ClientController.getUser().getUsername(), CurrencyFormatter.formatBTC(transactionRequest.getAmount()));
+//				return new PaymentMessage(PaymentMessage.ERROR, s1.getBytes());
+//			}
+//		case WAIT_FOR_TRANSACTION_CONFIRMATION:
+//			Log.d(TAG, "wait for transaction confirmation");
+//			try {
+//				SignedObject signedForBuyer = Serializer.deserialize(bytes);
+//				PublicKey serverPublicKey = KeyHandler.decodePublicKey(ClientController.getServerPublicKey());
+//				
+//				boolean verified = KeyHandler.verifyObject(signedForBuyer, serverPublicKey);
+//				Transaction tx = KeyHandler.retrieveTransaction(signedForBuyer);
+//				
+//				if (verified && tx.equals(transactionRequest)) {
+//					state = State.END;
+//					Message m = CommUtils.Message.PAYMENT_SUCCESS_BUYER;
+//					protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
+//					System.err.println("send ACK back!!");
+//					return new PaymentMessage(PaymentMessage.PROCEED, "ACK".getBytes());
+//				} else {
+//					return handleUnexpectedError(protocolHandler, new RuntimeException("error in WAIT_FOR_TRANSACTION_CONFIRMATION"));
+//				}
+//			} catch (Exception e) {
+//				return handleUnexpectedError(protocolHandler, e);
+//			}
+//		case END:
+//			Log.d(TAG, "We finished, nothing to do here.");
+//			break;
+//		}
 		return null;
 	}
 	

@@ -301,8 +301,10 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		try {
 			//TODO simon: adapt TransactionHandler etc
 			signedTransactionBuyer = TransactionHandler.signPayment(transaction);
-			CreateTransactionTransferObject ctto = new CreateTransactionTransferObject(null, signedTransactionBuyer);
-			launchTransactionRequest(ctto);
+			
+//			new CreateTransactionTransferObject(new ServerPaymentRequest(paymentRequestPayer))
+//			CreateTransactionTransferObject ctto = new CreateTransactionTransferObject(null, signedTransactionBuyer);
+//			launchTransactionRequest(ctto);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

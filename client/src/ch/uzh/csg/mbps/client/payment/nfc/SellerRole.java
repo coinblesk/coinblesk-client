@@ -12,10 +12,9 @@ import ch.uzh.csg.mbps.client.payment.nfc.CommUtils.Message;
 import ch.uzh.csg.mbps.client.payment.nfc.messages.PaymentMessage;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
+import ch.uzh.csg.mbps.customserialization.security.KeyHandler;
 import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
-import ch.uzh.csg.mbps.util.KeyHandler;
-import ch.uzh.csg.mbps.util.Serializer;
 
 /**
  * This class handles the messages coming from the buyer and returns the
@@ -79,96 +78,97 @@ public class SellerRole {
 	}
 
 	private void proceed(byte[] bytes, Handler protocolHandler) {
-		switch (state) {
-		case START:
-			try {
-				// send payment request to buyer
-				Transaction tx = TransactionHandler.requestPayment();
-				if (tx.getAmount().compareTo(BigDecimal.ZERO) == 0) {
-					Log.e(TAG, "amount is 0"); 
-					// the seller has not entered an amount or entered 0
-					state = State.END;
-					Message m = CommUtils.Message.PAYMENT_ERROR_NO_AMOUNT_ENTERED;
-					protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, m.getMessage()).sendToTarget();
-				} else {
-					Log.d(TAG, "wait for payment confirmation");
-					state = State.WAIT_FOR_PAYMENT_CONFIRMATION;
-					PaymentMessage pm = new PaymentMessage(PaymentMessage.PROCEED, Serializer.serialize(tx));
-					Message m = CommUtils.Message.PAYMENT_TRANSCEIVE_PACKET;
-					protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, pm).sendToTarget();
-				}
-			} catch (Exception e) {
-				Log.e(TAG, "exception in START", e);
-				handleUnexpectedError(protocolHandler);
-			}
-			break;
-		case WAIT_FOR_PAYMENT_CONFIRMATION:
-			try {
-				SignedObject signedObjectFromByteArray = Serializer.deserialize(bytes);
-				Log.d(TAG, "sign own Payment and do Server Request (get signed transaction confirmation back)"); 
-				transactionRequest = TransactionHandler.newTransaction(signedObjectFromByteArray, protocolHandler);
-				state = State.WAIT_FOR_TRANSACTION_CONFIRMATION;
-				
-			} catch (Exception e) {
-				Log.e(TAG, "exception in WAIT_FOR_PAYMENT_CONFIRMATION", e);
-				handleUnexpectedError(protocolHandler);
-			}
-			break;
-		case WAIT_FOR_TRANSACTION_CONFIRMATION:
-			Log.d(TAG, "getting the response from the server");
-			String s = new String(bytes);
-			if (s.startsWith(CommUtils.Message.PAYMENT_ERROR_SERVER_REFUSED.getMessage())) {
-				Log.e(TAG, "server refused payment");
-				state = State.END;
-				Message m = CommUtils.Message.PAYMENT_ERROR_SERVER_REFUSED;
-				String errMsg = s.substring(CommUtils.Message.PAYMENT_ERROR_SERVER_REFUSED.getMessage().length());
-				protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, errMsg).sendToTarget();
-				break;
-			}
-			
-			try {
-				CreateTransactionTransferObject ctto = Serializer.deserialize(bytes);
-				
-				SignedObject signedForSeller = ctto.getSellerSignedObject();
-				PublicKey serverPublicKey = KeyHandler.decodePublicKey(ClientController.getServerPublicKey());
-				
-				boolean verified = KeyHandler.verifyObject(signedForSeller, serverPublicKey);
-				Transaction tx = KeyHandler.retrieveTransaction(signedForSeller);
-				
-				if (verified && tx.equals(transactionRequest)) {
-					state = State.WAIT_FOR_TRANSACTION_ACKNOWLEDGEMENT;
-					
-					PaymentMessage pm = new PaymentMessage(PaymentMessage.PROCEED, Serializer.serialize(ctto.getBuyerSignedObject()));
-					Message m = CommUtils.Message.PAYMENT_TRANSCEIVE_PACKET;
-					protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, pm).sendToTarget();
-					
-					//TOOD: not sure if needed at all. 
-					CatchAckMsgLostTask checkerTask = new CatchAckMsgLostTask(protocolHandler);
-					Thread t = new Thread(checkerTask);
-					t.start();
-					Log.d(TAG, "verified");
-				} else {
-					Log.e(TAG, "verification failed");
-					handleUnexpectedError(protocolHandler);
-				}
-			} catch (Exception e) {
-				Log.e(TAG, "exception in WAIT_FOR_TRANSACTION_CONFIRMATION", e);
-				handleUnexpectedError(protocolHandler);
-			}
-			break;
-		case WAIT_FOR_TRANSACTION_ACKNOWLEDGEMENT:
-			//from buyer
-			Log.d(TAG, "got ack "+ bytes.length);
-			if(Arrays.equals(bytes, "ACK".getBytes())) {
-				state = State.END;
-				Message m = CommUtils.Message.PAYMENT_SUCCESS_SELLER;
-				protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
-			}
-			break;
-		case END:
-			Log.d(TAG, "nothing to do, move along");
-			break;
-		}
+		//TODO jeton: refactor
+//		switch (state) {
+//		case START:
+//			try {
+//				// send payment request to buyer
+//				Transaction tx = TransactionHandler.requestPayment();
+//				if (tx.getAmount().compareTo(BigDecimal.ZERO) == 0) {
+//					Log.e(TAG, "amount is 0"); 
+//					// the seller has not entered an amount or entered 0
+//					state = State.END;
+//					Message m = CommUtils.Message.PAYMENT_ERROR_NO_AMOUNT_ENTERED;
+//					protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, m.getMessage()).sendToTarget();
+//				} else {
+//					Log.d(TAG, "wait for payment confirmation");
+//					state = State.WAIT_FOR_PAYMENT_CONFIRMATION;
+//					PaymentMessage pm = new PaymentMessage(PaymentMessage.PROCEED, Serializer.serialize(tx));
+//					Message m = CommUtils.Message.PAYMENT_TRANSCEIVE_PACKET;
+//					protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, pm).sendToTarget();
+//				}
+//			} catch (Exception e) {
+//				Log.e(TAG, "exception in START", e);
+//				handleUnexpectedError(protocolHandler);
+//			}
+//			break;
+//		case WAIT_FOR_PAYMENT_CONFIRMATION:
+//			try {
+//				SignedObject signedObjectFromByteArray = Serializer.deserialize(bytes);
+//				Log.d(TAG, "sign own Payment and do Server Request (get signed transaction confirmation back)"); 
+//				transactionRequest = TransactionHandler.newTransaction(signedObjectFromByteArray, protocolHandler);
+//				state = State.WAIT_FOR_TRANSACTION_CONFIRMATION;
+//				
+//			} catch (Exception e) {
+//				Log.e(TAG, "exception in WAIT_FOR_PAYMENT_CONFIRMATION", e);
+//				handleUnexpectedError(protocolHandler);
+//			}
+//			break;
+//		case WAIT_FOR_TRANSACTION_CONFIRMATION:
+//			Log.d(TAG, "getting the response from the server");
+//			String s = new String(bytes);
+//			if (s.startsWith(CommUtils.Message.PAYMENT_ERROR_SERVER_REFUSED.getMessage())) {
+//				Log.e(TAG, "server refused payment");
+//				state = State.END;
+//				Message m = CommUtils.Message.PAYMENT_ERROR_SERVER_REFUSED;
+//				String errMsg = s.substring(CommUtils.Message.PAYMENT_ERROR_SERVER_REFUSED.getMessage().length());
+//				protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, errMsg).sendToTarget();
+//				break;
+//			}
+//			
+//			try {
+//				CreateTransactionTransferObject ctto = Serializer.deserialize(bytes);
+//				
+//				SignedObject signedForSeller = ctto.getSellerSignedObject();
+//				PublicKey serverPublicKey = KeyHandler.decodePublicKey(ClientController.getServerPublicKey());
+//				
+//				boolean verified = KeyHandler.verifyObject(signedForSeller, serverPublicKey);
+//				Transaction tx = KeyHandler.retrieveTransaction(signedForSeller);
+//				
+//				if (verified && tx.equals(transactionRequest)) {
+//					state = State.WAIT_FOR_TRANSACTION_ACKNOWLEDGEMENT;
+//					
+//					PaymentMessage pm = new PaymentMessage(PaymentMessage.PROCEED, Serializer.serialize(ctto.getBuyerSignedObject()));
+//					Message m = CommUtils.Message.PAYMENT_TRANSCEIVE_PACKET;
+//					protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, pm).sendToTarget();
+//					
+//					//TOOD: not sure if needed at all. 
+//					CatchAckMsgLostTask checkerTask = new CatchAckMsgLostTask(protocolHandler);
+//					Thread t = new Thread(checkerTask);
+//					t.start();
+//					Log.d(TAG, "verified");
+//				} else {
+//					Log.e(TAG, "verification failed");
+//					handleUnexpectedError(protocolHandler);
+//				}
+//			} catch (Exception e) {
+//				Log.e(TAG, "exception in WAIT_FOR_TRANSACTION_CONFIRMATION", e);
+//				handleUnexpectedError(protocolHandler);
+//			}
+//			break;
+//		case WAIT_FOR_TRANSACTION_ACKNOWLEDGEMENT:
+//			//from buyer
+//			Log.d(TAG, "got ack "+ bytes.length);
+//			if(Arrays.equals(bytes, "ACK".getBytes())) {
+//				state = State.END;
+//				Message m = CommUtils.Message.PAYMENT_SUCCESS_SELLER;
+//				protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
+//			}
+//			break;
+//		case END:
+//			Log.d(TAG, "nothing to do, move along");
+//			break;
+//		}
 	}
 	
 	private void handleUnexpectedError(Handler protocolHandler) {

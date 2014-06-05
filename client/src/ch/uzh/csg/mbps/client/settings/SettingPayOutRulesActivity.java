@@ -203,8 +203,8 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements
 	
 	public void onTaskComplete(CustomResponseObject response) {
 		if (response.isSuccessful()) {
-			if (response.getPorto() != null) {
-				responseComplete(response.getPorto());
+			if (response.getPayOutRulesTO() != null) {
+				responseComplete(response.getPayOutRulesTO());
 			} else if (response.getMessage().equals(CREATION_SUCCESS)) {
 				createRuleView.setText("");
 				launchPayOutRuleGetRequest();

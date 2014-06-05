@@ -13,12 +13,11 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.TransactionRequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
+import ch.uzh.csg.mbps.customserialization.ServerPaymentResponse;
 import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
-import ch.uzh.csg.mbps.util.KeyHandler;
-import ch.uzh.csg.mbps.util.Serializer;
 
 /**
  * This is a helper class to handle the transactions initialization and
@@ -67,13 +66,16 @@ public class TransactionHandler {
 	 * @throws Exception
 	 */
 	public static SignedObject signPayment(Transaction tx) throws IllegalArgumentException, Exception {
+		//TODO jeton: this is not needed here! remove!
 		if (tx.getAmount() == null || tx.getSellerUsername() == null || tx.getSellerUsername().isEmpty())
 			throw new IllegalArgumentException();
 		
 		UserAccount user = ClientController.getUser();
 		tx.setBuyerUsername(user.getUsername());
 		tx.setTransactionNrBuyer(user.getTransactionNumber());
-		return KeyHandler.signTransaction(tx, user.getPrivateKey());
+//		return KeyHandler.signTransaction(tx, user.getPrivateKey());
+		
+		return null;
 	}
 	
 	/**
@@ -93,20 +95,22 @@ public class TransactionHandler {
 	 * @throws Exception
 	 */
 	public static Transaction newTransaction(SignedObject signedTransactionBuyer, Handler responseHandler) throws Exception {
-		Transaction transactionBuyer = KeyHandler.retrieveTransaction(signedTransactionBuyer);
-		
-		Transaction transactionSeller = requestPayment();
-		transactionSeller.setBuyerUsername(transactionBuyer.getBuyerUsername());
-		transactionSeller.setTransactionNrBuyer(transactionBuyer.getTransactionNrBuyer());
-		
-		SignedObject signedTransaction = KeyHandler.signTransaction(transactionSeller, ClientController.getUser().getPrivateKey());
-		CreateTransactionTransferObject ctto = new CreateTransactionTransferObject(signedTransactionBuyer, signedTransaction);
-		
-		responseListener = new ServerResponseListener(responseHandler);
-		//send Transaction to Server
-		launchRequest(ctto);
-		
-		return transactionSeller;
+		//TODO jeton: implement
+//		Transaction transactionBuyer = KeyHandler.retrieveTransaction(signedTransactionBuyer);
+//		
+//		Transaction transactionSeller = requestPayment();
+//		transactionSeller.setBuyerUsername(transactionBuyer.getBuyerUsername());
+//		transactionSeller.setTransactionNrBuyer(transactionBuyer.getTransactionNrBuyer());
+//		
+//		SignedObject signedTransaction = KeyHandler.signTransaction(transactionSeller, ClientController.getUser().getPrivateKey());
+//		CreateTransactionTransferObject ctto = new CreateTransactionTransferObject(signedTransactionBuyer, signedTransaction);
+//		
+//		responseListener = new ServerResponseListener(responseHandler);
+//		//send Transaction to Server
+//		launchRequest(ctto);
+//		
+//		return transactionSeller;
+		return null;
 	}
 
 	private static void launchRequest(CreateTransactionTransferObject ctto) {
@@ -127,9 +131,11 @@ public class TransactionHandler {
 		
 		public void onTaskComplete(CustomResponseObject response) {
 			try {
+				ServerPaymentResponse serverPaymentResponse = response.getCreateTransactionTO().getServerPaymentResponse();
+				
 				PaymentMessage pm;
 				if (response.isSuccessful())
-					pm = new PaymentMessage(PaymentMessage.PROCEED, Serializer.serialize(response.getCreateTransactionTO()));
+					pm = new PaymentMessage(PaymentMessage.PROCEED, serverPaymentResponse.encode());
 				else
 					pm = new PaymentMessage(PaymentMessage.PROCEED, (CommUtils.Message.PAYMENT_ERROR_SERVER_REFUSED.getMessage()+response.getMessage()).getBytes());
 				
