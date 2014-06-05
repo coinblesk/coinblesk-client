@@ -36,12 +36,12 @@ public abstract class AbstractPaymentActivity extends AbstractAsyncActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-		if (nfcAdapter == null) {
-			displayResponse(CommUtils.Message.ERROR_NO_NFC_MSG.getMessage());
-			finish();
-			return;
-		} 
+//		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+//		if (nfcAdapter == null) {
+//			displayResponse(CommUtils.Message.ERROR_NO_NFC_MSG.getMessage());
+//			finish();
+//			return;
+//		} 
 	}
 	
 	@Override
@@ -52,39 +52,39 @@ public abstract class AbstractPaymentActivity extends AbstractAsyncActivity {
 		 * If nfc is not enabled, the user receives the prompt to enable nfc.
 		 * Then, onStart is called again and the else-branch is called.
 		 */
-		if (!nfcAdapter.isEnabled()) {
-			if (!requestedToActivateNfc) {
-				displayResponse(CommUtils.Message.ACTIVATE_NFC_MSG.getMessage());
-				startActivity(new Intent(android.provider.Settings.ACTION_NFC_SETTINGS));
-				requestedToActivateNfc = true;
-			} else {
-				displayResponse(CommUtils.Message.ERROR_NFC_NOT_ACTIVATED_MSG.getMessage());
-				finish();
-			}
-		} else {
-			/*
-			 * The seller acts as the nfc reader, while the buyer acts as the
-			 * emulated tag. This distinction is needed to enable the p2p nfc
-			 * communicaiton.
-			 */
-			if (isSeller) {
-				if (nfcTransceiver == null)
-					nfcTransceiver = NfcTransceiver.getInstance(handler, this);
-			} else {
-				if (!hceServiceInitialized) {
-					CustomHostApduService.init(handler, this);
-					hceServiceInitialized = true;
-				}
-			}
-		}
+//		if (!nfcAdapter.isEnabled()) {
+//			if (!requestedToActivateNfc) {
+//				displayResponse(CommUtils.Message.ACTIVATE_NFC_MSG.getMessage());
+//				startActivity(new Intent(android.provider.Settings.ACTION_NFC_SETTINGS));
+//				requestedToActivateNfc = true;
+//			} else {
+//				displayResponse(CommUtils.Message.ERROR_NFC_NOT_ACTIVATED_MSG.getMessage());
+//				finish();
+//			}
+//		} else {
+//			/*
+//			 * The seller acts as the nfc reader, while the buyer acts as the
+//			 * emulated tag. This distinction is needed to enable the p2p nfc
+//			 * communicaiton.
+//			 */
+//			if (isSeller) {
+//				if (nfcTransceiver == null)
+//					nfcTransceiver = NfcTransceiver.getInstance(handler, this);
+//			} else {
+//				if (!hceServiceInitialized) {
+//					CustomHostApduService.init(handler, this);
+//					hceServiceInitialized = true;
+//				}
+//			}
+//		}
 	}
 	
 	@Override
 	public void onResume() {
 		super.onResume();
 		
-		if (isSeller)
-			nfcTransceiver.enable(this, nfcAdapter);
+//		if (isSeller)
+//			nfcTransceiver.enable(this, nfcAdapter);
 	}
 	
 	@Override
@@ -97,8 +97,8 @@ public abstract class AbstractPaymentActivity extends AbstractAsyncActivity {
 	public void onPause() {
 		super.onPause();
 		
-		if (isSeller)
-			nfcTransceiver.disable(this, nfcAdapter);
+//		if (isSeller)
+//			nfcTransceiver.disable(this, nfcAdapter);
 	}
 	
 	/**
