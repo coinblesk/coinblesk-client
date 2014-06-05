@@ -1,13 +1,8 @@
 package ch.uzh.csg.mbps.client.util;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.model.UserAccount;
 
