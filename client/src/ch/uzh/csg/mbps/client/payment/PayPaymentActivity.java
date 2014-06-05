@@ -19,7 +19,6 @@ import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
-import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
 /**
@@ -158,25 +157,26 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 		}
 	}
 	
-	@Override
-	protected void updateGUI(Transaction tx) {
-		CurrencyViewHandler.setBTC(resultTextView, tx.getAmount(), getApplicationContext());
-		
-		if (exchangeRate == null || exchangeRate.compareTo(BigDecimal.ZERO) == 0) {
-			resultTextViewCHF.setText("- CHF");
-		} else {
-			CurrencyViewHandler.setToCHF(resultTextViewCHF, exchangeRate, tx.getAmount());
-		}
-		sellerUsername.setText(tx.getSellerUsername());
-		
-		if (acceptPaymentAutomatically) {
-			getHCEService().setUserDecision(true);
-			disableButtons();
-		} else {
-			acceptBtn.setEnabled(true);
-			rejectBtn.setEnabled(true);
-		}
-	}
+	//TODO: refactor, since no Transaction model class anymore
+//	@Override
+//	protected void updateGUI(Transaction tx) {
+//		CurrencyViewHandler.setBTC(resultTextView, tx.getAmount(), getApplicationContext());
+//		
+//		if (exchangeRate == null || exchangeRate.compareTo(BigDecimal.ZERO) == 0) {
+//			resultTextViewCHF.setText("- CHF");
+//		} else {
+//			CurrencyViewHandler.setToCHF(resultTextViewCHF, exchangeRate, tx.getAmount());
+//		}
+//		sellerUsername.setText(tx.getSellerUsername());
+//		
+//		if (acceptPaymentAutomatically) {
+//			getHCEService().setUserDecision(true);
+//			disableButtons();
+//		} else {
+//			acceptBtn.setEnabled(true);
+//			rejectBtn.setEnabled(true);
+//		}
+//	}
 	
 	@Override
 	protected void resetGUI() {

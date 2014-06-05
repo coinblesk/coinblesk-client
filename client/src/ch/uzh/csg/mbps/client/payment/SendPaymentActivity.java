@@ -45,7 +45,6 @@ import ch.uzh.csg.mbps.client.util.AddressBookUtility;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
-import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
@@ -289,25 +288,26 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 	public void createTransaction(){
 		//TODO simon: refactor after jeton updated transaction handling
-		Transaction transaction = new Transaction();
-		transaction.setAmount(amountBTC);
-		transaction.setAmountInputCurrency(inputUnitValue);
-		transaction.setBuyerUsername(ClientController.getUser().getUsername());
-		String receiverUsername = receiverUsernameEditText.getText().toString();
-		transaction.setSellerUsername(receiverUsername);
-		transaction.setInputCurrency(Constants.inputUnit);
-		
-		SignedObject signedTransactionBuyer;
-		try {
-			//TODO simon: adapt TransactionHandler etc
-			signedTransactionBuyer = TransactionHandler.signPayment(transaction);
-			
-//			new CreateTransactionTransferObject(new ServerPaymentRequest(paymentRequestPayer))
-//			CreateTransactionTransferObject ctto = new CreateTransactionTransferObject(null, signedTransactionBuyer);
-//			launchTransactionRequest(ctto);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		//TODO: refactor, since no Transaction model class anymore
+//		Transaction transaction = new Transaction();
+//		transaction.setAmount(amountBTC);
+//		transaction.setAmountInputCurrency(inputUnitValue);
+//		transaction.setBuyerUsername(ClientController.getUser().getUsername());
+//		String receiverUsername = receiverUsernameEditText.getText().toString();
+//		transaction.setSellerUsername(receiverUsername);
+//		transaction.setInputCurrency(Constants.inputUnit);
+//		
+//		SignedObject signedTransactionBuyer;
+//		try {
+//			//TODO simon: adapt TransactionHandler etc
+//			signedTransactionBuyer = TransactionHandler.signPayment(transaction);
+//			
+////			new CreateTransactionTransferObject(new ServerPaymentRequest(paymentRequestPayer))
+////			CreateTransactionTransferObject ctto = new CreateTransactionTransferObject(null, signedTransactionBuyer);
+////			launchTransactionRequest(ctto);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	/**

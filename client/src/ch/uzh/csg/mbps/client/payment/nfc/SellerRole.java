@@ -13,7 +13,6 @@ import ch.uzh.csg.mbps.client.payment.nfc.messages.PaymentMessage;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.customserialization.security.KeyHandler;
-import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 
 /**
@@ -33,7 +32,8 @@ public class SellerRole {
 	
 	private State state;
 	
-	private Transaction transactionRequest;
+	//TODO: refactor, since no Transaction model class anymore
+//	private Transaction transactionRequest;
 	
 	private static final String TAG = "SellerRole";
 	
@@ -219,7 +219,8 @@ public class SellerRole {
 			Log.d(TAG, "late send success");
 			state = State.END;
 			Message m = CommUtils.Message.PAYMENT_SUCCESS_SELLER;
-			protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
+			//TODO: refactor, since no Transaction model class anymore
+//			protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
 		}
 	}
 	

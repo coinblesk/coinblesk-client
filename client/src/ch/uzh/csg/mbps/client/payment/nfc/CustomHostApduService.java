@@ -21,7 +21,6 @@ import ch.uzh.csg.mbps.client.payment.nfc.transceiver.SequenceNumberGenerator;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
-import ch.uzh.csg.mbps.model.Transaction;
 
 /**
  * This is the card emulation service. In order to be notified by the Android OS
@@ -324,10 +323,11 @@ public class CustomHostApduService extends HostApduService {
 					reset();
 				} else if (msg.arg1 == CommUtils.Message.PAYMENT_SUCCESS_BUYER.getCode()) {
 					Log.d(TAG, "PAYMENT_SUCCESS_BUYER");
-					Transaction tx = (Transaction) msg.obj;
-					ClientController.updateUserAfterTransaction(IS_SELLER, tx, activity.getApplicationContext());
-					String s = String.format(CommUtils.Message.PAYMENT_SUCCESS_BUYER.getMessage(), CurrencyFormatter.formatBTC(tx.getAmount()), tx.getSellerUsername());
-					guiHandler.obtainMessage(msg.what, msg.arg1, msg.arg2, s).sendToTarget();
+					//TODO: refactor, since no Transaction model class anymore
+//					Transaction tx = (Transaction) msg.obj;
+//					ClientController.updateUserAfterTransaction(IS_SELLER, tx, activity.getApplicationContext());
+//					String s = String.format(CommUtils.Message.PAYMENT_SUCCESS_BUYER.getMessage(), CurrencyFormatter.formatBTC(tx.getAmount()), tx.getSellerUsername());
+//					guiHandler.obtainMessage(msg.what, msg.arg1, msg.arg2, s).sendToTarget();
 					reset();
 				} else if (msg.arg1 == CommUtils.Message.PAYMENT_ERROR_BUYER_REJECTED.getCode()) {
 					Log.e(TAG, "PAYMENT_ERROR_BUYER_REJECTED");

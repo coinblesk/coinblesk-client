@@ -18,7 +18,6 @@ import ch.uzh.csg.mbps.client.payment.nfc.messages.PaymentMessage;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
-import ch.uzh.csg.mbps.model.Transaction;
 
 import com.acs.smartcard.Reader;
 
@@ -181,10 +180,11 @@ public abstract class NfcTransceiver {
 					Log.d(TAG, "got PAYMENT_TRANSCEIVE_PACKET");
 					write(pm);
 				} else if (msg.arg1 == CommUtils.Message.PAYMENT_SUCCESS_SELLER.getCode()) {
-					Transaction tx = (Transaction) msg.obj;
-					ClientController.updateUserAfterTransaction(isSeller, tx, context);
-					String s1 = String.format(CommUtils.Message.PAYMENT_SUCCESS_SELLER.getMessage(), CurrencyFormatter.formatBTC(tx.getAmount()), tx.getBuyerUsername());
-					guiHandler.obtainMessage(msg.what, msg.arg1, msg.arg2, s1).sendToTarget();
+					//TODO: refactor, since no Transaction model class anymore
+//					Transaction tx = (Transaction) msg.obj;
+//					ClientController.updateUserAfterTransaction(isSeller, tx, context);
+//					String s1 = String.format(CommUtils.Message.PAYMENT_SUCCESS_SELLER.getMessage(), CurrencyFormatter.formatBTC(tx.getAmount()), tx.getBuyerUsername());
+//					guiHandler.obtainMessage(msg.what, msg.arg1, msg.arg2, s1).sendToTarget();
 					Log.d(TAG, "success");
 					reset(true);
 				} else if (msg.arg1 == CommUtils.Message.PAYMENT_OTHERDEVICE_UNEXPECTED.getCode()) {

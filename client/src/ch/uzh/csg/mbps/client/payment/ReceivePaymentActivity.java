@@ -34,7 +34,6 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
-import ch.uzh.csg.mbps.model.Transaction;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
 /**
@@ -210,10 +209,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		});
 	}
 
-	@Override
-	protected void updateGUI(Transaction tx) {
-		//nothing to update on the seller side
-	}
+	//TODO: refactor, since no Transaction model class anymore
+//	@Override
+//	protected void updateGUI(Transaction tx) {
+//		//nothing to update on the seller side
+//	}
 	
 	@Override
 	protected void resetGUI() {

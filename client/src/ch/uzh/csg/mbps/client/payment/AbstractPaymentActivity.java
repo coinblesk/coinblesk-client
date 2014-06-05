@@ -12,7 +12,6 @@ import ch.uzh.csg.mbps.client.payment.nfc.CommUtils;
 import ch.uzh.csg.mbps.client.payment.nfc.CustomHostApduService;
 import ch.uzh.csg.mbps.client.payment.nfc.transceiver.NfcTransceiver;
 import ch.uzh.csg.mbps.client.util.CustomDialogFragment;
-import ch.uzh.csg.mbps.model.Transaction;
 
 /**
  * This is the abstract base class of the payment activities (receive and pay).
@@ -106,14 +105,15 @@ public abstract class AbstractPaymentActivity extends AbstractAsyncActivity {
 	 */
 	protected abstract void resetGUI();
 	
-	/**
-	 * Update the UI to show the transaction details before the transaction is
-	 * agreed on to be executed.
-	 * 
-	 * @param tx
-	 *            The transaction to be executed.
-	 */
-	protected abstract void updateGUI(Transaction tx);
+	//TODO: refactor, since no Transaction model class anymore
+//	/**
+//	 * Update the UI to show the transaction details before the transaction is
+//	 * agreed on to be executed.
+//	 * 
+//	 * @param tx
+//	 *            The transaction to be executed.
+//	 */
+//	protected abstract void updateGUI(Transaction tx);
 	
 	protected abstract void launchRequest();
 	
@@ -166,7 +166,8 @@ public abstract class AbstractPaymentActivity extends AbstractAsyncActivity {
 				} else if (msg.arg1 == CommUtils.Message.PAYMENT_ERROR_BUYER_REJECTED.getCode()) {
 					resetGUI();
 				} else if (msg.arg1 == CommUtils.Message.PAYMENT_UPDATE_GUI_AMOUNT.getCode()) {
-					updateGUI((Transaction) msg.obj);
+					//TODO: refactor, since no Transaction model class anymore
+//					updateGUI((Transaction) msg.obj);
 					break;
 				} else if (msg.arg1 == CommUtils.Message.PAYMENT_SUCCESS_SELLER.getCode() || msg.arg1 == CommUtils.Message.PAYMENT_SUCCESS_BUYER.getCode()) {
 					showDialogAndClearOlderOne(getResources().getString(R.string.payment_success), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), (String) msg.obj);

@@ -11,7 +11,6 @@ import ch.uzh.csg.mbps.client.payment.nfc.messages.PaymentMessage;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
 import ch.uzh.csg.mbps.customserialization.security.KeyHandler;
-import ch.uzh.csg.mbps.model.Transaction;
 
 /**
  * This class handles the messages coming from the seller and returns the
@@ -31,7 +30,8 @@ public class BuyerRole {
 	
 	private State state; 
 	
-	private Transaction transactionRequest;
+	//TODO: refactor, since no Transaction model class anymore
+//	private Transaction transactionRequest;
 	
 	public BuyerRole() {
 		this.state = State.START;
