@@ -10,7 +10,6 @@ import ch.uzh.csg.mbps.client.payment.nfc.CommUtils.Message;
 import ch.uzh.csg.mbps.client.payment.nfc.messages.PaymentMessage;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
-import ch.uzh.csg.mbps.customserialization.security.KeyHandler;
 
 /**
  * This class handles the messages coming from the seller and returns the

@@ -12,7 +12,6 @@ import ch.uzh.csg.mbps.client.payment.nfc.CommUtils.Message;
 import ch.uzh.csg.mbps.client.payment.nfc.messages.PaymentMessage;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
-import ch.uzh.csg.mbps.customserialization.security.KeyHandler;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 
 /**

@@ -1,8 +1,7 @@
 package ch.uzh.csg.mbps.client.payment.nfc.transceiver;
 
 import java.util.ArrayList;
-
-import org.apache.commons.lang3.ArrayUtils;
+import java.util.Arrays;
 
 import ch.uzh.csg.mbps.client.payment.nfc.messages.NfcMessage;
 
@@ -50,7 +49,7 @@ public class NfcMessageSplitter {
 		
 		for (int i=0; i<totalNofMessagesToSend; i++) {
 			int start = i*payloadPerFragment;
-			byte[] temp = ArrayUtils.subarray(payload, start, start+payloadPerFragment);
+			byte[] temp = Arrays.copyOfRange(payload, start, start+payloadPerFragment);
 			byte status = (i < (totalNofMessagesToSend-1)) ? NfcMessage.HAS_MORE_FRAGMENTS : NfcMessage.DEFAULT;
 			list.add(new NfcMessage(status, SequenceNumberGenerator.getNextSequenceNumber(), temp));
 		}

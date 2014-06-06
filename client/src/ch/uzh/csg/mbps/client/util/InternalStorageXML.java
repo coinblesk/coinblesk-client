@@ -70,23 +70,24 @@ public class InternalStorageXML{
 		// close tag: </balance>
 		xmlSerializer.endTag("", "balance");
  
-			// open tag: <transaction_nr>
-		xmlSerializer.startTag("", "transaction_nr");
-		xmlSerializer.text(String.valueOf(user.getTransactionNumber()));
-		// close tag: </transaction_nr>
-		xmlSerializer.endTag("", "transaction_nr");
-		
-		// open tag: <private_key>
-		xmlSerializer.startTag("", "private_key");
-		xmlSerializer.text(user.getPrivateKey());
-		// close tag: </private_key>
-		xmlSerializer.endTag("", "private_key");
- 
-			// open tag: <public_key>
-		xmlSerializer.startTag("", "public_key");
-		xmlSerializer.text(user.getPublicKey());
-		// close tag: </public_key>
-		xmlSerializer.endTag("", "public_key");
+		//TODO jeton: remove!
+//			// open tag: <transaction_nr>
+//		xmlSerializer.startTag("", "transaction_nr");
+//		xmlSerializer.text(String.valueOf(user.getTransactionNumber()));
+//		// close tag: </transaction_nr>
+//		xmlSerializer.endTag("", "transaction_nr");
+//		
+//		// open tag: <private_key>
+//		xmlSerializer.startTag("", "private_key");
+//		xmlSerializer.text(user.getPrivateKey());
+//		// close tag: </private_key>
+//		xmlSerializer.endTag("", "private_key");
+// 
+//			// open tag: <public_key>
+//		xmlSerializer.startTag("", "public_key");
+//		xmlSerializer.text(user.getPublicKey());
+//		// close tag: </public_key>
+//		xmlSerializer.endTag("", "public_key");
 
 		// open tag: <payment_address>
 		xmlSerializer.startTag("", "payment_address");
@@ -229,16 +230,17 @@ public class InternalStorageXML{
 		Document xmlInput = null;
 		UserAccount user = null;
 		try {
+			//TODO jeton: edit!!
 			xmlInput = loadXMLFromString(text);
 			if (Double.valueOf(xmlInput.getElementsByTagName("balance").item(0).getTextContent()) > -1
 					&& Integer.valueOf(xmlInput.getElementsByTagName("transaction_nr").item(0).getTextContent()) > -1) {
 				user = new UserAccount();
 				user.setId(Long.parseLong(xmlInput.getElementsByTagName("id").item(0).getTextContent()));
 				user.setBalance(new BigDecimal(xmlInput.getElementsByTagName("balance").item(0).getTextContent()));
-				user.setTransactionNumber(Long.parseLong(xmlInput.getElementsByTagName("transaction_nr").item(0).getTextContent()));
+//				user.setTransactionNumber(Long.parseLong(xmlInput.getElementsByTagName("transaction_nr").item(0).getTextContent()));
 				user.setPassword(password);
-				user.setPrivateKey(xmlInput.getElementsByTagName("private_key").item(0).getTextContent());
-				user.setPublicKey(xmlInput.getElementsByTagName("public_key").item(0).getTextContent());
+//				user.setPrivateKey(xmlInput.getElementsByTagName("private_key").item(0).getTextContent());
+//				user.setPublicKey(xmlInput.getElementsByTagName("public_key").item(0).getTextContent());
 				user.setPaymentAddress(xmlInput.getElementsByTagName("payment_address").item(0).getTextContent());
 				user.setEmail("");
 				user.setUsername("");

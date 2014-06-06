@@ -2,7 +2,6 @@ package ch.uzh.csg.mbps.client.util;
 
 import java.io.StringReader;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.spec.KeySpec;
 
 import javax.crypto.Cipher;
@@ -14,7 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.encoders.Base64;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -32,10 +31,6 @@ public class InternalStorageSecurityUtils {
 	private static final int KEY_LENGTH = 256;
 	private static final int SALT_LENGTH = KEY_LENGTH / 8;
 	private static SecureRandom random = new SecureRandom();
-	
-	static {
-		Security.addProvider(new BouncyCastleProvider());
-	}
 	
 	/**
 	 * Encrypts the user informations. The key which is used to encrypt the user
@@ -62,9 +57,9 @@ public class InternalStorageSecurityUtils {
         cipher.init(Cipher.ENCRYPT_MODE, key, ivParams);
         byte[] cipherText = cipher.doFinal(xmltext.getBytes("UTF-8"));
         
-        byte[] saltByte = org.bouncycastle.util.encoders.Base64.encode(salt);
-        byte[] ivByte = org.bouncycastle.util.encoders.Base64.encode(iv);
-        byte[] cipherTextBytes = org.bouncycastle.util.encoders.Base64.encode(cipherText);
+        byte[] saltByte = Base64.encode(salt);
+        byte[] ivByte = Base64.encode(iv);
+        byte[] cipherTextBytes = Base64.encode(cipherText);
         
         if (salt != null) {
             return String.format("%s%s%s%s%s", new String(saltByte), DELIMITER, new String(ivByte), DELIMITER, new String(cipherTextBytes));
@@ -90,9 +85,9 @@ public class InternalStorageSecurityUtils {
 	        return null;
 	    
 	    try {
-	        byte[] salt = org.bouncycastle.util.encoders.Base64.decode(fields[0]);
-	        byte[] iv = org.bouncycastle.util.encoders.Base64.decode(fields[1]);
-	        byte[] cipherBytes = org.bouncycastle.util.encoders.Base64.decode(fields[2]);
+	        byte[] salt = Base64.decode(fields[0]);
+	        byte[] iv = Base64.decode(fields[1]);
+	        byte[] cipherBytes = Base64.decode(fields[2]);
   
 	        SecretKey key = getKey(salt, password);
 	        Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM, "BC");
