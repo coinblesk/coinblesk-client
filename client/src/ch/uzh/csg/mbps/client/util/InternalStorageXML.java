@@ -22,10 +22,10 @@ import android.util.Xml;
 import ch.uzh.csg.mbps.model.UserAccount;
 
 /**
- * This class is used to store / read a xml format of the user information's
+ * This class is used to store / read a xml format of the user information
  * from the internal storage.
  */
-public class InternalStorageXML{
+public class InternalStorageXML {
 
 	public static String createUsingXMLSerializer() throws Exception {
 		XmlSerializer xmlSerializer = Xml.newSerializer();
@@ -58,7 +58,7 @@ public class InternalStorageXML{
 		xmlSerializer.startTag("", "user_account");
 		xmlSerializer.attribute("", "identifier", "mbps_client");		
  
-			//open tag: <id>
+		// open tag: <id>
 		xmlSerializer.startTag("", "id");
 		xmlSerializer.text(String.valueOf(user.getId()));
 		// close tag: </id>
@@ -70,13 +70,13 @@ public class InternalStorageXML{
 		// close tag: </balance>
 		xmlSerializer.endTag("", "balance");
  
+		// open tag: <payment_address>
+		xmlSerializer.startTag("", "payment_address");
+		xmlSerializer.text(user.getPaymentAddress());
+		// close tag: </payment_address>
+		xmlSerializer.endTag("", "payment_address");
+		
 		//TODO jeton: remove!
-//			// open tag: <transaction_nr>
-//		xmlSerializer.startTag("", "transaction_nr");
-//		xmlSerializer.text(String.valueOf(user.getTransactionNumber()));
-//		// close tag: </transaction_nr>
-//		xmlSerializer.endTag("", "transaction_nr");
-//		
 //		// open tag: <private_key>
 //		xmlSerializer.startTag("", "private_key");
 //		xmlSerializer.text(user.getPrivateKey());
@@ -89,16 +89,11 @@ public class InternalStorageXML{
 //		// close tag: </public_key>
 //		xmlSerializer.endTag("", "public_key");
 
-		// open tag: <payment_address>
-		xmlSerializer.startTag("", "payment_address");
-		xmlSerializer.text(user.getPaymentAddress());
-		// close tag: </payment_address>
-		xmlSerializer.endTag("", "payment_address");
 		
 		// close tag: </user_account>
 		xmlSerializer.endTag("", "user_account");
- 
-			xmlSerializer.endDocument();
+		
+		xmlSerializer.endDocument();
 	    return writer.toString();
 	}
 	
@@ -108,7 +103,7 @@ public class InternalStorageXML{
 	 * 
 	 * @param context
 	 *            The conatext of the current view (activity).
-	 * @return Returns true if the process was successes.
+	 * @return Returns true if the process was successful.
 	 */
 	public static boolean writeUserAccountIntoFile(Context context){
 		BufferedWriter writer = null;
@@ -143,7 +138,7 @@ public class InternalStorageXML{
 	 *            The public key of the server as string
 	 * @return Returns true if the process successes.
 	 */
-	public static boolean writePublicKeyIntoFile(Context context, String encodedServerPublicKey){
+	public static boolean writePublicKeyIntoFile(Context context, String encodedServerPublicKey) {
 		BufferedWriter writer = null;
 		boolean success = false;
 		

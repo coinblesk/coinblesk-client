@@ -23,8 +23,8 @@ public class TimeHandler extends HandlerThread{
 		start();
 	}
 	
-	public static TimeHandler getInstance(){
-		if(mTimeHandler == null){
+	public static TimeHandler getInstance() {
+		if (mTimeHandler == null) {
 			mTimeHandler = new TimeHandler();
 		}
 		return mTimeHandler;
@@ -33,9 +33,9 @@ public class TimeHandler extends HandlerThread{
 	/**
 	 * Sets the start time when a request to the server was successful.
 	 */
-	public void setStartTime(){
+	public void setStartTime() {
 		mStartTime = System.currentTimeMillis();
-		if(mHandler == null){
+		if (mHandler == null) {
 			mHandler = new Handler(getLooper());
 			mHandler.removeCallbacks(mUpdateTimeTask);
 			mHandler.postDelayed(mUpdateTimeTask, Constants.CLIENT_CONNECTION_TIMEOUT);
@@ -55,8 +55,8 @@ public class TimeHandler extends HandlerThread{
 	/**
 	 * Removes active runnable and sets the handler back to null.
 	 */
-	public void terminateSession(){
-		if(mHandler != null){
+	public void terminateSession() {
+		if (mHandler != null) {
 			mHandler.removeCallbacks(mUpdateTimeTask);
 			mHandler.getLooper().quit();
 			mHandler = null;
@@ -87,17 +87,17 @@ public class TimeHandler extends HandlerThread{
 	private Runnable mUpdateTimeTask = new Runnable() {
 		public void run() {
 			Long now = System.currentTimeMillis();
-			if((now-mStartTime) >= Constants.CLIENT_SESSION_TIMEOUT){
+			if ((now - mStartTime) >= Constants.CLIENT_SESSION_TIMEOUT) {
 				InternalStorageXML.writeUserAccountIntoFile(activity);
 				Intent intent = new Intent(activity, LoginActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-				intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS );
+				intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				activity.startActivity(intent);
 				ClientController.clear();
 				terminateSession();
-			}else{
+			} else {
 				mHandler.postDelayed(mUpdateTimeTask, Constants.CLIENT_CHECK_TIME_INTERVAL);
 			}
 		}

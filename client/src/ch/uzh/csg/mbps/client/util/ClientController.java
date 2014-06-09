@@ -122,5 +122,5 @@ public class ClientController {
 		user.setBalance(balance);
 		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
 	}
+	
 }
-

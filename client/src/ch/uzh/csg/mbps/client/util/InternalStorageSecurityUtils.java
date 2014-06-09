@@ -18,7 +18,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 /**
- * This class encrypts and decrypts the sensible user information's into the 
+ * This class encrypts and decrypts the sensible user information into the 
  * internal storage.
  * copied from http://stackoverflow.com/questions/14022934/android-cipher-encrypt-decrypt
  */
