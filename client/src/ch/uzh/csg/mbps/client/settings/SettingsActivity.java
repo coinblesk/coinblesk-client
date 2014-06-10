@@ -191,6 +191,7 @@ public class SettingsActivity extends PreferenceActivity {
 			addPreferencesFromResource(R.xml.pref_payment);
 			bindPreferenceSummaryToValue(findPreference("bitcoin_list"));
 			bindPreferenceSummaryToValue(findPreference("fee_amount"));
+			bindPreferenceSummaryToValue(findPreference("auto_accept_amount"));
 	    }
 	}
 
@@ -221,6 +222,7 @@ public class SettingsActivity extends PreferenceActivity {
 			PreferenceCategory fakeHeader = new PreferenceCategory(getActivity());
 			getPreferenceScreen().addPreference(fakeHeader);
 			bindPreferenceSummaryToValue(findPreference("fee_amount"));
+			bindPreferenceSummaryToValue(findPreference("auto_accept_amount"));
 		}
 	}
 

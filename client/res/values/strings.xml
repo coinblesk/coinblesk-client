@@ -274,6 +274,14 @@
     <!-- Shared Preferences -->
     <string name="sharedPreferences_isFirstTime">isFirstTime</string>
     <string name="stored_username"></string>
+    
+    <!-- Settings -->
+    <string name="settings_autoAccept_checkbox_summary">Auto accept payments for trusted payees up to defined limit</string>
+    <string name="settings_autoAccept_checkbox_title">Auto accept payments</string>
+    <string name="settings_autoAccept_editText_defaultValue">0.01</string>
+    <string name="settings_autoAccept_editText_title">Auto accept limit in Bitcoin</string>
+    
+
 
     <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
