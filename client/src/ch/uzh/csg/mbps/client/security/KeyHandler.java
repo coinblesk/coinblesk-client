@@ -21,7 +21,7 @@ import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.jce.spec.ECParameterSpec;
 
 import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
-import ch.uzh.csg.mbps.customserialization.UnknownPKIAlgorithmException;
+import ch.uzh.csg.mbps.customserialization.exceptions.UnknownPKIAlgorithmException;
 
 /**
  * The KeyHandler allows generating KeyPairs and encoding a key to base64 string
