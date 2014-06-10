@@ -77,7 +77,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 		initClickListener();
 		checkOnlineModeAndProceed();
-		
+
 	}
 
 
@@ -278,7 +278,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		history.addAll(transactionHistory);
 		history.addAll(payInTransactionHistory);
 		history.addAll(payOutTransactionHistory);
-		Collections.sort(history, new CustomComparator());
+		Collections.sort(history, Collections.reverseOrder(new CustomComparator()));
 
 		return history;
 	}
@@ -292,27 +292,28 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	private void createHistoryViews(ArrayList<AbstractHistory> history) {
 		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.mainActivity_history);
 		linearLayout.removeAllViews();
-
-		for(int i = history.size()-1;i>=history.size()-3;i--){
-			TextView tView = new TextView(getApplicationContext());
-			tView.setGravity(Gravity.LEFT);
-			tView.setTextColor(Color.BLACK);
-			int drawable = getImage(history.get(i));
-			final int historyFilterValue = getHistoryCode(history.get(i));
-			tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
-			tView.setText(history.get(i).toString());
-			tView.setClickable(true);
-			tView.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					handleAsyncTask();
-					Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-					Bundle b = new Bundle();
-					b.putInt("filter", historyFilterValue);
-					intent.putExtras(b);
-					startActivity(intent);
-				}
-			});
-			linearLayout.addView(tView);
+		for(int i = 0; i < 3; i++){
+			if(i<history.size()){
+				TextView tView = new TextView(getApplicationContext());
+				tView.setGravity(Gravity.LEFT);
+				tView.setTextColor(Color.BLACK);
+				int drawable = getImage(history.get(i));
+				final int historyFilterValue = getHistoryCode(history.get(i));
+				tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
+				tView.setText(history.get(i).toString());
+				tView.setClickable(true);
+				tView.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						handleAsyncTask();
+						Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+						Bundle b = new Bundle();
+						b.putInt("filter", historyFilterValue);
+						intent.putExtras(b);
+						startActivity(intent);
+					}
+				});
+				linearLayout.addView(tView);
+			}
 		}
 	}
 
