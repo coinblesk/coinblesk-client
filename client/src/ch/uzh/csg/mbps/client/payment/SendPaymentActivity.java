@@ -2,7 +2,6 @@ package ch.uzh.csg.mbps.client.payment;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.security.SignedObject;
 import java.util.Set;
 
 import android.app.AlertDialog;
@@ -38,6 +37,7 @@ import ch.uzh.csg.mbps.client.CurrencyViewHandler;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.MainActivity;
 import ch.uzh.csg.mbps.client.R;
+import ch.uzh.csg.mbps.client.payment.nfc.CommUtils;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.TransactionRequestTask;
@@ -45,9 +45,11 @@ import ch.uzh.csg.mbps.client.util.AddressBookUtility;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
+import ch.uzh.csg.mbps.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
+import ch.uzh.csg.mbps.util.Converter;
 
 /**
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
@@ -126,9 +128,16 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		}
 	}
 
-	protected void launchTransactionRequest(CreateTransactionTransferObject ctto) {
+	protected void launchTransactionRequest(ServerPaymentRequest serverPaymnetRequest) {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
+			CreateTransactionTransferObject ctto = null;
+			try {
+				ctto = new CreateTransactionTransferObject(serverPaymnetRequest);
+			} catch (Exception e ) {
+				// TODO simon: handle exception
+				e.printStackTrace();
+			}
 			RequestTask transactionRequest = new TransactionRequestTask(this, ctto);
 			transactionRequest.execute();
 		}
@@ -145,7 +154,13 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, ClientController.getUser().getBalance()) + ")");
 			}
 			else if (response.getType().equals(Type.OTHER)){
-				//TODO simon: show successful payment notification
+				if(response.isSuccessful()){
+					String s = String.format(CommUtils.Message.PAYMENT_SUCCESS_BUYER.getMessage(), CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(response.getServerPaymentResponse().getPaymentResponsePayer().getAmount())), response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
+					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
+					AddressBookUtility.addAddressBookEntry(this, response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
+				} else {
+					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, response.getMessage());
+				}
 			}
 		} else if(response.getMessage().equals(Constants.REST_CLIENT_ERROR)){
 			displayResponse(getResources().getString(R.string.no_connection_server));
@@ -287,24 +302,15 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	}
 
 	public void createTransaction(){
-		//TODO simon: refactor after jeton updated transaction handling
+		//TODO simon: add PrivateKey
 		//TODO: refactor, since no Transaction model class anymore
-//		Transaction transaction = new Transaction();
-//		transaction.setAmount(amountBTC);
-//		transaction.setAmountInputCurrency(inputUnitValue);
-//		transaction.setBuyerUsername(ClientController.getUser().getUsername());
-//		String receiverUsername = receiverUsernameEditText.getText().toString();
-//		transaction.setSellerUsername(receiverUsername);
-//		transaction.setInputCurrency(Constants.inputUnit);
-//		
-//		SignedObject signedTransactionBuyer;
+		
+//		PaymentRequest paymentRequestPayer = new PaymentRequest(pkiAlgorithm, keyNumber, ClientController.getUser().getUsername(), receiverUsernameEditText.getText().toString() , Currency.BTC, amountBTC, Constants.inputUnit  , inputUnitValue, new Date());
+//
 //		try {
-//			//TODO simon: adapt TransactionHandler etc
-//			signedTransactionBuyer = TransactionHandler.signPayment(transaction);
-//			
-////			new CreateTransactionTransferObject(new ServerPaymentRequest(paymentRequestPayer))
-////			CreateTransactionTransferObject ctto = new CreateTransactionTransferObject(null, signedTransactionBuyer);
-////			launchTransactionRequest(ctto);
+//			paymentRequestPayer.sign(privateKey);
+//			ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
+//			launchTransactionRequest(serverPaymentRequest);
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}

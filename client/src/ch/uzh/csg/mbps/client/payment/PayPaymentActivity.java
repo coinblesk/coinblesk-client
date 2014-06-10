@@ -35,6 +35,7 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 	private Button acceptBtn;
 	private Button rejectBtn;
 	
+	//TODO simon: remove autoaccept
 	private boolean acceptPaymentAutomatically = false;
 	private Switch acceptPaymentSwitch;
 	
