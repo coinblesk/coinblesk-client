@@ -37,7 +37,6 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
-import ch.uzh.csg.mbps.client.util.InternalStorageXML;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
@@ -72,14 +71,11 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		setScreenOrientation();
 
 		initializeDrawer();
-		readServerPublicKey();
 		initializeGui();
 
 		initClickListener();
 		checkOnlineModeAndProceed();
-
 	}
-
 
 	@Override
 	public void onResume(){
@@ -194,15 +190,6 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		nfcActivityAnimation.start();
 
 		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getUser().getBalance(), getApplicationContext());
-	}
-
-	private void readServerPublicKey() {
-		try {
-			String serverPK = InternalStorageXML.readPublicKeyFromFile(getApplicationContext());
-			ClientController.setServerPublicKey(serverPK);
-		} catch (Exception e) {
-			displayResponse(getResources().getString(R.string.unexcepted_error));
-		}
 	}
 
 	private void initClickListener() {

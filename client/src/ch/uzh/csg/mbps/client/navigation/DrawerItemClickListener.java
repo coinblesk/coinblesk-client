@@ -24,11 +24,9 @@ import ch.uzh.csg.mbps.client.request.SignOutRequestTask;
 import ch.uzh.csg.mbps.client.settings.SettingsActivity;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
-import ch.uzh.csg.mbps.client.util.InternalStorageXML;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
-import ch.uzh.csg.mbps.responseobject.ReadAccountTransferObject;
 
 /**
  * This class represents the navigation drawer. The methods from
@@ -129,7 +127,14 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 		if (response.isSuccessful()) {
 			if (response.getReadAccountTO() != null) {
 				dismissProgressDialog();
-				updateClientController(response.getReadAccountTO());
+				
+				try {
+					ClientController.setUser(response.getReadAccountTO().getUserAccount(), true);
+				} catch (Exception e) {
+					//TODO jeton: handle exception
+				}
+				ClientController.setOnlineMode(true);
+				launchActivity(MainActivity.class);
 			} else if (response.getType() == Type.LOGIN) {
 				RequestTask read = new ReadRequestTask(this);
 				read.execute();
@@ -146,17 +151,7 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 		}
 	}
 	
-	private void updateClientController(ReadAccountTransferObject rato) {
-		String username = ClientController.getUser().getUsername();
-		String password = ClientController.getUser().getPassword();
-		ClientController.setUser(password, username, rato.getUserAccount(), view.getContext());
-		ClientController.setOnlineMode(true);
-
-		launchActivity(MainActivity.class);
-	}
-	
 	private void updateClientControllerAndFinish() {
-		InternalStorageXML.writeUserAccountIntoFile(this.view.getContext().getApplicationContext());
 		dismissProgressDialog();
 		ClientController.clear();
 		launchActivity( LoginActivity.class);

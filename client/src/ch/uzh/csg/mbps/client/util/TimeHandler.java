@@ -88,7 +88,6 @@ public class TimeHandler extends HandlerThread{
 		public void run() {
 			Long now = System.currentTimeMillis();
 			if ((now - mStartTime) >= Constants.CLIENT_SESSION_TIMEOUT) {
-				InternalStorageXML.writeUserAccountIntoFile(activity);
 				Intent intent = new Intent(activity, LoginActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

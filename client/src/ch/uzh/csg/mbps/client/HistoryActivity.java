@@ -28,10 +28,8 @@ import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
 import ch.uzh.csg.mbps.model.HistoryTransaction;
-import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.GetHistoryTransferObject;
-import ch.uzh.csg.mbps.responseobject.ReadAccountTransferObject;
 
 /**
  * This class is a UI class, showing the history of transactions of the
@@ -184,9 +182,13 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 		if (response.isSuccessful()) {
 			ghto = response.getGetHistoryTO();
 			if (ghto != null) {
-				if (response.getReadAccountTO() != null)
-					updateUserAcount(response.getReadAccountTO());
-				
+				if (response.getReadAccountTO() != null) {
+					try {
+						ClientController.setUser(response.getReadAccountTO().getUserAccount(), true);
+					} catch (Exception e) {
+						//TODO jeton: handle exception
+					}
+				}
 				writeHistory();
 			}
 		} else {
@@ -450,11 +452,6 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 		return 0;
 	}
 	
-    private void updateUserAcount(ReadAccountTransferObject rato) {
-    	UserAccount userAccount = ClientController.getUser();
-		ClientController.setUser(userAccount.getPassword(), userAccount.getUsername(), rato.getUserAccount(), getApplicationContext());
-	}
-
 	private class CustomComparator implements Comparator<AbstractHistory> {
 	    public int compare(AbstractHistory o1, AbstractHistory o2) {
 	        return o1.getTimestamp().compareTo(o2.getTimestamp());

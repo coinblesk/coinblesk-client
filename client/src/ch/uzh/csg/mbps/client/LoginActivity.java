@@ -15,12 +15,10 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.SignInRequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
-import ch.uzh.csg.mbps.client.util.InternalStorageXML;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.client.util.WrongPasswordException;
 import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
-import ch.uzh.csg.mbps.responseobject.ReadAccountTransferObject;
 
 /**
  * The Login Activity is the first view of the application. The user has to sign
@@ -104,7 +102,6 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	private void launchSignInRequest() {
 		showLoadingProgressDialog();
 		TimeHandler.getInstance().setStartActivity(this);
-		ClientController.setFielname(username+".xml");
 		UserAccount user = new UserAccount(username, null, password);
 		RequestTask signIn = new SignInRequestTask(this, user);
 		signIn.execute();
@@ -118,7 +115,15 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 			 */
 			if (response.getReadAccountTO() != null) {
 				writeServerPublicKey(response.getEncodedServerPublicKey());
-				initClientController(response.getReadAccountTO());
+				
+				try {
+					ClientController.init(getApplicationContext(), username, password);
+					ClientController.setUser(response.getReadAccountTO().getUserAccount(), true);
+				} catch (Exception e) {
+					//TODO jeton: handle exception
+				}
+				ClientController.setOnlineMode(true);
+				launchMainActivity();
 			} else {
 				launchReadRequest();
 			}
@@ -145,19 +150,9 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	 *            the encoded server public key
 	 */
 	private void writeServerPublicKey(String encodedServerPublicKey) {
-		InternalStorageXML.writePublicKeyIntoFile(getApplicationContext(), encodedServerPublicKey);
-	}
-	
-	/**
-	 * The retrieved user informations from the server are stored dynamically.
-	 * 
-	 * @param rato
-	 *            The user informations of the signed in user
-	 */
-	private void initClientController(ReadAccountTransferObject rato) {
-		ClientController.setUser(password, username, rato.getUserAccount(), getApplicationContext());
-		ClientController.setOnlineMode(true);
-		launchMainActivity();
+		//TODO jeton: we need a new UserPublicKey request/resposne here!!!
+//		InternalStorageXML.writePublicKeyIntoFile(getApplicationContext(), encodedServerPublicKey);
+		//TODO jeton: delegate to ClientController
 	}
 	
 	/**
@@ -166,20 +161,17 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	 */
 	private void launchOfflineMode() {
 		try {
-			String text = InternalStorageXML.readUserAccountFromFile(getApplicationContext(), password);
-			if (text != null) {
-				UserAccount user = InternalStorageXML.readUserAccount(text, password);
-				if (user != null) {
-					ClientController.setUser(password, username, user, getApplicationContext());
-					launchMainActivity();
-				} else {
-					displayResponse(getResources().getString(R.string.establish_internet_connection));
-				}
+			if (ClientController.loadUserAccountFromStorage()) {
+				launchMainActivity();
+			} else {
+				displayResponse(getResources().getString(R.string.establish_internet_connection));
 			}
 		} catch (WrongPasswordException e) {
 			displayResponse(getResources().getString(R.string.invalid_password));
 		} catch (IOException e) {
 			displayResponse(getResources().getString(R.string.establish_internet_connection));
+		} catch (Exception e) {
+			//TODO jeton: handle exception
 		}
 	}
 	

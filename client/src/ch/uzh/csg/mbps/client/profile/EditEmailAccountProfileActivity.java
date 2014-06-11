@@ -96,7 +96,11 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity imple
     public void onTaskComplete(CustomResponseObject response) {
 		if (response.isSuccessful()) {
 			String saveEmail = ((EditText) findViewById(R.id.updateEmailEditText)).getText().toString();
-			ClientController.setUserEmail(saveEmail, getApplicationContext());
+			try {
+				ClientController.setUserEmail(saveEmail);
+			} catch (Exception e) {
+				//TODO jeton: handle exception!
+			}
 			finish();
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			reload(getIntent());

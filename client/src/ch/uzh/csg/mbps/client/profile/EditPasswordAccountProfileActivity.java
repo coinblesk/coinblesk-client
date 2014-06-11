@@ -102,7 +102,11 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity im
     
     public void onTaskComplete(CustomResponseObject response) {
 		if (response.isSuccessful()) {
-			ClientController.setUserPassword(password, this.getApplicationContext());
+			try {
+				ClientController.setUserPassword(password);
+			} catch (Exception e) {
+				//TODO jeton: handle exception!
+			}
 			finish();
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			reload(getIntent());

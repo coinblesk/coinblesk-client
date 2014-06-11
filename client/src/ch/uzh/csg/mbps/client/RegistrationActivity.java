@@ -1,8 +1,5 @@
 package ch.uzh.csg.mbps.client;
 
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -24,8 +21,6 @@ import android.widget.TextView;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.SignUpRequestTask;
 import ch.uzh.csg.mbps.client.util.CheckFormatHandler;
-import ch.uzh.csg.mbps.client.util.InternalStorageSecurityUtils;
-import ch.uzh.csg.mbps.client.util.InternalStorageXML;
 import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
@@ -104,13 +99,12 @@ public class RegistrationActivity extends AbstractAsyncActivity implements IAsyn
 	private void buildDialog(String message) {
 		Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.createAccountSuccessful)
-		.setMessage(message)
-		.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				createFileOnInternalStorage();
-				finish();
-			}
-		});
+				.setMessage(message)
+				.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							finish();
+						}
+					});
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
@@ -128,19 +122,6 @@ public class RegistrationActivity extends AbstractAsyncActivity implements IAsyn
 				popupWindow.dismiss();
 			}
 		});
-	}
-	
-	private void createFileOnInternalStorage() {
-		String filename = this.username +".xml";
-		BufferedWriter writer = null;
-		try{
-			String xmlFile = InternalStorageXML.createUsingXMLSerializer();
-			writer = new BufferedWriter(new OutputStreamWriter(openFileOutput(filename, Context.MODE_PRIVATE)));
-			String encryptedFile = InternalStorageSecurityUtils.encrypt(xmlFile, this.password);
-			writer.write(encryptedFile);
-			writer.close();
-		} catch (Exception e) {
-		}
 	}
 	
 	@Override

@@ -6,65 +6,20 @@ import android.content.Context;
 import ch.uzh.csg.mbps.model.UserAccount;
 
 /**
- * This class stores the user information as long as the user is logged in. The
- * status if the user is online mode is retrieved from this class.
+ * This class stores the user information as long as the user is logged in. It
+ * also provides the information if the user is in only mode or not.
+ * Furthermore, it holds the reference to the {@link InternalStorageHandler}.
  */
 public class ClientController {
-	private final static String SERVERPKFILENAME = "serverPK.txt";
-	private static String serverPublicKey;
-	private static UserAccount user;
-	private static String filename;
+	private static UserAccount userAccount;
 	private static boolean isOnline = false;
-	
-	public static UserAccount getUser(){
-		return user;
-	}
+	private static InternalStorageHandler internalStorageHandler;
 	
 	/**
-	 * The retrieved user information from the server or from the internal
-	 * storage is stored.
-	 * 
-	 * @param password
-	 *            The plain password as string.
-	 * @param username
-	 *            The username as string.
-	 * @param newUser
-	 *            The user informations.
-	 * @param context
-	 *            The context of the current view (activity).
+	 * Returns the {@link InternalStorageHandler}.
 	 */
-	public static void setUser(String password, String username, UserAccount newUser, Context context){
-		user = newUser;
-		
-		if(user != null){
-			if (username != null)
-				user.setUsername(username);
-
-			if (password != null)
-				user.setPassword(password);
-		}
-		// The user informations are stored into the internal storage
-		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
-	}
-	
-	public static String getFilename(){
-		return filename;
-	}
-	
-	public static void setFielname(String name){
-		filename = name;
-	}
-	
-	public static String getServerPublicKeyFilename(){
-		return SERVERPKFILENAME;
-	}
-	
-	public static void setServerPublicKey(String key){
-		serverPublicKey = key;
-	}
-	
-	public static String getServerPublicKey(){
-		return serverPublicKey;
+	public static InternalStorageHandler getStorageHandler() {
+		return internalStorageHandler;
 	}
 	
 	public static void setOnlineMode(boolean mode){
@@ -75,52 +30,103 @@ public class ClientController {
 		return isOnline;
 	}
 	
+	public static UserAccount getUser(){
+		return userAccount;
+	}
+	
+	/**
+	 * Initializes the {@link ClientController} in order to be able to read and
+	 * write to the local storage.
+	 * 
+	 * @param context
+	 *            the application's context
+	 * @param username
+	 *            the username of the authenticated user (needed to create a so
+	 *            named xml file)
+	 * @param password
+	 *            the password of the authenticaed user (needed to encrypt the
+	 *            file in on the local storage)
+	 * @throws Exception
+	 *             if the application can't write to the internal storage or if
+	 *             a decryption exception is thrown
+	 */
+	public static void init(Context context, String username, String password) throws Exception {
+		internalStorageHandler = new InternalStorageHandler(context, username, password);
+	}
+	
+	/**
+	 * Sets a new (or updated) {@link UserAccount} object.
+	 * 
+	 * @param newUser
+	 *            the new object
+	 * @param persist
+	 *            if true, the {@link UserAccount} object is saved to the local
+	 *            storage
+	 * @throws Exception
+	 *             if the {@link UserAccount} object could not be persisted
+	 */
+	public static void setUser(UserAccount newUser, boolean persist) throws Exception {
+		//TODO jeton: persist always?
+		userAccount = newUser;
+		if (persist)
+			getStorageHandler().saveUserAccount(userAccount);
+	}
+	
 	/**
 	 * Deletes the temporary information stored in this class.
 	 */
 	public static void clear(){
-		user = null;
-		filename  = null;
+		userAccount = null;
 		isOnline = false;
-		serverPublicKey = null;
+		internalStorageHandler = null;
 	}
 
-	//TODO: refactor, since no Transaction model class anymore
-//	/**
-//	 * The balance of the buyer and seller is updated after a transaction is
-//	 * accomplished successfully.
-//	 * 
-//	 * @param isSeller
-//	 *            if the user is seller.
-//	 * @param tx
-//	 *            The transaction information's from the accomplished
-//	 *            transaction.
-//	 * @param context
-//	 *            The context of the current view (activity).
-//	 */
-//	public static void updateUserAfterTransaction(boolean isSeller, Transaction tx, Context context) {
-//		user.setTransactionNumber(user.getTransactionNumber()+1);
-//		if (isSeller)
-//			user.setBalance(user.getBalance().add(tx.getAmount()));
-//		else
-//			user.setBalance(user.getBalance().subtract(tx.getAmount()));
-//		
-//		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
-//	}
-
-	public static void setUserPassword(String password, Context context) {
-		user.setPassword(password);
-		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
+	public static void setUserPassword(String password) throws Exception {
+		userAccount.setPassword(password);
+		internalStorageHandler.saveUserAccount(userAccount);
 	}
 
-	public static void setUserEmail(String saveEmail, Context context) {
-		user.setEmail(saveEmail);
-		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
+	public static void setUserEmail(String saveEmail) throws Exception {
+		userAccount.setEmail(saveEmail);
+		internalStorageHandler.saveUserAccount(userAccount);
 	}
 
-	public static void setUserBalance(BigDecimal balance, Context context) {
-		user.setBalance(balance);
-		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
+	public static void setUserBalance(BigDecimal balance) throws Exception {
+		userAccount.setBalance(balance);
+		internalStorageHandler.saveUserAccount(userAccount);
 	}
+	
+	public static boolean loadUserAccountFromStorage() throws Exception {
+		UserAccount ua = internalStorageHandler.getUserAccount();
+		if (ua == null) {
+			return false;
+		} else {
+			userAccount = ua;
+			return true;
+		}
+	}
+	
+//	//TODO: refactor, since no Transaction model class anymore
+////	/**
+////	 * The balance of the buyer and seller is updated after a transaction is
+////	 * accomplished successfully.
+////	 * 
+////	 * @param isSeller
+////	 *            if the user is seller.
+////	 * @param tx
+////	 *            The transaction information's from the accomplished
+////	 *            transaction.
+////	 * @param context
+////	 *            The context of the current view (activity).
+////	 */
+////	public static void updateUserAfterTransaction(boolean isSeller, Transaction tx, Context context) {
+////		user.setTransactionNumber(user.getTransactionNumber()+1);
+////		if (isSeller)
+////			user.setBalance(user.getBalance().add(tx.getAmount()));
+////		else
+////			user.setBalance(user.getBalance().subtract(tx.getAmount()));
+////		
+////		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
+////	}
 	
 }

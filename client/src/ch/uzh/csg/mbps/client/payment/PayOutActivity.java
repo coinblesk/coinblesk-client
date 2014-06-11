@@ -196,7 +196,11 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getUser().getBalance());
 			} else {
 				showDialog("Pay out", getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()),response.getMessage());
-				ClientController.setUserBalance(ClientController.getUser().getBalance().subtract(payOutAmount), getApplicationContext());
+				try {
+					ClientController.setUserBalance(ClientController.getUser().getBalance().subtract(payOutAmount));
+				} catch (Exception e) {
+					//TODO jeton: handle exception!
+				}
 				CurrencyViewHandler.setBTC(btcBalance, ClientController.getUser().getBalance(), getApplicationContext());
 				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getUser().getBalance());
 				chfAmount.setText("");
