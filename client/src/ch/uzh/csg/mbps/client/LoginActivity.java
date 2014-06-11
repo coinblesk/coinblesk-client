@@ -59,12 +59,11 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
     }
     
 	private void retrieveLastSignedUsername() {
-		
 		SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
 		String storedUsername = sharedPref.getString(getString(R.string.stored_username), "");
 		EditText usernameEditText = (EditText) findViewById(R.id.loginUsernameEditText);
 		usernameEditText.setText(storedUsername);
-		if(!storedUsername.isEmpty()){
+		if (!storedUsername.isEmpty()) {
 			username = storedUsername;
 			EditText password = (EditText) findViewById(R.id.loginPasswordEditText);
 			password.requestFocus();
@@ -107,17 +106,22 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 		signIn.execute();
 	}
 
-	public void onTaskComplete(CustomResponseObject response){
-		// The response object was successful
+	public void onTaskComplete(CustomResponseObject response) {
+		try {
+			ClientController.init(getApplicationContext(), username, password);
+		} catch (Exception e) {
+			//TODO jeton: handle exception
+		}
+		
 		if (response.isSuccessful()) {
-			/* Checks the getReadAccountTO method to 
-			 * find out if it was a read account request
+			/*
+			 * Checks the getReadAccountTO method to find out if it was a read
+			 * account request
 			 */
 			if (response.getReadAccountTO() != null) {
 				writeServerPublicKey(response.getEncodedServerPublicKey());
 				
 				try {
-					ClientController.init(getApplicationContext(), username, password);
 					ClientController.setUser(response.getReadAccountTO().getUserAccount(), true);
 				} catch (Exception e) {
 					//TODO jeton: handle exception
@@ -134,7 +138,6 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 			displayResponse(response.getMessage());
 			dismissProgressDialog();
 		}
-		
 	}
 	
 	private void launchReadRequest() {		
