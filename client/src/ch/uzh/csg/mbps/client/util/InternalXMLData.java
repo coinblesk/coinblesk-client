@@ -19,7 +19,7 @@ import org.xml.sax.InputSource;
 
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.model.UserAccount;
-import ch.uzh.csg.mbps.model.UserPublicKey;
+import ch.uzh.csg.mbps.model.CustomPublicKey;
 import ch.uzh.csg.mbps.util.Converter;
 
 //TODO jeton: javadoc
@@ -176,7 +176,7 @@ public class InternalXMLData {
 		return null;
 	}
 
-	public String setServerPublicKey(String xml, UserPublicKey publicKey) throws Exception {
+	public String setServerPublicKey(String xml, CustomPublicKey publicKey) throws Exception {
 		Document doc = stringToXml(xml);
 		
 		Node serverElement = doc.getElementsByTagName(SERVER).item(0);
@@ -202,7 +202,7 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 	
-	public UserPublicKey getServerPublicKey(String xml) throws Exception {
+	public CustomPublicKey getServerPublicKey(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 		
 		byte pkiAlgorithm = 0;
@@ -229,7 +229,7 @@ public class InternalXMLData {
 		}
 		
 		if (pkiAlgorithm != 0 && key != null)
-			return new UserPublicKey(pkiAlgorithm, key);
+			return new CustomPublicKey(pkiAlgorithm, key);
 		else
 			return null;
 	}

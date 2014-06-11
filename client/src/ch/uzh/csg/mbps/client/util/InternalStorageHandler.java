@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import android.content.Context;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.model.UserAccount;
-import ch.uzh.csg.mbps.model.UserPublicKey;
+import ch.uzh.csg.mbps.model.CustomPublicKey;
 
 //TODO jeton: javadoc
 public class InternalStorageHandler {
@@ -95,12 +95,12 @@ public class InternalStorageHandler {
 		writeToFileSystem(encrypted);
 	}
 	
-	public void saveServerPublicKey(UserPublicKey publicKey) throws Exception {
+	public void saveServerPublicKey(CustomPublicKey publicKey) throws Exception {
 		currentXML = xmlData.setServerPublicKey(currentXML, publicKey);
 		encryptAndSave();
 	}
 	
-	public UserPublicKey getServerPublicKey() throws Exception {
+	public CustomPublicKey getServerPublicKey() throws Exception {
 		return xmlData.getServerPublicKey(currentXML);
 	}
 	
