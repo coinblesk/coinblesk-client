@@ -3,6 +3,7 @@ package ch.uzh.csg.mbps.client.util;
 import java.math.BigDecimal;
 
 import android.content.Context;
+import ch.uzh.csg.mbps.client.internalstorage.InternalStorageHandler;
 import ch.uzh.csg.mbps.model.UserAccount;
 
 /**

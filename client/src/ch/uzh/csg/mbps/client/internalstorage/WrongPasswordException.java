@@ -1,4 +1,4 @@
-package ch.uzh.csg.mbps.client.util;
+package ch.uzh.csg.mbps.client.internalstorage;
 
 /**
  * This exception is thrown when the xml file in the shared preferences cannot be

@@ -1,4 +1,4 @@
-package ch.uzh.csg.mbps.client.util;
+package ch.uzh.csg.mbps.client.internalstorage;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,14 +15,8 @@ import ch.uzh.csg.mbps.model.CustomPublicKey;
 //TODO jeton: javadoc
 public class InternalStorageHandler {
 	
-	//TODO jeton: move all xml stuff to separate package! .localstorage
-	
-	//TODO: create instance in ClientController
-	
 	//TODO jeton: implement IPersistencyHandler
 	//TODO jeton: when saving each time adding a persisted crap, it takes way too long because of the encryption!!!
-	
-	
 	//TODO jeton: extract save and document!!!
 	
 	private Context context;

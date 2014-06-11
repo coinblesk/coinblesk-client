@@ -1,4 +1,4 @@
-package ch.uzh.csg.mbps.client.util;
+package ch.uzh.csg.mbps.client.internalstorage;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -51,8 +51,6 @@ public class InternalXMLData {
 	private static final String PENDING_REQUESTS = "pending-requests";
 	
 	private static final String ADDRESS_BOOK = "address-book";
-	
-	//TODO: store xml string InternalStorageHandler if we need to edit xml!
 	
 	public String getRootElementName() {
 		return ROOT;

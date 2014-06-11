@@ -1,4 +1,4 @@
-package ch.uzh.csg.mbps.client.util;
+package ch.uzh.csg.mbps.client.internalstorage;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
