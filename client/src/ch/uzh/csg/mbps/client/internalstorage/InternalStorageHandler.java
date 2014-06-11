@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 
 import android.content.Context;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
+import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
-import ch.uzh.csg.mbps.model.CustomPublicKey;
 
 //TODO jeton: javadoc
 public class InternalStorageHandler {
