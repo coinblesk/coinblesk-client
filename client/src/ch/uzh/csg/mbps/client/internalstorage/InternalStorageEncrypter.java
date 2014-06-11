@@ -50,7 +50,7 @@ public class InternalStorageEncrypter {
 	}
 	
 	private String encrypt(String xml, SecretKey key, byte[] salt) throws Exception {
-		Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM, "SC");
+		Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM, "BC");
 		
 		byte[] iv = generateIv(cipher.getBlockSize());
 		IvParameterSpec ivParams = new IvParameterSpec(iv);
@@ -93,7 +93,7 @@ public class InternalStorageEncrypter {
 	        byte[] cipherBytes = Base64.decode(fields[2]);
   
 	        SecretKey key = getKey(salt, password);
-	        Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM, "SC");
+	        Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM, "BC");
 	        IvParameterSpec ivParams = new IvParameterSpec(iv);
 	        cipher.init(Cipher.DECRYPT_MODE, key, ivParams);
 	        
