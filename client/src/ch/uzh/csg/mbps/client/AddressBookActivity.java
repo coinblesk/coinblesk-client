@@ -22,12 +22,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import ch.uzh.csg.mbps.client.util.AddressBookUtility;
 import ch.uzh.csg.mbps.client.util.ClientController;
 
 public class AddressBookActivity extends Activity {
 	private MenuItem menuWarning;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +81,16 @@ public class AddressBookActivity extends Activity {
 				alert.setPositiveButton(getString(R.string.addressBook_addContact_save), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 				  String username = input.getText().toString();
-				  AddressBookUtility.addAddressBookEntry(getApplicationContext(), username);
-				  createAddressBookEntries();
+				  try {
+					ClientController.getStorageHandler().addAddressBookEntry(username);
+				} catch (Exception e1) {
+					//do nothing
+					}
+				  try {
+					createAddressBookEntries();
+				} catch (Exception e) {
+					//do nothing
+				}
 				  }
 				});
 				alert.setNegativeButton(getString(R.string.addressBook_addContact_cancel), new DialogInterface.OnClickListener() {
@@ -100,21 +106,33 @@ public class AddressBookActivity extends Activity {
 		removeUntrusted.setOnClickListener(new OnClickListener() {
 			
 			public void onClick(View v) {
-				AddressBookUtility.removeAllUntrustedAddressBookEntries(getApplicationContext());;
-				createAddressBookEntries();
+				try {
+					ClientController.getStorageHandler().removeAllUntrustedAddressBookEntries();
+				} catch (Exception e1) {
+					//do nothing
+				};
+				try {
+					createAddressBookEntries();
+				} catch (Exception e) {
+					//do nothing
+				}
 			}
 		});
-		createAddressBookEntries();
+		try {
+			createAddressBookEntries();
+		} catch (Exception e) {
+			//do nothing
+		}
 
 	}
 
-	private void createAddressBookEntries() {
+	private void createAddressBookEntries() throws Exception {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		LinearLayout parent = (LinearLayout) findViewById(R.id.addressBookActivity_linearLayout);
 		parent.removeAllViews();
 
 		int i = 0;
-		for (Iterator<String> it = AddressBookUtility.getAddressBook(this).iterator(); it.hasNext();) {
+		for (Iterator<String> it = ClientController.getStorageHandler().getAddressBook().iterator(); it.hasNext();) {
 			final String username = it.next();
 			View custom = inflater.inflate(R.layout.addressbook_entry_layout, null);
 			TextView tv = (TextView) custom.findViewById(R.id.textView1);
@@ -129,8 +147,12 @@ public class AddressBookActivity extends Activity {
 					.setMessage(username)
 					.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
-				        	AddressBookUtility.removeAddressBookEntry(getApplicationContext(), username);
-							createAddressBookEntries();
+							try {
+								ClientController.getStorageHandler().removeAddressBookEntry(username);
+								createAddressBookEntries();
+							} catch (Exception e1) {
+								//do nothing
+							}
 						}
 					})
 					.setNegativeButton(R.string.dialog_no, null);
@@ -143,15 +165,19 @@ public class AddressBookActivity extends Activity {
 			setTrustedImage(trusted, username);
 			trusted.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					if (AddressBookUtility.isTrusted(getApplicationContext(), username)){
-						AddressBookUtility.removeTrustedAddressBookEntry(getApplicationContext(), username);
-						trusted.setImageResource(R.drawable.ic_not_starred);
-						showToast(getString(R.string.addressBook_removeContact));
-					}
-					else{
-						AddressBookUtility.addTrustedAddressBookEntry(getApplicationContext(), username);
-						trusted.setImageResource(R.drawable.ic_starred);
-						showToast(getString(R.string.addressBook_addContact));
+					try {
+						if (ClientController.getStorageHandler().isTrustedContact(username)){
+							ClientController.getStorageHandler().removeTrustedAddressBookEntry(username);
+							trusted.setImageResource(R.drawable.ic_not_starred);
+							showToast(getString(R.string.addressBook_removeContact));
+						}
+						else{
+							ClientController.getStorageHandler().addTrustedAddressBookEntry(username);
+							trusted.setImageResource(R.drawable.ic_starred);
+							showToast(getString(R.string.addressBook_addContact));
+						}
+					} catch (Exception e) {
+						//do nothing
 					}
 				}
 			});
@@ -170,8 +196,8 @@ public class AddressBookActivity extends Activity {
 		Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 	}
 
-	private void setTrustedImage(ImageView img, String username){
-		if(AddressBookUtility.isTrusted(getApplicationContext(), username)){
+	private void setTrustedImage(ImageView img, String username) throws Exception{
+		if(ClientController.getStorageHandler().isTrustedContact(username)){
 			img.setImageResource(R.drawable.ic_starred);
 		} else{
 			img.setImageResource(R.drawable.ic_not_starred);

@@ -40,7 +40,6 @@ import ch.uzh.csg.mbps.client.payment.nfc.CommUtils;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.TransactionRequestTask;
-import ch.uzh.csg.mbps.client.util.AddressBookUtility;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
@@ -154,7 +153,11 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				if(response.isSuccessful()){
 					String s = String.format(CommUtils.Message.PAYMENT_SUCCESS_BUYER.getMessage(), CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(response.getServerPaymentResponse().getPaymentResponsePayer().getAmount())), response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
 					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
-					AddressBookUtility.addAddressBookEntry(this, response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
+					try {
+						ClientController.getStorageHandler().addAddressBookEntry(response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
+					} catch (Exception e) {
+						//do nothing
+					}
 				} else {
 					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, response.getMessage());
 				}
@@ -298,16 +301,16 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	public void createTransaction(){
 		//TODO simon: add PrivateKey
 		//TODO: refactor, since no Transaction model class anymore
-		
-//		PaymentRequest paymentRequestPayer = new PaymentRequest(pkiAlgorithm, keyNumber, ClientController.getUser().getUsername(), receiverUsernameEditText.getText().toString() , Currency.BTC, amountBTC, Constants.inputUnit  , inputUnitValue, new Date());
-//
-//		try {
-//			paymentRequestPayer.sign(privateKey);
-//			ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
-//			launchTransactionRequest(serverPaymentRequest);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+
+		//		PaymentRequest paymentRequestPayer = new PaymentRequest(pkiAlgorithm, keyNumber, ClientController.getUser().getUsername(), receiverUsernameEditText.getText().toString() , Currency.BTC, amountBTC, Constants.inputUnit  , inputUnitValue, new Date());
+		//
+		//		try {
+		//			paymentRequestPayer.sign(privateKey);
+		//			ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
+		//			launchTransactionRequest(serverPaymentRequest);
+		//		} catch (Exception e) {
+		//			e.printStackTrace();
+		//		}
 	}
 
 	/**
@@ -318,7 +321,13 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	public static class AddressBookDialog extends DialogFragment {
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			Set<String> receiverEntries = AddressBookUtility.getAddressBook(this.getActivity());
+			Set<String> receiverEntries = null;
+			try {
+				receiverEntries = ClientController.getStorageHandler().getAddressBook();
+			} catch (Exception e1) {
+				//do nothing
+			}
+
 			final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -336,12 +345,16 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				entry.setPadding(0, 0, 0, 10);
 				entry.setTextColor(Color.BLACK);
 				entry.setText(username);
-				if (AddressBookUtility.isTrusted(getActivity().getApplicationContext(), username)) {
-					entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null,null,null);
-				} else{
-					entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null,null,null);
+				try {
+					if (ClientController.getStorageHandler().isTrustedContact(username)) {
+						entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null,null,null);
+					} else{
+						entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null,null,null);
+					}
+				} catch (Exception e) {
+					//do nothing
 				}
-				
+
 				entry.setClickable(true);
 				entry.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
@@ -349,12 +362,12 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 						dismiss();
 					}
 				});
-				
+
 				linearLayout.addView(entry);
 			}
 			scrollView.addView(linearLayout);
 			builder.setView(scrollView);
-			
+
 			return builder.create();
 		}
 	}

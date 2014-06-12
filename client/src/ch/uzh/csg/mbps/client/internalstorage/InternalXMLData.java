@@ -6,20 +6,18 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
+import android.annotation.SuppressLint;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
@@ -30,6 +28,7 @@ import ch.uzh.csg.mbps.util.Converter;
  * This class is used to store / read a xml format of the user information
  * from the internal storage.
  */
+@SuppressLint("DefaultLocale")
 public class InternalXMLData {
 	private static final String ROOT = "persisted-data";
 
@@ -445,14 +444,14 @@ public class InternalXMLData {
 			return null;
 	}
 
-	public Set<String> getContacts(String xml) throws Exception{
+	protected Set<String> getAddressBookContacts(String xml) throws Exception{
 		Document doc = stringToXml(xml);
 
 		Node addressBookElement = doc.getElementsByTagName(ADDRESS_BOOK).item(0);
 		Set<String> contactsSet = new TreeSet<String>(new Comparator<String>() {
 			public int compare(String o1, String o2) {
-		        return o1.toLowerCase().compareTo(o2.toLowerCase());
-		    }
+				return o1.toLowerCase().compareTo(o2.toLowerCase());
+			}
 		});
 
 		NodeList addressBookNodes = addressBookElement.getChildNodes();
@@ -469,12 +468,12 @@ public class InternalXMLData {
 		}
 		return contactsSet;
 	}
-	
-	public String addAddressBookContact(String xml, String username) throws Exception{
+
+	protected String addAddressBookContact(String xml, String username) throws Exception{
 		Document doc = stringToXml(xml);
 
 		Node addressBookElement = doc.getElementsByTagName(ADDRESS_BOOK).item(0);
-		
+
 		NodeList addressBookNodes = addressBookElement.getChildNodes();
 		for (int i=0; i<addressBookNodes.getLength(); i++) {
 			Node addressBookChild = addressBookNodes.item(i);
@@ -487,16 +486,15 @@ public class InternalXMLData {
 		}
 		return xmlToString(doc);
 	}
-	
-	
-	public Set<String> getTrustedContacts(String xml) throws Exception{
+
+	protected Set<String> getTrusteAddressBookdContacts(String xml) throws Exception{
 		Document doc = stringToXml(xml);
 
 		Node addressBookElement = doc.getElementsByTagName(ADDRESS_BOOK).item(0);
 		Set<String> trustedContactsSet = new TreeSet<String>(new Comparator<String>() {
 			public int compare(String o1, String o2) {
-		        return o1.toLowerCase().compareTo(o2.toLowerCase());
-		    }
+				return o1.toLowerCase().compareTo(o2.toLowerCase());
+			}
 		});
 
 		NodeList addressBookNodes = addressBookElement.getChildNodes();
@@ -513,12 +511,12 @@ public class InternalXMLData {
 		}
 		return trustedContactsSet;
 	}
-	
-	public String addTrustedAddressBookContact(String xml, String username) throws Exception{
+
+	protected String addTrustedAddressBookContact(String xml, String username) throws Exception{
 		Document doc = stringToXml(xml);
 
 		Node addressBookElement = doc.getElementsByTagName(ADDRESS_BOOK).item(0);
-		
+
 		NodeList addressBookNodes = addressBookElement.getChildNodes();
 		for (int i=0; i<addressBookNodes.getLength(); i++) {
 			Node addressBookChild = addressBookNodes.item(i);
@@ -530,6 +528,52 @@ public class InternalXMLData {
 			}
 		}
 		return xmlToString(doc);
+	}
+
+	protected String removeAddressBookContact(String xml, String username) throws Exception {
+		Document doc = stringToXml(xml);
+
+		Node addressBookElement = doc.getElementsByTagName(ADDRESS_BOOK).item(0);
+
+		NodeList addressBookNodes = addressBookElement.getChildNodes();
+		for (int i=0; i<addressBookNodes.getLength(); i++) {
+			Node addressBookChild = addressBookNodes.item(i);
+			if (addressBookChild.getNodeName().equals(CONTACTS)) {
+
+				NodeList nodeList = addressBookChild.getChildNodes();
+				for(int j=0;j<nodeList.getLength();j++){
+					Node nodeToRemove = nodeList.item(j);
+
+					if(nodeToRemove.getTextContent().equals(username)){
+						addressBookChild.removeChild(nodeToRemove);
+					}
+				}
+			}
+		}
+		return xmlToString(doc);
+	}
+
+	public String removeTrustedAddressBookEntry(String xml, String username) throws Exception {
+		Document doc = stringToXml(xml);
+
+		Node addressBookElement = doc.getElementsByTagName(ADDRESS_BOOK).item(0);
+
+		NodeList addressBookNodes = addressBookElement.getChildNodes();
+		for (int i=0; i<addressBookNodes.getLength(); i++) {
+			Node addressBookChild = addressBookNodes.item(i);
+			if (addressBookChild.getNodeName().equals(TRUSTED_CONTACTS)) {
+
+				NodeList nodeList = addressBookChild.getChildNodes();
+				for(int j=0;j<nodeList.getLength();j++){
+					Node nodeToRemove = nodeList.item(j);
+
+					if(nodeToRemove.getTextContent().equals(username)){
+						addressBookChild.removeChild(nodeToRemove);
+					}
+				}
+			}
+		}
+		return xmlToString(doc);		
 	}
 
 }
