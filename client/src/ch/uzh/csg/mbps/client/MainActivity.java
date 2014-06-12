@@ -116,7 +116,6 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		menuWarning = menu.findItem(R.id.action_warning);
 		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-			//TODO simon: put to superclass?
 			public boolean onMenuItemClick(MenuItem item) {
 				displayResponse(getResources().getString(R.string.optionMenu_offlineModeHint));
 				return false;

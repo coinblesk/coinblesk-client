@@ -126,15 +126,14 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		}
 	}
 
-	protected void launchTransactionRequest(ServerPaymentRequest serverPaymnetRequest) {
+	protected void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
 			CreateTransactionTransferObject ctto = null;
 			try {
-				ctto = new CreateTransactionTransferObject(serverPaymnetRequest);
+				ctto = new CreateTransactionTransferObject(serverPaymentRequest);
 			} catch (Exception e ) {
-				// TODO simon: handle exception
-				e.printStackTrace();
+				displayResponse("Internal Error");
 			}
 			RequestTask transactionRequest = new TransactionRequestTask(this, ctto);
 			transactionRequest.execute();
