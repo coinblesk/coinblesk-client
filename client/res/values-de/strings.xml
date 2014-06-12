@@ -11,10 +11,10 @@
     <string name="title_activity_main">Kontoübersicht</string>
     <string name="title_activity_history">Verlauf</string>
     <string name="title_activity_pay_payment">Bezahlen</string>
-    <string name="title_activity_receive_payment">BTC verlangen</string>
-    <string name="title_activity_send_payment">BTC senden</string>
-    <string name="title_activity_pay_in">BTC Einzahlen</string>
-    <string name="title_activity_pay_out">BTC Auszahlen</string>
+    <string name="title_activity_receive_payment">Bitcoins verlangen</string>
+    <string name="title_activity_send_payment">Bitcoins senden</string>
+    <string name="title_activity_pay_in">Bitcoins Einzahlen</string>
+    <string name="title_activity_pay_out">Bitcoins Auszahlen</string>
     <string name="title_activity_profile_account">Profil</string>
     <string name="title_activity_edit_email_account_profile">Emailadresse ändern</string>
     <string name="title_activity_edit_passwotrd_account_profile">Passwort ändern</string>

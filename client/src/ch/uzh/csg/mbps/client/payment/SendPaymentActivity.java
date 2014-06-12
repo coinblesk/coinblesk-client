@@ -27,7 +27,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -56,8 +55,7 @@ import ch.uzh.csg.mbps.util.Converter;
  */
 public class SendPaymentActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
 	private MenuItem menuWarning;
-	private String[] currencies = { "Swiss", "Bitcoins" };
-	private int arr_images[] = { R.drawable.ic_swiss_currency_light, R.drawable.ic_bitcoin_currency_light };
+	private String[] currencies = { "CHF", "BTC" };
 	protected CalculatorDialog calculatorDialogFragment;
 	protected static BigDecimal amountBTC = BigDecimal.ZERO;
 	protected static BigDecimal inputUnitValue = BigDecimal.ZERO;
@@ -242,9 +240,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			View row = inflater.inflate(R.layout.spinner_currency, parent, false);
 			TextView label = (TextView) row.findViewById(R.id.textView_currency);
 			label.setText(currencies[position]);
-
-			ImageView icon = (ImageView) row.findViewById(R.id.image_currency);
-			icon.setImageResource(arr_images[position]);
 
 			return row;
 		}

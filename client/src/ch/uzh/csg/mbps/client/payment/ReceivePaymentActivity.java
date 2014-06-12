@@ -41,8 +41,7 @@ import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
  */
 public class ReceivePaymentActivity extends AbstractPaymentActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
 	private MenuItem menuWarning;
-	private String[] strings = { "Swiss", "Bitcoins" };
-	private int arr_images[] = { R.drawable.ic_swiss_currency_light, R.drawable.ic_bitcoin_currency_light };
+	private String[] strings = { "CHF", "BTC" };
 	protected CalculatorDialog newFragment;
 	protected static BigDecimal amountBTC = BigDecimal.ZERO;
 	protected static BigDecimal inputUnitValue = BigDecimal.ZERO;
@@ -242,9 +241,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			View row = inflater.inflate(R.layout.spinner_currency, parent, false);
 			TextView label = (TextView) row.findViewById(R.id.textView_currency);
 			label.setText(strings[position]);
-			
-			ImageView icon = (ImageView) row.findViewById(R.id.image_currency);
-			icon.setImageResource(arr_images[position]);
 
 			return row;
 		}
