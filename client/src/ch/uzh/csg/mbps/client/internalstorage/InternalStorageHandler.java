@@ -6,8 +6,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
@@ -143,4 +148,35 @@ public class InternalStorageHandler {
 	
 	//TODO simon: implement addressbook stuff
 
+	/**
+	 * Adds an entry (username) to the address book of known users.
+	 * 
+	 * @param context Application Context
+	 * @param username to store
+	 * @throws Exception 
+	 */
+	public void addAddressBookEntry(String username) throws Exception{
+		currentXML = xmlData.addAddressBookContact(currentXML, username);
+		encryptAndSave();
+	}
+	
+	/**
+	 * Adds an entry (username) to the address book of trusted users.
+	 * 
+	 * @param context Application Context
+	 * @param username to store
+	 * @throws Exception 
+	 */
+	public void addTrustedAddressBookEntry(String username) throws Exception{
+		currentXML = xmlData.addTrustedAddressBookContact(currentXML, username);
+		encryptAndSave();
+	}
+	
+	public Set<String> getAddressBook() throws Exception {
+		return xmlData.getContacts(currentXML);
+	}
+
+	public Set<String> getTrustedAddressbook() throws Exception {
+		return xmlData.getTrustedContacts(currentXML);
+	}
 }
