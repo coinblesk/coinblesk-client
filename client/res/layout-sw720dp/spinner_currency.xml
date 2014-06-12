@@ -4,22 +4,17 @@
     android:layout_height="wrap_content"
     android:padding="3dip" >
 
-    <ImageView
-        android:id="@+id/image_currency"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView_currency"
-        android:layout_toRightOf="@+id/textView_currency"
-        android:src="@drawable/ic_swiss_currency_light" >
-    </ImageView>
-
     <TextView
         android:id="@+id/textView_currency"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_marginTop="10dip"
-        android:text="@string/textView_currency" >
+        android:layout_marginBottom="5dip"
+        android:layout_marginRight="15dip"
+        android:text="@string/textView_currency"
+        android:textStyle="bold"
+        android:textSize="24sp" >
     </TextView>
-
+    
 </RelativeLayout>
