@@ -60,27 +60,4 @@ public class ClientController {
 		internalStorageHandler = null;
 	}
 
-//	//TODO: refactor, since no Transaction model class anymore
-////	/**
-////	 * The balance of the buyer and seller is updated after a transaction is
-////	 * accomplished successfully.
-////	 * 
-////	 * @param isSeller
-////	 *            if the user is seller.
-////	 * @param tx
-////	 *            The transaction information's from the accomplished
-////	 *            transaction.
-////	 * @param context
-////	 *            The context of the current view (activity).
-////	 */
-////	public static void updateUserAfterTransaction(boolean isSeller, Transaction tx, Context context) {
-////		user.setTransactionNumber(user.getTransactionNumber()+1);
-////		if (isSeller)
-////			user.setBalance(user.getBalance().add(tx.getAmount()));
-////		else
-////			user.setBalance(user.getBalance().subtract(tx.getAmount()));
-////		
-////		InternalStorageXML.writeUserAccountIntoFile(context.getApplicationContext());
-////	}
-	
 }

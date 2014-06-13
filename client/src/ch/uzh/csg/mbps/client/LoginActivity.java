@@ -129,24 +129,28 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 			if (response.getType() == Type.LOGIN) {
 				launchReadRequest();
 			} else if (response.getType() == Type.AFTER_LOGIN) {
-				try {
-					ClientController.getStorageHandler().saveServerPublicKey(response.getServerPublicKey());
-					boolean saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
-					if (!saved) {
-						//TODO: display message that not saved to xml --> not able to use offline!
-					}
-					
-					CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
-					if (ckp == null) {
+				boolean saved = ClientController.getStorageHandler().saveServerPublicKey(response.getServerPublicKey());
+				if (!saved) {
+					//TODO: display message that not saved to xml --> not able to use offline!
+				}
+				saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
+				if (!saved) {
+					//TODO: display message that not saved to xml --> not able to use offline!
+				}
+				
+				CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
+				if (ckp == null) {
+					try {
 						KeyPair keyPair = KeyHandler.generateKeyPair();
 						ckp = new CustomKeyPair(PKIAlgorithm.DEFAULT.getCode(), (byte) 0, KeyHandler.encodePublicKey(keyPair.getPublic()), KeyHandler.encodePrivateKey(keyPair.getPrivate()));
 						this.customKeyPair = ckp;
 						
 						launchCommitKeyRequest(ckp);
 						return;
+					} catch (Exception e) {
+						//TODO: display message that not saved to xml --> not able to use offline!
+						//TODO: show error that keys not created, cannot use the app for payment (if you see this message repeatedly, try uninstalling and installing again, you will loose no information)
 					}
-				} catch (Exception e) {
-					//TODO jeton: handle this
 				}
 				ClientController.setOnlineMode(true);
 				launchMainActivity();
@@ -155,10 +159,9 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 				byte keyNumber = Byte.parseByte(keyNr);
 				
 				CustomKeyPair ckp = new CustomKeyPair(customKeyPair.getPkiAlgorithm(), keyNumber, customKeyPair.getPublicKey(), customKeyPair.getPrivateKey());
-				try {
-					ClientController.getStorageHandler().saveKeyPair(ckp);
-				} catch (Exception e) {
-					//TODO jeton: handle this
+				boolean saved = ClientController.getStorageHandler().saveKeyPair(ckp);
+				if (!saved) {
+					//TODO: display message that not saved to xml --> not able to use offline!
 				}
 				
 				dismissProgressDialog();

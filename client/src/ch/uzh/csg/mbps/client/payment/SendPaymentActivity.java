@@ -159,10 +159,9 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				if(response.isSuccessful()){
 					String s = String.format(CommUtils.Message.PAYMENT_SUCCESS_BUYER.getMessage(), CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(response.getServerPaymentResponse().getPaymentResponsePayer().getAmount())), response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
 					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
-					try {
-						ClientController.getStorageHandler().addAddressBookEntry(response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
-					} catch (Exception e) {
-						//do nothing
+					boolean saved = ClientController.getStorageHandler().addAddressBookEntry(response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
+					if (!saved) {
+						//TODO: display message that not saved to xml --> not able to use offline!
 					}
 				} else {
 					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, response.getMessage());
@@ -305,8 +304,8 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	}
 
 	public void createTransaction(){
+		CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
 		try {
-			CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
 			PaymentRequest paymentRequestPayer = new PaymentRequest(
 					PKIAlgorithm.DEFAULT, 
 					ckp.getKeyNumber(), 
@@ -335,11 +334,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			Set<String> receiverEntries = null;
-			try {
-				receiverEntries = ClientController.getStorageHandler().getAddressBook();
-			} catch (Exception e1) {
-				//do nothing
-			}
+			receiverEntries = ClientController.getStorageHandler().getAddressBook();
 
 			final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
 
@@ -358,14 +353,10 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				entry.setPadding(0, 0, 0, 10);
 				entry.setTextColor(Color.BLACK);
 				entry.setText(username);
-				try {
-					if (ClientController.getStorageHandler().isTrustedContact(username)) {
-						entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null,null,null);
-					} else{
-						entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null,null,null);
-					}
-				} catch (Exception e) {
-					//do nothing
+				if (ClientController.getStorageHandler().isTrustedContact(username)) {
+					entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null,null,null);
+				} else{
+					entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null,null,null);
 				}
 
 				entry.setClickable(true);

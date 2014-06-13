@@ -69,7 +69,7 @@ public class AddressBookActivity extends Activity {
 	private void setUpGui() {
 		Button addContact = (Button) findViewById(R.id.addressBook_addButton);
 		addContact.setOnClickListener(new OnClickListener() {
-	
+
 			public void onClick(View v) {
 				AlertDialog.Builder alert = new AlertDialog.Builder(v.getContext());
 				alert.setTitle(getString(R.string.addressBook_addContact_title));
@@ -78,26 +78,23 @@ public class AddressBookActivity extends Activity {
 				final EditText input = new EditText(v.getContext());
 				alert.setView(input);
 
-				alert.setPositiveButton(getString(R.string.addressBook_addContact_save), new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-				  String username = input.getText().toString();
-				  try {
-					ClientController.getStorageHandler().addAddressBookEntry(username);
-				} catch (Exception e1) {
-					//do nothing
-					}
-				  try {
-					createAddressBookEntries();
-				} catch (Exception e) {
-					//do nothing
-				}
-				  }
-				});
-				alert.setNegativeButton(getString(R.string.addressBook_addContact_cancel), new DialogInterface.OnClickListener() {
-				  public void onClick(DialogInterface dialog, int whichButton) {
-				    // Dialog canceled
-				  }
-				});
+				alert.setPositiveButton(getString(R.string.addressBook_addContact_save),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								String username = input.getText().toString();
+								boolean saved = ClientController.getStorageHandler().addAddressBookEntry(username);
+								if (!saved) {
+									//TODO: display message that not saved to xml --> not able to use offline! 
+								}
+								createAddressBookEntries();
+							}
+						});
+				alert.setNegativeButton(getString(R.string.addressBook_addContact_cancel),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								// Dialog canceled
+							}
+						});
 				alert.show();
 			}
 		});
@@ -106,27 +103,17 @@ public class AddressBookActivity extends Activity {
 		removeUntrusted.setOnClickListener(new OnClickListener() {
 			
 			public void onClick(View v) {
-				try {
-					ClientController.getStorageHandler().removeAllUntrustedAddressBookEntries();
-				} catch (Exception e1) {
-					//do nothing
-				};
-				try {
-					createAddressBookEntries();
-				} catch (Exception e) {
-					//do nothing
+				boolean saved = ClientController.getStorageHandler().removeAllUntrustedAddressBookEntries();
+				if (!saved) {
+					//TODO: display message that not saved to xml --> not able to use offline!
 				}
+				createAddressBookEntries();
 			}
 		});
-		try {
-			createAddressBookEntries();
-		} catch (Exception e) {
-			//do nothing
-		}
-
+		createAddressBookEntries();
 	}
 
-	private void createAddressBookEntries() throws Exception {
+	private void createAddressBookEntries() {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		LinearLayout parent = (LinearLayout) findViewById(R.id.addressBookActivity_linearLayout);
 		parent.removeAllViews();
@@ -147,12 +134,11 @@ public class AddressBookActivity extends Activity {
 					.setMessage(username)
 					.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
-							try {
-								ClientController.getStorageHandler().removeAddressBookEntry(username);
-								createAddressBookEntries();
-							} catch (Exception e1) {
-								//do nothing
+							boolean saved = ClientController.getStorageHandler().removeAddressBookEntry(username);
+							if (!saved) {
+								//TODO: display message that not saved to xml --> not able to use offline!
 							}
+							createAddressBookEntries();
 						}
 					})
 					.setNegativeButton(R.string.dialog_no, null);
@@ -165,19 +151,21 @@ public class AddressBookActivity extends Activity {
 			setTrustedImage(trusted, username);
 			trusted.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					try {
-						if (ClientController.getStorageHandler().isTrustedContact(username)){
-							ClientController.getStorageHandler().removeTrustedAddressBookEntry(username);
-							trusted.setImageResource(R.drawable.ic_not_starred);
-							showToast(getString(R.string.addressBook_removeContact));
+					if (ClientController.getStorageHandler().isTrustedContact(username)){
+						boolean saved = ClientController.getStorageHandler().removeTrustedAddressBookEntry(username);
+						if (!saved) {
+							//TODO: display message that not saved to xml --> not able to use offline!
 						}
-						else{
-							ClientController.getStorageHandler().addTrustedAddressBookEntry(username);
-							trusted.setImageResource(R.drawable.ic_starred);
-							showToast(getString(R.string.addressBook_addContact));
+						trusted.setImageResource(R.drawable.ic_not_starred);
+						showToast(getString(R.string.addressBook_removeContact));
+					}
+					else{
+						boolean saved = ClientController.getStorageHandler().addTrustedAddressBookEntry(username);
+						if (!saved) {
+							//TODO: display message that not saved to xml --> not able to use offline!
 						}
-					} catch (Exception e) {
-						//do nothing
+						trusted.setImageResource(R.drawable.ic_starred);
+						showToast(getString(R.string.addressBook_addContact));
 					}
 				}
 			});
@@ -196,10 +184,10 @@ public class AddressBookActivity extends Activity {
 		Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 	}
 
-	private void setTrustedImage(ImageView img, String username) throws Exception{
-		if(ClientController.getStorageHandler().isTrustedContact(username)){
+	private void setTrustedImage(ImageView img, String username) {
+		if (ClientController.getStorageHandler().isTrustedContact(username)) {
 			img.setImageResource(R.drawable.ic_starred);
-		} else{
+		} else {
 			img.setImageResource(R.drawable.ic_not_starred);
 		}
 	}
