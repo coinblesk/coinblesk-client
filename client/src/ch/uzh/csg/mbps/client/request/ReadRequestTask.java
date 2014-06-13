@@ -16,7 +16,7 @@ public class ReadRequestTask extends RequestTask {
 	
 	public ReadRequestTask(IAsyncTaskCompleteListener<CustomResponseObject> cro) {
 		this.callback = cro;
-		this.url = Constants.BASE_URI_SSL + "/user/read";
+		this.url = Constants.BASE_URI_SSL + "/user/afterLogin";
 	}
 	
 	@Override
