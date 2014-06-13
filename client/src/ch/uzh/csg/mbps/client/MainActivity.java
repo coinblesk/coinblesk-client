@@ -74,7 +74,6 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		initializeGui();
 
 		initClickListener();
-		checkOnlineModeAndProceed();
 	}
 
 	@Override
@@ -227,7 +226,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		TextView lastTransactionsTitle = (TextView) findViewById(R.id.mainActivity_lastTransactionsTitle);
 		if (response.isSuccessful()) {
 			exchangeRate = new BigDecimal(response.getMessage());
-			ClientController.getUser().setBalance(response.getReadAccountTO().getUserAccount().getBalance());
+			ClientController.getUser().setBalance(new BigDecimal(response.getBalance()));
 			ArrayList<AbstractHistory> transactions = extractLastFewTransactions(response.getGetHistoryTO());
 
 			//update gui
