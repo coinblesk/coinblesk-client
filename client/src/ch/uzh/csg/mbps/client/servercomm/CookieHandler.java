@@ -8,6 +8,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
 import ch.uzh.csg.mbps.client.model.PayOutTransaction;
+import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 import ch.uzh.csg.mbps.responseobject.PayOutRulesTransferObject;
@@ -149,6 +150,17 @@ public class CookieHandler {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.add(COOKIE_STRING, JSESSIONID_STRING + getCookie());
 		return new HttpEntity(porto, requestHeaders);
+	}
+
+	//TODO jeton: javadoc
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static HttpEntity getAuthHeaderCustomPublicKey(CustomPublicKey cpk) {
+		if (getCookie() == null || getCookie().equals(""))
+			return null;
+
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.add(COOKIE_STRING, JSESSIONID_STRING + getCookie());
+		return new HttpEntity(cpk, requestHeaders);
 	}
 	
 }
