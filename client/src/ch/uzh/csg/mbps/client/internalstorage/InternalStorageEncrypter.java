@@ -44,7 +44,7 @@ public class InternalStorageEncrypter {
 	 * @throws Exception
 	 *             if the encryption was not successful
 	 */
-	public String encrypt(String xml, String password) throws Exception {
+	protected String encrypt(String xml, String password) throws Exception {
 		byte[] salt = generateSalt();
 		return encrypt(xml, getKey(salt, password), salt);
 	}
@@ -82,7 +82,7 @@ public class InternalStorageEncrypter {
 	 * @throws CorruptFileException
 	 *             if the stored file is corrupt and cannot be decrypted
 	 */
-	public String decrypt(String ciphertext, String password, String rootElementName) throws WrongPasswordException, CorruptFileException {
+	protected String decrypt(String ciphertext, String password, String rootElementName) throws WrongPasswordException, CorruptFileException {
 	    String[] fields = ciphertext.split(DELIMITER);
 	    if (fields.length != 3)
 	        throw new CorruptFileException();

@@ -35,8 +35,6 @@ import ch.uzh.csg.mbps.util.Converter;
 public class InternalXMLData {
 	private static final String ROOT = "persisted-data";
 	
-	//TODO jeton: make all methods protected!!
-
 	private static final String SERVER = "server";
 	private static final String SERVER_IP = "ip";
 	private static final String SERVER_KEY = "public-key";
@@ -62,11 +60,11 @@ public class InternalXMLData {
 	private static final String TRUSTED_CONTACTS = "trusted-contacts";
 	private static final String CONTACTS = "contacts";
 
-	public String getRootElementName() {
+	protected String getRootElementName() {
 		return ROOT;
 	}
 
-	public String createEmptyXML() throws Exception {
+	protected String createEmptyXML() throws Exception {
 		DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
 		// root element
@@ -159,7 +157,7 @@ public class InternalXMLData {
 		return db.parse(is);
 	}
 
-	public String setServerIp(String xml, String ip) throws Exception {
+	protected String setServerIp(String xml, String ip) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node serverElement = doc.getElementsByTagName(SERVER).item(0);
@@ -175,7 +173,7 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
-	public String getServerIp(String xml) throws Exception {
+	protected String getServerIp(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node serverElement = doc.getElementsByTagName(SERVER).item(0);
@@ -194,7 +192,7 @@ public class InternalXMLData {
 		return null;
 	}
 
-	public String setServerPublicKey(String xml, CustomPublicKey publicKey) throws Exception {
+	protected String setServerPublicKey(String xml, CustomPublicKey publicKey) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node serverElement = doc.getElementsByTagName(SERVER).item(0);
@@ -224,7 +222,7 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
-	public CustomPublicKey getServerPublicKey(String xml, byte keyNumber) throws Exception {
+	protected CustomPublicKey getServerPublicKey(String xml, byte keyNumber) throws Exception {
 		Document doc = stringToXml(xml);
 
 		byte pkiAlgorithm = 0;
@@ -274,7 +272,7 @@ public class InternalXMLData {
 			return new CustomPublicKey(keyNumber, pkiAlgorithm, key);
 	}
 
-	public String setUserAccount(String xml, UserAccount userAccount) throws Exception {
+	protected String setUserAccount(String xml, UserAccount userAccount) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node userAccountElement = doc.getElementsByTagName(USER_ACCOUNT).item(0);
@@ -302,7 +300,7 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
-	public UserAccount getUserAccount(String xml) throws Exception {
+	protected UserAccount getUserAccount(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
 		long userId = 0;
@@ -362,7 +360,7 @@ public class InternalXMLData {
 		}
 	}
 
-	public long getUserId(String xml) throws Exception {
+	protected long getUserId(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node userAccountElement = doc.getElementsByTagName(USER_ACCOUNT).item(0);
@@ -380,7 +378,7 @@ public class InternalXMLData {
 		return -1;
 	}
 
-	public String getUsername(String xml) throws Exception {
+	protected String getUsername(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node userAccountElement = doc.getElementsByTagName(USER_ACCOUNT).item(0);
@@ -398,7 +396,7 @@ public class InternalXMLData {
 		return null;
 	}
 
-	public BigDecimal getUserBalance(String xml) throws Exception {
+	protected BigDecimal getUserBalance(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node userAccountElement = doc.getElementsByTagName(USER_ACCOUNT).item(0);
@@ -416,7 +414,7 @@ public class InternalXMLData {
 		return null;
 	}
 
-	public String getUserPaymentAddress(String xml) throws Exception {
+	protected String getUserPaymentAddress(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node userAccountElement = doc.getElementsByTagName(USER_ACCOUNT).item(0);
@@ -434,7 +432,7 @@ public class InternalXMLData {
 		return null;
 	}
 
-	public String setUserKeyPair(String xml, CustomKeyPair customKeyPair) throws Exception {
+	protected String setUserKeyPair(String xml, CustomKeyPair customKeyPair) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node userAccountElement = doc.getElementsByTagName(KEYPAIR).item(0);
@@ -461,7 +459,7 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
-	public CustomKeyPair getUserKeyPair(String xml) throws Exception {
+	protected CustomKeyPair getUserKeyPair(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
 		byte pkiAlgorithm = 0;
@@ -623,7 +621,7 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
-	public String removeTrustedAddressBookEntry(String xml, String username) throws Exception {
+	protected String removeTrustedAddressBookEntry(String xml, String username) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node addressBookElement = doc.getElementsByTagName(ADDRESS_BOOK).item(0);
