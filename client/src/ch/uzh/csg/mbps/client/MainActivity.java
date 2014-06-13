@@ -79,7 +79,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	@Override
 	public void onResume(){
 		super.onResume();
-		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getUser().getBalance(), getApplicationContext());
+		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
 		checkOnlineModeAndProceed();
 		invalidateOptionsMenu();
 	}
@@ -187,7 +187,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
 		nfcActivityAnimation.start();
 
-		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getUser().getBalance(), getApplicationContext());
+		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
 	}
 
 	private void initClickListener() {
@@ -233,7 +233,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 				lastTransactionsTitle.setVisibility(View.VISIBLE);
 				createHistoryViews(transactions);
 			}
-			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getUser().getBalance());
+			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance());
 			TextView balanceTv = (TextView) findViewById(R.id.mainActivity_balanceCHF);
 			balanceTv.append(" (1 BTC = " + CurrencyFormatter.formatChf(exchangeRate) + " CHF)");
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
@@ -303,7 +303,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 	private int getImage(AbstractHistory history) {
 		if(history instanceof HistoryTransaction){
-			if(((HistoryTransaction) history).getSeller().equals(ClientController.getUser().getUsername())){
+			if(((HistoryTransaction) history).getSeller().equals(ClientController.getStorageHandler().getUserAccount().getUsername())){
 				return R.drawable.ic_receive_payment;
 			}else{
 				return R.drawable.ic_pay_payment;
@@ -318,7 +318,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 
 	private int getHistoryCode(AbstractHistory history) {
 		if(history instanceof HistoryTransaction){
-			if(((HistoryTransaction) history).getSeller().equals(ClientController.getUser().getUsername())){
+			if(((HistoryTransaction) history).getSeller().equals(ClientController.getStorageHandler().getUserAccount().getUsername())){
 				return 0;
 			}else{
 				return 0;

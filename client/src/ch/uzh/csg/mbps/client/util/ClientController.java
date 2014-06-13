@@ -1,10 +1,8 @@
 package ch.uzh.csg.mbps.client.util;
 
-import java.math.BigDecimal;
-
 import android.content.Context;
 import ch.uzh.csg.mbps.client.internalstorage.InternalStorageHandler;
-import ch.uzh.csg.mbps.model.UserAccount;
+import ch.uzh.csg.mbps.client.internalstorage.WrongPasswordException;
 
 /**
  * This class stores the user information as long as the user is logged in. It
@@ -12,7 +10,6 @@ import ch.uzh.csg.mbps.model.UserAccount;
  * Furthermore, it holds the reference to the {@link InternalStorageHandler}.
  */
 public class ClientController {
-	private static UserAccount userAccount;
 	private static boolean isOnline = false;
 	private static InternalStorageHandler internalStorageHandler;
 	
@@ -31,11 +28,6 @@ public class ClientController {
 		return isOnline;
 	}
 	
-	//TODO jeton: check wrong usage of modification of user account (must go over xml)
-	public static UserAccount getUser(){
-		return userAccount;
-	}
-	
 	/**
 	 * Initializes the {@link ClientController} in order to be able to read and
 	 * write to the local storage.
@@ -48,66 +40,26 @@ public class ClientController {
 	 * @param password
 	 *            the password of the authenticaed user (needed to encrypt the
 	 *            file in on the local storage)
-	 * @throws Exception
-	 *             if the application can't write to the internal storage or if
-	 *             a decryption exception is thrown
+	 * @return true if the existing xml could be read or a new xml file could be
+	 *         created, false if there was an exception thrown in
+	 *         reading/writing/encoding/decoding the xml
+	 * @throws WrongPasswordException
+	 *             if the password provided does not match the password of the
+	 *             given username
 	 */
-	public static void init(Context context, String username, String password) throws Exception {
+	public static boolean init(Context context, String username, String password) throws WrongPasswordException {
 		internalStorageHandler = new InternalStorageHandler(context, username, password);
-	}
-	
-	/**
-	 * Sets a new (or updated) {@link UserAccount} object.
-	 * 
-	 * @param newUser
-	 *            the new object
-	 * @param persist
-	 *            if true, the {@link UserAccount} object is saved to the local
-	 *            storage
-	 * @throws Exception
-	 *             if the {@link UserAccount} object could not be persisted
-	 */
-	public static void setUser(UserAccount newUser, boolean persist) throws Exception {
-		//TODO jeton: persist always?
-		userAccount = newUser;
-		if (persist)
-			getStorageHandler().saveUserAccount(userAccount);
+		return internalStorageHandler.init();
 	}
 	
 	/**
 	 * Deletes the temporary information stored in this class.
 	 */
 	public static void clear(){
-		userAccount = null;
 		isOnline = false;
 		internalStorageHandler = null;
 	}
 
-	public static void setUserPassword(String password) throws Exception {
-		userAccount.setPassword(password);
-		internalStorageHandler.saveUserAccount(userAccount);
-	}
-
-	public static void setUserEmail(String saveEmail) throws Exception {
-		userAccount.setEmail(saveEmail);
-		internalStorageHandler.saveUserAccount(userAccount);
-	}
-
-	public static void setUserBalance(BigDecimal balance) throws Exception {
-		userAccount.setBalance(balance);
-		internalStorageHandler.saveUserAccount(userAccount);
-	}
-	
-	public static boolean loadUserAccountFromStorage() throws Exception {
-		UserAccount ua = internalStorageHandler.getUserAccount();
-		if (ua == null) {
-			return false;
-		} else {
-			userAccount = ua;
-			return true;
-		}
-	}
-	
 //	//TODO: refactor, since no Transaction model class anymore
 ////	/**
 ////	 * The balance of the buyer and seller is updated after a transaction is

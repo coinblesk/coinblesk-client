@@ -183,10 +183,10 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 			ghto = response.getGetHistoryTO();
 			if (ghto != null) {
 				if (response.getReadAccountTO() != null) {
-					try {
-						ClientController.setUser(response.getReadAccountTO().getUserAccount(), true);
-					} catch (Exception e) {
-						//TODO jeton: handle exception
+					//TODO simon: do we need to get the user account here as well? since already fetched in MainActivity
+					boolean saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
+					if (!saved) {
+						//TODO: display message that not saved to xml --> not able to use offline!
 					}
 				}
 				writeHistory();
@@ -439,7 +439,7 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 
 	private int getImage(AbstractHistory history) {
 		if (history instanceof HistoryTransaction) {
-			if (((HistoryTransaction) history).getSeller().equals(ClientController.getUser().getUsername())) {
+			if (((HistoryTransaction) history).getSeller().equals(ClientController.getStorageHandler().getUserAccount().getUsername())) {
 				return R.drawable.ic_receive_payment;
 			} else {
 				return R.drawable.ic_pay_payment;

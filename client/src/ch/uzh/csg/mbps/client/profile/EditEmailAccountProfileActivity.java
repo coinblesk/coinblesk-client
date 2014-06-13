@@ -84,7 +84,7 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity imple
     	String emailString = email.getText().toString();
     	if (emailString.isEmpty() || !CheckFormatHandler.isEmailValid(emailString)) {
     		displayResponse(getResources().getString(R.string.email_address_invalid));
-    	} else if (emailString.equals(ClientController.getUser().getEmail())) {
+    	} else if (emailString.equals(ClientController.getStorageHandler().getUserAccount().getEmail())) {
     		displayResponse(getResources().getString(R.string.same_email_address));
     	} else {
     		showLoadingProgressDialog();
@@ -96,11 +96,12 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity imple
     public void onTaskComplete(CustomResponseObject response) {
 		if (response.isSuccessful()) {
 			String saveEmail = ((EditText) findViewById(R.id.updateEmailEditText)).getText().toString();
-			try {
-				ClientController.setUserEmail(saveEmail);
-			} catch (Exception e) {
-				//TODO jeton: handle exception!
+			
+			boolean saved = ClientController.getStorageHandler().setUserEmail(saveEmail);
+			if (!saved) {
+				//TODO: display message that not saved to xml --> not able to use offline!
 			}
+			
 			finish();
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			reload(getIntent());

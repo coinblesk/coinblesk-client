@@ -2,8 +2,6 @@ package ch.uzh.csg.mbps.client.payment;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.security.KeyPair;
-import java.util.Date;
 import java.util.Set;
 
 import android.app.AlertDialog;
@@ -152,9 +150,10 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			if(response.getType().equals(Type.EXCHANGE_RATE)){
 				exchangeRate = new BigDecimal(response.getMessage());
 				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.sendPayment_exchangeRate));
-				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), ClientController.getUser().getBalance(), getBaseContext());
+				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
-				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, ClientController.getUser().getBalance()) + ")");
+				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
 			}
 			else if (response.getType().equals(Type.OTHER)){
 				if(response.isSuccessful()){
@@ -311,7 +310,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			PaymentRequest paymentRequestPayer = new PaymentRequest(
 					PKIAlgorithm.DEFAULT, 
 					ckp.getKeyNumber(), 
-					ClientController.getUser().getUsername(), 
+					ClientController.getStorageHandler().getUserAccount().getUsername(), 
 					receiverUsernameEditText.getText().toString(), 
 					Currency.BTC, 
 					Converter.getLongFromBigDecimal(amountBTC),

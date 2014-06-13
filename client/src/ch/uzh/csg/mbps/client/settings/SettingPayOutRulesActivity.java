@@ -170,7 +170,7 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements
 	private void initBalanceRuleRequest() {
 		PayOutRulesTransferObject transferObject = new PayOutRulesTransferObject();
 		
-		PayOutRule balance = new PayOutRule(ClientController.getUser().getId(), CustomOnItemSelectedListener.getBalanceAmount(), payOutAddress);
+		PayOutRule balance = new PayOutRule(ClientController.getStorageHandler().getUserAccount().getId(), CustomOnItemSelectedListener.getBalanceAmount(), payOutAddress);
 		transferObject.setPayOutRule(balance);
 		launchPayOutRuleRequest(transferObject);
 	}
@@ -187,7 +187,7 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements
 		//Get for every day all time slots
 		for (int day : CustomOnItemSelectedListener.getDaySelections()) {
 			for (TextView hour : CustomOnItemSelectedListener.getTimeSelections()) {
-				PayOutRule dayTime = new PayOutRule(ClientController.getUser().getId(), Integer.parseInt(hour.getText().toString()), day, payOutAddress);
+				PayOutRule dayTime = new PayOutRule(ClientController.getStorageHandler().getUserAccount().getId(), Integer.parseInt(hour.getText().toString()), day, payOutAddress);
 				transferObject.setPayOutRule(dayTime);
 			}
 		}

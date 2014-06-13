@@ -1,6 +1,5 @@
 package ch.uzh.csg.mbps.client;
 
-import java.io.IOException;
 import java.security.KeyPair;
 
 import android.content.Context;
@@ -117,9 +116,13 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	
 	public void onTaskComplete(CustomResponseObject response) {
 		try {
-			ClientController.init(getApplicationContext(), username, password);
-		} catch (Exception e) {
-			//TODO jeton: handle exception
+			boolean init = ClientController.init(getApplicationContext(), username, password);
+			if (!init) {
+				//TODO: display message that not saved to xml --> not able to use offline!
+			}
+		} catch (WrongPasswordException e) {
+			displayResponse(getResources().getString(R.string.invalid_password));
+			return;
 		}
 		
 		if (response.isSuccessful()) {
@@ -128,9 +131,10 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 			} else if (response.getType() == Type.AFTER_LOGIN) {
 				try {
 					ClientController.getStorageHandler().saveServerPublicKey(response.getServerPublicKey());
-					ClientController.setUser(response.getReadAccountTO().getUserAccount(), true);
-					//TODO jeton: if done like below, user is not set in ClientController!!!
-//					ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
+					boolean saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
+					if (!saved) {
+						//TODO: display message that not saved to xml --> not able to use offline!
+					}
 					
 					CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
 					if (ckp == null) {
@@ -185,18 +189,10 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	 * informations are retrieved from the internal storage.
 	 */
 	private void launchOfflineMode() {
-		try {
-			if (ClientController.loadUserAccountFromStorage()) {
-				launchMainActivity();
-			} else {
-				displayResponse(getResources().getString(R.string.establish_internet_connection));
-			}
-		} catch (WrongPasswordException e) {
-			displayResponse(getResources().getString(R.string.invalid_password));
-		} catch (IOException e) {
+		if (ClientController.getStorageHandler().getUserAccount() != null) {
+			launchMainActivity();
+		} else {
 			displayResponse(getResources().getString(R.string.establish_internet_connection));
-		} catch (Exception e) {
-			//TODO jeton: handle exception
 		}
 	}
 	

@@ -141,9 +141,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		if (response.isSuccessful()) {
 			exchangeRate = new BigDecimal(response.getMessage());
 			CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.exchangeRate));
-			CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), ClientController.getUser().getBalance(), getBaseContext());
+			BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+			CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
 			TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
-			balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, ClientController.getUser().getBalance()) + ")");
+			balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
 		} else if(response.getMessage().equals(Constants.REST_CLIENT_ERROR)){
 			displayResponse(getResources().getString(R.string.no_connection_server));
 			finish();

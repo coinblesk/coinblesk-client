@@ -57,7 +57,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		btcBalance = (TextView) findViewById(R.id.payOut_Balance);
-		CurrencyViewHandler.setBTC(btcBalance, ClientController.getUser().getBalance(), getApplicationContext());
+		CurrencyViewHandler.setBTC(btcBalance, ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
 		chfBalance = (TextView) findViewById(R.id.payOut_BalanceCHF);
 		CurrencyViewHandler.clearTextView(chfBalance);
 		
@@ -124,9 +124,10 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 		
 	  	allBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				BigDecimal amount = CurrencyViewHandler.getBTCAmountInDefinedUnit(ClientController.getUser().getBalance(), getApplicationContext());
+				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+				BigDecimal amount = CurrencyViewHandler.getBTCAmountInDefinedUnit(balance, getApplicationContext());
 				payoutAmountEditText.setText(CurrencyFormatter.formatBTC(amount));
-				payOutAmount = ClientController.getUser().getBalance();
+				payOutAmount = balance;
 			}
 		});  
 		
@@ -166,7 +167,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 			BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(payoutAmountEditText.getText().toString());
 			payOutAmount = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
 			
-			PayOutTransaction pot = new PayOutTransaction(ClientController.getUser().getId(), payOutAmount, payoutAddress.getText().toString());
+			PayOutTransaction pot = new PayOutTransaction(ClientController.getStorageHandler().getUserAccount().getId(), payOutAmount, payoutAddress.getText().toString());
 			RequestTask payOut = new PayOutRequestTask(this, pot);
 			payOut.execute();
 		} else {
@@ -193,16 +194,19 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 			if (response.getType() == Type.EXCHANGE_RATE) {
 				exchangeRate = new BigDecimal(response.getMessage());
 				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payout_exchangeRate));
-				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getUser().getBalance());
+				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance());
 			} else {
 				showDialog("Pay out", getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()),response.getMessage());
-				try {
-					ClientController.setUserBalance(ClientController.getUser().getBalance().subtract(payOutAmount));
-				} catch (Exception e) {
-					//TODO jeton: handle exception!
+				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+				
+				boolean saved = ClientController.getStorageHandler().setUserBalance(balance.subtract(payOutAmount));
+				if (!saved) {
+					//TODO: display message that not saved to xml --> not able to use offline!
 				}
-				CurrencyViewHandler.setBTC(btcBalance, ClientController.getUser().getBalance(), getApplicationContext());
-				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getUser().getBalance());
+				
+				balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+				CurrencyViewHandler.setBTC(btcBalance,balance, getApplicationContext());
+				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
 				chfAmount.setText("");
 				payoutAmountEditText.setText("");
 			}

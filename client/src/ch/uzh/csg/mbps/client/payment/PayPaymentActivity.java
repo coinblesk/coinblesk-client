@@ -59,7 +59,7 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 		acceptPaymentSwitch = (Switch) findViewById(R.id.payPayment_switch);
 		acceptPaymentSwitch.setChecked(false);
 		
-		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.payPayment_balanceBTC), ClientController.getUser().getBalance(), getApplicationContext());
+		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.payPayment_balanceBTC), ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
 		
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		initClickListener();
@@ -128,7 +128,7 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 		if (ClientController.isOnline()) {
 			launchRequest();
 		} else {
-			CurrencyViewHandler.setBTC((TextView) findViewById(R.id.payPayment_balanceBTC), ClientController.getUser().getBalance(), getApplicationContext());
+			CurrencyViewHandler.setBTC((TextView) findViewById(R.id.payPayment_balanceBTC), ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
 			CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.payPayment_balanceCHF));
 		}
 	}
@@ -149,7 +149,7 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 		if (response.isSuccessful()) {
 			exchangeRate = new BigDecimal(response.getMessage());
 			CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payPayment_exchangeRateValue));
-			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.payPayment_balanceCHF), exchangeRate, ClientController.getUser().getBalance());
+			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.payPayment_balanceCHF), exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance());
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			reload(getIntent());
 			invalidateOptionsMenu();
@@ -185,9 +185,10 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 		CurrencyViewHandler.clearTextView(resultTextViewCHF);
 		CurrencyViewHandler.clearTextView(sellerUsername);
 		
-		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.payPayment_balanceBTC), ClientController.getUser().getBalance(), getApplicationContext());
+		BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.payPayment_balanceBTC), balance, getApplicationContext());
 		if (ClientController.isOnline()) {
-			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.payPayment_balanceCHF), exchangeRate, ClientController.getUser().getBalance());
+			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.payPayment_balanceCHF), exchangeRate, balance);
 		}
 		
 		disableButtons();

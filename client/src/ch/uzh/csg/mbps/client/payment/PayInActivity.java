@@ -109,7 +109,7 @@ public class PayInActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	
     private void setPaymentAddress() {
     	TextView tv = (TextView) findViewById(R.id.payIn_address);
-		payInAddress = ClientController.getUser().getPaymentAddress();
+		payInAddress = ClientController.getStorageHandler().getUserAccount().getPaymentAddress();
 		tv.setText(payInAddress);
 	}
 

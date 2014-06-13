@@ -86,8 +86,8 @@ public class AccountProfileActivity extends AbstractAsyncActivity implements IAs
 		TextView username = (TextView) findViewById(R.id.profileUsernameText);
 		TextView email = (TextView) findViewById(R.id.profileEmailText);
 
-		username.setText(ClientController.getUser().getUsername());
-		email.setText(ClientController.getUser().getEmail());
+		username.setText(ClientController.getStorageHandler().getUserAccount().getUsername());
+		email.setText(ClientController.getStorageHandler().getUserAccount().getEmail());
 	}
 	
 	private void initClickListener() {

@@ -95,7 +95,7 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 	private void launchConnectionRequest() {
 		if (!ClientController.isOnline()) {
 			showLoadingProgressDialog();
-			RequestTask signIn = new SignInRequestTask(this, ClientController.getUser());
+			RequestTask signIn = new SignInRequestTask(this, ClientController.getStorageHandler().getUserAccount());
 			signIn.execute();
 		} else {
 			displayResponse(view.getContext().getResources().getString(R.string.already_connected_to_server));
@@ -128,11 +128,11 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 			if (response.getReadAccountTO() != null) {
 				dismissProgressDialog();
 				
-				try {
-					ClientController.setUser(response.getReadAccountTO().getUserAccount(), true);
-				} catch (Exception e) {
-					//TODO jeton: handle exception
+				boolean saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
+				if (!saved) {
+					//TODO: display message that not saved to xml --> not able to use offline!
 				}
+				
 				ClientController.setOnlineMode(true);
 				launchActivity(MainActivity.class);
 			} else if (response.getType() == Type.LOGIN) {

@@ -29,8 +29,9 @@ public class InternalStorageHandler {
 	private InternalStorageEncrypter encrypter = null;
 
 	private String currentXML;
+	private UserAccount userAccount;
 
-	public InternalStorageHandler(Context context, String username, String password) throws Exception {
+	public InternalStorageHandler(Context context, String username, String password) {
 		this.context = context;
 		this.fileName = username+".xml";
 		this.password = password;
@@ -39,22 +40,29 @@ public class InternalStorageHandler {
 		this.encrypter = new InternalStorageEncrypter();
 
 		this.currentXML = null;
-		init();
+		this.userAccount = null;
 	}
 
-	private void init() throws Exception {
-		if (fileExists()) {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(context.openFileInput(fileName)));
-			String line;
-			String content = "";
-			while ((line = reader.readLine()) != null) {
-				content += line;
+	public boolean init() throws WrongPasswordException {
+		try {
+			if (fileExists()) {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(context.openFileInput(fileName)));
+				String line;
+				String content = "";
+				while ((line = reader.readLine()) != null) {
+					content += line;
+				}
+				reader.close();
+				
+				currentXML = encrypter.decrypt(content, password, xmlData.getRootElementName());
+			} else {
+				currentXML = xmlData.createEmptyXML();
 			}
-			reader.close();
-
-			currentXML = encrypter.decrypt(content, password, xmlData.getRootElementName());
-		} else {
-			currentXML = xmlData.createEmptyXML();
+			return true;
+		} catch (WrongPasswordException e) {
+			throw new WrongPasswordException(e.getMessage());
+		} catch (Exception e) {
+			return false;
 		}
 	}
 
@@ -90,6 +98,50 @@ public class InternalStorageHandler {
 		String encrypted = encrypter.encrypt(currentXML, password);
 		writeToFileSystem(encrypted);
 	}
+	
+	public boolean saveUserAccount(UserAccount userAccount) {
+		this.userAccount = userAccount;
+		try {
+			currentXML = xmlData.setUserAccount(currentXML, userAccount);
+			encryptAndSave();
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public UserAccount getUserAccount() {
+		if (userAccount == null) {
+			try {
+				userAccount = xmlData.getUserAccount(currentXML);
+			} catch (Exception e) {
+			}
+		}
+		return userAccount;
+	}
+	
+	public boolean setUserPassword(String password) {
+		userAccount.setPassword(password);
+		return saveUserAccount(userAccount);
+	}
+
+	public boolean setUserEmail(String saveEmail) {
+		userAccount.setEmail(saveEmail);
+		return saveUserAccount(userAccount);
+	}
+
+	public boolean setUserBalance(BigDecimal balance) {
+		userAccount.setBalance(balance);
+		return saveUserAccount(userAccount);
+	}
+	
+	
+	//TODO jeton: remove throws exception
+	
+	
+	
+	
+	
 
 	public void saveServerPublicKey(CustomPublicKey publicKey) throws Exception {
 		if (xmlData.getServerPublicKey(currentXML, publicKey.getKeyNumber()) == null) {
@@ -110,15 +162,6 @@ public class InternalStorageHandler {
 
 	public String getServerIP() throws Exception {
 		return xmlData.getServerIp(currentXML);
-	}
-
-	public void saveUserAccount(UserAccount userAccount) throws Exception {
-		currentXML = xmlData.setUserAccount(currentXML, userAccount);
-		encryptAndSave();
-	}
-
-	public UserAccount getUserAccount() throws Exception {
-		return xmlData.getUserAccount(currentXML);
 	}
 
 	public long getUserId() throws Exception {

@@ -102,10 +102,9 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity im
     
     public void onTaskComplete(CustomResponseObject response) {
 		if (response.isSuccessful()) {
-			try {
-				ClientController.setUserPassword(password);
-			} catch (Exception e) {
-				//TODO jeton: handle exception!
+			boolean saved = ClientController.getStorageHandler().setUserPassword(password);
+			if (!saved) {
+				//TODO: display message that not saved to xml --> not able to use offline!
 			}
 			finish();
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
