@@ -1,6 +1,7 @@
 package ch.uzh.csg.mbps.client;
 
 import java.io.IOException;
+import java.security.KeyPair;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,14 +12,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import ch.uzh.csg.mbps.client.internalstorage.WrongPasswordException;
+import ch.uzh.csg.mbps.client.request.CommitPublicKeyRequestTask;
 import ch.uzh.csg.mbps.client.request.ReadRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.SignInRequestTask;
+import ch.uzh.csg.mbps.client.security.KeyHandler;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
+import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
+import ch.uzh.csg.mbps.keys.CustomKeyPair;
+import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
 
 /**
  * The Login Activity is the first view of the application. The user has to sign
@@ -33,6 +40,8 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	private Button signInBtn;
 	private Button signUpBtn;
 	private TextView resetPassword;
+	
+	private CustomKeyPair customKeyPair;
 	
 	/**
 	 * Called when the activity is first created.
@@ -105,7 +114,7 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 		RequestTask signIn = new SignInRequestTask(this, user);
 		signIn.execute();
 	}
-
+	
 	public void onTaskComplete(CustomResponseObject response) {
 		try {
 			ClientController.init(getApplicationContext(), username, password);
@@ -114,29 +123,50 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 		}
 		
 		if (response.isSuccessful()) {
-			/*
-			 * Checks the getReadAccountTO method to find out if it was a read
-			 * account request
-			 */
-			if (response.getReadAccountTO() != null) {
-				writeServerPublicKey(response.getEncodedServerPublicKey());
-				
+			if (response.getType() == Type.LOGIN) {
+				launchReadRequest();
+			} else if (response.getType() == Type.AFTER_LOGIN) {
 				try {
+					ClientController.getStorageHandler().saveServerPublicKey(response.getServerPublicKey());
 					ClientController.setUser(response.getReadAccountTO().getUserAccount(), true);
+					//TODO jeton: if done like below, user is not set in ClientController!!!
+//					ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
+					
+					CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
+					if (ckp == null) {
+						KeyPair keyPair = KeyHandler.generateKeyPair();
+						ckp = new CustomKeyPair(PKIAlgorithm.DEFAULT.getCode(), (byte) 0, KeyHandler.encodePublicKey(keyPair.getPublic()), KeyHandler.encodePrivateKey(keyPair.getPrivate()));
+						this.customKeyPair = ckp;
+						
+						launchCommitKeyRequest(ckp);
+						return;
+					}
 				} catch (Exception e) {
-					//TODO jeton: handle exception
+					//TODO jeton: handle this
 				}
 				ClientController.setOnlineMode(true);
 				launchMainActivity();
-			} else {
-				launchReadRequest();
+			} else if (response.getType() == Type.SAVE_PUBLIC_KEY) {
+				String keyNr = response.getMessage();
+				byte keyNumber = Byte.parseByte(keyNr);
+				
+				CustomKeyPair ckp = new CustomKeyPair(customKeyPair.getPkiAlgorithm(), keyNumber, customKeyPair.getPublicKey(), customKeyPair.getPrivateKey());
+				try {
+					ClientController.getStorageHandler().saveKeyPair(ckp);
+				} catch (Exception e) {
+					//TODO jeton: handle this
+				}
+				
+				dismissProgressDialog();
+				ClientController.setOnlineMode(true);
+				launchMainActivity();
 			}
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+			dismissProgressDialog();
 			launchOfflineMode();
-			dismissProgressDialog();
 		} else {
-			displayResponse(response.getMessage());
 			dismissProgressDialog();
+			displayResponse(response.getMessage());
 		}
 	}
 	
@@ -145,17 +175,9 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 		read.execute();
 	}
 	
-	/**
-	 * After the user signed in successfully, the retrieved public key of the
-	 * server is written into the internal Storage.
-	 * 
-	 * @param encodedServerPublicKey
-	 *            the encoded server public key
-	 */
-	private void writeServerPublicKey(String encodedServerPublicKey) {
-		//TODO jeton: we need a new UserPublicKey request/resposne here!!!
-//		InternalStorageXML.writePublicKeyIntoFile(getApplicationContext(), encodedServerPublicKey);
-		//TODO jeton: delegate to ClientController
+	private void launchCommitKeyRequest(CustomKeyPair ckp) {
+		CustomPublicKey cpk = new CustomPublicKey(ckp.getKeyNumber(), ckp.getPkiAlgorithm(), ckp.getPublicKey());
+		new CommitPublicKeyRequestTask(this, cpk).execute();
 	}
 	
 	/**

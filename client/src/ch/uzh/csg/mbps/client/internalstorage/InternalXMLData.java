@@ -34,10 +34,13 @@ import ch.uzh.csg.mbps.util.Converter;
 @SuppressLint("DefaultLocale")
 public class InternalXMLData {
 	private static final String ROOT = "persisted-data";
+	
+	//TODO jeton: make all methods protected!!
 
 	private static final String SERVER = "server";
 	private static final String SERVER_IP = "ip";
 	private static final String SERVER_KEY = "public-key";
+	private static final String SERVER_KEY_KEY_NR = "keynumber";
 	private static final String SERVER_KEY_PKIALGORITHM = "pkialgorithm";
 	private static final String SERVER_KEY_BASE64 = "base64-publickey";
 
@@ -80,6 +83,9 @@ public class InternalXMLData {
 		// server key element
 		Element serverKey = doc.createElement(SERVER_KEY);
 		server.appendChild(serverKey);
+		// server key nr element
+		Element keyNumber = doc.createElement(SERVER_KEY_KEY_NR);
+		serverKey.appendChild(keyNumber);
 		// server key pki algorithm element
 		Element pkiAlgorithm = doc.createElement(SERVER_KEY_PKIALGORITHM);
 		serverKey.appendChild(pkiAlgorithm);
@@ -199,8 +205,13 @@ public class InternalXMLData {
 				NodeList serverKeyNodes = node.getChildNodes();
 				for (int j=0; j<serverKeyNodes.getLength(); j++) {
 					Node n = serverKeyNodes.item(j);
+					
+					if (n.getNodeName().equals(SERVER_KEY_KEY_NR)) {
+						n.setTextContent(Byte.toString(publicKey.getKeyNumber()));
+					}
+					
 					if (n.getNodeName().equals(SERVER_KEY_PKIALGORITHM)) {
-						n.setTextContent(Byte.toString(publicKey.getPKIAlgorithm()));
+						n.setTextContent(Byte.toString(publicKey.getPkiAlgorithm()));
 					}
 
 					if (n.getNodeName().equals(SERVER_KEY_BASE64)) {
@@ -213,7 +224,7 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
-	public CustomPublicKey getServerPublicKey(String xml) throws Exception {
+	public CustomPublicKey getServerPublicKey(String xml, byte keyNumber) throws Exception {
 		Document doc = stringToXml(xml);
 
 		byte pkiAlgorithm = 0;
@@ -228,6 +239,16 @@ public class InternalXMLData {
 				for (int j=0; j<serverKeyNodes.getLength(); j++) {
 					Node n = serverKeyNodes.item(j);
 					String textContent;
+					if (n.getNodeName().equals(SERVER_KEY_KEY_NR)) {
+						textContent = n.getTextContent();
+						if (textContent == null || textContent.isEmpty())
+							return null;
+						
+						byte b = Byte.parseByte(textContent);
+						if (b != keyNumber)
+							continue;
+					}
+					
 					if (n.getNodeName().equals(SERVER_KEY_PKIALGORITHM)) {
 						textContent = n.getTextContent();
 						if (textContent == null || textContent.isEmpty())
@@ -250,7 +271,7 @@ public class InternalXMLData {
 		if (pkiAlgorithm == 0 || key == null)
 			return null;
 		else
-			return new CustomPublicKey(pkiAlgorithm, key);
+			return new CustomPublicKey(keyNumber, pkiAlgorithm, key);
 	}
 
 	public String setUserAccount(String xml, UserAccount userAccount) throws Exception {

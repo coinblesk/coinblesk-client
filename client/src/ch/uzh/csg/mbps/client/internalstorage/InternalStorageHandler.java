@@ -92,12 +92,15 @@ public class InternalStorageHandler {
 	}
 
 	public void saveServerPublicKey(CustomPublicKey publicKey) throws Exception {
-		currentXML = xmlData.setServerPublicKey(currentXML, publicKey);
-		encryptAndSave();
+		if (xmlData.getServerPublicKey(currentXML, publicKey.getKeyNumber()) == null) {
+			// only save the public key if it is not already saved (i.e., a new one)
+			currentXML = xmlData.setServerPublicKey(currentXML, publicKey);
+			encryptAndSave();
+		}
 	}
 
-	public CustomPublicKey getServerPublicKey() throws Exception {
-		return xmlData.getServerPublicKey(currentXML);
+	public CustomPublicKey getServerPublicKey(byte keyNumber) throws Exception {
+		return xmlData.getServerPublicKey(currentXML, keyNumber);
 	}
 
 	public void saveServerIP(String ip) throws Exception {
