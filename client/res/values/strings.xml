@@ -123,6 +123,8 @@
     <string name="sendPayment_sendButton">Send</string>
     <string name="sendPayment_balanceTitle">Balance:</string>
     <string name="sendPayment_selectReceiver">Select receiver</string>
+    <string name="sendPayment_error">Problems occured while sending your transaction. Please try again later.</string>
+    
 
     <!-- Spinner currency -->
     <string name="textView_currency">currency</string>

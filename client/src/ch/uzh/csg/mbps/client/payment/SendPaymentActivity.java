@@ -2,6 +2,8 @@ package ch.uzh.csg.mbps.client.payment;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.security.KeyPair;
+import java.util.Date;
 import java.util.Set;
 
 import android.app.AlertDialog;
@@ -40,10 +42,15 @@ import ch.uzh.csg.mbps.client.payment.nfc.CommUtils;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.TransactionRequestTask;
+import ch.uzh.csg.mbps.client.security.KeyHandler;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
+import ch.uzh.csg.mbps.customserialization.Currency;
+import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
+import ch.uzh.csg.mbps.customserialization.PaymentRequest;
 import ch.uzh.csg.mbps.customserialization.ServerPaymentRequest;
+import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
@@ -299,18 +306,25 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	}
 
 	public void createTransaction(){
-		//TODO simon: add PrivateKey
-		//TODO: refactor, since no Transaction model class anymore
+		try {
+			CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
+			PaymentRequest paymentRequestPayer = new PaymentRequest(
+					PKIAlgorithm.DEFAULT, 
+					ckp.getKeyNumber(), 
+					ClientController.getUser().getUsername(), 
+					receiverUsernameEditText.getText().toString(), 
+					Currency.BTC, 
+					Converter.getLongFromBigDecimal(amountBTC),
+					Currency.CHF, 
+					Converter.getLongFromBigDecimal(inputUnitValue), 
+					System.currentTimeMillis());
 
-		//		PaymentRequest paymentRequestPayer = new PaymentRequest(pkiAlgorithm, keyNumber, ClientController.getUser().getUsername(), receiverUsernameEditText.getText().toString() , Currency.BTC, amountBTC, Constants.inputUnit  , inputUnitValue, new Date());
-		//
-		//		try {
-		//			paymentRequestPayer.sign(privateKey);
-		//			ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
-		//			launchTransactionRequest(serverPaymentRequest);
-		//		} catch (Exception e) {
-		//			e.printStackTrace();
-		//		}
+			paymentRequestPayer.sign(KeyHandler.decodePrivateKey(ckp.getPrivateKey()));
+			ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
+			launchTransactionRequest(serverPaymentRequest);
+		} catch (Exception e) {
+			displayResponse(getResources().getString(R.string.sendPayment_error));
+		}
 	}
 
 	/**

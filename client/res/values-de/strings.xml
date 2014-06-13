@@ -125,7 +125,7 @@
     <string name="sendPayment_sendButton">Senden</string>
     <string name="sendPayment_balanceTitle">Kontostand:</string>
     <string name="sendPayment_selectReceiver">Empfänger auswählen</string>
-    
+    <string name="sendPayment_error">Probleme beim Erstellen der Transaktion. Bitte versuchen Sie es später erneut.</string>
     
 
     <!-- Spinner currency -->
