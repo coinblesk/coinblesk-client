@@ -31,6 +31,7 @@ public class ClientController {
 		return isOnline;
 	}
 	
+	//TODO jeton: check wrong usage of modification of user account (must go over xml)
 	public static UserAccount getUser(){
 		return userAccount;
 	}

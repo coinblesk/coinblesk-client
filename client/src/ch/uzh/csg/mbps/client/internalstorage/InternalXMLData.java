@@ -6,17 +6,20 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+
 import android.annotation.SuppressLint;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
@@ -55,7 +58,6 @@ public class InternalXMLData {
 	private static final String ADDRESS_BOOK = "address-book";
 	private static final String TRUSTED_CONTACTS = "trusted-contacts";
 	private static final String CONTACTS = "contacts";
-
 
 	public String getRootElementName() {
 		return ROOT;
@@ -151,7 +153,6 @@ public class InternalXMLData {
 		return db.parse(is);
 	}
 
-
 	public String setServerIp(String xml, String ip) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -165,7 +166,6 @@ public class InternalXMLData {
 				break;
 			}
 		}
-
 		return xmlToString(doc);
 	}
 
@@ -178,10 +178,13 @@ public class InternalXMLData {
 			Node node = serverNodes.item(i);
 			if (node.getNodeName().equals(SERVER_IP)) {
 				Node ipNode = node.getChildNodes().item(0);
-				return ipNode.getTextContent();
+				String textContent = ipNode.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				return textContent;
 			}
 		}
-
 		return null;
 	}
 
@@ -207,7 +210,6 @@ public class InternalXMLData {
 				break;
 			}
 		}
-
 		return xmlToString(doc);
 	}
 
@@ -225,22 +227,30 @@ public class InternalXMLData {
 				NodeList serverKeyNodes = node.getChildNodes();
 				for (int j=0; j<serverKeyNodes.getLength(); j++) {
 					Node n = serverKeyNodes.item(j);
+					String textContent;
 					if (n.getNodeName().equals(SERVER_KEY_PKIALGORITHM)) {
-						pkiAlgorithm = Byte.parseByte(n.getTextContent());
+						textContent = n.getTextContent();
+						if (textContent == null || textContent.isEmpty())
+							return null;
+						
+						pkiAlgorithm = Byte.parseByte(textContent);
 					}
 
 					if (n.getNodeName().equals(SERVER_KEY_BASE64)) {
-						key = n.getTextContent();
+						textContent = n.getTextContent();
+						if (textContent == null || textContent.isEmpty())
+							return null;
+						
+						key = textContent;
 					}
 				}
 				break;
 			}
 		}
-
-		if (pkiAlgorithm != 0 && key != null)
-			return new CustomPublicKey(pkiAlgorithm, key);
-		else
+		if (pkiAlgorithm == 0 || key == null)
 			return null;
+		else
+			return new CustomPublicKey(pkiAlgorithm, key);
 	}
 
 	public String setUserAccount(String xml, UserAccount userAccount) throws Exception {
@@ -268,7 +278,6 @@ public class InternalXMLData {
 				node.setTextContent(userAccount.getPaymentAddress());
 			}
 		}
-
 		return xmlToString(doc);
 	}
 
@@ -284,34 +293,51 @@ public class InternalXMLData {
 		NodeList userAccountNodes = userAccountElement.getChildNodes();
 		for (int i=0; i<userAccountNodes.getLength(); i++) {
 			Node node = userAccountNodes.item(i);
+			String textContent;
 
 			if (node.getNodeName().equals(USER_ID)) {
-				userId = Long.parseLong(node.getTextContent());
+				textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				userId = Long.parseLong(textContent);
 			}
 
 			if (node.getNodeName().equals(USER_NAME)) {
-				username = node.getTextContent();
+				textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				username = textContent;
 			}
 
 			if (node.getNodeName().equals(USER_BALANCE)) {
-				long balanceLong = Long.parseLong(node.getTextContent());
-				balance = Converter.getBigDecimalFromLong(balanceLong);
+				textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				balance = Converter.getBigDecimalFromLong(Long.parseLong(textContent));
 			}
 
 			if (node.getNodeName().equals(USER_PAYMENT_ADRESS)) {
-				paymentAddress = node.getTextContent();
+				textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				paymentAddress = textContent;
 			}
 		}
 
-		if (userId != 0 && username != null && balance != null && paymentAddress != null) {
+		if (userId == 0 || username == null || balance == null || paymentAddress == null) {
+			return null;
+		} else {
 			UserAccount ua = new UserAccount();
 			ua.setId(userId);
 			ua.setUsername(username);
 			ua.setBalance(balance);
 			ua.setPaymentAddress(paymentAddress);
 			return ua;
-		} else {
-			return null;
+			
 		}
 	}
 
@@ -322,13 +348,15 @@ public class InternalXMLData {
 		NodeList userAccountNodes = userAccountElement.getChildNodes();
 		for (int i=0; i<userAccountNodes.getLength(); i++) {
 			Node node = userAccountNodes.item(i);
-
 			if (node.getNodeName().equals(USER_ID)) {
-				return Long.parseLong(node.getTextContent());
+				String textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return -1;
+				
+				return Long.parseLong(textContent);
 			}
 		}
-
-		return 0;
+		return -1;
 	}
 
 	public String getUsername(String xml) throws Exception {
@@ -338,12 +366,14 @@ public class InternalXMLData {
 		NodeList userAccountNodes = userAccountElement.getChildNodes();
 		for (int i=0; i<userAccountNodes.getLength(); i++) {
 			Node node = userAccountNodes.item(i);
-
 			if (node.getNodeName().equals(USER_NAME)) {
-				return node.getTextContent();
+				String textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				return textContent;
 			}
 		}
-
 		return null;
 	}
 
@@ -354,13 +384,14 @@ public class InternalXMLData {
 		NodeList userAccountNodes = userAccountElement.getChildNodes();
 		for (int i=0; i<userAccountNodes.getLength(); i++) {
 			Node node = userAccountNodes.item(i);
-
 			if (node.getNodeName().equals(USER_BALANCE)) {
-				long balanceLong = Long.parseLong(node.getTextContent());
-				return Converter.getBigDecimalFromLong(balanceLong);
+				String textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				return Converter.getBigDecimalFromLong(Long.parseLong(textContent));
 			}
 		}
-
 		return null;
 	}
 
@@ -371,12 +402,14 @@ public class InternalXMLData {
 		NodeList userAccountNodes = userAccountElement.getChildNodes();
 		for (int i=0; i<userAccountNodes.getLength(); i++) {
 			Node node = userAccountNodes.item(i);
-
 			if (node.getNodeName().equals(USER_PAYMENT_ADRESS)) {
-				return node.getTextContent();
+				String textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				return textContent;
 			}
 		}
-
 		return null;
 	}
 
@@ -404,7 +437,6 @@ public class InternalXMLData {
 				node.setTextContent(customKeyPair.getPrivateKey());
 			}
 		}
-
 		return xmlToString(doc);
 	}
 
@@ -420,28 +452,45 @@ public class InternalXMLData {
 		NodeList userAccountNodes = userAccountElement.getChildNodes();
 		for (int i=0; i<userAccountNodes.getLength(); i++) {
 			Node node = userAccountNodes.item(i);
-
+			String textContent;
+			
 			if (node.getNodeName().equals(KEYPAIR_PKIALGORITHM)) {
-				pkiAlgorithm = Byte.parseByte(node.getTextContent());
+				textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				pkiAlgorithm = Byte.parseByte(textContent);
 			}
 
 			if (node.getNodeName().equals(KEYPAIR_KEYNR)) {
-				keyNumber = Byte.parseByte(node.getTextContent());
+				textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				keyNumber = Byte.parseByte(textContent);
 			}
 
 			if (node.getNodeName().equals(KEYPAIR_PUBKEY)) {
-				publicKey = node.getTextContent();
+				textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				publicKey = textContent;
 			}
 
 			if (node.getNodeName().equals(KEYPAIR_PRIVKEY)) {
-				privateKey = node.getTextContent();
+				textContent = node.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					return null;
+				
+				privateKey = textContent;
 			}
 		}
-
-		if (pkiAlgorithm != 0 && keyNumber != 0 && publicKey != null & privateKey != null)
-			return new CustomKeyPair(pkiAlgorithm, keyNumber, publicKey, privateKey);
-		else
+		
+		if (pkiAlgorithm == 0 || keyNumber == 0 || publicKey == null || privateKey == null)
 			return null;
+		else
+			return new CustomKeyPair(pkiAlgorithm, keyNumber, publicKey, privateKey);
 	}
 
 	protected Set<String> getAddressBookContacts(String xml) throws Exception{
