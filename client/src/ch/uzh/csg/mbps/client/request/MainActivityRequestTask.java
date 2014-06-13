@@ -16,7 +16,7 @@ public class MainActivityRequestTask extends RequestTask {
 	
 	public MainActivityRequestTask(IAsyncTaskCompleteListener<CustomResponseObject> cro) {
 		this.callback = cro;
-		this.url = Constants.BASE_URI_SSL + "/transaction/mainActivityRequests/";
+		this.url = Constants.BASE_URI_SSL + "/user/mainActivityRequests/";
 	}
 
 	@Override
@@ -25,4 +25,5 @@ public class MainActivityRequestTask extends RequestTask {
 		HttpEntity requestEntity = CookieHandler.getAuthHeader();
 		return restTemplate.exchange(url, HttpMethod.GET, requestEntity);
 	}
+	
 }
