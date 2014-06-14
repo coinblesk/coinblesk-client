@@ -227,12 +227,13 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		if (response.isSuccessful()) {
 			exchangeRate = new BigDecimal(response.getMessage());
 			ArrayList<AbstractHistory> transactions = extractLastFewTransactions(response.getGetHistoryTO());
-
+			ClientController.getStorageHandler().setUserBalance(new BigDecimal(response.getBalance()));
 			//update gui
 			if(! transactions.isEmpty()){
 				lastTransactionsTitle.setVisibility(View.VISIBLE);
 				createHistoryViews(transactions);
 			}
+			CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
 			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance());
 			TextView balanceTv = (TextView) findViewById(R.id.mainActivity_balanceCHF);
 			balanceTv.append(" (1 BTC = " + CurrencyFormatter.formatChf(exchangeRate) + " CHF)");
