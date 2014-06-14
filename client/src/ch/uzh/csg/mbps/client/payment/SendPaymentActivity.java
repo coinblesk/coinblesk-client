@@ -155,7 +155,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
 				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
 			}
-			else if (response.getType().equals(Type.OTHER)){
+			else if (response.getType().equals(Type.CREATE_TRANSACTION)){
 				if(response.isSuccessful()){
 					String s = String.format(CommUtils.Message.PAYMENT_SUCCESS_BUYER.getMessage(), CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(response.getServerPaymentResponse().getPaymentResponsePayer().getAmount())), response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
 					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
