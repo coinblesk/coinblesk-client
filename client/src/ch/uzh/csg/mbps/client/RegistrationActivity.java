@@ -126,7 +126,9 @@ public class RegistrationActivity extends AbstractAsyncActivity implements IAsyn
 	
 	@Override
 	public void finish(){
+		//TODO simon: fix!
 		Intent data = new Intent();
+		data.setClass(RegistrationActivity.this, LoginActivity.class);
 		data.putExtra("username", this.username);
 		setResult(RESULT_OK,data);
 		super.finish();
