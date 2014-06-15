@@ -9,6 +9,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -36,7 +37,6 @@ import ch.uzh.csg.mbps.client.CurrencyViewHandler;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.MainActivity;
 import ch.uzh.csg.mbps.client.R;
-import ch.uzh.csg.mbps.client.payment.nfc.CommUtils;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.TransactionRequestTask;
@@ -164,16 +164,15 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					try {
 						serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
 					} catch (Exception e) {
-						// TODO simon: what to do on exception?
+						displayResponse(getResources().getString(R.string.error_transaction_failed));
 					}
-					String s = String.format(CommUtils.Message.PAYMENT_SUCCESS_BUYER.getMessage(),
+					String s = String.format(getResources().getString(R.string.payment_notification_success_payer),
 							CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(serverPaymentResponse.getPaymentResponsePayer().getAmount())),
 							serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
 					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
 					boolean saved = ClientController.getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
 					if (!saved) {
-						// TODO: display message that not saved to xml --> not
-						// able to use offline!
+						displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 					}
 				} else {
 					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, response.getMessage());

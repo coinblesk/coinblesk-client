@@ -126,7 +126,10 @@
     <string name="sendPayment_balanceTitle">Kontostand:</string>
     <string name="sendPayment_selectReceiver">Empfänger auswählen</string>
     <string name="sendPayment_error">Probleme beim Erstellen der Transaktion. Bitte versuchen Sie es später erneut.</string>
-    
+
+        <!-- Payment Notifications -->
+    <string name="payment_notification_success_payer">Sie haben %1$s BTC an %2$s gesendet.</string>
+    <string name="payment_notification_success_payee">Sie haben %1$s BTC von %2$s erhalten.</string>
 
     <!-- Spinner currency -->
     <string name="textView_currency">Währung</string>
@@ -306,4 +309,7 @@
     <string name="addressBook_addContact_title">Neuen Kontakt speichern</string>
     <string name="addressBook_addContact_message">Geben Sie bitte den Benutzername des Konakts ein den sie gerne speichern möchten:</string>
     
+    <!-- Error Strings -->
+    <string name="error_xmlSave_failed">Lokale XML Datei konnte nicht gespeichert werden. Wenn dies öfters geschieht versuchen Sie das Problem durch löschen der MBPS Applikationsdaten in den Android Einstellungen zu beheben.</string>
+    <string name="error_transaction_failed">Übermittlungsfehler. Bitte prüfen Sie den Transaktionsverlauf um zu sehen ob ihre Transaktion erfolgreich war.</string>
 </resources>

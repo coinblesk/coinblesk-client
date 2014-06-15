@@ -125,6 +125,9 @@
     <string name="sendPayment_selectReceiver">Select receiver</string>
     <string name="sendPayment_error">Problems occured while sending your transaction. Please try again later.</string>
     
+    <!-- Payment Notifications -->
+    <string name="payment_notification_success_payer">You paid %1$s BTC to %2$s</string>
+    <string name="payment_notification_success_payee">You got %1$s BTC from %2$s</string>
 
     <!-- Spinner currency -->
     <string name="textView_currency">currency</string>
@@ -184,6 +187,7 @@
     <string name="display_default_day">Day - </string>
     <string name="display_balance_rule">Balance rule</string>
     <string name="display_balance">Balance: </string>
+    
     <!-- Payout Rule on item select -->
     <string name="display_time_slots">You can\'t define more than four time slots!</string>
     <string name="display_already_selected">This time is already selected!</string>
@@ -302,4 +306,7 @@
     <string name="addressBook_addContact_title">Save new contact</string>
     <string name="addressBook_addContact_message">Please enter the username of the contact you would like to save:</string>
     
+    <!-- Error Strings -->
+    <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting MBPS app preferences in Android Settings.</string>
+    <string name="error_transaction_failed">Transmission error. Please check your history if transaction was successful.</string>
 </resources>
