@@ -45,9 +45,11 @@ import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
 import ch.uzh.csg.mbps.customserialization.Currency;
+import ch.uzh.csg.mbps.customserialization.DecoderFactory;
 import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
 import ch.uzh.csg.mbps.customserialization.PaymentRequest;
 import ch.uzh.csg.mbps.customserialization.ServerPaymentRequest;
+import ch.uzh.csg.mbps.customserialization.ServerPaymentResponse;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
@@ -156,12 +158,22 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
 			}
 			else if (response.getType().equals(Type.CREATE_TRANSACTION)){
-				if(response.isSuccessful()){
-					String s = String.format(CommUtils.Message.PAYMENT_SUCCESS_BUYER.getMessage(), CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(response.getServerPaymentResponse().getPaymentResponsePayer().getAmount())), response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
+				if (response.isSuccessful()) {
+					byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
+					ServerPaymentResponse serverPaymentResponse = null;
+					try {
+						serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
+					} catch (Exception e) {
+						// TODO simon: what to do on exception?
+					}
+					String s = String.format(CommUtils.Message.PAYMENT_SUCCESS_BUYER.getMessage(),
+							CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(serverPaymentResponse.getPaymentResponsePayer().getAmount())),
+							serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
 					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
-					boolean saved = ClientController.getStorageHandler().addAddressBookEntry(response.getServerPaymentResponse().getPaymentResponsePayer().getUsernamePayee());
+					boolean saved = ClientController.getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
 					if (!saved) {
-						//TODO: display message that not saved to xml --> not able to use offline!
+						// TODO: display message that not saved to xml --> not
+						// able to use offline!
 					}
 				} else {
 					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, response.getMessage());
