@@ -99,7 +99,7 @@
             android:label="@string/title_activity_receive_payment" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.ChoosePaymentActivity" />
+                android:value="ch.uzh.csg.mbps.client.MainActivity" />
         </activity>
         <activity
             android:name="ch.uzh.csg.mbps.client.payment.PayInActivity"
@@ -166,11 +166,11 @@
         <activity
             android:name="ch.uzh.csg.mbps.client.payment.SendPaymentActivity"
             android:label="@string/title_activity_send_payment"
-            android:parentActivityName="ch.uzh.csg.mbps.client.ChoosePaymentActivity"
+            android:parentActivityName="ch.uzh.csg.mbps.client.MainActivity"
             android:windowSoftInputMode="stateHidden" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.ChoosePaymentActivity" />
+                android:value="ch.uzh.csg.mbps.client.MainActivity" />
         </activity>
         <activity
             android:name="ch.uzh.csg.mbps.client.AddressBookActivity"
