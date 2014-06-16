@@ -186,7 +186,7 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 					//TODO simon: do we need to get the user account here as well? since already fetched in MainActivity
 					boolean saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
 					if (!saved) {
-						//TODO: display message that not saved to xml --> not able to use offline!
+						displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 					}
 				}
 				writeHistory();

@@ -130,7 +130,7 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 				
 				boolean saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
 				if (!saved) {
-					//TODO: display message that not saved to xml --> not able to use offline!
+					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 				}
 				
 				ClientController.setOnlineMode(true);

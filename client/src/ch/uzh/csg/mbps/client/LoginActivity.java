@@ -123,7 +123,7 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 		try {
 			boolean init = ClientController.init(getApplicationContext(), username, password);
 			if (!init) {
-				//TODO: display message that not saved to xml --> not able to use offline!
+				displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 			}
 		} catch (WrongPasswordException e) {
 			displayResponse(getResources().getString(R.string.invalid_password));
@@ -136,11 +136,11 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 			} else if (response.getType() == Type.AFTER_LOGIN) {
 				boolean saved = ClientController.getStorageHandler().saveServerPublicKey(response.getServerPublicKey());
 				if (!saved) {
-					//TODO: display message that not saved to xml --> not able to use offline!
+					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 				}
 				saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
 				if (!saved) {
-					//TODO: display message that not saved to xml --> not able to use offline!
+					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 				}
 				
 				CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
@@ -165,7 +165,7 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 				CustomKeyPair ckp = new CustomKeyPair(customKeyPair.getPkiAlgorithm(), keyNumber, customKeyPair.getPublicKey(), customKeyPair.getPrivateKey());
 				boolean saved = ClientController.getStorageHandler().saveKeyPair(ckp);
 				if (!saved) {
-					//TODO: display message that not saved to xml --> not able to use offline!
+					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 				}
 				
 				dismissProgressDialog();

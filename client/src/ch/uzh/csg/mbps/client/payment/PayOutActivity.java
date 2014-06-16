@@ -208,7 +208,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 				
 				boolean saved = ClientController.getStorageHandler().setUserBalance(balance.subtract(payOutAmount));
 				if (!saved) {
-					//TODO: display message that not saved to xml --> not able to use offline!
+					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 				}
 				
 				balance = ClientController.getStorageHandler().getUserAccount().getBalance();
