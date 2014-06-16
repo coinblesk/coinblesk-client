@@ -12,6 +12,13 @@ public class Constants {
 	public static final String BASE_URI = "http://bitcoin-clone1.csg.uzh.ch/server";
 	public static final String BASE_URI_SSL = "http://bitcoin-clone1.csg.uzh.ch/server";
 	
+	/*
+	 * The client version number helps to check if a version has been published
+	 * in order to force the user to update the app. This assures that
+	 * compatible versions are used. (see also client Constants.java)
+	 */
+	public static final int CLIENT_VERSION = 1;
+	
 	public static final long RESUME_TIMEOUT = 10 * 1000; 
 	public static final long BUYER_ACK_TIMEOUT = 3 * 1000; // in ms
 	public static final int CLIENT_READ_TIMEOUT = 5000; // in ms

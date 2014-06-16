@@ -32,6 +32,7 @@
     <string name="enter_username_password">Please enter a username and a password</string>
     <string name="establish_internet_connection">Please establish a internet connection to proceed.</string>
     <string name="invalid_password">Invalid password</string>
+    <string name="invalid_client_version">Please update this app. This version is outdated and is no longer supported.</string>
 
     <!-- Reset Password Activity -->
     <string name="resetPW_descriptionTextView">To reset your password please insert your registrated Email address below and click Reset</string>
@@ -123,7 +124,7 @@
     <string name="sendPayment_sendButton">Send</string>
     <string name="sendPayment_balanceTitle">Balance:</string>
     <string name="sendPayment_selectReceiver">Select receiver</string>
-    <string name="sendPayment_error">Problems occured while sending your transaction. Please try again later.</string>
+    <string name="sendPayment_error">Problems occurred while sending your transaction. Please try again later.</string>
     
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">You paid %1$s BTC to %2$s</string>

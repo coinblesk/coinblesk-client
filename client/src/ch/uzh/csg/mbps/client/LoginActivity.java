@@ -134,6 +134,11 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 			if (response.getType() == Type.LOGIN) {
 				launchReadRequest();
 			} else if (response.getType() == Type.AFTER_LOGIN) {
+				if (response.getClientVersion() != Constants.CLIENT_VERSION) {
+					displayResponse(getResources().getString(R.string.invalid_client_version));
+					return;
+				}
+				
 				boolean saved = ClientController.getStorageHandler().saveServerPublicKey(response.getServerPublicKey());
 				if (!saved) {
 					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
