@@ -1,7 +1,6 @@
 package ch.uzh.csg.mbps.client.payment;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Set;
 
 import android.app.AlertDialog;
@@ -10,11 +9,9 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -69,7 +66,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	private BigDecimal exchangeRate;
 	private EditText sendAmount;
 	private TextView descriptionOfInputUnit;
-	private SharedPreferences settings;
 	AnimationDrawable nfcActivityAnimation;
 	private Button sendButton;
 	private Button addressBookButton;
@@ -88,7 +84,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		Constants.inputUnit = INPUT_UNIT_CHF;
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		exchangeRate = BigDecimal.ZERO;
-		settings = PreferenceManager.getDefaultSharedPreferences(this);
 
 		launchRequest();
 		setUpGui();
@@ -167,8 +162,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				}
 				
 				PaymentResponse paymentResponsePayer = serverPaymentResponse.getPaymentResponsePayer();
-				//TODO simon: verify server answer!
-				// paymentResponsePayer.verify(ClientController.getStorageHandler().getServerPublicKey( (byte) paymentResponsePayer.getKeyNumber()))
+				//verification of server response not needed as no interaction with selling partner
 				if (paymentResponsePayer.getStatus() == ServerResponseStatus.SUCCESS ) {
 					//update textviews
 					receiverUsernameEditText.setText("");
@@ -234,21 +228,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.sendPayment_CHFinBTC), exchangeRate, amountBTC);
 			} catch(NumberFormatException e) {
 				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.sendPayment_CHFinBTC), exchangeRate, amountBTC);
-			}
-		}
-
-		//TODO simon: check if can be removed!
-		
-		//Check if the user defined a fee on the received amount of bitcoin.
-		if(settings.getBoolean("include_fee", false)){
-			String percentageStr = settings.getString("fee_amount", "pref_fee_amount");
-			try{
-				double percentage = 1 + ((double) Integer.valueOf(percentageStr))/100;
-				amountBTC = amountBTC.multiply(new BigDecimal(percentage)).setScale(Constants.SCALE_BTC, RoundingMode.HALF_UP) ;
-				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_BTCIncFee), amountBTC, getApplicationContext());
-				((TextView)findViewById(R.id.sendPayment_BTCIncFeeText)).setText("(" + getResources().getString(R.string.receivePayment_fee) + " " +  percentageStr +"%)");				
-			} catch(NumberFormatException e){
-				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_BTCIncFee), BigDecimal.ZERO, getApplicationContext());
 			}
 		}
 	}
