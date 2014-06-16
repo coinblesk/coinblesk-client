@@ -27,6 +27,8 @@ public class TransactionHandler {
 	private static final String TAG = "TransactionHandler";
 	
 	//TODO: refactor, since no Transaction model class anymore
+	
+	
 //	/**
 //	 * Returns a Transaction request, which contains only the information about
 //	 * the seller (i.e. the authenticated user). This Transaction object needs
@@ -53,7 +55,6 @@ public class TransactionHandler {
 //		return tx;
 //	}
 	
-	//TODO: refactor, since no Transaction model class anymore
 //	/**
 //	 * Signs a Transaction object filled with the information about the seller
 //	 * with the seller's private key (i.e. the authenticated user) and returns a
@@ -67,7 +68,6 @@ public class TransactionHandler {
 //	 * @throws Exception
 //	 */
 //	public static SignedObject signPayment(Transaction tx) throws IllegalArgumentException, Exception {
-//		//TODO jeton: this is not needed here! remove!
 //		if (tx.getAmount() == null || tx.getSellerUsername() == null || tx.getSellerUsername().isEmpty())
 //			throw new IllegalArgumentException();
 //		
@@ -79,7 +79,6 @@ public class TransactionHandler {
 //		return null;
 //	}
 	
-	//TODO: refactor, since no Transaction model class anymore
 //	/**
 //	 * Creates a Transaction object containing information about the buyer and
 //	 * the seller and transmits it to the server in order to execute the
@@ -97,7 +96,6 @@ public class TransactionHandler {
 //	 * @throws Exception
 //	 */
 //	public static Transaction newTransaction(SignedObject signedTransactionBuyer, Handler responseHandler) throws Exception {
-//		//TODO jeton: implement
 ////		Transaction transactionBuyer = KeyHandler.retrieveTransaction(signedTransactionBuyer);
 ////		
 ////		Transaction transactionSeller = requestPayment();

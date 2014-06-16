@@ -134,7 +134,6 @@ public class InternalNfcTransceiver extends NfcTransceiver implements ReaderCall
 		long start = System.currentTimeMillis();
 		int length = 0;
 
-		//TODO: is looping really needed?
 		for (int i = 0; i < 10; i++) {
 			try {
 				messageSplitter = new NfcMessageSplitter(MAX_WRITE_LENGTH);

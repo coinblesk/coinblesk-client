@@ -77,7 +77,6 @@ public class SellerRole {
 	}
 
 	private void proceed(byte[] bytes, Handler protocolHandler) {
-		//TODO jeton: refactor
 //		switch (state) {
 //		case START:
 //			try {
@@ -218,7 +217,6 @@ public class SellerRole {
 			Log.d(TAG, "late send success");
 			state = State.END;
 			Message m = CommUtils.Message.PAYMENT_SUCCESS_SELLER;
-			//TODO: refactor, since no Transaction model class anymore
 //			protocolHandler.obtainMessage(m.getCategory(), m.getCode(), 0, transactionRequest).sendToTarget();
 		}
 	}

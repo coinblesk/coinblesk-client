@@ -64,7 +64,6 @@ public class BuyerRole {
 	
 
 	private PaymentMessage proceed(byte[] bytes, Handler protocolHandler) {
-		//TODO jeton: refactor
 //		switch (state) {
 //		case START:
 //			Log.d(TAG, "Start payment");
