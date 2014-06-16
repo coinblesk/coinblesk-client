@@ -84,7 +84,7 @@ public class AddressBookActivity extends Activity {
 								String username = input.getText().toString();
 								boolean saved = ClientController.getStorageHandler().addAddressBookEntry(username);
 								if (!saved) {
-									//TODO: display message that not saved to xml --> not able to use offline! 
+									Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show(); 
 								}
 								createAddressBookEntries();
 							}
@@ -105,7 +105,7 @@ public class AddressBookActivity extends Activity {
 			public void onClick(View v) {
 				boolean saved = ClientController.getStorageHandler().removeAllUntrustedAddressBookEntries();
 				if (!saved) {
-					//TODO: display message that not saved to xml --> not able to use offline!
+					Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
 				}
 				createAddressBookEntries();
 			}
@@ -136,7 +136,7 @@ public class AddressBookActivity extends Activity {
 						public void onClick(DialogInterface dialog, int which) {
 							boolean saved = ClientController.getStorageHandler().removeAddressBookEntry(username);
 							if (!saved) {
-								//TODO: display message that not saved to xml --> not able to use offline!
+								Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
 							}
 							createAddressBookEntries();
 						}
@@ -154,7 +154,7 @@ public class AddressBookActivity extends Activity {
 					if (ClientController.getStorageHandler().isTrustedContact(username)){
 						boolean saved = ClientController.getStorageHandler().removeTrustedAddressBookEntry(username);
 						if (!saved) {
-							//TODO: display message that not saved to xml --> not able to use offline!
+							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
 						}
 						trusted.setImageResource(R.drawable.ic_not_starred);
 						showToast(getString(R.string.addressBook_removeContact));
@@ -162,7 +162,7 @@ public class AddressBookActivity extends Activity {
 					else{
 						boolean saved = ClientController.getStorageHandler().addTrustedAddressBookEntry(username);
 						if (!saved) {
-							//TODO: display message that not saved to xml --> not able to use offline!
+							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
 						}
 						trusted.setImageResource(R.drawable.ic_starred);
 						showToast(getString(R.string.addressBook_addContact));
