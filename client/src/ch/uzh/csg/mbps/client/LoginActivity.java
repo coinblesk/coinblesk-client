@@ -43,6 +43,8 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 	
 	private CustomKeyPair customKeyPair;
 	
+	private boolean clientControllerInitialized = false;
+	
 	/**
 	 * Called when the activity is first created.
 	 * 
@@ -119,15 +121,19 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 		signIn.execute();
 	}
 	
+	//TODO simon: exactly the same behavior must also be provided in DrawerItemClickListener->reconnect_to_server
 	public void onTaskComplete(CustomResponseObject response) {
-		try {
-			boolean init = ClientController.init(getApplicationContext(), username, password);
-			if (!init) {
-				displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+		if (!clientControllerInitialized) {
+			try {
+				boolean init = ClientController.init(getApplicationContext(), username, password);
+				if (!init) {
+					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+				}
+				clientControllerInitialized = true;
+			} catch (WrongPasswordException e) {
+				displayResponse(getResources().getString(R.string.invalid_password));
+				return;
 			}
-		} catch (WrongPasswordException e) {
-			displayResponse(getResources().getString(R.string.invalid_password));
-			return;
 		}
 		
 		if (response.isSuccessful()) {
@@ -135,7 +141,8 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 				launchReadRequest();
 			} else if (response.getType() == Type.AFTER_LOGIN) {
 				if (response.getClientVersion() != Constants.CLIENT_VERSION) {
-					displayResponse(getResources().getString(R.string.invalid_client_version));
+					dismissProgressDialog();
+					showDialog(getResources().getString(R.string.invalid_client_version_title), R.drawable.ic_alerts_and_states_warning, getResources().getString(R.string.invalid_client_version));
 					return;
 				}
 				

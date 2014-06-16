@@ -23,7 +23,6 @@
     <string name="title_activity_choose_payment">Zahlungsweise auswählen</string>
     <string name="title_activity_address_book">Adressbuch</string>
     
-
     <!-- Login Strings -->
     <string name="loginUsernameEditText">Benutzername</string>
     <string name="loginPasswordEditText">Passwort</string>
@@ -33,9 +32,9 @@
     <string name="enter_username_password">Bitte geben Sie Benutzername und Passwort ein</string>
     <string name="establish_internet_connection">Bitte schalten Sie die Internetverbindung ein um fortzufahren.</string>
     <string name="invalid_password">Falsches Passwort.</string>
+	<string name="invalid_client_version_title">Update verfügbar</string>
 	<string name="invalid_client_version">Bitte updaten Sie diese App. Diese Version is veraltet und wird nicht mehr unterstützt.</string>
     
-
     <!-- Reset Password Activity -->
     <string name="resetPW_descriptionTextView">Um Ihr Passwort zurückzusetzen geben Sie bitte ihre registrierte Email Adresse ein und klicken Sie auf "Passwort zurücksetzen".</string>
     <string name="resetPW_emailEditText">Email Adresse eingeben</string>

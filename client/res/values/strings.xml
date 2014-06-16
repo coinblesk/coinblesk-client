@@ -32,6 +32,7 @@
     <string name="enter_username_password">Please enter a username and a password</string>
     <string name="establish_internet_connection">Please establish a internet connection to proceed.</string>
     <string name="invalid_password">Invalid password</string>
+    <string name="invalid_client_version_title">Update available</string>
     <string name="invalid_client_version">Please update this app. This version is outdated and is no longer supported.</string>
 
     <!-- Reset Password Activity -->
