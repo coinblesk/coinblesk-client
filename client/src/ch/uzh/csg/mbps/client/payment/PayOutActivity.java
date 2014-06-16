@@ -146,11 +146,9 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 				try {
 					BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(payoutAmountEditText.getText().toString());
 					payOutAmount = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
-					
 					CurrencyViewHandler.setToCHF(chfAmount, exchangeRate, payOutAmount);
 				} catch (NumberFormatException e) {
-					Log.e("PayOut", e.getMessage(), e);
-					CurrencyViewHandler.setToCHF(chfAmount, BigDecimal.ZERO, payOutAmount);
+					CurrencyViewHandler.setToCHF(chfAmount, BigDecimal.ZERO, BigDecimal.ZERO);
 				}
 			}
 
@@ -216,6 +214,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
 				chfAmount.setText("");
 				payoutAmountEditText.setText("");
+				payoutAddress.setText("");
 			}
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			exchangeRate = BigDecimal.ZERO;
