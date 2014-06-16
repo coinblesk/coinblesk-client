@@ -47,8 +47,10 @@ import ch.uzh.csg.mbps.customserialization.Currency;
 import ch.uzh.csg.mbps.customserialization.DecoderFactory;
 import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
 import ch.uzh.csg.mbps.customserialization.PaymentRequest;
+import ch.uzh.csg.mbps.customserialization.PaymentResponse;
 import ch.uzh.csg.mbps.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.mbps.customserialization.ServerPaymentResponse;
+import ch.uzh.csg.mbps.customserialization.ServerResponseStatus;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
@@ -148,27 +150,25 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	public void onTaskComplete(CustomResponseObject response) {
 		dismissProgressDialog();
 		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
-		if (response.isSuccessful()) {
-			if(response.getType().equals(Type.EXCHANGE_RATE)){
-				exchangeRate = new BigDecimal(response.getMessage());
-				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.sendPayment_exchangeRate));
-				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
-				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
-				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
-				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
-			} else if (response.getType().equals(Type.CREATE_TRANSACTION)){
-				if (response.isSuccessful()) {
-					byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
-					ServerPaymentResponse serverPaymentResponse = null;
-					try {
-						serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
-					} catch (Exception e) {
-						displayResponse(getResources().getString(R.string.error_transaction_failed));
-						return;
-					}
+		
+		if (response.getType() == Type.CREATE_TRANSACTION) {
+			if (!response.isSuccessful()) {
+				displayResponse(response.getMessage());
+			} else {
+				byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
+				ServerPaymentResponse serverPaymentResponse = null;
+				try {
+					serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
+				} catch (Exception e) {
+					displayResponse(getResources().getString(R.string.error_transaction_failed));
+					return;
+				}
+				
+				PaymentResponse paymentResponsePayer = serverPaymentResponse.getPaymentResponsePayer();
+				if (paymentResponsePayer.getStatus() == ServerResponseStatus.SUCCESS) {
 					String s = String.format(getResources().getString(R.string.payment_notification_success_payer),
-							CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(serverPaymentResponse.getPaymentResponsePayer().getAmount())),
-							serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
+									CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount())),
+									paymentResponsePayer.getUsernamePayee());
 					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
 					boolean saved = ClientController.getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
 					if (!saved) {
@@ -178,11 +178,24 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, response.getMessage());
 				}
 			}
-		} else if(response.getMessage().equals(Constants.REST_CLIENT_ERROR)){
+			
+			return;
+		}
+		
+		if (response.isSuccessful()) {
+			if(response.getType().equals(Type.EXCHANGE_RATE)){
+				exchangeRate = new BigDecimal(response.getMessage());
+				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.sendPayment_exchangeRate));
+				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
+				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
+				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
+			}
+		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			displayResponse(getResources().getString(R.string.no_connection_server));
 			finish();
 			launchActivity(this, MainActivity.class);
-		} else{
+		} else {
 			displayResponse(response.getMessage());
 		}
 	}
