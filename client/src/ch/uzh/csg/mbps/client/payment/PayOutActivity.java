@@ -5,13 +5,16 @@ import java.math.BigDecimal;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -110,6 +113,9 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 		acceptBtn.setOnClickListener(new View.OnClickListener() {
 	  		public void onClick(View v) {
 				if (ClientController.isOnline()) {
+					// hide virtual keyboard
+					InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
+					inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 					launchPayOutRequest();
 				}
 	  		}
@@ -126,8 +132,8 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 			public void onClick(View v) {
 				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
 				BigDecimal amount = CurrencyViewHandler.getBTCAmountInDefinedUnit(balance, getApplicationContext());
-				payoutAmountEditText.setText(CurrencyFormatter.formatBTC(amount));
 				payOutAmount = balance;
+				payoutAmountEditText.setText(amount.toPlainString());
 			}
 		});  
 		
@@ -143,6 +149,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 					
 					CurrencyViewHandler.setToCHF(chfAmount, exchangeRate, payOutAmount);
 				} catch (NumberFormatException e) {
+					Log.e("PayOut", e.getMessage(), e);
 					CurrencyViewHandler.setToCHF(chfAmount, BigDecimal.ZERO, payOutAmount);
 				}
 			}
