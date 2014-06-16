@@ -77,6 +77,8 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 	protected static final String INPUT_UNIT_CHF = "CHF";
 
+	//TODO simon: refactor!
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -149,12 +151,12 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 	public void onTaskComplete(CustomResponseObject response) {
 		dismissProgressDialog();
-		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
 		
 		if (response.getType() == Type.CREATE_TRANSACTION) {
 			if (!response.isSuccessful()) {
 				displayResponse(response.getMessage());
 			} else {
+				
 				byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
 				ServerPaymentResponse serverPaymentResponse = null;
 				try {
@@ -165,7 +167,18 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				}
 				
 				PaymentResponse paymentResponsePayer = serverPaymentResponse.getPaymentResponsePayer();
-				if (paymentResponsePayer.getStatus() == ServerResponseStatus.SUCCESS) {
+				//TODO simon: verify server answer!
+				// paymentResponsePayer.verify(ClientController.getStorageHandler().getServerPublicKey( (byte) paymentResponsePayer.getKeyNumber()))
+				if (paymentResponsePayer.getStatus() == ServerResponseStatus.SUCCESS ) {
+					//update textviews
+					receiverUsernameEditText.setText("");
+					sendAmount.setText("");
+					refreshCurrencyTextViews();
+					BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance().subtract(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount()));
+					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
+					TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
+					balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
+					
 					String s = String.format(getResources().getString(R.string.payment_notification_success_payer),
 									CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount())),
 									paymentResponsePayer.getUsernamePayee());
@@ -178,25 +191,27 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, response.getMessage());
 				}
 			}
-			
 			return;
 		}
 		
-		if (response.isSuccessful()) {
-			if(response.getType().equals(Type.EXCHANGE_RATE)){
-				exchangeRate = new BigDecimal(response.getMessage());
-				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.sendPayment_exchangeRate));
-				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
-				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
-				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
-				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
+		if (response.getType() == Type.EXCHANGE_RATE){
+			CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
+			if (response.isSuccessful()) {
+				if(response.getType().equals(Type.EXCHANGE_RATE)){
+					exchangeRate = new BigDecimal(response.getMessage());
+					CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.sendPayment_exchangeRate));
+					BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
+					TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
+					balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
+				}
+			} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+				displayResponse(getResources().getString(R.string.no_connection_server));
+				finish();
+				launchActivity(this, MainActivity.class);
+			} else {
+				displayResponse(response.getMessage());
 			}
-		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
-			displayResponse(getResources().getString(R.string.no_connection_server));
-			finish();
-			launchActivity(this, MainActivity.class);
-		} else {
-			displayResponse(response.getMessage());
 		}
 	}
 
@@ -222,6 +237,8 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			}
 		}
 
+		//TODO simon: check if can be removed!
+		
 		//Check if the user defined a fee on the received amount of bitcoin.
 		if(settings.getBoolean("include_fee", false)){
 			String percentageStr = settings.getString("fee_amount", "pref_fee_amount");
