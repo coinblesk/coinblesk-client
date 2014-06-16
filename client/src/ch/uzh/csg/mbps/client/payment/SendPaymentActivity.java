@@ -327,23 +327,27 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 	public void createTransaction(){
 		CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
-		try {
-			PaymentRequest paymentRequestPayer = new PaymentRequest(
-					PKIAlgorithm.DEFAULT, 
-					ckp.getKeyNumber(), 
-					ClientController.getStorageHandler().getUserAccount().getUsername(), 
-					receiverUsernameEditText.getText().toString(), 
-					Currency.BTC, 
-					Converter.getLongFromBigDecimal(amountBTC),
-					Currency.CHF, 
-					Converter.getLongFromBigDecimal(inputUnitValue), 
-					System.currentTimeMillis());
+		if(! receiverUsernameEditText.getText().toString().isEmpty() && ! (amountBTC == null)){
+			try {
+				PaymentRequest paymentRequestPayer = new PaymentRequest(
+						PKIAlgorithm.DEFAULT, 
+						ckp.getKeyNumber(), 
+						ClientController.getStorageHandler().getUserAccount().getUsername(), 
+						receiverUsernameEditText.getText().toString(), 
+						Currency.BTC, 
+						Converter.getLongFromBigDecimal(amountBTC),
+						Currency.CHF, 
+						Converter.getLongFromBigDecimal(inputUnitValue), 
+						System.currentTimeMillis());
 
-			paymentRequestPayer.sign(KeyHandler.decodePrivateKey(ckp.getPrivateKey()));
-			ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
-			launchTransactionRequest(serverPaymentRequest);
-		} catch (Exception e) {
-			displayResponse(getResources().getString(R.string.sendPayment_error));
+				paymentRequestPayer.sign(KeyHandler.decodePrivateKey(ckp.getPrivateKey()));
+				ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
+				launchTransactionRequest(serverPaymentRequest);
+			} catch (Exception e) {
+				displayResponse(getResources().getString(R.string.sendPayment_error));
+			}
+		} else {
+			displayResponse(getResources().getString(R.string.fill_necessary_fields));
 		}
 	}
 
