@@ -146,6 +146,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	}
 
 	public void onTaskComplete(CustomResponseObject response) {
+		dismissProgressDialog();
 		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
 		if (response.isSuccessful()) {
 			if(response.getType().equals(Type.EXCHANGE_RATE)){
@@ -155,8 +156,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
 				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
-			}
-			else if (response.getType().equals(Type.CREATE_TRANSACTION)){
+			} else if (response.getType().equals(Type.CREATE_TRANSACTION)){
 				if (response.isSuccessful()) {
 					byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
 					ServerPaymentResponse serverPaymentResponse = null;
@@ -164,6 +164,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 						serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
 					} catch (Exception e) {
 						displayResponse(getResources().getString(R.string.error_transaction_failed));
+						return;
 					}
 					String s = String.format(getResources().getString(R.string.payment_notification_success_payer),
 							CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(serverPaymentResponse.getPaymentResponsePayer().getAmount())),
@@ -181,11 +182,9 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			displayResponse(getResources().getString(R.string.no_connection_server));
 			finish();
 			launchActivity(this, MainActivity.class);
-		}
-		else{
+		} else{
 			displayResponse(response.getMessage());
 		}
-		dismissProgressDialog();
 	}
 
 	private void refreshCurrencyTextViews() {
