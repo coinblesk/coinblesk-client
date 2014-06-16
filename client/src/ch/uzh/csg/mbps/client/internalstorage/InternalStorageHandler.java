@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import android.content.Context;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
@@ -253,14 +254,22 @@ public class InternalStorageHandler {
 	 * @param username to remove
 	 */
 	public boolean removeAddressBookEntry(String username) {
+		boolean isTrusted = trustedAddressbook.contains(username);
+		
 		if (!getAddressBook().contains(username)) {
 			return true;
 		} else {
 			addressbook.remove(username);
+			if (isTrusted) {
+				trustedAddressbook.remove(username);
+			}
 			try {
 				currentXML = xmlData.removeAddressBookContact(currentXML, username);
-				//delete also trusted address book entry if available
-				currentXML = xmlData.removeTrustedAddressBookEntry(currentXML, username);
+
+				if(isTrusted){
+					//delete also trusted address book entry if available
+					currentXML = xmlData.removeTrustedAddressBookEntry(currentXML, username);
+				}
 				encryptAndSave();
 				return true;
 			} catch (Exception e) {
@@ -275,20 +284,23 @@ public class InternalStorageHandler {
 	 * @param context Application Context
 	 */
 	public boolean removeAllUntrustedAddressBookEntries() {
-		Set<String> trustedAddressBook = getTrustedAddressbook();
-		Set<String> addressesToRemove = getAddressBook();
-		
-		addressesToRemove.removeAll(trustedAddressBook);
-		
-		try {
-			for (Iterator<String> it = addressesToRemove.iterator(); it.hasNext();) {
-				String username = it.next();
-				currentXML = xmlData.removeAddressBookContact(currentXML, username);	
-				addressbook.remove(username);
+		Set<String> trustedAddressBook = new TreeSet<String>(getTrustedAddressbook());
+		Set<String> addressesToRemove = new TreeSet<String>(getAddressBook());
+
+		boolean removed = addressesToRemove.removeAll(trustedAddressBook);
+		if(removed){
+			try {
+				for (Iterator<String> it = addressesToRemove.iterator(); it.hasNext();) {
+					String username = it.next();
+					currentXML = xmlData.removeAddressBookContact(currentXML, username);
+					addressbook.remove(username);
+				}
+				encryptAndSave();
+				return true;
+			} catch (Exception e) {
+				return false;
 			}
-			encryptAndSave();
-			return true;
-		} catch (Exception e) {
+		} else{
 			return false;
 		}
 	}
