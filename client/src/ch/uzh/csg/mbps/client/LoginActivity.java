@@ -153,7 +153,6 @@ public class LoginActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 						launchCommitKeyRequest(ckp);
 						return;
 					} catch (Exception e) {
-						//TODO: display message that not saved to xml --> not able to use offline!
 						//TODO: show error that keys not created, cannot use the app for payment (if you see this message repeatedly, try uninstalling and installing again, you will loose no information)
 					}
 				}
