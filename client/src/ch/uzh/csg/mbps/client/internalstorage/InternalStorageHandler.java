@@ -25,9 +25,14 @@ import ch.uzh.csg.mbps.model.UserAccount;
  */
 public class InternalStorageHandler {
 
-	//TODO jeton: implement IPersistencyHandler
-	//TODO jeton: when saving each time adding a persisted crap, it takes way too long because of the encryption!!!
-	//TODO jeton: extract save and document!!!
+	/*
+	 * TODO jeton: implement IPersistencyHandler
+	 * 
+	 * regarding PersistedPaymentRequests: when saving each time adding a
+	 * persisted crap, it takes way too long because of the encryption!!!
+	 * 
+	 * --> extract save and document!!!
+	 */
 
 	private Context context;
 	private String fileName;
