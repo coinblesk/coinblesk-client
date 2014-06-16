@@ -15,7 +15,14 @@ import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
 
-//TODO jeton: javadoc
+/**
+ * Handles storing and retrieving user information which needs to be persisted
+ * locally. The user information is encrypted using
+ * {@link InternalStorageEncrypter}.
+ * 
+ * @author Jeton Memeti
+ * 
+ */
 public class InternalStorageHandler {
 
 	//TODO jeton: implement IPersistencyHandler
@@ -38,6 +45,17 @@ public class InternalStorageHandler {
 	private Set<String> addressbook;
 	private Set<String> trustedAddressbook;
 
+	/**
+	 * Instantiates a new {@link InternalStorageHandler}.
+	 * 
+	 * @param context
+	 *            the application's context used to be able to write on the
+	 *            private storage
+	 * @param username
+	 *            used as filename
+	 * @param password
+	 *            used to encrypt/decrypt the file
+	 */
 	public InternalStorageHandler(Context context, String username, String password) {
 		this.context = context;
 		this.fileName = username+".xml";
@@ -50,6 +68,14 @@ public class InternalStorageHandler {
 		this.userAccount = null;
 	}
 
+	/**
+	 * Initializes the {@link InternalStorageHandler}. This must always be
+	 * called after instantiating a new object. It reads the existing xml file
+	 * or creates a new one if it does not exist.
+	 * 
+	 * @return
+	 * @throws WrongPasswordException
+	 */
 	public boolean init() throws WrongPasswordException {
 		try {
 			if (fileExists()) {
@@ -106,6 +132,12 @@ public class InternalStorageHandler {
 		writeToFileSystem(encrypted);
 	}
 	
+	/**
+	 * Saves the {@link UserAccount} to the internal storage.
+	 * 
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
+	 */
 	public boolean saveUserAccount(UserAccount userAccount) {
 		this.userAccount = userAccount;
 		try {
@@ -117,6 +149,9 @@ public class InternalStorageHandler {
 		}
 	}
 
+	/**
+	 * Returns the {@link UserAccount} from internal storage.
+	 */
 	public UserAccount getUserAccount() {
 		if (userAccount == null) {
 			try {
@@ -127,21 +162,55 @@ public class InternalStorageHandler {
 		return userAccount;
 	}
 	
+	/**
+	 * Sets the user's password and saves it to the internal storage. Uses this
+	 * password from now on to encrypt/decrypt the file.
+	 * 
+	 * @param password
+	 *            the new password
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
+	 */
 	public boolean setUserPassword(String password) {
+		this.password = password;
 		userAccount.setPassword(password);
 		return saveUserAccount(userAccount);
 	}
 
-	public boolean setUserEmail(String saveEmail) {
-		userAccount.setEmail(saveEmail);
+	/**
+	 * Sets the user's email and saves it to the internal storage.
+	 * 
+	 * @param saveEmail
+	 *            the new email address
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
+	 */
+	public boolean setUserEmail(String email) {
+		userAccount.setEmail(email);
 		return saveUserAccount(userAccount);
 	}
 
+	/**
+	 * Sets the user's balance and saves it to the internal storage.
+	 * 
+	 * @param balance
+	 *            the new balance
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
+	 */
 	public boolean setUserBalance(BigDecimal balance) {
 		userAccount.setBalance(balance);
 		return saveUserAccount(userAccount);
 	}
 	
+	/**
+	 * Saves the user's {@link CustomKeyPair} to the internal storage.
+	 * 
+	 * @param customKeyPair
+	 *            the {@link CustomKeyPair} to be saved
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
+	 */
 	public boolean saveKeyPair(CustomKeyPair customKeyPair) {
 		this.userKeyPair = customKeyPair;
 		try {
@@ -153,6 +222,10 @@ public class InternalStorageHandler {
 		}
 	}
 
+	/**
+	 * Returns the user's {@link CustomKeyPair} or null, if it was not set
+	 * before.
+	 */
 	public CustomKeyPair getKeyPair() {
 		if (userKeyPair == null) {
 			try {
@@ -163,6 +236,14 @@ public class InternalStorageHandler {
 		return userKeyPair;
 	}
 	
+	/**
+	 * Saves the server's {@link CustomPublicKey} to the internal storage.
+	 * 
+	 * @param publicKey
+	 *            the {@link CustomPublicKey} to be saved
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
+	 */
 	public boolean saveServerPublicKey(CustomPublicKey publicKey) {
 		this.serverPublicKey = publicKey;
 		try {
@@ -177,7 +258,14 @@ public class InternalStorageHandler {
 		}
 	}
 
-	public CustomPublicKey getServerPublicKey(byte keyNumber) throws Exception {
+	/**
+	 * Returns the server's {@link CustomPublicKey} with the given key number or
+	 * null, if there is no {@link CustomPublicKey} with the given key number.
+	 * 
+	 * @param keyNumber
+	 *            the key number of the {@link CustomPublicKey} to return
+	 */
+	public CustomPublicKey getServerPublicKey(byte keyNumber) {
 		if (serverPublicKey == null) {
 			try {
 				serverPublicKey = xmlData.getServerPublicKey(currentXML, keyNumber);
@@ -187,6 +275,14 @@ public class InternalStorageHandler {
 		return serverPublicKey;
 	}
 	
+	/**
+	 * Saves the server's IP to the internal storage.
+	 * 
+	 * @param ip
+	 *            the server's IP to be saved
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
+	 */
 	public boolean saveServerIP(String ip) {
 		this.serverIp = ip;
 		try {
@@ -198,6 +294,9 @@ public class InternalStorageHandler {
 		}
 	}
 
+	/**
+	 * Returns the server's IP or null, if it was not set before.
+	 */
 	public String getServerIP() {
 		if (serverIp == null) {
 			try {
@@ -212,9 +311,8 @@ public class InternalStorageHandler {
 	 * Returns an alphabetically ordered Set<String> with all usernames stored
 	 * in address book.
 	 * 
-	 * @param context
-	 *            Application Context
-	 * @return Set<String> with all usernames stored in address book.
+	 * @return Set<String> with all usernames stored in address book or null, if
+	 *         there is no such element in the underlying xml
 	 */
 	public Set<String> getAddressBook() {
 		if (addressbook == null) {
@@ -229,8 +327,10 @@ public class InternalStorageHandler {
 	/**
 	 * Adds an entry (username) to the address book of known users.
 	 * 
-	 * @param context Application Context
-	 * @param username to store
+	 * @param username
+	 *            the username to be saved
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
 	 */
 	public boolean addAddressBookEntry(String username) {
 		if (getAddressBook().contains(username)) {
@@ -250,8 +350,10 @@ public class InternalStorageHandler {
 	/**
 	 * Removes an entry (username) from the address book of known users.
 	 * 
-	 * @param context Application Context
-	 * @param username to remove
+	 * @param username
+	 *            the username to be removed
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
 	 */
 	public boolean removeAddressBookEntry(String username) {
 		boolean isTrusted = trustedAddressbook.contains(username);
@@ -281,7 +383,8 @@ public class InternalStorageHandler {
 	/**
 	 * Removes all entries from address book which are not trusted.
 	 * 
-	 * @param context Application Context
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
 	 */
 	public boolean removeAllUntrustedAddressBookEntries() {
 		Set<String> trustedAddressBook = new TreeSet<String>(getTrustedAddressbook());
@@ -306,11 +409,11 @@ public class InternalStorageHandler {
 	}
 	
 	/**
-	 * Returns an alphabetically ordered Set<String> with all usernames of trusted users stored
-	 * in the trusted address book.
+	 * Returns an alphabetically ordered Set<String> with all usernames of
+	 * trusted users stored in the trusted address book.
 	 * 
-	 * @param context
 	 * @return Set<String> with all trusted usernames (alphabetically ordered)
+	 *         or null, if there is no such element in the underlying xml
 	 */
 	public Set<String> getTrustedAddressbook() {
 		if (trustedAddressbook == null) {
@@ -325,8 +428,10 @@ public class InternalStorageHandler {
 	/**
 	 * Adds an entry (username) to the address book of trusted users.
 	 * 
-	 * @param context Application Context
-	 * @param username to store
+	 * @param username
+	 *            the username to be saved
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
 	 */
 	public boolean addTrustedAddressBookEntry(String username) {
 		if (getTrustedAddressbook().contains(username)) {
@@ -346,8 +451,10 @@ public class InternalStorageHandler {
 	/**
 	 * Removes an entry (username) from the address book of trusted users.
 	 * 
-	 * @param context (Application Context)
-	 * @param username to remove
+	 * @param username
+	 *            the username to be removed
+	 * @return true if the file was saved, false if it is just set temporarily
+	 *         but could not be persisted
 	 */
 	public boolean removeTrustedAddressBookEntry(String username) {
 		if (!getTrustedAddressbook().contains(username)) {
@@ -365,13 +472,12 @@ public class InternalStorageHandler {
 	}
 	
 	/**
-	 * Returns boolean which indicates if a given username is saved in
-	 * trustedAddressBook and therefore trusted (true) or not (false).
+	 * Returns if a given username is saved in trustedAddressBook and therefore
+	 * trusted (true) or not (false).
 	 * 
-	 * @param context
-	 *            (Application Context)
-	 * @param username to check
-	 * @return boolean if username is trusted
+	 * @param username
+	 *            to check
+	 * @return if username is trusted
 	 */
 	public boolean isTrustedContact(String username) {
 		return getTrustedAddressbook().contains(username);
