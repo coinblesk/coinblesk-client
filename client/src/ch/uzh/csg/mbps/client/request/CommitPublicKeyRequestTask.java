@@ -10,7 +10,13 @@ import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
-//TODO jeton: javadoc
+/**
+ * This class sends the request to commit a {@link CustomPublicKey} for the
+ * account of the authenticated user.
+ * 
+ * @author Jeton Memeti
+ * 
+ */
 public class CommitPublicKeyRequestTask extends RequestTask {
 	
 	private CustomPublicKey cpk;

@@ -152,7 +152,15 @@ public class CookieHandler {
 		return new HttpEntity(porto, requestHeaders);
 	}
 
-	//TODO jeton: javadoc
+	/**
+	 * Returns a HttpEntity with the cookie in the entity header and a
+	 * {@link CustomPublicKey} object in the entity body. Return null if no
+	 * cookie is stored.
+	 * 
+	 * @param cpk
+	 *            the {@link CustomPublicKey} object to be added to the
+	 *            HttpEntity body
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static HttpEntity getAuthHeaderCustomPublicKey(CustomPublicKey cpk) {
 		if (getCookie() == null || getCookie().equals(""))

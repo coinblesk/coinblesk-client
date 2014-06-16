@@ -26,10 +26,18 @@ import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.util.Converter;
 
-//TODO jeton: javadoc
 /**
- * This class is used to store / read a xml format of the user information
- * from the internal storage.
+ * Generates a xml data string and offers the functionality to manipulate the
+ * content of that xml string in order to be stored on the local storage of the
+ * device. This class contains all the information which needs to be persisted
+ * locally.
+ * 
+ * While some fields are always fetched from the server and changes are not
+ * commited, other information like the KEYPAIR and ADDRESSBOOK exist only on
+ * the device.
+ * 
+ * @author Jeton Memeti
+ * 
  */
 @SuppressLint("DefaultLocale")
 public class InternalXMLData {
@@ -64,6 +72,13 @@ public class InternalXMLData {
 		return ROOT;
 	}
 
+	/**
+	 * Creates an empty xml string containing only the structure of the xml file
+	 * but no content.
+	 * 
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String createEmptyXML() throws Exception {
 		DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
@@ -157,6 +172,17 @@ public class InternalXMLData {
 		return db.parse(is);
 	}
 
+	/**
+	 * Sets the given server IP to the xml and returns the updated xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param ip
+	 *            the server IP to be added
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String setServerIp(String xml, String ip) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -173,6 +199,15 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
+	/**
+	 * Returns the server IP from the given xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to read out the server IP from
+	 * @return the server IP or null, if this field is not set
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String getServerIp(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -192,6 +227,18 @@ public class InternalXMLData {
 		return null;
 	}
 
+	/**
+	 * Sets the server's {@link CustomPublicKey} to the xml and returns the
+	 * updated xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param publicKey
+	 *            the server's {@link CustomPublicKey} to be added
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String setServerPublicKey(String xml, CustomPublicKey publicKey) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -221,7 +268,22 @@ public class InternalXMLData {
 		}
 		return xmlToString(doc);
 	}
-
+	
+	/**
+	 * Returns the server's {@link CustomPublicKey} with the key number provided
+	 * from the given xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to read out the server's
+	 *            {@link CustomPublicKey} from
+	 * @param keyNumber
+	 *            the key number of the {@link CustomPublicKey} to be retrieved
+	 * @return the server's {@link CustomPublicKey} or null, if this field is
+	 *         not set or no {@link CustomPublicKey} with the provided key
+	 *         number could be found
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected CustomPublicKey getServerPublicKey(String xml, byte keyNumber) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -272,6 +334,18 @@ public class InternalXMLData {
 			return new CustomPublicKey(keyNumber, pkiAlgorithm, key);
 	}
 
+	/**
+	 * Sets the {@link UserAccount} to the xml and returns the updated xml
+	 * string.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param userAccount
+	 *            the {@link UserAccount} to be added
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String setUserAccount(String xml, UserAccount userAccount) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -299,7 +373,17 @@ public class InternalXMLData {
 		}
 		return xmlToString(doc);
 	}
-
+	
+	/**
+	 * Returns the {@link UserAccount} from the given xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to read out the {@link UserAccount} from
+	 * @return the {@link UserAccount} or null, if any mandatory property is not
+	 *         set correctly or the {@link UserAccount} is not set
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected UserAccount getUserAccount(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -359,7 +443,19 @@ public class InternalXMLData {
 			
 		}
 	}
-
+	
+	/**
+	 * Sets the user's {@link CustomKeyPair} to the xml and returns the updated
+	 * xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param customKeyPair
+	 *            the {@link CustomKeyPair} to be added
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String setUserKeyPair(String xml, CustomKeyPair customKeyPair) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -387,6 +483,15 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
+	/**
+	 * Returns the user's {@link CustomKeyPair} from the given xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to read out the {@link CustomKeyPair} from
+	 * @return the user's {@link CustomKeyPair} or null, if has not been set
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected CustomKeyPair getUserKeyPair(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -440,6 +545,16 @@ public class InternalXMLData {
 			return new CustomKeyPair(pkiAlgorithm, keyNumber, publicKey, privateKey);
 	}
 
+	/**
+	 * Returns the address book contacts from the given xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to read out the address book entries from
+	 * @return a set of string containing all entries or an empty set, if there
+	 *         are no address book entries
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected Set<String> getAddressBookContacts(String xml) throws Exception{
 		Document doc = stringToXml(xml);
 
@@ -464,7 +579,18 @@ public class InternalXMLData {
 		}
 		return contactsSet;
 	}
-
+	
+	/**
+	 * Adds an address book entry to the xml and returns the updated xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param username
+	 *            the username to add to the address book
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String addAddressBookContact(String xml, String username) throws Exception{
 		Document doc = stringToXml(xml);
 
@@ -483,6 +609,17 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
+	/**
+	 * Returns the trusted address book contacts from the given xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to read out the trusted address book entries
+	 *            from
+	 * @return a set of string containing all trusted contacts or an empty set,
+	 *         if there are not trusted contacts
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected Set<String> getTrusteAddressBookdContacts(String xml) throws Exception{
 		Document doc = stringToXml(xml);
 
@@ -508,6 +645,18 @@ public class InternalXMLData {
 		return trustedContactsSet;
 	}
 
+	/**
+	 * Adds a trusted address book entry to the xml and returns the updated xml
+	 * string.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param username
+	 *            the username to add to the address book
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String addTrustedAddressBookContact(String xml, String username) throws Exception{
 		Document doc = stringToXml(xml);
 
@@ -526,6 +675,18 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
+	/**
+	 * Removes the address book entry with the given username from the xml and
+	 * returns the updated xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param username
+	 *            the username to remove from the address book
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String removeAddressBookContact(String xml, String username) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -549,6 +710,18 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 
+	/**
+	 * Removes the trusted address book entry with the given username from the
+	 * xml and returns the updated xml string.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param username
+	 *            the username to remove from the trusted contacts
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
 	protected String removeTrustedAddressBookEntry(String xml, String username) throws Exception {
 		Document doc = stringToXml(xml);
 
@@ -560,10 +733,10 @@ public class InternalXMLData {
 			if (addressBookChild.getNodeName().equals(TRUSTED_CONTACTS)) {
 
 				NodeList nodeList = addressBookChild.getChildNodes();
-				for(int j=0;j<nodeList.getLength();j++){
+				for (int j = 0; j < nodeList.getLength(); j++) {
 					Node nodeToRemove = nodeList.item(j);
 
-					if(nodeToRemove.getTextContent().equals(username)){
+					if (nodeToRemove.getTextContent().equals(username)) {
 						addressBookChild.removeChild(nodeToRemove);
 					}
 				}
