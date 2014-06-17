@@ -1,12 +1,14 @@
 package ch.uzh.csg.mbps.client.navigation;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
+import ch.uzh.csg.mbps.client.AbstractLoginActivity;
 import ch.uzh.csg.mbps.client.AddressBookActivity;
 import ch.uzh.csg.mbps.client.ChoosePaymentActivity;
 import ch.uzh.csg.mbps.client.HistoryActivity;
@@ -17,9 +19,7 @@ import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.payment.PayInActivity;
 import ch.uzh.csg.mbps.client.payment.PayOutActivity;
 import ch.uzh.csg.mbps.client.profile.AccountProfileActivity;
-import ch.uzh.csg.mbps.client.request.ReadRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
-import ch.uzh.csg.mbps.client.request.SignInRequestTask;
 import ch.uzh.csg.mbps.client.request.SignOutRequestTask;
 import ch.uzh.csg.mbps.client.settings.SettingsActivity;
 import ch.uzh.csg.mbps.client.util.ClientController;
@@ -32,14 +32,14 @@ import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
  * This class represents the navigation drawer. The methods from
  * {@link AbstractAsyncActivity} are not inherited but overridden.
  */
-public class DrawerItemClickListener extends AbstractAsyncActivity implements OnItemClickListener, IAsyncTaskCompleteListener<CustomResponseObject> {
+public class DrawerItemClickListener extends AbstractLoginActivity implements OnItemClickListener, IAsyncTaskCompleteListener<CustomResponseObject> {
 	private View view;
 	private ProgressDialog dialog;
 
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		selectItem(parent, position);
 	}
-	
+
 	/**
 	 * Swaps fragments to guide through views from main view {@link MainActvity}
 	 */
@@ -76,7 +76,7 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 			break;
 		case 7:
 			// Reconnect to Server
-			launchConnectionRequest();
+			launchSignInRequest();
 			break;
 		case 8:
 			// Help
@@ -91,17 +91,15 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 			break;
 		}
 	}
-	
-	private void launchConnectionRequest() {
+
+	protected void launchSignInRequest() {
 		if (!ClientController.isOnline()) {
-			showLoadingProgressDialog();
-			RequestTask signIn = new SignInRequestTask(this, ClientController.getStorageHandler().getUserAccount());
-			signIn.execute();
+			super.launchSignInRequest();
 		} else {
-			displayResponse(view.getContext().getResources().getString(R.string.already_connected_to_server));
+			displayResponse(getContext().getResources().getString(R.string.already_connected_to_server));
 		}
 	}
-	
+
 	private void launchSignOut() {
 		if (ClientController.isOnline()) {
 			if(!TimeHandler.getInstance().determineIfLessThanFiveSecondsLeft()){
@@ -110,53 +108,37 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 				// Dismiss session
 				TimeHandler.getInstance().terminateSession();
 				updateClientControllerAndFinish();
-				displayResponse(view.getContext().getResources().getString(R.string.session_expired));
+				displayResponse(getContext().getResources().getString(R.string.session_expired));
 			}
 		} else {
 			updateClientControllerAndFinish();
 		}
 	}
-	
+
 	private void launchSignOutRequest() {
 		showLoadingProgressDialog();
 		RequestTask signOut = new SignOutRequestTask(this);		
 		signOut.execute();
 	}
-	
+
 	public void onTaskComplete(CustomResponseObject response) {
-		if (response.isSuccessful()) {
-			if (response.getReadAccountTO() != null) {
-				dismissProgressDialog();
-				
-				boolean saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
-				if (!saved) {
-					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-				}
-				
-				ClientController.setOnlineMode(true);
-				launchActivity(MainActivity.class);
-			} else if (response.getType() == Type.LOGIN) {
-				RequestTask read = new ReadRequestTask(this);
-				read.execute();
-			} else if (response.getType() == Type.LOGOUT) {
-				TimeHandler.getInstance().terminateSession();
-				updateClientControllerAndFinish();
-			}
-		} else if (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
-			dismissProgressDialog();
-			displayResponse(response.getMessage());
-		} else {
+		if (response.getType() == Type.LOGOUT) {
+			TimeHandler.getInstance().terminateSession();
+			updateClientControllerAndFinish();
+		} else if (response.getMessage() != null && (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR))) {
 			dismissProgressDialog();
 			displayResponse(response.getMessage());
 		}
+		else
+			super.onTaskComplete(response, getContext());
 	}
-	
+
 	private void updateClientControllerAndFinish() {
 		dismissProgressDialog();
 		ClientController.clear();
-		launchActivity( LoginActivity.class);
+		launchActivity(LoginActivity.class);
 	}
-	
+
 	/**
 	 * Starts a new activity. The method is called only for guiding to another
 	 * activity.
@@ -182,9 +164,9 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 	 *            The message which is shown in a toast call.
 	 */
 	public void displayResponse(String response) {
-		Toast.makeText(this.view.getContext().getApplicationContext(), response, Toast.LENGTH_LONG).show();
+		Toast.makeText(getContext(), response, Toast.LENGTH_LONG).show();
 	}
-	
+
 	/**
 	 * Starts the progress dialog. As long dialog is running other touch actions
 	 * are ignored.
@@ -197,17 +179,18 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 		}
 
 		dialog.setMessage(view.getContext().getResources().getString(R.string.loading_progress_dialog));
-		
+
 		/*
 		 * Runs an UI thread to show the 
 		 * loading progress over another view. 
 		 */
 		runOnUiThread(new Runnable(){
-            public void run() {
-            	dialog.show();
-                }});    
+			public void run() {
+				dialog.show();
+			}});    
 	}
 
+	@Override
 	public void dismissProgressDialog() {
 		try {
 			if (dialog != null) {
@@ -216,4 +199,7 @@ public class DrawerItemClickListener extends AbstractAsyncActivity implements On
 		} catch (Exception e) {}
 	}
 
+	private Context getContext(){
+		return this.view.getContext();
+	}
 }
