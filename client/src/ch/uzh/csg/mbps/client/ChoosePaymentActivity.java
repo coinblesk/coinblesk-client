@@ -1,7 +1,6 @@
 package ch.uzh.csg.mbps.client;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,20 +44,6 @@ public class ChoosePaymentActivity extends AbstractAsyncActivity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.choose_payment, menu);
 		return true;
-	}
-	
-	/**
-	 * Checks the resolution of the device and determines its orientation.
-	 * Smart-phones are in portrait and tablets in landscape view. This method
-	 * is called by every activity. Disables the rotation function of the
-	 * screen.
-	 */
-	public void setScreenOrientation(){
-		if (getResources().getBoolean(R.bool.portrait_only)) {
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		} else {
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		}
 	}
 
 	private void initClickListener() {
