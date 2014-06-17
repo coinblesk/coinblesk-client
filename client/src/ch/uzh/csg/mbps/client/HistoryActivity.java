@@ -182,13 +182,6 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 		if (response.isSuccessful()) {
 			ghto = response.getGetHistoryTO();
 			if (ghto != null) {
-				if (response.getReadAccountTO() != null) {
-					//TODO simon: do we need to get the user account here as well? since already fetched in MainActivity
-					boolean saved = ClientController.getStorageHandler().saveUserAccount(response.getReadAccountTO().getUserAccount());
-					if (!saved) {
-						displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-					}
-				}
 				writeHistory();
 			}
 		} else {
