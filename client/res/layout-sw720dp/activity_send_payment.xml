@@ -114,21 +114,6 @@
             android:layout_alignLeft="@+id/sendPayment_amountText"
             android:layout_below="@+id/sendPayment_amountText" />
 
-        <TextView
-            android:id="@+id/sendPayment_BTCIncFee"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/sendPayment_CHFinBTC"
-            android:layout_below="@+id/sendPayment_CHFinBTC" />
-
-        <TextView
-            android:id="@+id/sendPayment_BTCIncFeeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/sendPayment_BTCIncFee"
-            android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@+id/sendPayment_BTCIncFee" />
-
         <EditText
             android:id="@+id/sendPayment_enterReceiver"
             android:layout_width="wrap_content"
