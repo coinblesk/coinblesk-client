@@ -284,7 +284,7 @@
     <string name="stored_username"></string>
     
     <!-- Settings -->
-    <string name="settings_autoAccept_checkbox_summary">Auto accept payments for trusted payees up to defined limit</string>
+    <string name="settings_autoAccept_checkbox_summary">Auto accept payments for favorite payees up to defined limit</string>
     <string name="settings_autoAccept_checkbox_title">Auto accept payments</string>
     <string name="settings_autoAccept_editText_defaultValue">0.01</string>
     <string name="settings_autoAccept_editText_title">Auto accept limit in Bitcoin</string>
@@ -299,10 +299,10 @@
     <!-- Address Book Strings -->
     <string name="addressBook_title">Address Book</string>
     <string name="addressBook_addContactsButton">Add Contact</string>
-    <string name="addressBook_removeAllUntrustedButton">Remove all untrusted contacts</string>
+    <string name="addressBook_removeAllUntrustedButton">Remove all unfavored contacts</string>
     <string name="addressBook_dialogTitle">Do you really want to delete the following contact from your address book?</string>
-    <string name="addressBook_removeContact">Contact removed from trusted contacts.</string>
-    <string name="addressBook_addContact">Contact added to trusted contacts.</string>
+    <string name="addressBook_removeContact">Contact removed from favorite contacts.</string>
+    <string name="addressBook_addContact">Contact added to favorite contacts.</string>
         <string name="addressBook_addContact_save">Save</string>
     <string name="addressBook_addContact_cancel">Cancel</string>
     <string name="addressBook_addContact_title">Save new contact</string>

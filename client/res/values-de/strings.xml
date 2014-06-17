@@ -288,7 +288,7 @@
     <string name="sharedPreferences_isFirstTime"></string>
 
         <!-- Settings -->
-    <string name="settings_autoAccept_checkbox_summary">Für bevorzugte Verkäufer automatisch Zahlungen akzeptieren bis zu definiertem Limit.</string>
+    <string name="settings_autoAccept_checkbox_summary">Für favorisierte Verkäufer automatisch Zahlungen akzeptieren bis zu definiertem Limit.</string>
     <string name="settings_autoAccept_checkbox_title">Automatisch Zahlungen akzeptieren</string>
         <string name="settings_autoAccept_editText_defaultValue">0.01</string>
     <string name="settings_autoAccept_editText_title">Automatisch akzeptieren Limite in Bitcoin</string>
