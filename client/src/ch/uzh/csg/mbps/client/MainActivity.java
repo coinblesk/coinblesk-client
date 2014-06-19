@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
@@ -37,18 +38,20 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
+import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
 import ch.uzh.csg.mbps.model.HistoryTransaction;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
 import ch.uzh.csg.mbps.responseobject.GetHistoryTransferObject;
 
 /**
  * This class shows the main view of the user with the balance of the user's
  * account. The navigation to different views are handled from this class.
  */
-public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
+public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
 
 	private String[] mDrawerItems;
 	private DrawerLayout mDrawerLayout;
@@ -57,6 +60,10 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
 	private MenuItem menuWarning;
+	private MenuItem sessionCountdownMenuItem;
+	private MenuItem sessionRefreshMenuItem;
+	private TextView sessionCountdown;
+	private CountDownTimer timer;
 	private Button createNewTransactionBtn;
 	public static BigDecimal exchangeRate;
 	private RequestTask getMainActivityValues;
@@ -82,6 +89,7 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
 		checkOnlineModeAndProceed();
 		invalidateOptionsMenu();
+		
 	}
 
 	@Override
@@ -116,7 +124,18 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		menuWarning = menu.findItem(R.id.action_warning);
 		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
-				displayResponse(getResources().getString(R.string.optionMenu_offlineModeHint));
+				launchSignInRequest();
+				return false;
+			}
+		});
+
+		//setup timer
+		sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
+		sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
+		sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
+		sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				launchSignInRequest();
 				return false;
 			}
 		});
@@ -129,10 +148,35 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 		if(menuWarning != null){
 			if(ClientController.isOnline()) {
 				menuWarning.setVisible(false);
+				sessionCountdownMenuItem.setVisible(true);
+				sessionRefreshMenuItem.setVisible(true);
 			} else {
 				menuWarning.setVisible(true);
+				sessionCountdownMenuItem.setVisible(false);
+				sessionRefreshMenuItem.setVisible(false);
 			}
 		}
+	}
+
+	private void startTimer(long duration, long interval) {
+		if(timer != null){
+			timer.cancel();
+		}
+		timer = new CountDownTimer(duration, interval) {
+
+			@Override
+			public void onFinish() {
+				//Session Timeout is already handled by TimeHandler
+			}
+
+			@Override
+			public void onTick(long millisecondsLeft) {
+				int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
+				sessionCountdown.setText(getResources().getString(R.string.menu_sessionCountdown) + " " + TimeHandler.getInstance().formatCountdown(secondsLeft));
+			}
+		};
+
+		timer.start();
 	}
 
 	@Override
@@ -222,9 +266,9 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 	}
 
 	public void onTaskComplete(CustomResponseObject response) {
-		dismissProgressDialog();
 		TextView lastTransactionsTitle = (TextView) findViewById(R.id.mainActivity_lastTransactionsTitle);
-		if (response.isSuccessful()) {
+		if(response.getType() == Type.MAIN_ACTIVITY && response.isSuccessful()) {
+			dismissProgressDialog();
 			exchangeRate = new BigDecimal(response.getMessage());
 			ArrayList<AbstractHistory> transactions = extractLastFewTransactions(response.getGetHistoryTO());
 			ClientController.getStorageHandler().setUserBalance(new BigDecimal(response.getBalance()));
@@ -237,10 +281,18 @@ public class MainActivity extends AbstractAsyncActivity implements IAsyncTaskCom
 			CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance());
 			TextView balanceTv = (TextView) findViewById(R.id.mainActivity_balanceCHF);
 			balanceTv.append(" (1 BTC = " + CurrencyFormatter.formatChf(exchangeRate) + " CHF)");
-		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+			//renew Session Timeout Countdown
+			if(ClientController.isOnline()){
+				startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
+			}
+		} else if (response.getMessage() != null && (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR))) {
+			dismissProgressDialog();
 			reload(getIntent());
 			lastTransactionsTitle.setVisibility(View.INVISIBLE);
 			invalidateOptionsMenu();
+			displayResponse(response.getMessage());
+		} else {
+			super.onTaskComplete(response, getApplicationContext());
 		}
 	}
 

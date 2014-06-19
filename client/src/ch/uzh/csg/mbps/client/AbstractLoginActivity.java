@@ -33,6 +33,9 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 	
 	protected boolean clientControllerInitialized = false;
 	
+	// TODO simon: sets abstractloginactivity as startActivity for TimeHandler,
+	// app crashes after timeout if launched from DrawerItemClickListener
+	
 	protected void launchSignInRequest() {
 		showLoadingProgressDialog();
 		TimeHandler.getInstance().setStartActivity(this);
@@ -59,8 +62,8 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 			if (response.getType() == Type.LOGIN) {
 				launchReadRequest();
 			} else if (response.getType() == Type.AFTER_LOGIN) {
+				dismissProgressDialog();
 				if (response.getClientVersion() != Constants.CLIENT_VERSION) {
-					dismissProgressDialog();
 					showDialog(context.getResources().getString(R.string.invalid_client_version_title), R.drawable.ic_alerts_and_states_warning, context.getResources().getString(R.string.invalid_client_version));
 					return;
 				}

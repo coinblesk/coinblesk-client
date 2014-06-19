@@ -240,6 +240,8 @@
     <string name="drawer_open">Seitennavigation öffnen</string>
     <string name="drawer_close">Seitennavigation schliessen</string>
     <string name="action_warning">Keine Serververbindung! Verbinden Sie sich durch klicken von "Mit Server verbinden" in der Seitennavigation.</string>
+    <string name="menu_sessionCountdown">Verbleibende Sitzungsdauer:</string>
+    <string name="menu_refreshSession">Refresh Session</string>
     <string name="date_time_set">Setzen</string>
     <string name="cancel">Abbrechen</string>
     <string name="dialog_ok">OK</string>

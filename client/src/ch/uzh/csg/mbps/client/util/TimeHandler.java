@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.text.format.Time;
 import android.util.Log;
 import ch.uzh.csg.mbps.client.LoginActivity;
 
@@ -101,5 +102,45 @@ public class TimeHandler extends HandlerThread{
 			}
 		}
 	};
+	
+	/**
+	 * Returns the remaining time as a long until client session is ended and will be logged out.
+	 * @return remaining Session Time as long
+	 */
+	public long getRemainingTime(){
+		long now = System.currentTimeMillis();
+		return (Constants.CLIENT_SESSION_TIMEOUT - (now - mStartTime));
+	}
+	
+	/**
+	 * Formats input in milliseconds as a string with format hh:mm:ss.
+	 * 
+	 * @param improperSeconds (milliseconds to format in hh:mm:ss)
+	 * @return String with countdown format
+	 */
+	public String formatCountdown(int improperSeconds) {
+		Time timeLeft = new Time();
+		timeLeft.hour = 0;
+		timeLeft.minute = 0;
+		timeLeft.second = 0;
+
+		timeLeft.second = improperSeconds;
+		timeLeft.normalize(true);
+
+		String hours = String.valueOf(timeLeft.hour);
+		String minutes = String.valueOf(timeLeft.minute);
+		String seconds = String.valueOf(timeLeft.second);
+
+		if (seconds.length() < 2) {
+			seconds = "0" + seconds;
+		}
+		if (minutes.length() < 2) {
+			minutes = "0" + minutes;
+		}
+		if (hours.length() < 2) {
+			hours = "0" + hours;
+		}
+		return hours + ":" + minutes + ":" + seconds;
+	}
 
 }
