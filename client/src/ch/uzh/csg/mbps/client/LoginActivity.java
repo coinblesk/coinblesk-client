@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -46,6 +47,16 @@ public class LoginActivity extends AbstractLoginActivity implements IAsyncTaskCo
     	
     	initClickListener();
     }
+    
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+    	return false;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		return false;
+	}
     
     public void onTaskComplete(CustomResponseObject response) {
     	super.onTaskComplete(response, getApplicationContext());

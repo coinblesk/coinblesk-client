@@ -3,15 +3,15 @@ package ch.uzh.csg.mbps.client;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity;
 import ch.uzh.csg.mbps.client.payment.SendPaymentActivity;
 import ch.uzh.csg.mbps.client.util.ClientController;
+import ch.uzh.csg.mbps.client.util.TimeHandler;
+import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
-public class ChoosePaymentActivity extends AbstractAsyncActivity {
-	private MenuItem menuWarning;
+public class ChoosePaymentActivity extends AbstractLoginActivity {
 	private Button requestPaymentBtn;
 	private Button sendPaymentBtn;
 	private Button requestPaymentNoNfcBtn;
@@ -40,12 +40,24 @@ public class ChoosePaymentActivity extends AbstractAsyncActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.choose_payment, menu);
+		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		initializeMenuItems(menu);
+		
+		//renew Session Timeout Countdown
+		if(ClientController.isOnline()){
+			startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
+		}
+		
+		invalidateOptionsMenu();
+		return true;
+	}
+	
 	private void initClickListener() {
 
 		requestPaymentBtn.setOnClickListener(new View.OnClickListener() {
@@ -70,22 +82,8 @@ public class ChoosePaymentActivity extends AbstractAsyncActivity {
 			}
 		});
 	}
-	
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		menuWarning = menu.findItem(R.id.action_warning);
-		invalidateOptionsMenu();
-		return true;
-	}
 
-	@Override
-	public void invalidateOptionsMenu() {
-		if(menuWarning != null){
-			if(ClientController.isOnline()) {
-				menuWarning.setVisible(false);
-			} else {
-				menuWarning.setVisible(true);
-			}
-		}
+	public void onTaskComplete(CustomResponseObject response) {
+		super.onTaskComplete(response, getApplicationContext());
 	}
 }

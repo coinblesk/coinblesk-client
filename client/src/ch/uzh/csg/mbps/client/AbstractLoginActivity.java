@@ -5,6 +5,12 @@ import java.security.KeyPair;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.CountDownTimer;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
+import android.widget.TextView;
 import ch.uzh.csg.mbps.client.internalstorage.WrongPasswordException;
 import ch.uzh.csg.mbps.client.request.CommitPublicKeyRequestTask;
 import ch.uzh.csg.mbps.client.request.ReadRequestTask;
@@ -29,6 +35,12 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 	protected static String username;
 	protected static String password;
 	
+	private MenuItem menuWarning;
+	private MenuItem sessionCountdownMenuItem;
+	private MenuItem sessionRefreshMenuItem;
+	private TextView sessionCountdown;
+	private CountDownTimer timer;
+	
 	protected static CustomKeyPair customKeyPair;
 	
 	protected boolean clientControllerInitialized = false;
@@ -42,6 +54,78 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		UserAccount user = new UserAccount(username, null, password);
 		RequestTask signIn = new SignInRequestTask(this, user);
 		signIn.execute();
+	}
+	
+	//TODO simon: create one menutemplate for all activities
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.login, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		initializeMenuItems(menu);
+		invalidateOptionsMenu();
+		return true;
+	}
+	
+	protected void initializeMenuItems(Menu menu){
+		menuWarning = menu.findItem(R.id.action_warning);
+		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				launchSignInRequest();
+				return false;
+			}
+		});
+
+		//setup timer
+		sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
+		sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
+		sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
+		sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				launchSignInRequest();
+				return false;
+			}
+		});
+	}
+	
+	@Override
+	public void invalidateOptionsMenu() {
+		if(menuWarning != null){
+			if(ClientController.isOnline()) {
+				menuWarning.setVisible(false);
+				sessionCountdownMenuItem.setVisible(true);
+				sessionRefreshMenuItem.setVisible(true);
+			} else {
+				menuWarning.setVisible(true);
+				sessionCountdownMenuItem.setVisible(false);
+				sessionRefreshMenuItem.setVisible(false);
+			}
+		}
+	}
+	
+	protected void startTimer(long duration, long interval) {
+		if(timer != null){
+			timer.cancel();
+		}
+		timer = new CountDownTimer(duration, interval) {
+
+			@Override
+			public void onFinish() {
+				//Session Timeout is already handled by TimeHandler
+			}
+
+			@Override
+			public void onTick(long millisecondsLeft) {
+				int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
+				sessionCountdown.setText(getResources().getString(R.string.menu_sessionCountdown) + " " + TimeHandler.getInstance().formatCountdown(secondsLeft));
+			}
+		};
+
+		timer.start();
 	}
 	
 	public void onTaskComplete(CustomResponseObject response, Context context) {

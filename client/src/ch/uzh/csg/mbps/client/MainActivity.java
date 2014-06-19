@@ -13,7 +13,6 @@ import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
@@ -21,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -59,11 +57,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 	private ActionBarDrawerToggle mDrawerToggle;
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
-	private MenuItem menuWarning;
-	private MenuItem sessionCountdownMenuItem;
-	private MenuItem sessionRefreshMenuItem;
-	private TextView sessionCountdown;
-	private CountDownTimer timer;
+	
 	private Button createNewTransactionBtn;
 	public static BigDecimal exchangeRate;
 	private RequestTask getMainActivityValues;
@@ -117,66 +111,6 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main, menu);
 		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		menuWarning = menu.findItem(R.id.action_warning);
-		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-			public boolean onMenuItemClick(MenuItem item) {
-				launchSignInRequest();
-				return false;
-			}
-		});
-
-		//setup timer
-		sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
-		sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
-		sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
-		sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-			public boolean onMenuItemClick(MenuItem item) {
-				launchSignInRequest();
-				return false;
-			}
-		});
-		invalidateOptionsMenu();
-		return true;
-	}
-
-	@Override
-	public void invalidateOptionsMenu() {
-		if(menuWarning != null){
-			if(ClientController.isOnline()) {
-				menuWarning.setVisible(false);
-				sessionCountdownMenuItem.setVisible(true);
-				sessionRefreshMenuItem.setVisible(true);
-			} else {
-				menuWarning.setVisible(true);
-				sessionCountdownMenuItem.setVisible(false);
-				sessionRefreshMenuItem.setVisible(false);
-			}
-		}
-	}
-
-	private void startTimer(long duration, long interval) {
-		if(timer != null){
-			timer.cancel();
-		}
-		timer = new CountDownTimer(duration, interval) {
-
-			@Override
-			public void onFinish() {
-				//Session Timeout is already handled by TimeHandler
-			}
-
-			@Override
-			public void onTick(long millisecondsLeft) {
-				int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
-				sessionCountdown.setText(getResources().getString(R.string.menu_sessionCountdown) + " " + TimeHandler.getInstance().formatCountdown(secondsLeft));
-			}
-		};
-
-		timer.start();
 	}
 
 	@Override
