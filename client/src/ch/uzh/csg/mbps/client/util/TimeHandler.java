@@ -113,21 +113,21 @@ public class TimeHandler extends HandlerThread{
 	}
 	
 	/**
-	 * Formats input in milliseconds as a string with format hh:mm:ss.
+	 * Formats input in milliseconds as a string with format mm:ss. Not
+	 * applicable for inputs bigger than 60minutes.
 	 * 
-	 * @param improperSeconds (milliseconds to format in hh:mm:ss)
+	 * @param improperSeconds
+	 *            (milliseconds to format in mm:ss)
 	 * @return String with countdown format
 	 */
 	public String formatCountdown(int improperSeconds) {
 		Time timeLeft = new Time();
-		timeLeft.hour = 0;
 		timeLeft.minute = 0;
 		timeLeft.second = 0;
 
 		timeLeft.second = improperSeconds;
 		timeLeft.normalize(true);
 
-		String hours = String.valueOf(timeLeft.hour);
 		String minutes = String.valueOf(timeLeft.minute);
 		String seconds = String.valueOf(timeLeft.second);
 
@@ -137,10 +137,7 @@ public class TimeHandler extends HandlerThread{
 		if (minutes.length() < 2) {
 			minutes = "0" + minutes;
 		}
-		if (hours.length() < 2) {
-			hours = "0" + hours;
-		}
-		return hours + ":" + minutes + ":" + seconds;
+		return minutes + ":" + seconds;
 	}
 
 }
