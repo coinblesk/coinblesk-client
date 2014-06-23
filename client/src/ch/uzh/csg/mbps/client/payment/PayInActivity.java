@@ -57,7 +57,7 @@ public class PayInActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.pay_in, menu);
+		getMenuInflater().inflate(R.menu.offline_mode, menu);
 		return true;
 	}
 

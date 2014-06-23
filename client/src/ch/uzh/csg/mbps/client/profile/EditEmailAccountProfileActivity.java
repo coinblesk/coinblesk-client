@@ -51,7 +51,7 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity imple
     
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.edit_email_account_profile, menu);
+		getMenuInflater().inflate(R.menu.offline_mode, menu);
 		return true;
 	}
 	

@@ -53,7 +53,7 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity im
     
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.edit_password_account_profile, menu);
+		getMenuInflater().inflate(R.menu.offline_mode, menu);
 		return true;
 	}
 

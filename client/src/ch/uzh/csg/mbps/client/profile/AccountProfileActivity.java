@@ -60,7 +60,7 @@ public class AccountProfileActivity extends AbstractAsyncActivity implements IAs
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.profile_account, menu);
+		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.offline_mode, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 	

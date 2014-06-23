@@ -76,7 +76,7 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.pay_payment, menu);
+		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.main, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 

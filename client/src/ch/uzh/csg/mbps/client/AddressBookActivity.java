@@ -44,7 +44,7 @@ public class AddressBookActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.send_payment, menu);
+		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.offline_mode, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 

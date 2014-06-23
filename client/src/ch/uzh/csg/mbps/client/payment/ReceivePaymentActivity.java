@@ -10,12 +10,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -34,13 +36,13 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
+import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
 /**
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
  */
 public class ReceivePaymentActivity extends AbstractPaymentActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
-	private MenuItem menuWarning;
 	private String[] strings = { "CHF", "BTC" };
 	protected CalculatorDialog newFragment;
 	protected static BigDecimal amountBTC = BigDecimal.ZERO;
@@ -50,7 +52,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private TextView descriptionOfInputUnit;
 	private SharedPreferences settings;
 	AnimationDrawable nfcActivityAnimation;
-	
+
+	private MenuItem menuWarning;
+	private MenuItem sessionCountdownMenuItem;
+	private MenuItem sessionRefreshMenuItem;
+	private TextView sessionCountdown;
+	private CountDownTimer timer;
+
 	protected static final String INPUT_UNIT_CHF = "CHF";
 
 	@Override
@@ -59,21 +67,21 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_receive_payment);
 		setScreenOrientation();
-		
+
 		Constants.inputUnit = INPUT_UNIT_CHF;
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		exchangeRate = BigDecimal.ZERO;
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
-		
+
 		receiveAmount = (EditText) findViewById(R.id.receivePayment_amountText);
 		receiveAmount.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				openCalculatorDialog();			
 			}
 		});
-		
+
 		receiveAmount.setFocusable(false);
-		
+
 		descriptionOfInputUnit = (TextView)findViewById(R.id.receivePayment_enterAmountIn);
 		launchRequest();
 
@@ -81,9 +89,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		spinner.setAdapter(new MyAdapter(this, R.layout.spinner_currency, strings));
 		spinner.setOnItemSelectedListener(spinnerListener);
 		spinner.setSelection(0);
-		
+
 		refreshCurrencyTextViews();
-		
+
 		//adapt view for actively sending instead of requesting bitcoins
 		Intent myIntent = getIntent(); // gets the previously created intent
 		boolean isSend = myIntent.getBooleanExtra("isSend", false); 
@@ -105,26 +113,72 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.receive_payment, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		menuWarning = menu.findItem(R.id.action_warning);
-		invalidateOptionsMenu();
+		inflater.inflate(R.menu.main, menu);
 		return true;
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		initializeMenuItems(menu);
+		invalidateOptionsMenu();
+		return true;
+	}
+
+	protected void initializeMenuItems(Menu menu){
+		menuWarning = menu.findItem(R.id.action_warning);
+		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				launchRequest();
+				return false;
+			}
+		});
+
+		//setup timer
+		sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
+		sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
+		sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
+		sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				launchRequest();
+				return false;
+			}
+		});
+	}
+
+	@Override
 	public void invalidateOptionsMenu() {
-		if (menuWarning != null) {
-			if (ClientController.isOnline()) {
+		if(menuWarning != null){
+			if(ClientController.isOnline()) {
 				menuWarning.setVisible(false);
+				sessionCountdownMenuItem.setVisible(true);
+				sessionRefreshMenuItem.setVisible(true);
 			} else {
 				menuWarning.setVisible(true);
+				sessionCountdownMenuItem.setVisible(false);
+				sessionRefreshMenuItem.setVisible(false);
 			}
 		}
+	}
+
+	protected void startTimer(long duration, long interval) {
+		if(timer != null){
+			timer.cancel();
+		}
+		timer = new CountDownTimer(duration, interval) {
+
+			@Override
+			public void onFinish() {
+				//Session Timeout is already handled by TimeHandler
+			}
+
+			@Override
+			public void onTick(long millisecondsLeft) {
+				int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
+				sessionCountdown.setText(getResources().getString(R.string.menu_sessionCountdown) + " " + TimeHandler.getInstance().formatCountdown(secondsLeft));
+			}
+		};
+
+		timer.start();
 	}
 
 	@Override
@@ -135,10 +189,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			getExchangeRate.execute();
 		}
 	}
-	
+
 	public void onTaskComplete(CustomResponseObject response) {
 		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.exchangeRate));	
 		if (response.isSuccessful()) {
+			//renew Session Timeout Countdown
+			if(ClientController.isOnline()){
+				startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
+			}
 			exchangeRate = new BigDecimal(response.getMessage());
 			CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.exchangeRate));
 			BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
@@ -174,7 +232,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.receivePayment_CHFinBTC), exchangeRate, amountBTC);
 			}
 		}
-		
+
 		//Check if the user defined a fee on the received amount of bitcoin.
 		if(settings.getBoolean("include_fee", false)){
 			String percentageStr = settings.getString("fee_amount", "pref_fee_amount");
@@ -193,11 +251,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		newFragment = new CalculatorDialog(this);
 		newFragment.show();
 		newFragment.setOnDismissListener(new OnDismissListener() {
-			
+
 			public void onDismiss(DialogInterface dialog) {
 				receiveAmount.setText(Constants.inputValueCalculator.toString());
 				refreshCurrencyTextViews();
-				
+
 				//show nfc instructions
 				findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.VISIBLE);;
 				//create animated nfc activity image
@@ -210,11 +268,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	}
 
 	//TODO: refactor, since no Transaction model class anymore
-//	@Override
-//	protected void updateGUI(Transaction tx) {
-//		//nothing to update on the seller side
-//	}
-	
+	//	@Override
+	//	protected void updateGUI(Transaction tx) {
+	//		//nothing to update on the seller side
+	//	}
+
 	@Override
 	protected void resetGUI() {
 		receiveAmount.setText("");
@@ -222,7 +280,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	}
 
 	private class MyAdapter extends ArrayAdapter<String> {
-		
+
 		public MyAdapter(Context context, int textViewResourceId, String[] objects) {
 			super(context, textViewResourceId, objects);
 		}
@@ -246,7 +304,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			return row;
 		}
 	}
-	
+
 	private OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
 
 		public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -254,14 +312,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				Constants.inputUnit = INPUT_UNIT_CHF;
 			else
 				Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
-			
+
 			descriptionOfInputUnit.setText(Constants.inputUnit);
 			refreshCurrencyTextViews();
 		}
 
 		public void onNothingSelected(AdapterView<?> parent) {
 		}
-		
+
 	};
-	
+
 }

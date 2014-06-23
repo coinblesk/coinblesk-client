@@ -70,7 +70,7 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.setting_pay_out_rules, menu);
+		getMenuInflater().inflate(R.menu.offline_mode, menu);
 		return true;
 	}
 	

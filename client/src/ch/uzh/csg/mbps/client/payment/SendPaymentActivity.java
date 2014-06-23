@@ -12,11 +12,13 @@ import android.content.DialogInterface.OnDismissListener;
 import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
@@ -41,6 +43,7 @@ import ch.uzh.csg.mbps.client.security.KeyHandler;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
+import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.customserialization.Currency;
 import ch.uzh.csg.mbps.customserialization.DecoderFactory;
 import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
@@ -59,7 +62,6 @@ import ch.uzh.csg.mbps.util.Converter;
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
  */
 public class SendPaymentActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
-	private MenuItem menuWarning;
 	private String[] currencies = { "CHF", "BTC" };
 	protected CalculatorDialog calculatorDialogFragment;
 	protected static BigDecimal amountBTC = BigDecimal.ZERO;
@@ -72,10 +74,16 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	private Button addressBookButton;
 	public static EditText receiverUsernameEditText;
 
+	private MenuItem menuWarning;
+	private MenuItem sessionCountdownMenuItem;
+	private MenuItem sessionRefreshMenuItem;
+	private TextView sessionCountdown;
+	private CountDownTimer timer;
+
 	protected static final String INPUT_UNIT_CHF = "CHF";
 
 	//TODO simon: refactor!
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -101,26 +109,72 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.send_payment, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		menuWarning = menu.findItem(R.id.action_warning);
-		invalidateOptionsMenu();
+		inflater.inflate(R.menu.main, menu);
 		return true;
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		initializeMenuItems(menu);
+		invalidateOptionsMenu();
+		return true;
+	}
+
+	protected void initializeMenuItems(Menu menu){
+		menuWarning = menu.findItem(R.id.action_warning);
+		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				launchRequest();
+				return false;
+			}
+		});
+
+		//setup timer
+		sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
+		sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
+		sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
+		sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				launchRequest();
+				return false;
+			}
+		});
+	}
+
+	@Override
 	public void invalidateOptionsMenu() {
-		if (menuWarning != null) {
-			if (ClientController.isOnline()) {
+		if(menuWarning != null){
+			if(ClientController.isOnline()) {
 				menuWarning.setVisible(false);
+				sessionCountdownMenuItem.setVisible(true);
+				sessionRefreshMenuItem.setVisible(true);
 			} else {
 				menuWarning.setVisible(true);
+				sessionCountdownMenuItem.setVisible(false);
+				sessionRefreshMenuItem.setVisible(false);
 			}
 		}
+	}
+
+	protected void startTimer(long duration, long interval) {
+		if(timer != null){
+			timer.cancel();
+		}
+		timer = new CountDownTimer(duration, interval) {
+
+			@Override
+			public void onFinish() {
+				//Session Timeout is already handled by TimeHandler
+			}
+
+			@Override
+			public void onTick(long millisecondsLeft) {
+				int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
+				sessionCountdown.setText(getResources().getString(R.string.menu_sessionCountdown) + " " + TimeHandler.getInstance().formatCountdown(secondsLeft));
+			}
+		};
+
+		timer.start();
 	}
 
 	protected void launchRequest() {
@@ -147,11 +201,15 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 	public void onTaskComplete(CustomResponseObject response) {
 		dismissProgressDialog();
-		
+
 		if (response.getType() == Type.CREATE_TRANSACTION) {
 			if (!response.isSuccessful()) {
 				displayResponse(response.getMessage());
 			} else {
+				//renew Session Timeout Countdown
+				if(ClientController.isOnline()){
+					startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
+				}
 				
 				byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
 				ServerPaymentResponse serverPaymentResponse = null;
@@ -161,7 +219,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					displayResponse(getResources().getString(R.string.error_transaction_failed));
 					return;
 				}
-				
+
 				PaymentResponse paymentResponsePayer = serverPaymentResponse.getPaymentResponsePayer();
 				//verification of server response not needed as no interaction with selling partner
 				if (paymentResponsePayer.getStatus() == ServerResponseStatus.SUCCESS ) {
@@ -173,10 +231,10 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 					TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
 					balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
-					
+
 					String s = String.format(getResources().getString(R.string.payment_notification_success_payer),
-									CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount())),
-									paymentResponsePayer.getUsernamePayee());
+							CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount())),
+							paymentResponsePayer.getUsernamePayee());
 					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
 					boolean saved = ClientController.getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
 					if (!saved) {
@@ -188,25 +246,27 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			}
 			return;
 		}
-		
-		if (response.getType() == Type.EXCHANGE_RATE){
+
+		else if (response.getType() == Type.EXCHANGE_RATE){
 			CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
 			if (response.isSuccessful()) {
-				if(response.getType().equals(Type.EXCHANGE_RATE)){
-					exchangeRate = new BigDecimal(response.getMessage());
-					CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.sendPayment_exchangeRate));
-					BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
-					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
-					TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
-					balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
+				//renew Session Timeout Countdown
+				if(ClientController.isOnline()){
+					startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 				}
-			} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
-				displayResponse(getResources().getString(R.string.no_connection_server));
-				finish();
-				launchActivity(this, MainActivity.class);
-			} else {
-				displayResponse(response.getMessage());
+				exchangeRate = new BigDecimal(response.getMessage());
+				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.sendPayment_exchangeRate));
+				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
+				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
+				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
 			}
+		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+			displayResponse(getResources().getString(R.string.no_connection_server));
+			finish();
+			launchActivity(this, MainActivity.class);
+		} else {
+			displayResponse(response.getMessage());
 		}
 	}
 

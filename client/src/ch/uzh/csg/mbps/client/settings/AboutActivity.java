@@ -34,7 +34,7 @@ public class AboutActivity extends AbstractAsyncActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.about, menu);
+		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.offline_mode, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 

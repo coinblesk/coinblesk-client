@@ -6,10 +6,13 @@ import java.util.Comparator;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -24,6 +27,7 @@ import ch.uzh.csg.mbps.client.request.HistoryRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
+import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
@@ -36,7 +40,6 @@ import ch.uzh.csg.mbps.responseobject.GetHistoryTransferObject;
  * authenticated user.
  */
 public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
-	private MenuItem menuWarning;
 	private GetHistoryTransferObject ghto;
 	private Spinner filterSpinner;
 	
@@ -44,6 +47,12 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 	private int payInResultsPerPage;
 	private int payOutResultsPerPage;
 	private int txPage, txPayInPage, txPayOutPage = 0;
+	
+	private MenuItem menuWarning;
+	private MenuItem sessionCountdownMenuItem;
+	private MenuItem sessionRefreshMenuItem;
+	private TextView sessionCountdown;
+	private CountDownTimer timer;
 	
 	private enum Filter {
 		TX(0),
@@ -87,33 +96,81 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
     
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.history, menu);
-		return super.onCreateOptionsMenu(menu);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main, menu);
+		return true;
 	}
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-    	menuWarning = menu.findItem(R.id.action_warning);
-        invalidateOptionsMenu();
-        return true;
-    }
-    
 	@Override
-    public void invalidateOptionsMenu() {
-    	if(menuWarning != null){
-        	if(ClientController.isOnline()) {
-                menuWarning.setVisible(false);
-                if (filterSpinner != null) {
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		initializeMenuItems(menu);
+		invalidateOptionsMenu();
+		return true;
+	}
+
+	protected void initializeMenuItems(Menu menu){
+		menuWarning = menu.findItem(R.id.action_warning);
+		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				setupSpinner();
+				return false;
+			}
+		});
+
+		//setup timer
+		sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
+		sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
+		sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
+		sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				setupSpinner();;
+				return false;
+			}
+		});
+	}
+
+	@Override
+	public void invalidateOptionsMenu() {
+		if(menuWarning != null){
+			if(ClientController.isOnline()) {
+				menuWarning.setVisible(false);
+				sessionCountdownMenuItem.setVisible(true);
+				sessionRefreshMenuItem.setVisible(true);
+			    if (filterSpinner != null) {
                 	filterSpinner.setEnabled(true);
                 }
-            } else {
-            	menuWarning.setVisible(true);
-                if (filterSpinner != null) {
-                	filterSpinner.setEnabled(false);
-                }
-            }
-    	}
-    }
+			} else {
+				menuWarning.setVisible(true);
+				sessionCountdownMenuItem.setVisible(false);
+				sessionRefreshMenuItem.setVisible(false);
+				 if (filterSpinner != null) {
+	                	filterSpinner.setEnabled(false);
+	                }
+			}
+		}
+	}
+
+	protected void startTimer(long duration, long interval) {
+		if(timer != null){
+			timer.cancel();
+		}
+		timer = new CountDownTimer(duration, interval) {
+
+			@Override
+			public void onFinish() {
+				//Session Timeout is already handled by TimeHandler
+			}
+
+			@Override
+			public void onTick(long millisecondsLeft) {
+				int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
+				sessionCountdown.setText(getResources().getString(R.string.menu_sessionCountdown) + " " + TimeHandler.getInstance().formatCountdown(secondsLeft));
+			}
+		};
+
+		timer.start();
+	}
+    
     
 	/**
 	 * Creates the spinner where the user can choose between custom
@@ -174,12 +231,20 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 		dismissProgressDialog();
 		
 		if (response.getType() == CustomResponseObject.Type.HISTORY_EMAIL) {
+			//renew Session Timeout Countdown
+			if(ClientController.isOnline()){
+				startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
+			}
 			displayResponse(response.getMessage());
 			ghto = null;
 			return;
 		}
 		
 		if (response.isSuccessful()) {
+			//renew Session Timeout Countdown
+			if(ClientController.isOnline()){
+				startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
+			}
 			ghto = response.getGetHistoryTO();
 			if (ghto != null) {
 				writeHistory();

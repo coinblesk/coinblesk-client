@@ -60,7 +60,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.login, menu);
+		inflater.inflate(R.menu.main, menu);
 		return true;
 	}
 
