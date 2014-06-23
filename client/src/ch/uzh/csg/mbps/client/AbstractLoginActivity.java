@@ -56,7 +56,6 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		signIn.execute();
 	}
 	
-	//TODO simon: create one menutemplate for all activities
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
