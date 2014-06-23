@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
@@ -201,6 +202,8 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 
 	public void onTaskComplete(CustomResponseObject response) {
 		TextView lastTransactionsTitle = (TextView) findViewById(R.id.mainActivity_lastTransactionsTitle);
+		String s = String.format(getResources().getString(R.string.lastFewTransactionsTitle), getNumberOfLastTransactions());
+		lastTransactionsTitle.setText(s);
 		if(response.getType() == Type.MAIN_ACTIVITY && response.isSuccessful()) {
 			dismissProgressDialog();
 			exchangeRate = new BigDecimal(response.getMessage());
@@ -259,11 +262,17 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			return o1.getTimestamp().compareTo(o2.getTimestamp());
 		}
 	}
+	
+	private int getNumberOfLastTransactions(){
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		String value =  sharedPref.getString("numberOfLastTransactions", "3");
+		return Integer.parseInt(value);
+	}
 
 	private void createHistoryViews(ArrayList<AbstractHistory> history) {
 		LinearLayout linearLayout = (LinearLayout)findViewById(R.id.mainActivity_history);
 		linearLayout.removeAllViews();
-		for(int i = 0; i < 3; i++){
+		for(int i = 0; i < getNumberOfLastTransactions(); i++){
 			if(i<history.size()){
 				TextView tView = new TextView(getApplicationContext());
 				tView.setGravity(Gravity.LEFT);

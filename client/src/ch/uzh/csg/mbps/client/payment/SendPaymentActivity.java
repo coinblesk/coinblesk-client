@@ -243,10 +243,9 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				} else if (paymentResponsePayer.getStatus() == ServerResponseStatus.DUPLICATE_REQUEST) {
 					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, getResources().getString(R.string.transaction_duplicate_error));
 				} else {
-					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, response.getMessage());
+					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, paymentResponsePayer.getReason());
 				}
 			}
-			return;
 		} else if (response.getType() == Type.EXCHANGE_RATE){
 			CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
 			if (response.isSuccessful()) {

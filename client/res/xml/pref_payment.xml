@@ -40,4 +40,17 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="@string/settings_autoAccept_editText_title" />
+     
+     <EditTextPreference
+        android:defaultValue="3"
+        android:inputType="numberDecimal"
+        android:numeric="integer"
+        android:key="numberOfLastTransactions"
+        android:maxLength="1"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="false"
+        android:title="@string/sharedPreferences_numberOfLastTransactionsTitle" 
+        android:summary="@string/sharedPreferences_numberOfLastTransactionsDescription"/>
+     
 </PreferenceScreen>

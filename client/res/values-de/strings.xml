@@ -61,7 +61,7 @@
     <!-- Main View Strings -->
     <string name="mainActivityTextView">Kontoübersicht</string>
     <string name="payButton">Neue Transaktion erstellen</string>
-    <string name="last5TransactionsTitle">Ihre letzten 3 Transaktionen:</string>
+    <string name="lastFewTransactionsTitle">Ihre letzten %1$s Transaktionen:</string>
     <string name="mainActivity_processTransactionTitle">Transaktion ausführen</string>
     <string name="mainActivity_processTransactionInstruction">(Geräte zusammenhalten um bereits eingeleitete Transaktion zu verarbeiten)</string>
     <string name="mainActivity_or">ODER</string>
@@ -127,7 +127,6 @@
     <string name="sendPayment_balanceTitle">Kontostand:</string>
     <string name="sendPayment_selectReceiver">Empfänger auswählen</string>
     <string name="sendPayment_error">Probleme beim Erstellen der Transaktion. Bitte versuchen Sie es später erneut.</string>
-    <string name="transaction_duplicate_error">Diese Transaktion wurde vom Server zurückgewiesen da eine Transaktion mit identischem Zeitstempel bereits verbucht wurde.</string>
 
         <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">Sie haben %1$s BTC an %2$s gesendet.</string>
@@ -289,6 +288,8 @@
     <!-- Shared Preferences -->
     <string name="stored_username"></string>
     <string name="sharedPreferences_isFirstTime"></string>
+    <string name="sharedPreferences_numberOfLastTransactionsTitle">Anzahl letzter Transaktionen</string>
+    <string name="sharedPreferences_numberOfLastTransactionsDescription">Anzahl anzuzeigende letzte Transaktionen in Kontoübersicht (Nummer zwischen 1 und 5 eingeben)</string>
 
         <!-- Settings -->
     <string name="settings_autoAccept_checkbox_summary">Für favorisierte Verkäufer automatisch Zahlungen akzeptieren bis zu definiertem Limit.</string>
@@ -316,4 +317,6 @@
     <!-- Error Strings -->
     <string name="error_xmlSave_failed">Lokale XML Datei konnte nicht gespeichert werden. Wenn dies öfters geschieht versuchen Sie das Problem durch löschen der MBPS Applikationsdaten in den Android Einstellungen zu beheben.</string>
     <string name="error_transaction_failed">Übermittlungsfehler. Bitte prüfen Sie den Transaktionsverlauf um zu sehen ob ihre Transaktion erfolgreich war.</string>
+    <string name="transaction_duplicate_error">Diese Transaktion wurde vom Server zurückgewiesen da eine Transaktion mit identischem Zeitstempel bereits verbucht wurde.</string>
+    
 </resources>

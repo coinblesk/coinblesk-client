@@ -61,7 +61,7 @@
     <!-- Main View Strings -->
     <string name="mainActivityTextView">Account Overview</string>
     <string name="payButton">Create new transaction</string>
-    <string name="last5TransactionsTitle">Your last 3 transactions:</string>
+    <string name="lastFewTransactionsTitle">Your last %1$s transactions:</string>
     <string name="mainActivity_processTransactionTitle">Process Transaction</string>
     <string name="mainActivity_processTransactionInstruction">(Hold devices together to process transaction initiated by counterparty)</string>
     <string name="mainActivity_or">OR</string>
@@ -126,7 +126,7 @@
     <string name="sendPayment_balanceTitle">Balance:</string>
     <string name="sendPayment_selectReceiver">Select receiver</string>
     <string name="sendPayment_error">Problems occurred while sending your transaction. Please try again later.</string>
-    <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
+   
     
     
     <!-- Payment Notifications -->
@@ -286,6 +286,9 @@
     <!-- Shared Preferences -->
     <string name="sharedPreferences_isFirstTime">isFirstTime</string>
     <string name="stored_username"></string>
+    <string name="sharedPreferences_numberOfLastTransactionsTitle">Number of last transactions</string>
+    <string name="sharedPreferences_numberOfLastTransactionsDescription">Number of last transactions to show in account overview (enter number from 1 to 5)</string>
+    
     
     <!-- Settings -->
     <string name="settings_autoAccept_checkbox_summary">Auto accept payments for favorite payees up to defined limit</string>
@@ -307,7 +310,7 @@
     <string name="addressBook_dialogTitle">Do you really want to delete the following contact from your address book?</string>
     <string name="addressBook_removeContact">Contact removed from favorite contacts.</string>
     <string name="addressBook_addContact">Contact added to favorite contacts.</string>
-        <string name="addressBook_addContact_save">Save</string>
+    <string name="addressBook_addContact_save">Save</string>
     <string name="addressBook_addContact_cancel">Cancel</string>
     <string name="addressBook_addContact_title">Save new contact</string>
     <string name="addressBook_addContact_message">Please enter the username of the contact you would like to save:</string>
@@ -315,4 +318,5 @@
     <!-- Error Strings -->
     <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting MBPS app preferences in Android Settings.</string>
     <string name="error_transaction_failed">Transmission error. Please check your history if transaction was successful.</string>
+     <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
 </resources>
