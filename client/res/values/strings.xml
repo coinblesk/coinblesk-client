@@ -126,6 +126,8 @@
     <string name="sendPayment_balanceTitle">Balance:</string>
     <string name="sendPayment_selectReceiver">Select receiver</string>
     <string name="sendPayment_error">Problems occurred while sending your transaction. Please try again later.</string>
+    <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
+    
     
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">You paid %1$s BTC to %2$s</string>

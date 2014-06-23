@@ -240,14 +240,14 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					if (!saved) {
 						displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 					}
+				} else if (paymentResponsePayer.getStatus() == ServerResponseStatus.DUPLICATE_REQUEST) {
+					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, getResources().getString(R.string.transaction_duplicate_error));
 				} else {
 					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, response.getMessage());
 				}
 			}
 			return;
-		}
-
-		else if (response.getType() == Type.EXCHANGE_RATE){
+		} else if (response.getType() == Type.EXCHANGE_RATE){
 			CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
 			if (response.isSuccessful()) {
 				//renew Session Timeout Countdown
