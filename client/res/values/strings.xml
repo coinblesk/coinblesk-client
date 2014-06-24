@@ -315,6 +315,14 @@
     <string name="addressBook_addContact_title">Save new contact</string>
     <string name="addressBook_addContact_message">Please enter the username of the contact you would like to save:</string>
     
+       <!-- History Transaction Strings -->
+    <string name="history_from">From:</string>
+    <string name="history_to">To:</string>
+    <string name="history_amount">Amount:</string>
+    <string name="history_payIn">PayOut Transaction:</string>
+    <string name="history_payOut">PayIn Transaction:</string>
+    <string name="history_payOutTo">to address:</string>
+    
     <!-- Error Strings -->
     <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting MBPS app preferences in Android Settings.</string>
     <string name="error_transaction_failed">Transmission error. Please check your history if transaction was successful.</string>

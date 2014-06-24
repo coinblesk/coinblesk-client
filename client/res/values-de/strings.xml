@@ -314,6 +314,14 @@
     <string name="addressBook_addContact_title">Neuen Kontakt speichern</string>
     <string name="addressBook_addContact_message">Geben Sie bitte den Benutzername des Konakts ein den sie gerne speichern möchten:</string>
     
+    <!-- History Transaction Strings -->
+    <string name="history_from">Von:</string>
+    <string name="history_to">An:</string>
+    <string name="history_amount">Betrag:</string>
+    <string name="history_payIn">Einzahlungs-Transaktion vom BTC Netzwerk:</string>
+    <string name="history_payOut">Auszahlungs-Transaktion:</string>
+    <string name="history_payOutTo">an Adresse:</string>
+    
     <!-- Error Strings -->
     <string name="error_xmlSave_failed">Lokale XML Datei konnte nicht gespeichert werden. Wenn dies öfters geschieht versuchen Sie das Problem durch löschen der MBPS Applikationsdaten in den Android Einstellungen zu beheben.</string>
     <string name="error_transaction_failed">Übermittlungsfehler. Bitte prüfen Sie den Transaktionsverlauf um zu sehen ob ihre Transaktion erfolgreich war.</string>

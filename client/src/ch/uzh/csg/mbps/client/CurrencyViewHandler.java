@@ -70,6 +70,22 @@ public class CurrencyViewHandler {
 	}
 	
 	/**
+	 * The bitcoin balance of a user is represented in decimal format with an
+	 * precision of eight digits. The bitcoin balance can be shown in three
+	 * different units. Returns a String representation of the bitcoin value in
+	 * the corresponding chosen BTC-unit.
+	 * 
+	 * @param amountBtc
+	 * @param context
+	 * @return String with BTC value formatted in proper currency
+	 */
+	public static String formatBTCAsString(BigDecimal amountBtc, Context context) {
+		BigDecimal amount = getBTCAmountInDefinedUnit(amountBtc, context);
+		return CurrencyFormatter.formatBTC(amount) + " " + getBitcoinUnit(context);
+	}
+	
+	
+	/**
 	 * Converts the the entered amount from CHF to bitcoin.
 	 * 
 	 * @param exchangeRate

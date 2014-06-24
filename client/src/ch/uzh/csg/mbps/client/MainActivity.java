@@ -37,6 +37,7 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
+import ch.uzh.csg.mbps.client.util.HistoryTransactionFormatter;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
@@ -280,7 +281,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 				int drawable = getImage(history.get(i));
 				final int historyFilterValue = getHistoryCode(history.get(i));
 				tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
-				tView.setText(history.get(i).toString());
+				tView.setText(HistoryTransactionFormatter.formatHistoryTransaction(history.get(i), getApplicationContext()));
 				tView.setClickable(true);
 				if(i % 2 == 0){
 					tView.setBackgroundColor(Color.LTGRAY);

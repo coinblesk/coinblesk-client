@@ -27,6 +27,7 @@ import ch.uzh.csg.mbps.client.request.HistoryRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
+import ch.uzh.csg.mbps.client.util.HistoryTransactionFormatter;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
@@ -308,7 +309,7 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 			tv.setGravity(Gravity.LEFT);
 			int drawable = getImage(history.get(i));
 			tv.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
-            tv.setText(history.get(i).toString());
+			tv.setText(HistoryTransactionFormatter.formatHistoryTransaction(history.get(i), getApplicationContext()));
             tv.setPadding(0, 5, 0, 5);
             tv.setTextColor(Color.BLACK);
             if(i % 2 == 0){
