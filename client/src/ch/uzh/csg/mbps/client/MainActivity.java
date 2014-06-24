@@ -282,6 +282,9 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 				tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
 				tView.setText(history.get(i).toString());
 				tView.setClickable(true);
+				if(i % 2 == 0){
+					tView.setBackgroundColor(Color.LTGRAY);
+				}
 				tView.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						handleAsyncTask();

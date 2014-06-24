@@ -303,20 +303,22 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 			linearLayout.addView(tv);
 			return;
 		}
-		
 		for(int i = history.size()-1; i >= 0; i--){
 			TextView tv = new TextView(getApplicationContext());
 			tv.setGravity(Gravity.LEFT);
 			int drawable = getImage(history.get(i));
 			tv.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
             tv.setText(history.get(i).toString());
+            tv.setPadding(0, 5, 0, 5);
             tv.setTextColor(Color.BLACK);
+            if(i % 2 == 0){
+				tv.setBackgroundColor(Color.LTGRAY);
+			}
 			linearLayout.addView(tv);
 			//TB: add a horizontal separator
 			View ruler = new View(getApplicationContext()); 
 			ruler.setBackgroundColor(Color.DKGRAY);
 			linearLayout.addView(ruler);
-			
 		}
 		
 		createNavigationButtons(linearLayout);
