@@ -14,10 +14,15 @@ import ch.uzh.csg.mbps.model.HistoryTransaction;
 public class HistoryTransactionFormatter {
 	private static  SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy' 'HH:mm:ss", Locale.getDefault());
 
+	/**
+	 * Returns a String representation of the HistoryTransaction depending on
+	 * its subtype in the proper language.
+	 * 
+	 * @param tx which shall be formatted
+	 * @param context ApplicationContext to access String ressources
+	 * @return String representation of HistoryTransaction
+	 */
 	public static String formatHistoryTransaction(AbstractHistory tx, Context context){
-		//TODO simon: check
-//		sdf.setTimeZone(TimeZone.getDefault());
-
 		if(tx instanceof HistoryPayInTransaction)
 			return formatHistoryPayInTransaction((HistoryPayInTransaction) tx, context);
 		else if (tx instanceof HistoryPayOutTransaction)
