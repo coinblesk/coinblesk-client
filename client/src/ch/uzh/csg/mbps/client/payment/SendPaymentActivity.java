@@ -59,7 +59,7 @@ import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
 import ch.uzh.csg.mbps.util.Converter;
 
 /**
- * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
+ * This is the UI to send a payment directly to a known receiver without the use of NFC communication.
  */
 public class SendPaymentActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
 	private String[] currencies = { "CHF", "BTC" };
@@ -82,8 +82,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 	protected static final String INPUT_UNIT_CHF = "CHF";
 
-	//TODO simon: refactor!
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -97,7 +95,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		launchRequest();
 		setUpGui();
 		refreshCurrencyTextViews();
-
 	}
 
 	@Override
@@ -128,7 +125,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				return false;
 			}
 		});
-
 		//setup timer
 		sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
 		sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
@@ -157,23 +153,20 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	}
 
 	protected void startTimer(long duration, long interval) {
-		if(timer != null){
+		if (timer != null) {
 			timer.cancel();
 		}
 		timer = new CountDownTimer(duration, interval) {
-
 			@Override
 			public void onFinish() {
 				//Session Timeout is already handled by TimeHandler
 			}
-
 			@Override
 			public void onTick(long millisecondsLeft) {
 				int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
 				sessionCountdown.setText(getResources().getString(R.string.menu_sessionCountdown) + " " + TimeHandler.getInstance().formatCountdown(secondsLeft));
 			}
 		};
-
 		timer.start();
 	}
 
@@ -210,7 +203,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				if(ClientController.isOnline()){
 					startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 				}
-				
+
 				byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
 				ServerPaymentResponse serverPaymentResponse = null;
 				try {
@@ -227,7 +220,8 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					receiverUsernameEditText.setText("");
 					sendAmount.setText("");
 					refreshCurrencyTextViews();
-					BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance().subtract(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount()));
+					BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance()
+							.subtract(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount()));
 					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 					TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
 					balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
@@ -246,7 +240,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, paymentResponsePayer.getReason());
 				}
 			}
-		} else if (response.getType() == Type.EXCHANGE_RATE){
+		} else if (response.getType() == Type.EXCHANGE_RATE) {
 			CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
 			if (response.isSuccessful()) {
 				//renew Session Timeout Countdown
@@ -259,6 +253,8 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
 				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
+			} else { //Server couldn't get exchange rate 
+				displayResponse(getResources().getString(R.string.exchangeRate_error));
 			}
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
 			displayResponse(getResources().getString(R.string.no_connection_server));
@@ -306,7 +302,8 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 	private class MyAdapter extends ArrayAdapter<String> {
 
-		public MyAdapter(Context context, int textViewResourceId, String[] objects) {
+		public MyAdapter(Context context, int textViewResourceId,
+				String[] objects) {
 			super(context, textViewResourceId, objects);
 		}
 
@@ -344,14 +341,13 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 		public void onNothingSelected(AdapterView<?> parent) {
 		}
-
 	};
 
-	private void setUpGui(){
+	private void setUpGui() {
 		sendAmount = (EditText) findViewById(R.id.sendPayment_amountText);
 		sendAmount.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				openCalculatorDialog();			
+				openCalculatorDialog();
 			}
 		});
 		sendAmount.setFocusable(false);
@@ -364,17 +360,17 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		spinner.setOnItemSelectedListener(spinnerListener);
 		spinner.setSelection(0);
 
-		sendButton = (Button)findViewById(R.id.sendPayment_sendButton);
+		sendButton = (Button) findViewById(R.id.sendPayment_sendButton);
 		sendButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				// hide virtual keyboard
-				InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
+				InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 				createTransaction();
 			}
 		});
 
-		addressBookButton = (Button)findViewById(R.id.sendPayment_addressBookButton);
+		addressBookButton = (Button) findViewById(R.id.sendPayment_addressBookButton);
 		addressBookButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				AddressBookDialog dialog = new AddressBookDialog();
@@ -386,7 +382,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 	public void createTransaction(){
 		CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
-		if(! receiverUsernameEditText.getText().toString().isEmpty() && ! (amountBTC == null)){
+		if (!receiverUsernameEditText.getText().toString().isEmpty() && !(amountBTC == null)) {
 			try {
 				PaymentRequest paymentRequestPayer = new PaymentRequest(
 						PKIAlgorithm.DEFAULT, 

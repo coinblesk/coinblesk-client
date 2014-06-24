@@ -318,5 +318,7 @@
     <!-- Error Strings -->
     <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting MBPS app preferences in Android Settings.</string>
     <string name="error_transaction_failed">Transmission error. Please check your history if transaction was successful.</string>
-     <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
+    <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
+    <string name="exchangeRate_error">Current exchange rate is not available at the moment.</string>
+     
 </resources>
