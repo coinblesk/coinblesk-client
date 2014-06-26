@@ -294,8 +294,8 @@
     <!-- Settings -->
     <string name="settings_autoAccept_checkbox_summary">Auto accept payments for favorite payees up to defined limit</string>
     <string name="settings_autoAccept_checkbox_title">Auto accept payments</string>
-    <string name="settings_autoAccept_editText_defaultValue">0.01</string>
-    <string name="settings_autoAccept_editText_title">Auto accept limit in Bitcoin</string>
+    <string name="settings_autoAccept_editText_defaultValue">10</string>
+    <string name="settings_autoAccept_editText_title">Auto accept limit in CHF</string>
     
 
 

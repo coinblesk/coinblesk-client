@@ -295,8 +295,8 @@
         <!-- Settings -->
     <string name="settings_autoAccept_checkbox_summary">Für favorisierte Verkäufer automatisch Zahlungen akzeptieren bis zu definiertem Limit.</string>
     <string name="settings_autoAccept_checkbox_title">Automatisch Zahlungen akzeptieren</string>
-        <string name="settings_autoAccept_editText_defaultValue">0.01</string>
-    <string name="settings_autoAccept_editText_title">Automatisch akzeptieren Limite in Bitcoin</string>
+        <string name="settings_autoAccept_editText_defaultValue">10</string>
+    <string name="settings_autoAccept_editText_title">Automatisch akzeptieren Limite in CHF</string>
     
     <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Bitcoins Senden</string>

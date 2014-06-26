@@ -33,9 +33,10 @@
      <EditTextPreference
         android:defaultValue="@string/settings_autoAccept_editText_defaultValue"
         android:dependency="auto_accept"
-        android:inputType="numberDecimal"
+        android:numeric="integer"
+        android:inputType="number"
         android:key="auto_accept_amount"
-        android:maxLength="24"
+        android:maxLength="3"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"
