@@ -94,7 +94,7 @@ public class DrawerItemClickListener extends AbstractLoginActivity implements On
 
 	protected void launchSignInRequest() {
 		if (!ClientController.isOnline()) {
-			super.launchSignInRequest();
+			super.launchSignInRequest(getContext());
 		} else {
 			displayResponse(getContext().getResources().getString(R.string.already_connected_to_server));
 		}

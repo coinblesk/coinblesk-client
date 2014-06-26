@@ -57,6 +57,14 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		signIn.execute();
 	}
 	
+	protected void launchSignInRequest(Context context) {
+		showLoadingProgressDialog();
+		TimeHandler.getInstance().setStartActivity(context);
+		UserAccount user = new UserAccount(username, null, password);
+		RequestTask signIn = new SignInRequestTask(this, user);
+		signIn.execute();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();

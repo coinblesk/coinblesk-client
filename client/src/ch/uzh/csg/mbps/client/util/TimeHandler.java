@@ -1,6 +1,6 @@
 package ch.uzh.csg.mbps.client.util;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -17,7 +17,7 @@ public class TimeHandler extends HandlerThread{
 	private static TimeHandler mTimeHandler;
 	private static Handler mHandler;
 	private static long mStartTime;
-	private static Activity activity;
+	private static Context context;
 	
 	public TimeHandler() {
 		super("TimeSessionHandler");
@@ -44,13 +44,13 @@ public class TimeHandler extends HandlerThread{
 	}
 
 	/**
-	 * Sets the activity. This is used to terminate the session.
+	 * Sets the context of the activity. This is used to terminate the session.
 	 * 
-	 * @param activity
-	 *            The activity in which the MBPS starts.
+	 * @param context
+	 *            Context of the activity in which the MBPS starts.
 	 */
-	public void setStartActivity(Activity startActivity){
-		activity = startActivity;
+	public void setStartActivity(Context startActivity){
+		context = startActivity;
 	}
 	
 	/**
@@ -89,12 +89,12 @@ public class TimeHandler extends HandlerThread{
 		public void run() {
 			Long now = System.currentTimeMillis();
 			if ((now - mStartTime) >= Constants.CLIENT_SESSION_TIMEOUT) {
-				Intent intent = new Intent(activity, LoginActivity.class);
+				Intent intent = new Intent(context, LoginActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				activity.startActivity(intent);
+				context.startActivity(intent);
 				ClientController.clear();
 				terminateSession();
 			} else {
