@@ -1,8 +1,6 @@
 package ch.uzh.csg.mbps.client.profile;
 
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,7 +19,6 @@ import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
  * This class is the view to set an new email address.
  */
 public class EditEmailAccountProfileActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
-	private MenuItem menuWarning;
 	private Button saveChangeBtn;
 	
 	@Override
@@ -47,30 +44,6 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity imple
     	super.onResume();
     	checkOnlineModeAndProceed();
     	invalidateOptionsMenu();
-    }
-    
-    @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.offline_mode, menu);
-		return true;
-	}
-	
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		menuWarning = menu.findItem(R.id.action_warning);
-		invalidateOptionsMenu();
-		return true;
-	}
-	
-    @Override
-    public void invalidateOptionsMenu(){
-		if (menuWarning != null) {
-			if (ClientController.isOnline()) {
-				menuWarning.setVisible(false);
-			} else {
-				menuWarning.setVisible(true);
-			}
-		}
     }
     
 	/**

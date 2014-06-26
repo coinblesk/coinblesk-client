@@ -54,6 +54,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	AnimationDrawable nfcActivityAnimation;
 
 	private MenuItem menuWarning;
+	private MenuItem offlineMode;
 	private MenuItem sessionCountdownMenuItem;
 	private MenuItem sessionRefreshMenuItem;
 	private TextView sessionCountdown;
@@ -126,6 +127,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	protected void initializeMenuItems(Menu menu){
 		menuWarning = menu.findItem(R.id.action_warning);
+		offlineMode = menu.findItem(R.id.menu_offlineMode);
+		TextView offlineModeTV = (TextView) offlineMode.getActionView();
+		offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
+		
 		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
 				launchRequest();
@@ -150,10 +155,12 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		if(menuWarning != null){
 			if(ClientController.isOnline()) {
 				menuWarning.setVisible(false);
+				offlineMode.setVisible(false);
 				sessionCountdownMenuItem.setVisible(true);
 				sessionRefreshMenuItem.setVisible(true);
 			} else {
 				menuWarning.setVisible(true);
+				offlineMode.setVisible(true);
 				sessionCountdownMenuItem.setVisible(false);
 				sessionRefreshMenuItem.setVisible(false);
 			}

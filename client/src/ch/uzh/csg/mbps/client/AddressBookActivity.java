@@ -2,7 +2,6 @@ package ch.uzh.csg.mbps.client;
 
 import java.util.Iterator;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -11,9 +10,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -24,8 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import ch.uzh.csg.mbps.client.util.ClientController;
 
-public class AddressBookActivity extends Activity {
-	private MenuItem menuWarning;
+public class AddressBookActivity extends AbstractAsyncActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,36 +29,10 @@ public class AddressBookActivity extends Activity {
 		setUpGui();
 	}
 
-
 	@Override
 	public void onResume() {
 		super.onResume();
 		invalidateOptionsMenu();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.offline_mode, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		menuWarning = menu.findItem(R.id.action_warning);
-		invalidateOptionsMenu();
-		return true;
-	}
-
-	@Override
-	public void invalidateOptionsMenu() {
-		if (menuWarning != null) {
-			if (ClientController.isOnline()) {
-				menuWarning.setVisible(false);
-			} else {
-				menuWarning.setVisible(true);
-			}
-		}
 	}
 
 	private void setUpGui() {

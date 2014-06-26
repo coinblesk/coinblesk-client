@@ -59,7 +59,7 @@
     <string name="createAccountSuccessful">Bestätigung der Registrierung</string>
 
     <!-- Main View Strings -->
-    <string name="mainActivityTextView">Kontoübersicht</string>
+    <string name="mainActivityTextView">Übersicht</string>
     <string name="payButton">Neue Transaktion erstellen</string>
     <string name="lastFewTransactionsTitle">Ihre letzten %1$s Transaktionen:</string>
     <string name="mainActivity_processTransactionTitle">Transaktion ausführen</string>
@@ -250,6 +250,7 @@
     <string name="informationTextColor">#33b5e5</string>
     <string name="establishNfcConnectionInfo">Erstellen Sie nun den NFC Kontakt (Geräte zusammenhalten)</string>
     <string name="nfc_in_progress_dialog">Zahlung wird ausgeführt - NFC Kontakt halten</string>
+    <string name="menu_offlineModeText">Offline Modus</string>
     
 
     <!-- Async Abstract Activity -->

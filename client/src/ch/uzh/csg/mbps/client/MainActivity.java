@@ -191,6 +191,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			launchRequest();
 		} else {
 			createNewTransactionBtn.setEnabled(false);
+			createNewTransactionBtn.setTextColor(Color.LTGRAY);
 		}
 		showFirstTimeInformation();
 	}

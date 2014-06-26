@@ -6,9 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -28,7 +25,6 @@ import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
  * email address are editable.
  */
 public class AccountProfileActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
-    private MenuItem menuWarning; 
     private ImageButton editEmailImgBtn;
   	private ImageButton editPasswordImgBtn;
 	private Button deleteAccountBtn;
@@ -55,31 +51,6 @@ public class AccountProfileActivity extends AbstractAsyncActivity implements IAs
 		setFields();
 	    checkOnlineModeAndProceed();
 	    invalidateOptionsMenu();
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.offline_mode, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-	
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menuWarning = menu.findItem(R.id.action_warning);
-        invalidateOptionsMenu();
-        return true;
-    }
-    
-	@Override
-	public void invalidateOptionsMenu() {
-		if (menuWarning != null) {
-			if (ClientController.isOnline()) {
-				menuWarning.setVisible(false);
-			} else {
-				menuWarning.setVisible(true);
-			}
-		}
 	}
 	
 	private void setFields() {

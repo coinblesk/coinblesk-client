@@ -4,8 +4,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -23,7 +21,6 @@ import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
  */
 public class PayInActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
 	public String payInAddress;
-	private MenuItem menuWarning;
 	private Button copyClipboardBtn;
 	private Button sendAsMailBtn;
 	
@@ -55,30 +52,6 @@ public class PayInActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 			sendAsMailBtn.setEnabled(false);
     }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.offline_mode, menu);
-		return true;
-	}
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menuWarning = menu.findItem(R.id.action_warning);
-        invalidateOptionsMenu();
-        return true;
-    }
-    
-    @Override
-    public void invalidateOptionsMenu() {
-    	if(menuWarning != null){
-        	if(ClientController.isOnline()) {
-                menuWarning.setVisible(false);
-            } else {
-            	menuWarning.setVisible(true);
-            }
-    	}
-    }
-    
 	private void initClickListener() {
 		copyClipboardBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {

@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -38,7 +36,6 @@ import com.google.zxing.integration.android.IntentResult;
 public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
 	public static BigDecimal exchangeRate;
 	private BigDecimal payOutAmount;
-	private MenuItem menuWarning;
 	private Button acceptBtn;
 	private Button allBtn;
 	private Button scanQRButton;
@@ -82,30 +79,6 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
     	checkOnlineModeAndProceed();
     	invalidateOptionsMenu();
     }
-    
-    @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.offline_mode, menu);
-		return true;
-	}
-	
-	@Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menuWarning = menu.findItem(R.id.action_warning);
-        invalidateOptionsMenu();
-        return true;
-    }
-    
-	@Override
-	public void invalidateOptionsMenu() {
-		if (menuWarning != null) {
-			if (ClientController.isOnline()) {
-				menuWarning.setVisible(false);
-			} else {
-				menuWarning.setVisible(true);
-			}
-		}
-	}
     
     private void initClickListener() {
 

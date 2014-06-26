@@ -2,8 +2,6 @@ package ch.uzh.csg.mbps.client.profile;
 
 import android.os.Bundle;
 import android.util.Pair;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,7 +20,6 @@ import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
  * This class is the view to set an new password.
  */
 public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
-	private MenuItem menuWarning;
 	private Button saveChangeBtn;
 	private String password;
 
@@ -50,31 +47,7 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity im
     	checkOnlineModeAndProceed();
     	invalidateOptionsMenu();
     }
-    
-    @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.offline_mode, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		menuWarning = menu.findItem(R.id.action_warning);
-		menuWarning.setVisible(false);
-		return true;
-	}
-
-    @Override
-    public void invalidateOptionsMenu(){
-    	if(menuWarning != null){
-        	if(ClientController.isOnline()) {
-                menuWarning.setVisible(false);
-            } else {
-            	menuWarning.setVisible(true);
-            }
-    	}
-    }
-	
+    	
 	private void checkOnlineModeAndProceed() {
 		if(!ClientController.isOnline()){
 			saveChangeBtn.setEnabled(false);

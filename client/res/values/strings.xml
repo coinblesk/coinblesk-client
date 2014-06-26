@@ -59,7 +59,7 @@
     <string name="createAccountSuccessful">Registration confirmation</string>
 
     <!-- Main View Strings -->
-    <string name="mainActivityTextView">Account Overview</string>
+    <string name="mainActivityTextView">Overview</string>
     <string name="payButton">Create new transaction</string>
     <string name="lastFewTransactionsTitle">Your last %1$s transactions:</string>
     <string name="mainActivity_processTransactionTitle">Process Transaction</string>
@@ -72,7 +72,7 @@
         <item>Create new Transaction</item>
         <item>Transaction History</item>
         <item>Settings</item>
-        <item>Top Up</item>
+        <item>Top Up Account</item>
         <item>Pay out to BTC address</item>
         <item>Address Book</item>
         <item>Reconnect to Server</item>
@@ -249,6 +249,7 @@
     <string name="dialog_no">No</string>
     <string name="establishNfcConnectionInfo">Establish now NFC connection (Hold devices together)</string>
     <string name="nfc_in_progress_dialog">Payment in progress - Keep NFC connection</string>
+    <string name="menu_offlineModeText">Offline Mode</string>
 
     <!-- Async Abstract Activity -->
     <string name="loading_progress_dialog">Loading. Please wait&#8230;</string>

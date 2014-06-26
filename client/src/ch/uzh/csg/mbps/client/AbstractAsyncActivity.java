@@ -7,8 +7,12 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
+import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.CustomDialogFragment;
 
 /**
@@ -19,7 +23,9 @@ import ch.uzh.csg.mbps.client.util.CustomDialogFragment;
  * tablet and sets the orientation appropriately.
  */
 public abstract class AbstractAsyncActivity extends FragmentActivity {
-
+	private MenuItem menuWarning; 
+    private MenuItem offlineMode; 
+    
 	private ProgressDialog progressDialog;
 	private boolean destroyed = false;
 	
@@ -147,4 +153,36 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
 		return dialogFR;
 	}
 
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(ch.uzh.csg.mbps.client.R.menu.offline_mode, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menuWarning = menu.findItem(R.id.action_warning);
+        offlineMode = menu.findItem(R.id.menu_offlineMode);
+		TextView offlineModeTV = (TextView) offlineMode.getActionView();
+		offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
+		
+        invalidateOptionsMenu();
+        return true;
+    }
+    
+	@Override
+	public void invalidateOptionsMenu() {
+		if (menuWarning != null) {
+			if (ClientController.isOnline()) {
+				menuWarning.setVisible(false);
+				offlineMode.setVisible(false);
+			} else {
+				menuWarning.setVisible(true);
+				offlineMode.setVisible(true);
+			}
+		}
+	}
+	
 }

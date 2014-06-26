@@ -8,8 +8,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -35,7 +33,6 @@ import ch.uzh.csg.mbps.responseobject.PayOutRulesTransferObject;
  */
 public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
 	private static String payOutAddress;
-	private MenuItem menuWarning;
 	private Button saveRuleBtn;
 	private Button resetRuleBtn;
 	private EditText payOutAddressInput;
@@ -68,30 +65,6 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements
     	invalidateOptionsMenu();
     }
 	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.offline_mode, menu);
-		return true;
-	}
-	
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-    	menuWarning = menu.findItem(R.id.action_warning);
-        invalidateOptionsMenu();
-        return true;
-    }
-    
-    @Override
-    public void invalidateOptionsMenu() {
-		if (menuWarning != null) {
-			if (ClientController.isOnline()) {
-				menuWarning.setVisible(false);
-			} else {
-				menuWarning.setVisible(true);
-			}
-		}
-    }
-    
 	private void initClickListener() {
 		
 		payOutAddressInput.addTextChangedListener(new TextWatcher() {
