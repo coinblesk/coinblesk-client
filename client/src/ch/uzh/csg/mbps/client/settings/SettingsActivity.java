@@ -3,6 +3,8 @@ package ch.uzh.csg.mbps.client.settings;
 import java.util.List;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -17,6 +19,7 @@ import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.util.ClientController;
 
@@ -32,7 +35,7 @@ import ch.uzh.csg.mbps.client.util.ClientController;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends PreferenceActivity {
-	
+
 	private static final boolean ALWAYS_SIMPLE_PREFS = false;
 	private MenuItem menuWarning;
 	protected static Context context;
@@ -45,12 +48,28 @@ public class SettingsActivity extends PreferenceActivity {
 		} else {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		}
-		
+
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		context = getApplicationContext();
 		setupSimplePreferencesScreen();
+
+		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		prefs.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
+
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if(key.equals("numberOfLastTransactions")) {
+					int value = Integer.parseInt(sharedPreferences.getString("numberOfLastTransactions", "3"));
+					if(value <= 0 || value > 5){
+						Toast.makeText(context, "please enter number between 1 and 5", Toast.LENGTH_LONG).show();
+						SharedPreferences.Editor prefEditor = prefs.edit();
+				        prefEditor.putString("numberOfLastTransactions", "3");
+				        prefEditor.commit();
+					}
+				}
+			}
+		});
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -68,13 +87,13 @@ public class SettingsActivity extends PreferenceActivity {
 		return super.onCreateOptionsMenu(menu);
 	}
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-    	menuWarning = menu.findItem(R.id.action_warning);
-        invalidateOptionsMenu();
-        return true;
-    }
-    
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		menuWarning = menu.findItem(R.id.action_warning);
+		invalidateOptionsMenu();
+		return true;
+	}
+
 	@Override
 	public void invalidateOptionsMenu() {
 		if (menuWarning != null) {
@@ -85,7 +104,7 @@ public class SettingsActivity extends PreferenceActivity {
 			}
 		}
 	}
-	
+
 	/**
 	 * Shows the simplified settings UI if the device configuration if the
 	 * device configuration dictates that a simplified, single-pane UI should be
@@ -95,7 +114,7 @@ public class SettingsActivity extends PreferenceActivity {
 		if (!isSimplePreferences(this)) {
 			return;
 		}
-		
+
 		// Add all preferences for settings in one view
 		getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsPreferenceFragement()).commit();
 	}
@@ -167,7 +186,7 @@ public class SettingsActivity extends PreferenceActivity {
 	protected boolean isValidFragment(String fragmentName){
 		return true;
 	}
-	
+
 	/**
 	 * Binds a preference's summary to its value. More specifically, when the
 	 * preference's value is changed, its summary (line of text below the
@@ -180,8 +199,8 @@ public class SettingsActivity extends PreferenceActivity {
 	 */
 	public static class SettingsPreferenceFragement extends PreferenceFragment{
 		@Override
-	    public void onCreate(final Bundle savedInstanceState) {
-	        super.onCreate(savedInstanceState);
+		public void onCreate(final Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
 			// Add 'general' preferences
 			addPreferencesFromResource(R.xml.pref_general);
 			// Add 'payment' preferences, and a corresponding header.
@@ -192,7 +211,7 @@ public class SettingsActivity extends PreferenceActivity {
 			bindPreferenceSummaryToValue(findPreference("bitcoin_list"));
 			bindPreferenceSummaryToValue(findPreference("fee_amount"));
 			bindPreferenceSummaryToValue(findPreference("auto_accept_amount"));
-	    }
+		}
 	}
 
 	/**
@@ -209,7 +228,7 @@ public class SettingsActivity extends PreferenceActivity {
 			bindPreferenceSummaryToValue(findPreference("bitcoin_list"));
 		}
 	}
-	
+
 	/**
 	 * This class represents the view for tablets and larger devices. Here the
 	 * value's are bind which are declared in the payment part.
