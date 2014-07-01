@@ -467,31 +467,20 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	}
 
 	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
-
-		public void handleMessage(PaymentEvent event, Object object) {
-			Log.i(TAG, "evt1:" + event + " obj:" + object);
+		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
+			Log.i(TAG, "evt2:" + event + " obj:" + object);
 
 			if (userPromptDialog != null && userPromptDialog.isShowing()) {
 				userPromptDialog.dismiss();
 			}
-
-			if (event == PaymentEvent.ERROR) {
+			
+			switch (event) {
+			case ERROR:
+				dismissNfcInProgressDialog();
 				if (object == PaymentError.PAYER_REFUSED) {
 					showDialog(getResources().getString(R.string.transaction_rejected), false);
 				}
-			}
-
-			if (event == PaymentEvent.SUCCESS) {
-				showSuccessDialog(object);
-			}
-			resetStates();
-		}
-
-		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
-			Log.i(TAG, "evt2:" + event + " obj:" + object);
-
-			switch (event) {
-			case ERROR:
+				break;
 			case FORWARD_TO_SERVER:
 				try {
 					//TODO simon: show nfc in progress dialog
@@ -506,10 +495,16 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			case NO_SERVER_RESPONSE:
 				break;
 			case SUCCESS:
+				showSuccessDialog(object);
+				break;
+			case INITIALIZED:
+				showNfcInProgressDialog();
+				break;
+			default:
 				break;
 			}
+			resetStates();
 		}
-
 	};
 
 	private void showSuccessDialog(Object object) {

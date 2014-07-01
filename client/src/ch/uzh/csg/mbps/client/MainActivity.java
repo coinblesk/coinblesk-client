@@ -64,6 +64,7 @@ import ch.uzh.csg.paymentlib.PaymentEvent;
 import ch.uzh.csg.paymentlib.PaymentRequestHandler;
 import ch.uzh.csg.paymentlib.container.ServerInfos;
 import ch.uzh.csg.paymentlib.container.UserInfos;
+import ch.uzh.csg.paymentlib.messages.PaymentError;
 import ch.uzh.csg.paymentlib.persistency.IPersistencyHandler;
 import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
@@ -414,37 +415,32 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 	}
 	
 	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
-
-//		@Override
-		public void handleMessage(PaymentEvent event, Object object) {
-			Log.i(TAG, "evt1:" + event + " obj:" + object);
-			
-//			if (userPromptDialog != null && userPromptDialog.isShowing()) {
-//				userPromptDialog.dismiss();
-//			}
-			
-			if (event == PaymentEvent.SUCCESS) {
-				showSuccessDialog(object);
-			}
-			resetStates();
-		}
-
-//		@Override
-        public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
+		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
 			Log.i(TAG, "evt2:" + event + " obj:" + object);
+
+			if (userPromptDialog != null && userPromptDialog.isShowing()) {
+				userPromptDialog.dismiss();
+			}
 			
 			switch (event) {
 			case ERROR:
+				if (object == PaymentError.PAYER_REFUSED) {
+				}
 				break;
 			case FORWARD_TO_SERVER:
 				break;
 			case NO_SERVER_RESPONSE:
 				break;
 			case SUCCESS:
+				showSuccessDialog(object);
+				break;
+			case INITIALIZED:
+				break;
+			default:
 				break;
 			}
-        }
-		
+			resetStates();
+		}
 	};
 	
 	//TODO: simon: what for?
@@ -499,7 +495,8 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 	private void resetStates() {
 		paymentAccepted = false;
 	}
-
+	
+	//TODO simon: change to popup with receivepayment design
 	private void showCustomDialog(String username, Currency currency, long amount, final IUserPromptAnswer answer2) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Incoming Payment Request")
@@ -559,7 +556,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 		return nfcAdapter;
 	}
 	
-	protected void refreshActivity() {
+	private void refreshActivity() {
 		this.recreate();
 	}
 
