@@ -21,15 +21,6 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/mainActivityTextViewTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/mainActivityTextView"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="54sp"
-                android:textStyle="italic" />
-
-            <TextView
                 android:id="@+id/mainActivityTextViewBTCs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -45,7 +36,7 @@
                 android:id="@+id/mainActivity_lastTransactionsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:text="@string/lastFewTransactionsTitle"
                 android:visibility="invisible"
                 android:textAppearance="?android:attr/textAppearanceMedium"
@@ -93,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@string/mainActivity_processTransactionInstruction"
-                android:layout_marginTop="10dp" />
+                android:layout_marginTop="5dp" />
             
             <TextView
                 android:id="@+id/mainActivity_or"
@@ -103,7 +94,7 @@
                 android:text="@string/mainActivity_or"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textStyle="bold"
-                android:layout_marginTop="10dp" />
+                android:layout_marginTop="5dp" />
             
             <View
                 android:layout_width="fill_parent"
@@ -114,7 +105,7 @@
                 android:id="@+id/createNewTransactionButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="2dp"
                 android:gravity="center"
                 android:textColor="#33b5e5"
                 android:textStyle="bold"
