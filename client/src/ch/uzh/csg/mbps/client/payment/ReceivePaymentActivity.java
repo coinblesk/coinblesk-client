@@ -480,10 +480,12 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				if (object == PaymentError.PAYER_REFUSED) {
 					showDialog(getResources().getString(R.string.transaction_rejected), false);
 				}
+				if (object == PaymentError.NO_SERVER_RESPONSE) {
+					//TODO simon: display message
+				}
 				break;
 			case FORWARD_TO_SERVER:
 				try {
-					//TODO simon: show nfc in progress dialog
 					showNfcInProgressDialog();
 					ServerPaymentRequest serverPaymentRequest = DecoderFactory.decode(ServerPaymentRequest.class, (byte[]) object);
 					responseListener = caller;
@@ -491,8 +493,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				break;
-			case NO_SERVER_RESPONSE:
 				break;
 			case SUCCESS:
 				showSuccessDialog(object);

@@ -426,10 +426,11 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			case ERROR:
 				if (object == PaymentError.PAYER_REFUSED) {
 				}
+				if (object == PaymentError.NO_SERVER_RESPONSE) {
+					//TODO simon: display message
+				}
 				break;
 			case FORWARD_TO_SERVER:
-				break;
-			case NO_SERVER_RESPONSE:
 				break;
 			case SUCCESS:
 				showSuccessDialog(object);
