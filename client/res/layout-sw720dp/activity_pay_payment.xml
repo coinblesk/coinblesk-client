@@ -84,31 +84,12 @@
         android:textSize="@dimen/textSize"
         android:textColor="#33b5e5"
         android:text="@string/payPayment_paymentDescription" />
-    
-    <TextView
-        android:id="@+id/switchText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
-        android:layout_alignParentLeft="true"
-        android:layout_marginTop="15dp"
-        android:textSize="@dimen/textSize"
-        android:text="@string/payPayment_toggleText" />
-    
-    <Switch
-        android:id="@+id/payPayment_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-		android:layout_toRightOf="@+id/switchText"
-	    android:layout_alignBaseline="@+id/switchText"
-	    android:layout_marginLeft="10dp"
-        android:text="" />
-    
+
     <TextView
         android:id="@+id/payPayment_usernameTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/switchText"
+        android:layout_below="@+id/textView1"
         android:layout_alignParentLeft="true"
         android:layout_marginTop="15dp"
         android:textSize="@dimen/textSizeBig"
@@ -119,7 +100,7 @@
         android:id="@+id/payPayment_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/switchText"
+        android:layout_below="@+id/textView1"
         android:layout_alignLeft="@+id/payPayment_amountBTC"
 	    android:layout_alignBaseline="@+id/payPayment_usernameTitle"
         android:textStyle="bold"

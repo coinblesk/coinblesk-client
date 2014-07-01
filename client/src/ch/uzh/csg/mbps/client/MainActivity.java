@@ -56,6 +56,7 @@ import ch.uzh.csg.mbps.model.HistoryTransaction;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
 import ch.uzh.csg.mbps.responseobject.GetHistoryTransferObject;
+import ch.uzh.csg.mbps.util.Converter;
 import ch.uzh.csg.paymentlib.IPaymentEventHandler;
 import ch.uzh.csg.paymentlib.IServerResponseListener;
 import ch.uzh.csg.paymentlib.IUserPromptAnswer;
@@ -80,14 +81,14 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 	private ActionBarDrawerToggle mDrawerToggle;
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
-	
+
 	private Button createNewTransactionBtn;
 	public static BigDecimal exchangeRate;
 	private RequestTask getMainActivityValues;
 	private PopupWindow popupWindow;
 	public static Boolean isFirstTime;
 	AnimationDrawable nfcActivityAnimation;
-	
+
 	private boolean paymentAccepted = false;
 	private AlertDialog userPromptDialog;
 	private static final String TAG = "##NFC## MainActivity";
@@ -102,7 +103,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 		initializeGui();
 
 		initClickListener();
-		
+
 		//TODO simon: handle exceptions
 		try {
 			initializeNFC();
@@ -118,7 +119,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
 		checkOnlineModeAndProceed();
 		invalidateOptionsMenu();
-		
+
 	}
 
 	@Override
@@ -297,7 +298,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			return o1.getTimestamp().compareTo(o2.getTimestamp());
 		}
 	}
-	
+
 	private int getNumberOfLastTransactions(){
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		String value =  sharedPref.getString("numberOfLastTransactions", "3");
@@ -401,27 +402,27 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			editor.commit();
 		}
 	}
-	
-	
+
+
 	//TODO simon: refactor NFC stuff
 	private void initializeNFC() throws Exception{
 		final NfcAdapter adapter = createAdapter(MainActivity.this);
-		
+
 		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
 		final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
 		PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
 		final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
 		new PaymentRequestHandler(this, eventHandler, userInfos, serverInfos, userPrompt, persistencyHandler);
 	}
-	
+
 	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
 		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
 			Log.i(TAG, "evt2:" + event + " obj:" + object);
 
 			if (userPromptDialog != null && userPromptDialog.isShowing()) {
-				userPromptDialog.dismiss();
+//				userPromptDialog.dismiss();
 			}
-			
+
 			switch (event) {
 			case ERROR:
 				if (object == PaymentError.PAYER_REFUSED) {
@@ -443,24 +444,24 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			resetStates();
 		}
 	};
-	
+
 	//TODO: simon: what for?
 	private IUserPromptPaymentRequest userPrompt = new IUserPromptPaymentRequest() {
 
-//		@Override
+		//		@Override
 		public boolean isPaymentAccepted() {
 			Log.i(TAG, "payment accepted: "+paymentAccepted);
 			return paymentAccepted;
 		}
 
-//		@Override
-        public void promptUserPaymentRequest(String username, Currency currency, long amount, IUserPromptAnswer answer) {
+		//		@Override
+		public void promptUserPaymentRequest(String username, Currency currency, long amount, IUserPromptAnswer answer) {
 			Log.i(TAG, "user " + username + " wants " + amount);
 			showCustomDialog(username, currency, amount, answer);
-        }
-		
+		}
+
 	};
-	
+
 	//TODO simon: adapt
 	private void showSuccessDialog(Object object) {
 		String msg;
@@ -472,93 +473,132 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			PaymentResponse pr = (PaymentResponse) object;
 			msg = "payed "+pr.getAmount() +" "+pr.getCurrency().getCurrencyCode()+" to "+pr.getUsernamePayee();
 		}
-		
+
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Payment Success!")
-			.setMessage(msg)
-			.setCancelable(true)
-			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		                dialog.cancel();
-		           }
-		       });
-		
-		runOnUiThread(new Runnable() {
-		    public void run() {
-		    	AlertDialog alert = builder.create();
-				alert.show();
-		    }
+		.setMessage(msg)
+		.setCancelable(true)
+		.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
 		});
-		
+
+		runOnUiThread(new Runnable() {
+			public void run() {
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
+		});
+
 		resetStates();
 	}
-	
+
 	private void resetStates() {
 		paymentAccepted = false;
 	}
-	
+
 	//TODO simon: change to popup with receivepayment design
 	private void showCustomDialog(String username, Currency currency, long amount, final IUserPromptAnswer answer2) {
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Incoming Payment Request")
-			.setMessage("Do you want to pay "+amount+" "+currency.getCurrencyCode()+" to "+username+"?")
-			.setCancelable(false)
-			.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		        	   paymentAccepted = true;
-		               answer2.acceptPayment();
-		           }
-		       })
-		     .setNegativeButton("Reject", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		        	   paymentAccepted = false;
-		               answer2.rejectPayment();
-		               refreshActivity();
-		           }
-		       });
-		
-		runOnUiThread(new Runnable() {
-		    public void run() {
-		    	userPromptDialog = builder.create();
-				userPromptDialog.show();
-		    }
+		LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		ViewGroup group = (ViewGroup) findViewById(R.id.pay_payment_popup);
+		final View layout = inflater.inflate(R.layout.activity_pay_payment, group);
+		popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
+
+		final TextView receiverTv = (TextView) layout.findViewById(R.id.payPayment_username);
+		receiverTv.setText(username);
+		final TextView amountTv = (TextView) layout.findViewById(R.id.payPayment_amountBTC);
+		amountTv.setText(CurrencyViewHandler.formatBTCAsString(Converter.getBigDecimalFromLong(amount), getApplicationContext()));
+
+		layout.post(new Runnable() {
+			public void run() {
+				popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
+			}
 		});
-    }
-	
-	//TODO jeton: add to xml
-	private IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
 
-//		@Override
-		public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
-			Log.i(TAG, "getPersistedPaymentRequest");
-			return null;
-		}
-
-//		@Override
-		public void delete(PersistedPaymentRequest paymentRequest) {
-			Log.i(TAG, "delete");
-		}
-
-//		@Override
-		public void add(PersistedPaymentRequest paymentRequest) {
-			Log.i(TAG, "add");
-		}
+		final Button rejectButton = (Button) layout.findViewById(R.id.payPayment_reject);
+		rejectButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				paymentAccepted = false;
+				answer2.rejectPayment();
+				popupWindow.dismiss();
+				refreshActivity();
+			}
+		});
+		final Button acceptButton = (Button) layout.findViewById(R.id.payPayment_accept);
+		acceptButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				paymentAccepted = true;
+				answer2.acceptPayment();
+				popupWindow.dismiss();
+			}
+		});
 		
-	};
-	/**
-	 * Create an NFC adapter, if NFC is enabled, return the adapter, otherwise
-	 * null and open up NFC settings.
-	 * 
-	 * @param context
-	 * @return
-	 */
-	private NfcAdapter createAdapter(Context context) {
-		NfcAdapter nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(getApplicationContext());
-		return nfcAdapter;
+		
 	}
-	
-	private void refreshActivity() {
-		this.recreate();
+
+
+
+	//		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	//		builder.setTitle("Incoming Payment Request")
+	//			.setMessage("Do you want to pay "+amount+" "+currency.getCurrencyCode()+" to "+username+"?")
+	//			.setCancelable(false)
+	//			.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+	//		           public void onClick(DialogInterface dialog, int id) {
+	//		        	   paymentAccepted = true;
+	//		               answer2.acceptPayment();
+	//		           }
+	//		       })
+	//		     .setNegativeButton("Reject", new DialogInterface.OnClickListener() {
+	//		           public void onClick(DialogInterface dialog, int id) {
+	//		        	   paymentAccepted = false;
+	//		               answer2.rejectPayment();
+	//		               refreshActivity();
+	//		           }
+	//		       });
+	//		
+	//		runOnUiThread(new Runnable() {
+	//		    public void run() {
+	//		    	userPromptDialog = builder.create();
+	//				userPromptDialog.show();
+	//		    }
+	//		});
+//}
+
+//TODO jeton: add to xml
+private IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
+
+	//		@Override
+	public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
+		Log.i(TAG, "getPersistedPaymentRequest");
+		return null;
 	}
+
+	//		@Override
+	public void delete(PersistedPaymentRequest paymentRequest) {
+		Log.i(TAG, "delete");
+	}
+
+	//		@Override
+	public void add(PersistedPaymentRequest paymentRequest) {
+		Log.i(TAG, "add");
+	}
+
+};
+/**
+ * Create an NFC adapter, if NFC is enabled, return the adapter, otherwise
+ * null and open up NFC settings.
+ * 
+ * @param context
+ * @return
+ */
+private NfcAdapter createAdapter(Context context) {
+	NfcAdapter nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(getApplicationContext());
+	return nfcAdapter;
+}
+
+private void refreshActivity() {
+	this.recreate();
+}
 
 }
