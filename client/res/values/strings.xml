@@ -80,9 +80,6 @@
         <item>Sign out</item>
     </string-array>
 
-    <string name="session_expired">Session expired!</string>
-    <string name="unexcepted_error">An unexpected error occurred. Please try again</string>
-
     <!-- History Strings -->
     <string name="recent_payments">Recent Payments</string>
     <string name="history_activity_no_transactions_text">There are no transactions to display.</string>
@@ -329,5 +326,7 @@
     <string name="error_transaction_failed">Transmission error. Please check your history if transaction was successful.</string>
     <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
     <string name="exchangeRate_error">Current exchange rate is not available at the moment.</string>
-     
+    <string name="transaction_rejected">Payer has rejected the payment.</string>
+    <string name="session_expired">Session expired!</string>
+    <string name="unexcepted_error">An unexpected error occurred. Please try again</string>
 </resources>

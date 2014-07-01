@@ -255,348 +255,338 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				launchActivity(this, MainActivity.class);
 			}
 		} else if (response.getType() == Type.CREATE_TRANSACTION && response.isSuccessful()) {
-				
-				byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
-				ServerPaymentResponse serverPaymentResponse = null;
-				try {
-					serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
-				} catch (Exception e) {
-					displayResponse(getResources().getString(R.string.error_transaction_failed));
-					Log.e(TAG, e.getMessage());
-					return;
-				}
-				responseListener.onServerResponse(serverPaymentResponse);
-		} 
-			else {
-				displayResponse(response.getMessage());
-				Log.e(TAG, response.getMessage());
-				//TODO simon: show messsage in case of failure on server
+
+			byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
+			ServerPaymentResponse serverPaymentResponse = null;
+			try {
+				serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
+			} catch (Exception e) {
+				displayResponse(getResources().getString(R.string.error_transaction_failed));
+				Log.e(TAG, e.getMessage());
+				return;
 			}
+			responseListener.onServerResponse(serverPaymentResponse);
+		} 
+		else {
+			displayResponse(response.getMessage());
+			Log.e(TAG, response.getMessage());
+			//TODO simon: show messsage in case of failure on server
+		}
 		dismissProgressDialog();
 		dismissNfcInProgressDialog();
 	}
 
-		private void refreshCurrencyTextViews() {
-			amountBTC = BigDecimal.ZERO;
-			if (Constants.inputUnit.equals(INPUT_UNIT_CHF)) {
+	private void refreshCurrencyTextViews() {
+		amountBTC = BigDecimal.ZERO;
+		if (Constants.inputUnit.equals(INPUT_UNIT_CHF)) {
+			try {
+				BigDecimal amountChf = CurrencyFormatter.getBigDecimalChf(receiveAmount.getText().toString());
+				inputUnitValue = amountChf;
+				amountBTC = CurrencyViewHandler.getBitcoinExchangeValue(exchangeRate, amountChf);
+				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_CHFinBTC), amountBTC, getApplicationContext());
+			} catch (NumberFormatException e) {
+				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_CHFinBTC), BigDecimal.ZERO, getApplicationContext());
+			}
+		} else {
+			try{
+				BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(receiveAmount.getText().toString());
+				inputUnitValue = BigDecimal.ZERO;
+				amountBTC = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
+				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.receivePayment_CHFinBTC), exchangeRate, amountBTC);
+			} catch(NumberFormatException e) {
+				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.receivePayment_CHFinBTC), exchangeRate, amountBTC);
+			}
+		}
+
+		//Check if the user defined a fee on the received amount of bitcoin.
+		if(settings.getBoolean("include_fee", false)){
+			String percentageStr = settings.getString("fee_amount", "pref_fee_amount");
+			try{
+				double percentage = 1 + ((double) Integer.valueOf(percentageStr))/100;
+				amountBTC = amountBTC.multiply(new BigDecimal(percentage)).setScale(Constants.SCALE_BTC, RoundingMode.HALF_UP) ;
+				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_BTCIncFee), amountBTC, getApplicationContext());
+				((TextView)findViewById(R.id.receivePayment_BTCIncFeeText)).setText("(" + getResources().getString(R.string.receivePayment_fee) + " " +  percentageStr +"%)");				
+			} catch(NumberFormatException e){
+				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_BTCIncFee), BigDecimal.ZERO, getApplicationContext());
+			}
+		}
+	}
+
+	private void openCalculatorDialog() {
+		newFragment = new CalculatorDialog(this);
+		newFragment.show();
+		newFragment.setOnDismissListener(new OnDismissListener() {
+
+			public void onDismiss(DialogInterface dialog) {
+				receiveAmount.setText(Constants.inputValueCalculator.toString());
+				refreshCurrencyTextViews();
+
+				PaymentInfos paymentInfos;
 				try {
-					BigDecimal amountChf = CurrencyFormatter.getBigDecimalChf(receiveAmount.getText().toString());
-					inputUnitValue = amountChf;
-					amountBTC = CurrencyViewHandler.getBitcoinExchangeValue(exchangeRate, amountChf);
-					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_CHFinBTC), amountBTC, getApplicationContext());
-				} catch (NumberFormatException e) {
-					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_CHFinBTC), BigDecimal.ZERO, getApplicationContext());
+					paymentInfos = new PaymentInfos(Currency.BTC, Converter.getLongFromBigDecimal(amountBTC));
+					initializeNFC(paymentInfos);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} else {
-				try{
-					BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(receiveAmount.getText().toString());
-					inputUnitValue = BigDecimal.ZERO;
-					amountBTC = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
-					CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.receivePayment_CHFinBTC), exchangeRate, amountBTC);
-				} catch(NumberFormatException e) {
-					CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.receivePayment_CHFinBTC), exchangeRate, amountBTC);
-				}
+				showNfcInstructions();
 			}
+		});
+	}
 
-			//Check if the user defined a fee on the received amount of bitcoin.
-			if(settings.getBoolean("include_fee", false)){
-				String percentageStr = settings.getString("fee_amount", "pref_fee_amount");
-				try{
-					double percentage = 1 + ((double) Integer.valueOf(percentageStr))/100;
-					amountBTC = amountBTC.multiply(new BigDecimal(percentage)).setScale(Constants.SCALE_BTC, RoundingMode.HALF_UP) ;
-					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_BTCIncFee), amountBTC, getApplicationContext());
-					((TextView)findViewById(R.id.receivePayment_BTCIncFeeText)).setText("(" + getResources().getString(R.string.receivePayment_fee) + " " +  percentageStr +"%)");				
-				} catch(NumberFormatException e){
-					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_BTCIncFee), BigDecimal.ZERO, getApplicationContext());
-				}
-			}
-		}
+	private void showNfcInstructions(){
+		findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.VISIBLE);;
+		ImageView nfcActivity = (ImageView) findViewById(R.id.receivePayment_nfcIcon);
+		nfcActivity.setBackgroundResource(R.drawable.animation_nfc);
+		nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
+		nfcActivityAnimation.start();
+	}
 
-		private void openCalculatorDialog() {
-			newFragment = new CalculatorDialog(this);
-			newFragment.show();
-			newFragment.setOnDismissListener(new OnDismissListener() {
+	protected void refreshActivity() {
+		receiveAmount.setText("");
+		this.recreate();
+	}
 
-				public void onDismiss(DialogInterface dialog) {
-					receiveAmount.setText(Constants.inputValueCalculator.toString());
-					refreshCurrencyTextViews();
+	private class MyAdapter extends ArrayAdapter<String> {
 
-					PaymentInfos paymentInfos;
-					try {
-						paymentInfos = new PaymentInfos(Currency.BTC, Converter.getLongFromBigDecimal(amountBTC));
-						initializeNFC(paymentInfos);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					showNfcInstructions();
-				}
-			});
-		}
-		
-		private void showNfcInstructions(){
-			findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.VISIBLE);;
-			ImageView nfcActivity = (ImageView) findViewById(R.id.receivePayment_nfcIcon);
-			nfcActivity.setBackgroundResource(R.drawable.animation_nfc);
-			nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
-			nfcActivityAnimation.start();
+		public MyAdapter(Context context, int textViewResourceId, String[] objects) {
+			super(context, textViewResourceId, objects);
 		}
 
 		@Override
-		protected void refreshActivity() {
-			receiveAmount.setText("");
-			this.recreate();
+		public View getDropDownView(int position, View convertView, ViewGroup parent) {
+			return getCustomView(position, convertView, parent);
 		}
 
-		private class MyAdapter extends ArrayAdapter<String> {
-
-			public MyAdapter(Context context, int textViewResourceId, String[] objects) {
-				super(context, textViewResourceId, objects);
-			}
-
-			@Override
-			public View getDropDownView(int position, View convertView, ViewGroup parent) {
-				return getCustomView(position, convertView, parent);
-			}
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				return getCustomView(position, convertView, parent);
-			}
-
-			public View getCustomView(int position, View convertView, ViewGroup parent) {
-				LayoutInflater inflater = getLayoutInflater();
-				View row = inflater.inflate(R.layout.spinner_currency, parent, false);
-				TextView label = (TextView) row.findViewById(R.id.textView_currency);
-				label.setText(strings[position]);
-
-				return row;
-			}
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			return getCustomView(position, convertView, parent);
 		}
 
-		private OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
+		public View getCustomView(int position, View convertView, ViewGroup parent) {
+			LayoutInflater inflater = getLayoutInflater();
+			View row = inflater.inflate(R.layout.spinner_currency, parent, false);
+			TextView label = (TextView) row.findViewById(R.id.textView_currency);
+			label.setText(strings[position]);
 
-			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-				if (pos == 0)
-					Constants.inputUnit = INPUT_UNIT_CHF;
-				else
-					Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
+			return row;
+		}
+	}
 
-				descriptionOfInputUnit.setText(Constants.inputUnit);
-				refreshCurrencyTextViews();
-			}
+	private OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
 
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		};
-		
-		//TODO jeton: add to xml
-		private IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
+		public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+			if (pos == 0)
+				Constants.inputUnit = INPUT_UNIT_CHF;
+			else
+				Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
 
-//			@Override
-			public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
-				Log.i(TAG, "getPersistedPaymentRequest");
-				return null;
-			}
-
-//			@Override
-			public void delete(PersistedPaymentRequest paymentRequest) {
-				Log.i(TAG, "delete");
-			}
-
-//			@Override
-			public void add(PersistedPaymentRequest paymentRequest) {
-				Log.i(TAG, "add");
-			}
-			
-		};
-
-		private void initializeNFC(PaymentInfos paymentInfos) throws Exception {
-			//TODO simon: get Server Key Number!
-			//TODO simon: handle exceptions
-			PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
-			final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
-			PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
-			final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
-			
-			
-			if(isSend){
-				NfcAdapter nfcAdapter = createAdapter(ReceivePaymentActivity.this);
-				if (nfcAdapter == null) {
-					Log.e(TAG, "no nfc adapter");
-					return;
-				}
-				try {
-					Log.i(TAG, "init payment SEND");
-					new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (NfcLibException e) {
-					e.printStackTrace();
-				}
-			}
-			else {
-				NfcAdapter nfcAdapter = createAdapter(ReceivePaymentActivity.this);
-				if (nfcAdapter == null) {
-					Log.e(TAG, "no nfc adapter");
-					return;
-				}
-				try {
-					Log.i(TAG, "init payment REQUEST");
-
-					new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (NfcLibException e) {
-					e.printStackTrace();
-				}
-			}
+			descriptionOfInputUnit.setText(Constants.inputUnit);
+			refreshCurrencyTextViews();
 		}
 
-		
-		//TODO simon: check if works!
-		/**
-		 * Create an NFC adapter, if NFC is enabled, return the adapter, otherwise
-		 * null and open up NFC settings.
-		 * 
-		 * @param context
-		 * @return
-		 */
-		private NfcAdapter createAdapter(Context context) {
-			NfcAdapter nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(getApplicationContext());
-			return nfcAdapter;
+		public void onNothingSelected(AdapterView<?> parent) {
+		}
+	};
+
+	//TODO jeton: add to xml
+	private IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
+
+		//			@Override
+		public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
+			Log.i(TAG, "getPersistedPaymentRequest");
+			return null;
 		}
 
-		private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
-			
-			public void handleMessage(PaymentEvent event, Object object) {
-				Log.i(TAG, "evt1:" + event + " obj:" + object);
+		//			@Override
+		public void delete(PersistedPaymentRequest paymentRequest) {
+			Log.i(TAG, "delete");
+		}
 
-				if (userPromptDialog != null && userPromptDialog.isShowing()) {
-					userPromptDialog.dismiss();
-				}
-				
-				if (event == PaymentEvent.ERROR) {
-					if (object == PaymentError.PAYER_REFUSED) {
-						//TODO simon: put to separate method
-						final AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-						builder.setTitle(getResources().getString(R.string.payment_success))
-						.setMessage("rejected")
-						.setIcon(getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()))
-						.setCancelable(true)
-						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-								refreshActivity();
-							}
-						});
+		//			@Override
+		public void add(PersistedPaymentRequest paymentRequest) {
+			Log.i(TAG, "add");
+		}
 
-						runOnUiThread(new Runnable() {
-							public void run() {
-								AlertDialog alert = builder.create();
-								alert.show();
-							}
-						});
-					}
-				}
+	};
 
-				if (event == PaymentEvent.SUCCESS) {
-					showSuccessDialog(object);
-				}
-				resetStates();
+	private void initializeNFC(PaymentInfos paymentInfos) throws Exception {
+		//TODO simon: get Server Key Number!
+		//TODO simon: handle exceptions
+		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
+		final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
+		PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
+		final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
+
+
+		if(isSend){
+			NfcAdapter nfcAdapter = createAdapter(ReceivePaymentActivity.this);
+			if (nfcAdapter == null) {
+				Log.e(TAG, "no nfc adapter");
+				return;
+			}
+			try {
+				Log.i(TAG, "init payment SEND");
+				new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (NfcLibException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			NfcAdapter nfcAdapter = createAdapter(ReceivePaymentActivity.this);
+			if (nfcAdapter == null) {
+				Log.e(TAG, "no nfc adapter");
+				return;
+			}
+			try {
+				Log.i(TAG, "init payment REQUEST");
+
+				new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (NfcLibException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+	//TODO simon: check if works!
+	/**
+	 * Create an NFC adapter, if NFC is enabled, return the adapter, otherwise
+	 * null and open up NFC settings.
+	 * 
+	 * @param context
+	 * @return
+	 */
+	private NfcAdapter createAdapter(Context context) {
+		NfcAdapter nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(getApplicationContext());
+		return nfcAdapter;
+	}
+
+	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
+
+		public void handleMessage(PaymentEvent event, Object object) {
+			Log.i(TAG, "evt1:" + event + " obj:" + object);
+
+			if (userPromptDialog != null && userPromptDialog.isShowing()) {
+				userPromptDialog.dismiss();
 			}
 
-			public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
-				Log.i(TAG, "evt2:" + event + " obj:" + object);
-
-				switch (event) {
-				case ERROR:
-				case FORWARD_TO_SERVER:
-					try {
-						//TODO simon: show nfc in progress dialog
-						showNfcInProgressDialog();
-						ServerPaymentRequest serverPaymentRequest = DecoderFactory.decode(ServerPaymentRequest.class, (byte[]) object);
-						responseListener = caller;
-						launchTransactionRequest(serverPaymentRequest);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					break;
-				case NO_SERVER_RESPONSE:
-					break;
-				case SUCCESS:
-					break;
-				}
-			}
-
-		};
-
-		private void showSuccessDialog(Object object) {
-			String answer;
-			if (object == null) {
-				answer = "object is null";
-			} else if (!(object instanceof PaymentResponse)) {
-				answer = "object is not instance of PaymentResponse";
-			} else {
-				PaymentResponse pr = (PaymentResponse) object;
-				BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
-				
-				if(isSend){
-					answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
-							CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
-							pr.getUsernamePayee());
-				}
-				else {
-					answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
-							CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
-							pr.getUsernamePayer());
+			if (event == PaymentEvent.ERROR) {
+				if (object == PaymentError.PAYER_REFUSED) {
+					showDialog(getResources().getString(R.string.transaction_rejected), false);
 				}
 			}
 
-			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getResources().getString(R.string.payment_success))
-			.setMessage(answer)
-			.setIcon(getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()))
-			.setCancelable(true)
-			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					dialog.cancel();
-					refreshActivity();
-				}
-			});
-
-			runOnUiThread(new Runnable() {
-				public void run() {
-					AlertDialog alert = builder.create();
-					alert.show();
-				}
-			});
-
+			if (event == PaymentEvent.SUCCESS) {
+				showSuccessDialog(object);
+			}
 			resetStates();
 		}
 
-		private void resetStates() {
-			paymentAccepted = false;
-		}
+		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
+			Log.i(TAG, "evt2:" + event + " obj:" + object);
 
-		protected void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
-			if (ClientController.isOnline()) {
-				CreateTransactionTransferObject ctto = null;
+			switch (event) {
+			case ERROR:
+			case FORWARD_TO_SERVER:
 				try {
-					ctto = new CreateTransactionTransferObject(serverPaymentRequest);
-				} catch (Exception e ) {
-					displayResponse("Internal Error");
+					//TODO simon: show nfc in progress dialog
+					showNfcInProgressDialog();
+					ServerPaymentRequest serverPaymentRequest = DecoderFactory.decode(ServerPaymentRequest.class, (byte[]) object);
+					responseListener = caller;
+					launchTransactionRequest(serverPaymentRequest);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				RequestTask transactionRequest = new TransactionRequestTask(this, ctto);
-				transactionRequest.execute();
+				break;
+			case NO_SERVER_RESPONSE:
+				break;
+			case SUCCESS:
+				break;
 			}
 		}
-		
-		private void showNfcInProgressDialog(){
-			runOnUiThread(new Runnable() {
-				public void run() {
-					getNfcInProgressDialog().show();
-				}
-			});
+
+	};
+
+	private void showSuccessDialog(Object object) {
+		String answer;
+		if (object == null) {
+			answer = "object is null";
+		} else if (!(object instanceof PaymentResponse)) {
+			answer = "object is not instance of PaymentResponse";
+		} else {
+			PaymentResponse pr = (PaymentResponse) object;
+			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
+
+			if(isSend){
+				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						pr.getUsernamePayee());
+			}
+			else {
+				answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						pr.getUsernamePayer());
+			}
+		}
+		showDialog(answer, true);
+		resetStates();
+	}
+
+	private void showDialog(String message, boolean isSuccessful) {
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		if (isSuccessful) {
+			builder.setTitle(getResources().getString(R.string.payment_success))
+			.setIcon(getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()));
+		}
+		else {
+			builder.setTitle(getResources().getString(R.string.payment_failure))
+			.setIcon(getResources().getIdentifier("ic_payment_failed", "drawable", getPackageName()));
+		}
+		builder.setMessage(message);
+		builder.setCancelable(true);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+				refreshActivity();
+			}
+		});
+
+		runOnUiThread(new Runnable() {
+			public void run() {
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
+		});
+
+	}
+
+	private void resetStates() {
+		paymentAccepted = false;
+	}
+
+	protected void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
+		if (ClientController.isOnline()) {
+			CreateTransactionTransferObject ctto = null;
+			try {
+				ctto = new CreateTransactionTransferObject(serverPaymentRequest);
+			} catch (Exception e ) {
+				displayResponse("Internal Error");
+			}
+			RequestTask transactionRequest = new TransactionRequestTask(this, ctto);
+			transactionRequest.execute();
 		}
 	}
+
+	private void showNfcInProgressDialog(){
+		runOnUiThread(new Runnable() {
+			public void run() {
+				getNfcInProgressDialog().show();
+			}
+		});
+	}
+}

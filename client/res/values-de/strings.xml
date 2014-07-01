@@ -328,5 +328,5 @@
     <string name="error_transaction_failed">Übermittlungsfehler. Bitte prüfen Sie den Transaktionsverlauf um zu sehen ob ihre Transaktion erfolgreich war.</string>
     <string name="transaction_duplicate_error">Diese Transaktion wurde vom Server zurückgewiesen da eine Transaktion mit identischem Zeitstempel bereits verbucht wurde.</string>
     <string name="exchangeRate_error">Der aktuelle Wechselkurs ist momentan nicht verfügbar.</string>
-    
+    <string name="transaction_rejected">Zahlung wurde von Gegenpartei verweigert.</string>
 </resources>

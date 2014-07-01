@@ -47,11 +47,8 @@ import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
 import ch.uzh.csg.mbps.client.util.HistoryTransactionFormatter;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.customserialization.Currency;
-import ch.uzh.csg.mbps.customserialization.DecoderFactory;
 import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
-import ch.uzh.csg.mbps.customserialization.PaymentRequest;
 import ch.uzh.csg.mbps.customserialization.PaymentResponse;
-import ch.uzh.csg.mbps.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
@@ -67,7 +64,6 @@ import ch.uzh.csg.paymentlib.PaymentEvent;
 import ch.uzh.csg.paymentlib.PaymentRequestHandler;
 import ch.uzh.csg.paymentlib.container.ServerInfos;
 import ch.uzh.csg.paymentlib.container.UserInfos;
-import ch.uzh.csg.paymentlib.exceptions.IllegalArgumentException;
 import ch.uzh.csg.paymentlib.persistency.IPersistencyHandler;
 import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
@@ -519,6 +515,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   paymentAccepted = false;
 		               answer2.rejectPayment();
+		               refreshActivity();
 		           }
 		       });
 		
@@ -560,6 +557,10 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 	private NfcAdapter createAdapter(Context context) {
 		NfcAdapter nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(getApplicationContext());
 		return nfcAdapter;
+	}
+	
+	protected void refreshActivity() {
+		this.recreate();
 	}
 
 }
