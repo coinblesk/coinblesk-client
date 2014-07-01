@@ -240,7 +240,7 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="action_warning">No connection! Connect by selecting "Connect to Server"</string>
-    <string name="menu_sessionCountdown">Remaining session time:</string>
+    <string name="menu_sessionCountdown"></string>
     <string name="menu_refreshSession">Refresh Session</string>
     <string name="date_time_set">Set</string>
     <string name="cancel">Cancel</string>

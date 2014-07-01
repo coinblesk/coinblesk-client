@@ -53,7 +53,11 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
 		}
 		
 		progressDialog.setMessage(getResources().getString(R.string.loading_progress_dialog));
-		progressDialog.show();
+		runOnUiThread(new Runnable() {
+			public void run() {
+				progressDialog.show();
+			}
+		});
 	}
 
 	/**

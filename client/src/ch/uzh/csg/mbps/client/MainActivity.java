@@ -1,21 +1,27 @@
 package ch.uzh.csg.mbps.client;
 
 import java.math.BigDecimal;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
+import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,11 +40,18 @@ import android.widget.TextView;
 import ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener;
 import ch.uzh.csg.mbps.client.request.MainActivityRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
+import ch.uzh.csg.mbps.client.security.KeyHandler;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
 import ch.uzh.csg.mbps.client.util.HistoryTransactionFormatter;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
+import ch.uzh.csg.mbps.customserialization.Currency;
+import ch.uzh.csg.mbps.customserialization.DecoderFactory;
+import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
+import ch.uzh.csg.mbps.customserialization.PaymentRequest;
+import ch.uzh.csg.mbps.customserialization.PaymentResponse;
+import ch.uzh.csg.mbps.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
@@ -46,6 +59,17 @@ import ch.uzh.csg.mbps.model.HistoryTransaction;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
 import ch.uzh.csg.mbps.responseobject.GetHistoryTransferObject;
+import ch.uzh.csg.paymentlib.IPaymentEventHandler;
+import ch.uzh.csg.paymentlib.IServerResponseListener;
+import ch.uzh.csg.paymentlib.IUserPromptAnswer;
+import ch.uzh.csg.paymentlib.IUserPromptPaymentRequest;
+import ch.uzh.csg.paymentlib.PaymentEvent;
+import ch.uzh.csg.paymentlib.PaymentRequestHandler;
+import ch.uzh.csg.paymentlib.container.ServerInfos;
+import ch.uzh.csg.paymentlib.container.UserInfos;
+import ch.uzh.csg.paymentlib.exceptions.IllegalArgumentException;
+import ch.uzh.csg.paymentlib.persistency.IPersistencyHandler;
+import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
 /**
  * This class shows the main view of the user with the balance of the user's
@@ -66,6 +90,10 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 	private PopupWindow popupWindow;
 	public static Boolean isFirstTime;
 	AnimationDrawable nfcActivityAnimation;
+	
+	private boolean paymentAccepted = false;
+	private AlertDialog userPromptDialog;
+	private static final String TAG = "##NFC## MainActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -77,6 +105,14 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 		initializeGui();
 
 		initClickListener();
+		
+		//TODO simon: handle exceptions
+		try {
+			initializeNFC();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -367,6 +403,163 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			editor.putBoolean(getString(R.string.sharedPreferences_isFirstTime), false);
 			editor.commit();
 		}
+	}
+	
+	
+	//TODO simon: refactor NFC stuff
+	private void initializeNFC() throws Exception{
+		final NfcAdapter adapter = createAdapter(MainActivity.this);
+		
+		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
+		final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
+		PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
+		final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
+		new PaymentRequestHandler(this, eventHandler, userInfos, serverInfos, userPrompt, persistencyHandler);
+	}
+	
+	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
+
+//		@Override
+		public void handleMessage(PaymentEvent event, Object object) {
+			Log.i(TAG, "evt1:" + event + " obj:" + object);
+			
+//			if (userPromptDialog != null && userPromptDialog.isShowing()) {
+//				userPromptDialog.dismiss();
+//			}
+			
+			if (event == PaymentEvent.SUCCESS) {
+				showSuccessDialog(object);
+			}
+			resetStates();
+		}
+
+//		@Override
+        public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
+			Log.i(TAG, "evt2:" + event + " obj:" + object);
+			
+			switch (event) {
+			case ERROR:
+				break;
+			case FORWARD_TO_SERVER:
+				break;
+			case NO_SERVER_RESPONSE:
+				break;
+			case SUCCESS:
+				break;
+			}
+        }
+		
+	};
+	
+	//TODO: simon: what for?
+	private IUserPromptPaymentRequest userPrompt = new IUserPromptPaymentRequest() {
+
+//		@Override
+		public boolean isPaymentAccepted() {
+			Log.i(TAG, "payment accepted: "+paymentAccepted);
+			return paymentAccepted;
+		}
+
+//		@Override
+        public void promptUserPaymentRequest(String username, Currency currency, long amount, IUserPromptAnswer answer) {
+			Log.i(TAG, "user " + username + " wants " + amount);
+			showCustomDialog(username, currency, amount, answer);
+        }
+		
+	};
+	
+	//TODO simon: adapt
+	private void showSuccessDialog(Object object) {
+		String msg;
+		if (object == null) {
+			msg = "object is null";
+		} else if (!(object instanceof PaymentResponse)) {
+			msg = "object is not instance of PaymentResponse";
+		} else {
+			PaymentResponse pr = (PaymentResponse) object;
+			msg = "payed "+pr.getAmount() +" "+pr.getCurrency().getCurrencyCode()+" to "+pr.getUsernamePayee();
+		}
+		
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Payment Success!")
+			.setMessage(msg)
+			.setCancelable(true)
+			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		                dialog.cancel();
+		           }
+		       });
+		
+		runOnUiThread(new Runnable() {
+		    public void run() {
+		    	AlertDialog alert = builder.create();
+				alert.show();
+		    }
+		});
+		
+		resetStates();
+	}
+	
+	private void resetStates() {
+		paymentAccepted = false;
+	}
+
+	private void showCustomDialog(String username, Currency currency, long amount, final IUserPromptAnswer answer2) {
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Incoming Payment Request")
+			.setMessage("Do you want to pay "+amount+" "+currency.getCurrencyCode()+" to "+username+"?")
+			.setCancelable(false)
+			.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		        	   paymentAccepted = true;
+		               answer2.acceptPayment();
+		           }
+		       })
+		     .setNegativeButton("Reject", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		        	   paymentAccepted = false;
+		               answer2.rejectPayment();
+		           }
+		       });
+		
+		runOnUiThread(new Runnable() {
+		    public void run() {
+		    	userPromptDialog = builder.create();
+				userPromptDialog.show();
+		    }
+		});
+    }
+	
+	//TODO jeton: add to xml
+	private IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
+
+//		@Override
+		public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
+			Log.i(TAG, "getPersistedPaymentRequest");
+			return null;
+		}
+
+//		@Override
+		public void delete(PersistedPaymentRequest paymentRequest) {
+			Log.i(TAG, "delete");
+		}
+
+//		@Override
+		public void add(PersistedPaymentRequest paymentRequest) {
+			Log.i(TAG, "add");
+		}
+		
+	};
+	/**
+	 * Create an NFC adapter, if NFC is enabled, return the adapter, otherwise
+	 * null and open up NFC settings.
+	 * 
+	 * @param context
+	 * @return
+	 */
+	private NfcAdapter createAdapter(Context context) {
+		NfcAdapter nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(getApplicationContext());
+		return nfcAdapter;
 	}
 
 }

@@ -74,14 +74,12 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 		rejectBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				disableButtons();
-				getHCEService().setUserDecision(false);
 			}
 		});
 
 		acceptBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				disableButtons();
-				getHCEService().setUserDecision(true);
 			}
 		});
 
@@ -104,7 +102,6 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 		}
 	}
 
-	@Override
 	protected void launchRequest() {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
@@ -151,7 +148,7 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 //	}
 	
 	@Override
-	protected void resetGUI() {
+	protected void refreshActivity() {
 		CurrencyViewHandler.clearTextView(resultTextView);
 		CurrencyViewHandler.clearTextView(resultTextViewCHF);
 		CurrencyViewHandler.clearTextView(sellerUsername);

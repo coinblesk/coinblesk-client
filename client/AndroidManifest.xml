@@ -11,11 +11,11 @@
         android:minSdkVersion="19"
         android:targetSdkVersion="19" />
 
-    <!--
+    
           <uses-feature
         android:name="android.hardware.nfc"
         android:required="true" />
-    -->
+   
 
     <application
         android:allowBackup="true"
@@ -140,9 +140,8 @@
                 android:value="ch.uzh.csg.mbps.client.settings.SettingsActivity" />
         </activity>
 
-        <!--
-        <service
-            android:name="ch.uzh.csg.mbps.client.payment.nfc.CustomHostApduService"
+		<service
+            android:name="ch.uzh.csg.nfclib.HostApduServiceNfcLib"
             android:exported="true"
             android:permission="android.permission.BIND_NFC_SERVICE" >
             <intent-filter>
@@ -153,7 +152,6 @@
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/apduservice" />
         </service>
-        -->
 
         <activity
             android:name="ch.uzh.csg.mbps.client.ChoosePaymentActivity"
