@@ -474,8 +474,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				dismissNfcInProgressDialog();
 				if (object == PaymentError.PAYER_REFUSED) {
 					showDialog(getResources().getString(R.string.transaction_rejected), false);
+					resetStates();
 				}
 				if (object == PaymentError.NO_SERVER_RESPONSE) {
+					resetStates();
+					Log.i(TAG, "PaymentError:" + event + "no server response");
 					//TODO simon: display message
 				}
 				break;
@@ -498,7 +501,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			default:
 				break;
 			}
-			resetStates();
 		}
 	};
 

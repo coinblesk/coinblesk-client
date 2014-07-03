@@ -470,7 +470,7 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 	private void showCustomDialog(String username, Currency currency, long amount, final IUserPromptAnswer answer2) {
 		LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		ViewGroup group = (ViewGroup) findViewById(R.id.pay_payment_popup);
-		final View layout = inflater.inflate(R.layout.activity_pay_payment, group);
+		final View layout = inflater.inflate(R.layout.pay_payment_popup, group);
 		popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
 
 		final TextView receiverTv = (TextView) layout.findViewById(R.id.payPayment_username);

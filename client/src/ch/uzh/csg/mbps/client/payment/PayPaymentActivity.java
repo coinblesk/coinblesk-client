@@ -32,7 +32,7 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 	public void onCreate(Bundle savedInstanceState) {
 		isSeller = false;
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_pay_payment);
+		setContentView(R.layout.pay_payment_popup);
 		setScreenOrientation();
 		
 		resultTextView = (TextView) findViewById(R.id.payPayment_amountBTC);
