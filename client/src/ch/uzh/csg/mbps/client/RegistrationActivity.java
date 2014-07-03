@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -48,6 +49,16 @@ public class RegistrationActivity extends AbstractAsyncActivity implements IAsyn
 		
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 	  	initClickListener();
+	}
+	
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+    	return false;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		return false;
 	}
 
 	private void initClickListener() {
