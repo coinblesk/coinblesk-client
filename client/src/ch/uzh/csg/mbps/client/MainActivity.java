@@ -38,6 +38,7 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener;
+import ch.uzh.csg.mbps.client.payment.AbstractPaymentActivity;
 import ch.uzh.csg.mbps.client.request.MainActivityRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.security.KeyHandler;
@@ -73,7 +74,7 @@ import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
  * This class shows the main view of the user with the balance of the user's
  * account. The navigation to different views are handled from this class.
  */
-public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
+public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
 
 	private String[] mDrawerItems;
 	private DrawerLayout mDrawerLayout;
@@ -90,7 +91,6 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 	AnimationDrawable nfcActivityAnimation;
 
 	private boolean paymentAccepted = false;
-	private AlertDialog userPromptDialog;
 	private static final String TAG = "##NFC## MainActivity";
 
 	@Override
@@ -419,17 +419,15 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
 			Log.i(TAG, "evt2:" + event + " obj:" + object);
 
-			if (userPromptDialog != null && userPromptDialog.isShowing()) {
-//				userPromptDialog.dismiss();
-			}
-
 			switch (event) {
 			case ERROR:
 				if (object == PaymentError.PAYER_REFUSED) {
+					dismissNfcInProgressDialog();
 					showDialog(getResources().getString(R.string.transaction_rejected_payer), false);
 				}
 				if (object == PaymentError.NO_SERVER_RESPONSE) {
-					//TODO simon: display message
+					dismissNfcInProgressDialog();
+					showDialog(getResources().getString(R.string.error_transaction_failed), false);
 				}
 				break;
 			case FORWARD_TO_SERVER:
@@ -438,6 +436,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 				showSuccessDialog(object);
 				break;
 			case INITIALIZED:
+				showNfcInProgressDialog();
 				break;
 			default:
 				break;
@@ -463,38 +462,6 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 
 	};
 
-//	//TODO simon: adapt
-//	private void showSuccessDialog(Object object) {
-//		String msg;
-//		if (object == null) {
-//			msg = "object is null";
-//		} else if (!(object instanceof PaymentResponse)) {
-//			msg = "object is not instance of PaymentResponse";
-//		} else {
-//			PaymentResponse pr = (PaymentResponse) object;
-//			msg = "payed "+pr.getAmount() +" "+pr.getCurrency().getCurrencyCode()+" to "+pr.getUsernamePayee();
-//		}
-//
-//		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//		builder.setTitle("Payment Success!")
-//		.setMessage(msg)
-//		.setCancelable(true)
-//		.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//			public void onClick(DialogInterface dialog, int id) {
-//				dialog.cancel();
-//			}
-//		});
-//
-//		runOnUiThread(new Runnable() {
-//			public void run() {
-//				AlertDialog alert = builder.create();
-//				alert.show();
-//			}
-//		});
-//
-//		resetStates();
-//	}
-
 	private void resetStates() {
 		paymentAccepted = false;
 	}
@@ -510,9 +477,19 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 		receiverTv.setText(username);
 		final TextView amountTv = (TextView) layout.findViewById(R.id.payPayment_amountBTC);
 		amountTv.setText(CurrencyViewHandler.formatBTCAsString(Converter.getBigDecimalFromLong(amount), getApplicationContext()));
-
+		final TextView amountChfTv = (TextView) layout.findViewById(R.id.payPayment_amountCHF);
+		amountChfTv.setText(CurrencyViewHandler.amountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount)));
+		final TextView exchangeRateTv = (TextView) layout.findViewById(R.id.payPayment_exchangeRateValue);
+		CurrencyViewHandler.setExchangeRateView(exchangeRate, exchangeRateTv);
+		final TextView balanceTvBtc = (TextView) layout.findViewById(R.id.payPayment_balanceBTC);
+		balanceTvBtc.setText(CurrencyViewHandler.formatBTCAsString(ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext()));
+		final TextView balanceTvChf = (TextView) layout.findViewById(R.id.payPayment_balanceCHF);
+		balanceTvChf.setText(CurrencyViewHandler.amountInCHF(exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance()));
+		
+		
 		layout.post(new Runnable() {
 			public void run() {
+				dismissNfcInProgressDialog();
 				popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
 			}
 		});
@@ -523,7 +500,9 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 				paymentAccepted = false;
 				answer2.rejectPayment();
 				popupWindow.dismiss();
-				refreshActivity();
+				showNfcInProgressDialog();
+				//TODO Simon: do i get a response?
+//				refreshActivity();
 			}
 		});
 		final Button acceptButton = (Button) layout.findViewById(R.id.payPayment_accept);
@@ -532,6 +511,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 				paymentAccepted = true;
 				answer2.acceptPayment();
 				popupWindow.dismiss();
+				showNfcInProgressDialog();
 			}
 		});
 		
@@ -539,6 +519,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 	}
 	
 	private void showSuccessDialog(Object object) {
+		dismissNfcInProgressDialog();
 		String answer;
 		if (object == null) {
 			answer = "object is null";
@@ -549,11 +530,13 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
 
 			if(paymentAccepted){
+				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
 						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
 						pr.getUsernamePayee());
 			}
 			else {
+				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
 						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
 						pr.getUsernamePayer());
@@ -625,8 +608,16 @@ private NfcAdapter createAdapter(Context context) {
 	return nfcAdapter;
 }
 
-private void refreshActivity() {
+protected void refreshActivity() {
 	this.recreate();
+}
+
+private void showNfcInProgressDialog(){
+	runOnUiThread(new Runnable() {
+		public void run() {
+			getNfcInProgressDialog().show();
+		}
+	});
 }
 
 }

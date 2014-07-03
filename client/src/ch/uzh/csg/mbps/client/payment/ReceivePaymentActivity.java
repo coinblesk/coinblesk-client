@@ -91,7 +91,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private CountDownTimer timer;
 
 	private boolean paymentAccepted = false;
-	private AlertDialog userPromptDialog;
 	private IServerResponseListener responseListener;
 
 
@@ -470,10 +469,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
 			Log.i(TAG, "evt2:" + event + " obj:" + object);
 
-			if (userPromptDialog != null && userPromptDialog.isShowing()) {
-				userPromptDialog.dismiss();
-			}
-			
 			switch (event) {
 			case ERROR:
 				dismissNfcInProgressDialog();
@@ -518,11 +513,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
 
 			if(isSend){
+				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
 						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
 						pr.getUsernamePayee());
 			}
 			else {
+				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
 						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
 						pr.getUsernamePayer());
