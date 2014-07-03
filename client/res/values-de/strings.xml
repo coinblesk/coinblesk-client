@@ -329,4 +329,5 @@
     <string name="transaction_duplicate_error">Diese Transaktion wurde vom Server zurückgewiesen da eine Transaktion mit identischem Zeitstempel bereits verbucht wurde.</string>
     <string name="exchangeRate_error">Der aktuelle Wechselkurs ist momentan nicht verfügbar.</string>
     <string name="transaction_rejected">Zahlung wurde von Gegenpartei verweigert.</string>
+    <string name="transaction_rejected_payer">Sie haben die Zahlung verweigert.</string>
 </resources>

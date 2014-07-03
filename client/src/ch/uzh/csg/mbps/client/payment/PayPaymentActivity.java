@@ -5,9 +5,6 @@ import java.math.BigDecimal;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.Switch;
 import android.widget.TextView;
 import ch.uzh.csg.mbps.client.CurrencyViewHandler;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
@@ -31,10 +28,6 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 	private Button acceptBtn;
 	private Button rejectBtn;
 	
-	//TODO simon: remove autoaccept
-	private boolean acceptPaymentAutomatically = false;
-	private Switch acceptPaymentSwitch;
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		isSeller = false;
@@ -52,8 +45,6 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 		acceptBtn.setEnabled(false);
 		rejectBtn.setEnabled(false);
 		
-		acceptPaymentSwitch = (Switch) findViewById(R.id.payPayment_switch);
-		acceptPaymentSwitch.setChecked(false);
 		
 		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.payPayment_balanceBTC), ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
 		
@@ -80,15 +71,6 @@ public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyn
 		acceptBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				disableButtons();
-			}
-		});
-
-		acceptPaymentSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isChecked)
-					acceptPaymentAutomatically = true;
-				else
-					acceptPaymentAutomatically = false;
 			}
 		});
 	}

@@ -426,6 +426,7 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 			switch (event) {
 			case ERROR:
 				if (object == PaymentError.PAYER_REFUSED) {
+					showDialog(getResources().getString(R.string.transaction_rejected_payer), false);
 				}
 				if (object == PaymentError.NO_SERVER_RESPONSE) {
 					//TODO simon: display message
@@ -462,37 +463,37 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 
 	};
 
-	//TODO simon: adapt
-	private void showSuccessDialog(Object object) {
-		String msg;
-		if (object == null) {
-			msg = "object is null";
-		} else if (!(object instanceof PaymentResponse)) {
-			msg = "object is not instance of PaymentResponse";
-		} else {
-			PaymentResponse pr = (PaymentResponse) object;
-			msg = "payed "+pr.getAmount() +" "+pr.getCurrency().getCurrencyCode()+" to "+pr.getUsernamePayee();
-		}
-
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Payment Success!")
-		.setMessage(msg)
-		.setCancelable(true)
-		.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
-
-		runOnUiThread(new Runnable() {
-			public void run() {
-				AlertDialog alert = builder.create();
-				alert.show();
-			}
-		});
-
-		resetStates();
-	}
+//	//TODO simon: adapt
+//	private void showSuccessDialog(Object object) {
+//		String msg;
+//		if (object == null) {
+//			msg = "object is null";
+//		} else if (!(object instanceof PaymentResponse)) {
+//			msg = "object is not instance of PaymentResponse";
+//		} else {
+//			PaymentResponse pr = (PaymentResponse) object;
+//			msg = "payed "+pr.getAmount() +" "+pr.getCurrency().getCurrencyCode()+" to "+pr.getUsernamePayee();
+//		}
+//
+//		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//		builder.setTitle("Payment Success!")
+//		.setMessage(msg)
+//		.setCancelable(true)
+//		.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//			public void onClick(DialogInterface dialog, int id) {
+//				dialog.cancel();
+//			}
+//		});
+//
+//		runOnUiThread(new Runnable() {
+//			public void run() {
+//				AlertDialog alert = builder.create();
+//				alert.show();
+//			}
+//		});
+//
+//		resetStates();
+//	}
 
 	private void resetStates() {
 		paymentAccepted = false;
@@ -536,34 +537,61 @@ public class MainActivity extends AbstractLoginActivity implements IAsyncTaskCom
 		
 		
 	}
+	
+	private void showSuccessDialog(Object object) {
+		String answer;
+		if (object == null) {
+			answer = "object is null";
+		} else if (!(object instanceof PaymentResponse)) {
+			answer = "object is not instance of PaymentResponse";
+		} else {
+			PaymentResponse pr = (PaymentResponse) object;
+			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
+
+			if(paymentAccepted){
+				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						pr.getUsernamePayee());
+			}
+			else {
+				answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						pr.getUsernamePayer());
+			}
+		}
+		showDialog(answer, true);
+		resetStates();
+	}
+
+	private void showDialog(String message, boolean isSuccessful) {
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		if (isSuccessful) {
+			builder.setTitle(getResources().getString(R.string.payment_success))
+			.setIcon(getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()));
+		}
+		else {
+			builder.setTitle(getResources().getString(R.string.payment_failure))
+			.setIcon(getResources().getIdentifier("ic_payment_failed", "drawable", getPackageName()));
+		}
+		builder.setMessage(message);
+		builder.setCancelable(true);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+				refreshActivity();
+			}
+		});
+
+		runOnUiThread(new Runnable() {
+			public void run() {
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
+		});
+
+	}
 
 
-
-	//		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	//		builder.setTitle("Incoming Payment Request")
-	//			.setMessage("Do you want to pay "+amount+" "+currency.getCurrencyCode()+" to "+username+"?")
-	//			.setCancelable(false)
-	//			.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
-	//		           public void onClick(DialogInterface dialog, int id) {
-	//		        	   paymentAccepted = true;
-	//		               answer2.acceptPayment();
-	//		           }
-	//		       })
-	//		     .setNegativeButton("Reject", new DialogInterface.OnClickListener() {
-	//		           public void onClick(DialogInterface dialog, int id) {
-	//		        	   paymentAccepted = false;
-	//		               answer2.rejectPayment();
-	//		               refreshActivity();
-	//		           }
-	//		       });
-	//		
-	//		runOnUiThread(new Runnable() {
-	//		    public void run() {
-	//		    	userPromptDialog = builder.create();
-	//				userPromptDialog.show();
-	//		    }
-	//		});
-//}
 
 //TODO jeton: add to xml
 private IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
