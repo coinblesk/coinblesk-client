@@ -500,7 +500,7 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 				paymentAccepted = false;
 				answer2.rejectPayment();
 				popupWindow.dismiss();
-				showNfcInProgressDialog();
+//				showNfcInProgressDialog();
 				//TODO Simon: do i get a response?
 //				refreshActivity();
 			}
