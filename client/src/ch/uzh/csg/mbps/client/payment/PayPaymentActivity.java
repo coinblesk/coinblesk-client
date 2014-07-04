@@ -19,8 +19,6 @@ import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
  * This is the UI to accept a payment - i.e. to be the buyer in a transaction.
  */
 public class PayPaymentActivity extends AbstractPaymentActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
-	private BigDecimal exchangeRate;
-	
 	private TextView resultTextView;
 	private TextView resultTextViewCHF;
 	private TextView sellerUsername;

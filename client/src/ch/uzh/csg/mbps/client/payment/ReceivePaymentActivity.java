@@ -90,7 +90,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private TextView sessionCountdown;
 	private CountDownTimer timer;
 
-	private boolean paymentAccepted = false;
 	private IServerResponseListener responseListener;
 
 
@@ -388,26 +387,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		}
 	};
 
-	//TODO jeton: add to xml
-	private IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
-
-		//			@Override
-		public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
-			Log.i(TAG, "getPersistedPaymentRequest");
-			return null;
-		}
-
-		//			@Override
-		public void delete(PersistedPaymentRequest paymentRequest) {
-			Log.i(TAG, "delete");
-		}
-
-		//			@Override
-		public void add(PersistedPaymentRequest paymentRequest) {
-			Log.i(TAG, "add");
-		}
-
-	};
 
 	private void initializeNFC(PaymentInfos paymentInfos) throws Exception {
 		//TODO simon: get Server Key Number!
@@ -452,35 +431,42 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	}
 
 
-	//TODO simon: check if works!
-	/**
-	 * Create an NFC adapter, if NFC is enabled, return the adapter, otherwise
-	 * null and open up NFC settings.
-	 * 
-	 * @param context
-	 * @return
-	 */
-	private NfcAdapter createAdapter(Context context) {
-		NfcAdapter nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(getApplicationContext());
-		return nfcAdapter;
-	}
-
 	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
 		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
 			Log.i(TAG, "evt2:" + event + " obj:" + object);
 
 			switch (event) {
 			case ERROR:
-				dismissNfcInProgressDialog();
-				if (object == PaymentError.PAYER_REFUSED) {
+				PaymentError err = (PaymentError) object;
+				switch (err) {
+				case DUPLICATE_REQUEST:
+					dismissNfcInProgressDialog();
+					showDialog(getResources().getString(R.string.transaction_duplicate_error), false);
+					break;
+				case NO_SERVER_RESPONSE:
+					dismissNfcInProgressDialog();
+					showDialog(getResources().getString(R.string.error_transaction_failed), false);
+					break;
+				case PAYER_REFUSED:
+					dismissNfcInProgressDialog();
 					showDialog(getResources().getString(R.string.transaction_rejected), false);
-					resetStates();
+					break;
+				case REQUESTS_NOT_IDENTIC:
+					dismissNfcInProgressDialog();
+					showDialog(getResources().getString(R.string.transaction_server_rejected), false);
+					break;
+				case SERVER_REFUSED:
+					dismissNfcInProgressDialog();
+					showDialog(getResources().getString(R.string.transaction_server_rejected), false);
+					break;
+				case UNEXPECTED_ERROR:
+					dismissNfcInProgressDialog();
+					showDialog(getResources().getString(R.string.error_transaction_failed), false);
+					break;
+				default:
+					break;
 				}
-				if (object == PaymentError.NO_SERVER_RESPONSE) {
-					resetStates();
-					Log.i(TAG, "PaymentError:" + event + "no server response");
-					//TODO simon: display message
-				}
+				resetStates();
 				break;
 			case FORWARD_TO_SERVER:
 				try {
@@ -489,11 +475,12 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					responseListener = caller;
 					launchTransactionRequest(serverPaymentRequest);
 				} catch (Exception e) {
-					e.printStackTrace();
+					Log.i(TAG, "forward to server");
+					//TODO simon: error handling
 				}
 				break;
 			case SUCCESS:
-				showSuccessDialog(object);
+				showSuccessDialog(object, isSend);
 				break;
 			case INITIALIZED:
 				showNfcInProgressDialog();
@@ -503,65 +490,27 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			}
 		}
 	};
+	
+	//TODO jeton: add to xml
+		protected IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
 
-	private void showSuccessDialog(Object object) {
-		String answer;
-		if (object == null) {
-			answer = "object is null";
-		} else if (!(object instanceof PaymentResponse)) {
-			answer = "object is not instance of PaymentResponse";
-		} else {
-			PaymentResponse pr = (PaymentResponse) object;
-			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
-
-			if(isSend){
-				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
-				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
-						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
-						pr.getUsernamePayee());
+			//			@Override
+			public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
+//				Log.i(TAG, "getPersistedPaymentRequest");
+				return null;
 			}
-			else {
-				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
-				answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
-						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
-						pr.getUsernamePayer());
+
+			//			@Override
+			public void delete(PersistedPaymentRequest paymentRequest) {
+//				Log.i(TAG, "delete");
 			}
-		}
-		showDialog(answer, true);
-		resetStates();
-	}
 
-	private void showDialog(String message, boolean isSuccessful) {
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		if (isSuccessful) {
-			builder.setTitle(getResources().getString(R.string.payment_success))
-			.setIcon(getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()));
-		}
-		else {
-			builder.setTitle(getResources().getString(R.string.payment_failure))
-			.setIcon(getResources().getIdentifier("ic_payment_failed", "drawable", getPackageName()));
-		}
-		builder.setMessage(message);
-		builder.setCancelable(true);
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-				refreshActivity();
+			//			@Override
+			public void add(PersistedPaymentRequest paymentRequest) {
+//				Log.i(TAG, "add");
 			}
-		});
 
-		runOnUiThread(new Runnable() {
-			public void run() {
-				AlertDialog alert = builder.create();
-				alert.show();
-			}
-		});
-
-	}
-
-	private void resetStates() {
-		paymentAccepted = false;
-	}
+		};
 
 	protected void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
 		if (ClientController.isOnline()) {
@@ -576,11 +525,30 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		}
 	}
 
-	private void showNfcInProgressDialog(){
-		runOnUiThread(new Runnable() {
-			public void run() {
-				getNfcInProgressDialog().show();
+	protected void showSuccessDialog(Object object, boolean isSending) {
+		dismissNfcInProgressDialog();
+		String answer;
+		if (object == null) {
+			answer = "object is null";
+		} else if (!(object instanceof PaymentResponse)) {
+			answer = "object is not instance of PaymentResponse";
+		} else {
+			PaymentResponse pr = (PaymentResponse) object;
+			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
+
+			if(isSending){
+				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
+				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						pr.getUsernamePayee());
 			}
-		});
+			else {
+				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
+				answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						pr.getUsernamePayer());
+			}
+		}
+		showDialog(answer, true);
 	}
 }
