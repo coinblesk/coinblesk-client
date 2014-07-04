@@ -84,6 +84,7 @@
         android:layout_above="@+id/receivePayment_amountText"
         android:layout_alignBaseline="@+id/receivePayment_currencyText"
         android:layout_alignLeft="@+id/receivePayment_amountText"
+        android:layout_marginLeft="15dp"
         android:text="@string/receivePayment_enter" />
 
     <TextView

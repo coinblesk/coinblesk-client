@@ -231,7 +231,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	}
 
 	public void onTaskComplete(CustomResponseObject response) {
-		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.exchangeRate));	
+		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));	
 		if (response.getType() == Type.EXCHANGE_RATE) {
 			if (response.isSuccessful()) {
 				//renew Session Timeout Countdown
@@ -239,7 +239,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 				}
 				exchangeRate = new BigDecimal(response.getMessage());
-				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.exchangeRate));
+				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
 				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
 				TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);

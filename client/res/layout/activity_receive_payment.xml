@@ -41,7 +41,7 @@
             android:text="@string/receivePayment_exchangeRate" />
 
         <TextView
-            android:id="@+id/exchangeRate"
+            android:id="@+id/receivePayment_exchangeRate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/receivePayment_exchangeRateTitle"
@@ -88,6 +88,7 @@
             android:layout_above="@+id/receivePayment_amountText"
             android:layout_alignBaseline="@+id/receivePayment_currencyText"
             android:layout_alignLeft="@+id/receivePayment_amountText"
+            android:layout_marginLeft="15dp"
             android:text="@string/receivePayment_enter" />
 
         <TextView
