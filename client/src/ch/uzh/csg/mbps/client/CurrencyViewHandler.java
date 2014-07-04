@@ -46,7 +46,7 @@ public class CurrencyViewHandler {
 	 * @param amountBtc  The amount to transform to CHF.
 	 * @return the given bitcoin amount represented in CHF.
 	 */
-	public static String amountInCHF(BigDecimal exchangeRate, BigDecimal amountBtc) {
+	public static String getAmountInCHFAsString(BigDecimal exchangeRate, BigDecimal amountBtc) {
 		BigDecimal chf = amountBtc.multiply(exchangeRate);
 		return CurrencyFormatter.formatChf(chf) + " CHF";
 	}
@@ -100,6 +100,20 @@ public class CurrencyViewHandler {
 
 		MathContext mc = new MathContext(25);
 		return amountChf.divide(exchangeRate, mc).setScale(Constants.SCALE_BTC, RoundingMode.HALF_UP);
+	}
+	
+
+	/**
+	 * The swiss currency is represented in decimal format with an precision of
+	 * two digits. Returns a string to represent a bitcoin amount in CHF.
+	 * 
+	 * @param exchangeRate The rate of one bitcoin in relation to CHF.
+	 * @param amountBtc  The amount to transform to CHF.
+	 * @return the given bitcoin amount represented in CHF.
+	 */
+	public static BigDecimal getAmountInCHF(BigDecimal exchangeRate, BigDecimal amountBtc) {
+		BigDecimal chf = amountBtc.multiply(exchangeRate);
+		return CurrencyFormatter.getBigDecimalChf(chf.toPlainString());
 	}
 	
 	/**

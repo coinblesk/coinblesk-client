@@ -231,7 +231,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 							.subtract(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount()));
 					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 					TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
-					balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
+					balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
 
 					String s = String.format(getResources().getString(R.string.payment_notification_success_payer),
 							CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount())),
@@ -259,7 +259,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 				TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
-				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
+				balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
 			} else { //Server couldn't get exchange rate 
 				displayResponse(getResources().getString(R.string.exchangeRate_error));
 			}

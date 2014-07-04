@@ -243,7 +243,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
 				TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
-				balanceTv.append(" (" + CurrencyViewHandler.amountInCHF(exchangeRate, balance) + ")");
+				balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
 			} else if(response.getMessage().equals(Constants.REST_CLIENT_ERROR)){
 				displayResponse(getResources().getString(R.string.no_connection_server));
 				finish();
@@ -506,13 +506,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			if(isSending){
 				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
-						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")",
 						pr.getUsernamePayee());
 			}
 			else {
 				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
-						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")",
 						pr.getUsernamePayer());
 			}
 		}

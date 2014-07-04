@@ -467,9 +467,35 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 
 		public void promptUserPaymentRequest(String username, Currency currency, long amount, IUserPromptAnswer answer) {
 			Log.i(TAG, "user " + username + " wants " + amount);
-			showCustomDialog(username, currency, amount, answer);
+
+			if(checkAutoAccept(username, amount)) {
+				paymentAccepted = true;
+				answer.acceptPayment();
+				showNfcProgressDialog(false);
+			}
+			else {
+				showCustomDialog(username, currency, amount, answer);
+			}
 		}
 	};
+
+	private boolean checkAutoAccept(String username, long amount){
+		if (exchangeRate != null){
+			BigDecimal amountChf = CurrencyViewHandler.getAmountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount));
+			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+			boolean isAutoAcceptEnabled = sharedPref.getBoolean("auto_accept", false);
+			if(isAutoAcceptEnabled && ClientController.getStorageHandler().isTrustedContact(username)){
+				String value =  sharedPref.getString("auto_accept_amount", "0");
+				int limit = Integer.parseInt(value);
+				if (amountChf.compareTo(new BigDecimal(limit)) <= 0)
+					return true;
+			}
+			return false;
+		}
+		else {
+			return false;
+		}
+	}
 
 	private void showCustomDialog(String username, Currency currency, long amount, final IUserPromptAnswer answer2) {
 		LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -484,11 +510,11 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 
 		if(exchangeRate != null){
 			final TextView amountChfTv = (TextView) layout.findViewById(R.id.payPayment_amountCHF);
-			amountChfTv.setText(CurrencyViewHandler.amountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount)));
+			amountChfTv.setText(CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, Converter.getBigDecimalFromLong(amount)));
 			final TextView exchangeRateTv = (TextView) layout.findViewById(R.id.payPayment_exchangeRateValue);
 			CurrencyViewHandler.setExchangeRateView(exchangeRate, exchangeRateTv);
 			final TextView balanceTvChf = (TextView) layout.findViewById(R.id.payPayment_balanceCHF);
-			balanceTvChf.setText(CurrencyViewHandler.amountInCHF(exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance()));
+			balanceTvChf.setText(CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance()));
 		}
 		final TextView balanceTvBtc = (TextView) layout.findViewById(R.id.payPayment_balanceBTC);
 		balanceTvBtc.setText(CurrencyViewHandler.formatBTCAsString(ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext()));
@@ -539,7 +565,7 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 			BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
 			String chfValue = "";
 			if(exchangeRate != null) {
-				chfValue = " (" + CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")";
+				chfValue = " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")";
 			}
 
 			if(isSending){
