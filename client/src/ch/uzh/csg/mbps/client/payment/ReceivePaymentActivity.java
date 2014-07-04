@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -65,8 +64,6 @@ import ch.uzh.csg.paymentlib.container.ServerInfos;
 import ch.uzh.csg.paymentlib.container.UserInfos;
 import ch.uzh.csg.paymentlib.exceptions.IllegalArgumentException;
 import ch.uzh.csg.paymentlib.messages.PaymentError;
-import ch.uzh.csg.paymentlib.persistency.IPersistencyHandler;
-import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
 /**
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
@@ -396,13 +393,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
 		final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
 
+		NfcAdapter nfcAdapter = createAdapter(ReceivePaymentActivity.this);
+		if (nfcAdapter == null) {
+			Log.e(TAG, "no nfc adapter");
+			return;
+		}
 
 		if(isSend){
-			NfcAdapter nfcAdapter = createAdapter(ReceivePaymentActivity.this);
-			if (nfcAdapter == null) {
-				Log.e(TAG, "no nfc adapter");
-				return;
-			}
 			try {
 				Log.i(TAG, "init payment SEND");
 				new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
@@ -413,14 +410,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			}
 		}
 		else {
-			NfcAdapter nfcAdapter = createAdapter(ReceivePaymentActivity.this);
-			if (nfcAdapter == null) {
-				Log.e(TAG, "no nfc adapter");
-				return;
-			}
 			try {
 				Log.i(TAG, "init payment REQUEST");
-
 				new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
@@ -459,8 +450,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					showDialog(getResources().getString(R.string.transaction_server_rejected), false);
 					break;
 				case UNEXPECTED_ERROR:
-//					dismissNfcInProgressDialog();
-//					showDialog(getResources().getString(R.string.error_transaction_failed), false);
 					break;
 				default:
 					break;
@@ -469,7 +458,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				break;
 			case FORWARD_TO_SERVER:
 				try {
-					showNfcInProgressDialog();
+					showNfcProgressDialog(true);
 					ServerPaymentRequest serverPaymentRequest = DecoderFactory.decode(ServerPaymentRequest.class, (byte[]) object);
 					responseListener = caller;
 					launchTransactionRequest(serverPaymentRequest);
@@ -482,34 +471,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				showSuccessDialog(object, isSend);
 				break;
 			case INITIALIZED:
-				showNfcInProgressDialog();
+				showNfcProgressDialog(true);
 				break;
 			default:
 				break;
 			}
 		}
 	};
-	
-	//TODO jeton: add to xml
-		protected IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
-
-			//			@Override
-			public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
-//				Log.i(TAG, "getPersistedPaymentRequest");
-				return null;
-			}
-
-			//			@Override
-			public void delete(PersistedPaymentRequest paymentRequest) {
-//				Log.i(TAG, "delete");
-			}
-
-			//			@Override
-			public void add(PersistedPaymentRequest paymentRequest) {
-//				Log.i(TAG, "add");
-			}
-
-		};
 
 	protected void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
 		if (ClientController.isOnline()) {

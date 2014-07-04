@@ -325,5 +325,11 @@
     <string name="session_expired">Session ist abgelaufen!</string>
     <string name="unexcepted_error">Ein unerwarteter Fehler trat auf. Bitte versuchen Sie es erneut.</string>
     <string name="transaction_server_rejected">Die Transaktion wurde vom Server zurückgewiesen. Bitte versuchen Sie es erneut.</string>
-
+    
+    <!-- NFC Activation -->
+    <string name="nfc_enable_title">NFC Information</string>
+    <string name="nfc_enable_message">Um diese Applikation benutzen zu können müssen Sie NFC (Near Field Communication) in den Geräte-Einstellungen aktivieren.</string>
+    <string name="nfc_enable_button">Geräte Einstellungen öffnen</string>
+    <string name="nfc_enable_button_abort">Information schliessen</string>
+    <string name="nfc_no_adapter">This device has no NFC Adapter. A usage of MBPS is therefore not possible.</string>
 </resources>

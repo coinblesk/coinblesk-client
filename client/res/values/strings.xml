@@ -123,9 +123,7 @@
     <string name="sendPayment_balanceTitle">Balance:</string>
     <string name="sendPayment_selectReceiver">Select receiver</string>
     <string name="sendPayment_error">Problems occurred while sending your transaction. Please try again later.</string>
-   
-    
-    
+
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">You paid %1$s BTC to %2$s</string>
     <string name="payment_notification_success_payee">You got %1$s BTC from %2$s</string>
@@ -188,7 +186,7 @@
     <string name="display_default_day">Day - </string>
     <string name="display_balance_rule">Balance rule</string>
     <string name="display_balance">Balance: </string>
-    
+
     <!-- Payout Rule on item select -->
     <string name="display_time_slots">You can\'t define more than four time slots!</string>
     <string name="display_already_selected">This time is already selected!</string>
@@ -286,15 +284,12 @@
     <string name="stored_username"></string>
     <string name="sharedPreferences_numberOfLastTransactionsTitle">Number of last transactions</string>
     <string name="sharedPreferences_numberOfLastTransactionsDescription">Number of last transactions to show in account overview (enter number from 1 to 5)</string>
-    
-    
+
     <!-- Settings -->
     <string name="settings_autoAccept_checkbox_summary">Auto accept payments for favorite payees up to defined limit</string>
     <string name="settings_autoAccept_checkbox_title">Auto accept payments</string>
     <string name="settings_autoAccept_editText_defaultValue">10</string>
     <string name="settings_autoAccept_editText_title">Auto accept limit in CHF</string>
-    
-
 
     <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
@@ -312,15 +307,15 @@
     <string name="addressBook_addContact_cancel">Cancel</string>
     <string name="addressBook_addContact_title">Save new contact</string>
     <string name="addressBook_addContact_message">Please enter the username of the contact you would like to save:</string>
-    
-       <!-- History Transaction Strings -->
+
+    <!-- History Transaction Strings -->
     <string name="history_from">From:</string>
     <string name="history_to">To:</string>
     <string name="history_amount">Amount:</string>
     <string name="history_payIn">PayIn Transaction from BTC network:</string>
     <string name="history_payOut">PayOut Transaction:</string>
     <string name="history_payOutTo">to address:</string>
-    
+
     <!-- Error Strings -->
     <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting MBPS app preferences in Android Settings.</string>
     <string name="error_transaction_failed">Transmission error. Please check your history if transaction was successful.</string>
@@ -331,4 +326,12 @@
     <string name="session_expired">Session expired!</string>
     <string name="unexcepted_error">An unexpected error occurred. Please try again</string>
     <string name="transaction_server_rejected">The server rejected the transaction. Please try again.</string>
+     
+     <!-- NFC Activation -->
+    <string name="nfc_enable_title">NFC Information</string>
+    <string name="nfc_enable_message">To use this application you need to enable NFC (Near Field Communication) in your device settings.</string>
+    <string name="nfc_enable_button">Open Device Settings</string>
+    <string name="nfc_enable_button_abort">Close Information</string>
+    <string name="nfc_no_adapter">Dieses Gerät verüfgt über kein NFC-Modul. Eine Verwendung von MBPS ist aus diesem Grund nicht möglich.</string>
+
 </resources>

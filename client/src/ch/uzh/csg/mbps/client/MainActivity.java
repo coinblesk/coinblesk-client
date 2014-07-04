@@ -7,15 +7,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
-import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -67,8 +64,6 @@ import ch.uzh.csg.paymentlib.PaymentRequestHandler;
 import ch.uzh.csg.paymentlib.container.ServerInfos;
 import ch.uzh.csg.paymentlib.container.UserInfos;
 import ch.uzh.csg.paymentlib.messages.PaymentError;
-import ch.uzh.csg.paymentlib.persistency.IPersistencyHandler;
-import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
 /**
  * This class shows the main view of the user with the balance of the user's
@@ -89,6 +84,8 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 	AnimationDrawable nfcActivityAnimation;
 
 	private static final String TAG = "##NFC## MainActivity";
+
+	//TODO simon: remove logs
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -400,10 +397,8 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		}
 	}
 
-
-	//TODO simon: refactor NFC stuff
 	private void initializeNFC() throws Exception{
-		final NfcAdapter adapter = createAdapter(MainActivity.this);
+		createAdapter(MainActivity.this);
 
 		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
 		final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
@@ -417,7 +412,6 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 			Log.i(TAG, "evt2:" + event + " obj:" + object);
 
 			switch (event) {
-			//TODO simon: put error to abstractpayment
 			case ERROR:
 				PaymentError err = (PaymentError) object;
 				switch (err) {
@@ -442,8 +436,6 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 					showDialog(getResources().getString(R.string.transaction_server_rejected), false);
 					break;
 				case UNEXPECTED_ERROR:
-//					dismissNfcInProgressDialog();
-//					showDialog(getResources().getString(R.string.error_transaction_failed), false);
 					break;
 				default:
 					break;
@@ -457,7 +449,7 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 				resetStates();
 				break;
 			case INITIALIZED:
-				showNfcInProgressDialog();
+				showNfcProgressDialog(true);
 				break;
 			default:
 				break;
@@ -468,23 +460,17 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 	//TODO: simon: what for?
 	private IUserPromptPaymentRequest userPrompt = new IUserPromptPaymentRequest() {
 
-		//		@Override
 		public boolean isPaymentAccepted() {
 			Log.i(TAG, "payment accepted: "+paymentAccepted);
 			return paymentAccepted;
 		}
 
-		//		@Override
 		public void promptUserPaymentRequest(String username, Currency currency, long amount, IUserPromptAnswer answer) {
 			Log.i(TAG, "user " + username + " wants " + amount);
 			showCustomDialog(username, currency, amount, answer);
 		}
-
 	};
 
-
-
-	//TODO simon: change to popup with receivepayment design
 	private void showCustomDialog(String username, Currency currency, long amount, final IUserPromptAnswer answer2) {
 		LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		ViewGroup group = (ViewGroup) findViewById(R.id.pay_payment_popup);
@@ -495,7 +481,7 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		receiverTv.setText(username);
 		final TextView amountTv = (TextView) layout.findViewById(R.id.payPayment_amountBTC);
 		amountTv.setText(CurrencyViewHandler.formatBTCAsString(Converter.getBigDecimalFromLong(amount), getApplicationContext()));
-		
+
 		if(exchangeRate != null){
 			final TextView amountChfTv = (TextView) layout.findViewById(R.id.payPayment_amountCHF);
 			amountChfTv.setText(CurrencyViewHandler.amountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount)));
@@ -506,7 +492,6 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		}
 		final TextView balanceTvBtc = (TextView) layout.findViewById(R.id.payPayment_balanceBTC);
 		balanceTvBtc.setText(CurrencyViewHandler.formatBTCAsString(ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext()));
-
 
 		layout.post(new Runnable() {
 			public void run() {
@@ -519,48 +504,27 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		rejectButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				paymentAccepted = false;
-				showNfcInProgressDialog();
+				showNfcProgressDialog(false);
 				answer2.rejectPayment();
 				popupWindow.dismiss();
-				//TODO Simon: do i get a response?
-				//				refreshActivity();
 			}
 		});
+
 		final Button acceptButton = (Button) layout.findViewById(R.id.payPayment_accept);
 		acceptButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				paymentAccepted = true;
 				answer2.acceptPayment();
 				popupWindow.dismiss();
-				showNfcInProgressDialog();
+				showNfcProgressDialog(false);
 			}
 		});
 	}
-	
-	//TODO jeton: add to xml
-		protected IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
 
-			//			@Override
-			public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
-//				Log.i(TAG, "getPersistedPaymentRequest");
-				return null;
-			}
-
-			//			@Override
-			public void delete(PersistedPaymentRequest paymentRequest) {
-//				Log.i(TAG, "delete");
-			}
-
-			//			@Override
-			public void add(PersistedPaymentRequest paymentRequest) {
-//				Log.i(TAG, "add");
-			}
-
-		};
 	protected void refreshActivity() {
 		this.recreate();
 	}
-	
+
 	//TODO simon: replace error answers
 	protected void showSuccessDialog(Object object, boolean isSending) {
 		dismissNfcInProgressDialog();
