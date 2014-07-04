@@ -85,15 +85,6 @@
         </activity>
         <!-- Payment -->
         <activity
-            android:name="ch.uzh.csg.mbps.client.payment.PayPaymentActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/title_activity_pay_payment"
-            android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.ChoosePaymentActivity" />
-        </activity>
-        <activity
             android:name="ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_receive_payment" >

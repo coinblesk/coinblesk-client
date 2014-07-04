@@ -10,7 +10,6 @@
     <string name="title_activity_registration">Registrierung</string>
     <string name="title_activity_main">Kontoübersicht</string>
     <string name="title_activity_history">Verlauf</string>
-    <string name="title_activity_pay_payment">Bezahlen</string>
     <string name="title_activity_receive_payment">Bitcoins verlangen</string>
     <string name="title_activity_send_payment">Bitcoins senden</string>
     <string name="title_activity_pay_in">Bitcoins Einzahlen</string>

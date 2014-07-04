@@ -10,7 +10,6 @@
     <string name="title_activity_registration">MBPS - Registration</string>
     <string name="title_activity_main">Account Overview</string>
     <string name="title_activity_history">History</string>
-    <string name="title_activity_pay_payment">Pay</string>
     <string name="title_activity_receive_payment">Request Bitcoins</string>
     <string name="title_activity_send_payment">Send Bitcoins</string>
     <string name="title_activity_pay_in">Pay In</string>
