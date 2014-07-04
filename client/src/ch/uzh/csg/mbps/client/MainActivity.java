@@ -442,8 +442,8 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 					showDialog(getResources().getString(R.string.transaction_server_rejected), false);
 					break;
 				case UNEXPECTED_ERROR:
-					dismissNfcInProgressDialog();
-					showDialog(getResources().getString(R.string.error_transaction_failed), false);
+//					dismissNfcInProgressDialog();
+//					showDialog(getResources().getString(R.string.error_transaction_failed), false);
 					break;
 				default:
 					break;
@@ -495,14 +495,17 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		receiverTv.setText(username);
 		final TextView amountTv = (TextView) layout.findViewById(R.id.payPayment_amountBTC);
 		amountTv.setText(CurrencyViewHandler.formatBTCAsString(Converter.getBigDecimalFromLong(amount), getApplicationContext()));
-		final TextView amountChfTv = (TextView) layout.findViewById(R.id.payPayment_amountCHF);
-		amountChfTv.setText(CurrencyViewHandler.amountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount)));
-		final TextView exchangeRateTv = (TextView) layout.findViewById(R.id.payPayment_exchangeRateValue);
-		CurrencyViewHandler.setExchangeRateView(exchangeRate, exchangeRateTv);
+		
+		if(exchangeRate != null){
+			final TextView amountChfTv = (TextView) layout.findViewById(R.id.payPayment_amountCHF);
+			amountChfTv.setText(CurrencyViewHandler.amountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount)));
+			final TextView exchangeRateTv = (TextView) layout.findViewById(R.id.payPayment_exchangeRateValue);
+			CurrencyViewHandler.setExchangeRateView(exchangeRate, exchangeRateTv);
+			final TextView balanceTvChf = (TextView) layout.findViewById(R.id.payPayment_balanceCHF);
+			balanceTvChf.setText(CurrencyViewHandler.amountInCHF(exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance()));
+		}
 		final TextView balanceTvBtc = (TextView) layout.findViewById(R.id.payPayment_balanceBTC);
 		balanceTvBtc.setText(CurrencyViewHandler.formatBTCAsString(ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext()));
-		final TextView balanceTvChf = (TextView) layout.findViewById(R.id.payPayment_balanceCHF);
-		balanceTvChf.setText(CurrencyViewHandler.amountInCHF(exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance()));
 
 
 		layout.post(new Runnable() {
@@ -558,6 +561,7 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		this.recreate();
 	}
 	
+	//TODO simon: replace error answers
 	protected void showSuccessDialog(Object object, boolean isSending) {
 		dismissNfcInProgressDialog();
 		String answer;
@@ -568,17 +572,24 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		} else {
 			PaymentResponse pr = (PaymentResponse) object;
 			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
+			BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+			String chfValue = "";
+			if(exchangeRate != null) {
+				chfValue = " (" + CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")";
+			}
 
 			if(isSending){
+				ClientController.getStorageHandler().getUserAccount().setBalance(balance.subtract(amountBtc));
 				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
-						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue,
 						pr.getUsernamePayee());
 			}
 			else {
+				ClientController.getStorageHandler().getUserAccount().setBalance(balance.add(amountBtc));
 				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
-						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.amountInCHF(exchangeRate, amountBtc) + ")",
+						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue,
 						pr.getUsernamePayer());
 			}
 		}

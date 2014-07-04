@@ -430,7 +430,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		}
 	}
 
-
 	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
 		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
 			Log.i(TAG, "evt2:" + event + " obj:" + object);
@@ -460,8 +459,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					showDialog(getResources().getString(R.string.transaction_server_rejected), false);
 					break;
 				case UNEXPECTED_ERROR:
-					dismissNfcInProgressDialog();
-					showDialog(getResources().getString(R.string.error_transaction_failed), false);
+//					dismissNfcInProgressDialog();
+//					showDialog(getResources().getString(R.string.error_transaction_failed), false);
 					break;
 				default:
 					break;
