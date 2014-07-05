@@ -379,7 +379,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	private void initializeNFC(PaymentInfos paymentInfos) throws Exception {
 		//TODO simon: get Server Key Number!
-		//TODO simon: handle exceptions
 		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
 		final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
 		PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
