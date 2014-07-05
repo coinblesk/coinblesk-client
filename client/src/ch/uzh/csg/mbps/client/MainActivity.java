@@ -388,7 +388,7 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 
 	private void initializeNFC() {
 		createAdapter(MainActivity.this);
-		//TODO jeton: get serverkeynumber
+		//TODO jeton: change to new default serverkeynumber method when adapted method
 		try {
 			PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
 			final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
