@@ -390,6 +390,10 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	public void createTransaction(){
 		CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
 		if (!receiverUsernameEditText.getText().toString().isEmpty() && !(amountBTC == null)) {
+			if(receiverUsernameEditText.getText().toString().equals(ClientController.getStorageHandler().getUserAccount().getUsername())){
+				displayResponse(getResources().getString(R.string.sendPayment_error_user));
+				return;
+			}
 			try {
 				PaymentRequest paymentRequestPayer = new PaymentRequest(
 						PKIAlgorithm.DEFAULT, 

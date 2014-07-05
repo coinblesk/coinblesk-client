@@ -122,6 +122,7 @@
     <string name="sendPayment_balanceTitle">Balance:</string>
     <string name="sendPayment_selectReceiver">Select receiver</string>
     <string name="sendPayment_error">Problems occurred while sending your transaction. Please try again later.</string>
+    <string name="sendPayment_error_user">Error. You can not send a transaction to yourself.</string>
 
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">You paid %1$s BTC to %2$s</string>
