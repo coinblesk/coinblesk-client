@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -83,10 +82,6 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 	public static Boolean isFirstTime;
 	AnimationDrawable nfcActivityAnimation;
 
-	private static final String TAG = "##NFC## MainActivity";
-
-	//TODO simon: remove logs
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -98,13 +93,7 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 
 		initClickListener();
 
-		//TODO simon: handle exceptions
-		try {
-			initializeNFC();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		initializeNFC();
 	}
 
 	@Override
@@ -397,19 +386,22 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		}
 	}
 
-	private void initializeNFC() throws Exception{
+	private void initializeNFC() {
 		createAdapter(MainActivity.this);
-
-		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
-		final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
-		PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
-		final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
-		new PaymentRequestHandler(this, eventHandler, userInfos, serverInfos, userPrompt, persistencyHandler);
+		//TODO jeton: get serverkeynumber
+		try {
+			PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
+			final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
+			PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
+			final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
+			new PaymentRequestHandler(this, eventHandler, userInfos, serverInfos, userPrompt, persistencyHandler);
+		} catch (Exception e) {
+			displayResponse(getResources().getString(R.string.error_nfc_initializing));
+		}
 	}
 
 	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
 		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
-			Log.i(TAG, "evt2:" + event + " obj:" + object);
 
 			switch (event) {
 			case ERROR:
@@ -457,17 +449,13 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		}
 	};
 
-	//TODO: simon: what for?
 	private IUserPromptPaymentRequest userPrompt = new IUserPromptPaymentRequest() {
 
 		public boolean isPaymentAccepted() {
-			Log.i(TAG, "payment accepted: "+paymentAccepted);
 			return paymentAccepted;
 		}
 
 		public void promptUserPaymentRequest(String username, Currency currency, long amount, IUserPromptAnswer answer) {
-			Log.i(TAG, "user " + username + " wants " + amount);
-
 			if(checkAutoAccept(username, amount)) {
 				paymentAccepted = true;
 				answer.acceptPayment();
@@ -551,14 +539,11 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		this.recreate();
 	}
 
-	//TODO simon: replace error answers
 	protected void showSuccessDialog(Object object, boolean isSending) {
 		dismissNfcInProgressDialog();
 		String answer;
-		if (object == null) {
-			answer = "object is null";
-		} else if (!(object instanceof PaymentResponse)) {
-			answer = "object is not instance of PaymentResponse";
+		if (object == null || !(object instanceof PaymentResponse)) {
+			answer = getResources().getString(R.string.error_transaction_failed);
 		} else {
 			PaymentResponse pr = (PaymentResponse) object;
 			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());

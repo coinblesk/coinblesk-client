@@ -15,7 +15,6 @@ import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,7 +52,6 @@ import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
 import ch.uzh.csg.mbps.util.Converter;
-import ch.uzh.csg.nfclib.NfcLibException;
 import ch.uzh.csg.paymentlib.IPaymentEventHandler;
 import ch.uzh.csg.paymentlib.IServerResponseListener;
 import ch.uzh.csg.paymentlib.PaymentEvent;
@@ -62,7 +60,6 @@ import ch.uzh.csg.paymentlib.PaymentRequestInitializer.PaymentType;
 import ch.uzh.csg.paymentlib.container.PaymentInfos;
 import ch.uzh.csg.paymentlib.container.ServerInfos;
 import ch.uzh.csg.paymentlib.container.UserInfos;
-import ch.uzh.csg.paymentlib.exceptions.IllegalArgumentException;
 import ch.uzh.csg.paymentlib.messages.PaymentError;
 
 /**
@@ -78,7 +75,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private TextView descriptionOfInputUnit;
 	private SharedPreferences settings;
 	AnimationDrawable nfcActivityAnimation;
-	private boolean isSend;
+	private boolean isSendingMode;
 
 	private MenuItem menuWarning;
 	private MenuItem offlineMode;
@@ -91,7 +88,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 
 	protected static final String INPUT_UNIT_CHF = "CHF";
-	private static final String TAG = "##NFC## ReceivePaymentActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -126,8 +122,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		//adapt view for actively sending instead of requesting bitcoins
 		Intent myIntent = getIntent(); // gets the previously created intent
-		isSend = myIntent.getBooleanExtra("isSend", false); 
-		if(isSend){
+		isSendingMode = myIntent.getBooleanExtra("isSend", false); 
+		if(isSendingMode){
 			TextView title = (TextView) findViewById(R.id.receivePayment_title);
 			title.setText(getResources().getString(R.string.sendPayment_title));
 			ImageView logo = (ImageView) findViewById(R.id.receivePayment_logo);
@@ -257,15 +253,12 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
 			} catch (Exception e) {
 				displayResponse(getResources().getString(R.string.error_transaction_failed));
-				Log.e(TAG, e.getMessage());
 				return;
 			}
 			responseListener.onServerResponse(serverPaymentResponse);
 		} 
 		else {
 			displayResponse(response.getMessage());
-			Log.e(TAG, response.getMessage());
-			//TODO simon: show messsage in case of failure on server
 		}
 		dismissProgressDialog();
 		dismissNfcInProgressDialog();
@@ -321,8 +314,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					paymentInfos = new PaymentInfos(Currency.BTC, Converter.getLongFromBigDecimal(amountBTC));
 					initializeNFC(paymentInfos);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					displayResponse(getResources().getString(R.string.unexcepted_error));
 				}
 				showNfcInstructions();
 			}
@@ -395,35 +387,29 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		NfcAdapter nfcAdapter = createAdapter(ReceivePaymentActivity.this);
 		if (nfcAdapter == null) {
-			Log.e(TAG, "no nfc adapter");
 			return;
 		}
 
-		if(isSend){
+		if(isSendingMode){
 			try {
-				Log.i(TAG, "init payment SEND");
 				new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (NfcLibException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				displayResponse(getResources().getString(R.string.unexcepted_error));
+				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
 			}
 		}
 		else {
 			try {
-				Log.i(TAG, "init payment REQUEST");
 				new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (NfcLibException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				displayResponse(getResources().getString(R.string.unexcepted_error));
+				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
 			}
 		}
 	}
 
 	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
 		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
-			Log.i(TAG, "evt2:" + event + " obj:" + object);
 
 			switch (event) {
 			case ERROR:
@@ -463,12 +449,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					responseListener = caller;
 					launchTransactionRequest(serverPaymentRequest);
 				} catch (Exception e) {
-					Log.i(TAG, "forward to server");
-					//TODO simon: error handling
+					displayResponse(getResources().getString(R.string.unexcepted_error));
 				}
 				break;
 			case SUCCESS:
-				showSuccessDialog(object, isSend);
+				showSuccessDialog(object, isSendingMode);
 				break;
 			case INITIALIZED:
 				showNfcProgressDialog(true);

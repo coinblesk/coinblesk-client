@@ -324,6 +324,7 @@
     <string name="session_expired">Session ist abgelaufen!</string>
     <string name="unexcepted_error">Ein unerwarteter Fehler trat auf. Bitte versuchen Sie es erneut.</string>
     <string name="transaction_server_rejected">Die Transaktion wurde vom Server zurückgewiesen. Bitte versuchen Sie es erneut.</string>
+    <string name="error_nfc_initializing">Fehler bei Initialisierung von NFC. Zahlungen können eventuell nicht durchgeführt werden.</string>
     
     <!-- NFC Activation -->
     <string name="nfc_enable_title">NFC Information</string>
