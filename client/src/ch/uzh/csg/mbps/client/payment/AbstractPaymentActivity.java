@@ -23,7 +23,6 @@ import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 	protected boolean isSeller;
 	protected BigDecimal exchangeRate;
-	private AlertDialog lastDialog = null;
 	private ProgressDialog progressDialog;
 	private boolean destroyed = false;
 	protected boolean paymentAccepted = false;
@@ -82,9 +81,6 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 	}
 
 	protected void showDialog(String message, boolean isSuccessful) {
-		if (lastDialog != null) {
-			lastDialog.dismiss();
-		}
 		
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		if (isSuccessful) {
@@ -108,7 +104,6 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 			public void run() {
 				AlertDialog alert = builder.create();
 				alert.show();
-				lastDialog = alert;
 			}
 		});
 	}
