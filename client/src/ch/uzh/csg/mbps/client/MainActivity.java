@@ -405,33 +405,35 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 			switch (event) {
 			case ERROR:
 				PaymentError err = (PaymentError) object;
-				switch (err) {
-				case DUPLICATE_REQUEST:
-					dismissNfcInProgressDialog();
-					showDialog(getResources().getString(R.string.transaction_duplicate_error), false);
-					break;
-				case NO_SERVER_RESPONSE:
-					dismissNfcInProgressDialog();
-					showDialog(getResources().getString(R.string.error_transaction_failed), false);
-					break;
-				case PAYER_REFUSED:
-					dismissNfcInProgressDialog();
-					showDialog(getResources().getString(R.string.transaction_rejected_payer), false);
-					break;
-				case REQUESTS_NOT_IDENTIC:
-					dismissNfcInProgressDialog();
-					showDialog(getResources().getString(R.string.transaction_server_rejected), false);
-					break;
-				case SERVER_REFUSED:
-					dismissNfcInProgressDialog();
-					showDialog(getResources().getString(R.string.transaction_server_rejected), false);
-					break;
-				case UNEXPECTED_ERROR:
-					dismissNfcInProgressDialog();
-					showDialog(getResources().getString(R.string.error_transaction_failed), false);
-					break;
-				default:
-					break;
+				if (err != null){
+					switch (err) {
+					case DUPLICATE_REQUEST:
+						dismissNfcInProgressDialog();
+						showDialog(getResources().getString(R.string.transaction_duplicate_error), false);
+						break;
+					case NO_SERVER_RESPONSE:
+						dismissNfcInProgressDialog();
+						showDialog(getResources().getString(R.string.error_transaction_failed), false);
+						break;
+					case PAYER_REFUSED:
+						dismissNfcInProgressDialog();
+						showDialog(getResources().getString(R.string.transaction_rejected_payer), false);
+						break;
+					case REQUESTS_NOT_IDENTIC:
+						dismissNfcInProgressDialog();
+						showDialog(getResources().getString(R.string.transaction_server_rejected), false);
+						break;
+					case SERVER_REFUSED:
+						dismissNfcInProgressDialog();
+						showDialog(getResources().getString(R.string.transaction_server_rejected), false);
+						break;
+					case UNEXPECTED_ERROR:
+						dismissNfcInProgressDialog();
+						showDialog(getResources().getString(R.string.error_transaction_failed), false);
+						break;
+					default:
+						break;
+					}
 				}
 				resetStates();
 				break;
