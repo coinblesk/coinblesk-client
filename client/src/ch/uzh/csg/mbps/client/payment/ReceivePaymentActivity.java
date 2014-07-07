@@ -435,6 +435,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					showDialog(getResources().getString(R.string.transaction_server_rejected), false);
 					break;
 				case UNEXPECTED_ERROR:
+					dismissNfcInProgressDialog();
+					showDialog(getResources().getString(R.string.error_transaction_failed), false);
 					break;
 				default:
 					break;
@@ -479,11 +481,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	protected void showSuccessDialog(Object object, boolean isSending) {
 		dismissNfcInProgressDialog();
 		String answer;
-		if (object == null) {
-			answer = "object is null";
-		} else if (!(object instanceof PaymentResponse)) {
-			answer = "object is not instance of PaymentResponse";
-		} else {
+		if (object == null || !(object instanceof PaymentResponse)) {
+			answer = getResources().getString(R.string.error_transaction_failed);
+		}
+		else {
 			PaymentResponse pr = (PaymentResponse) object;
 			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
 
