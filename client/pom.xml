@@ -37,14 +37,14 @@
 			<artifactId>spring-android-core</artifactId>
 			<version>1.0.1.RELEASE</version>
 		</dependency>
-	
+
 		<!-- MBPS shared resources -->
 		<dependency>
 			<groupId>ch.uzh.csg</groupId>
 			<artifactId>mbps-shared-resources</artifactId>
 			<version>1.2.3</version>
 		</dependency>
-		
+
 		<!-- Spongy Castle (Bouncy Castle) -->
 		<dependency>
 			<groupId>com.madgag.spongycastle</groupId>
@@ -56,12 +56,12 @@
 			<artifactId>prov</artifactId>
 			<version>1.50.0.0</version>
 		</dependency>
-		
+
 		<!-- NFC Payment Libaray -->
 		<dependency>
-		    <groupId>ch.uzh.csg</groupId>
-		    <artifactId>nfcpaymentlib</artifactId>
-		    <version>0.1.0</version>
+			<groupId>ch.uzh.csg</groupId>
+			<artifactId>nfcpaymentlib</artifactId>
+			<version>0.1.0</version>
 		</dependency>
 
 		<!-- QR Code Scanner -->
@@ -70,6 +70,21 @@
 			<artifactId>android-integration</artifactId>
 			<version>3.0.1</version>
 		</dependency>
+		
+		<!-- JUnit dependency to resolve harmcrest/junit issue -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit-dep</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 	</dependencies>
 
 	<build>
