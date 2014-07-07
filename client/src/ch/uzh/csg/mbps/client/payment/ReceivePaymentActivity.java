@@ -378,8 +378,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 
 	private void initializeNFC(PaymentInfos paymentInfos) throws Exception {
-		//TODO jeton: change to new default serverkeynumber method when adapted method
-		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey((byte) 1).getPublicKey());
+		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey().getPublicKey());
 		final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
 		PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
 		final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());

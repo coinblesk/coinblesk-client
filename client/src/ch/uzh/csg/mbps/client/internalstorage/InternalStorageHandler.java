@@ -262,8 +262,15 @@ public class InternalStorageHandler {
 			return false;
 		}
 	}
+	
+	/**
+	 * Returns the server's {@link CustomPublicKey} with the key number 1 or
+	 * null, if there is no {@link CustomPublicKey} with the key number 1.
+	 */
+	public CustomPublicKey getServerPublicKey() {
+		return getServerPublicKey((byte) 1);
+	}
 
-	//TODO jeton: create method without key number
 	/**
 	 * Returns the server's {@link CustomPublicKey} with the given key number or
 	 * null, if there is no {@link CustomPublicKey} with the given key number.
