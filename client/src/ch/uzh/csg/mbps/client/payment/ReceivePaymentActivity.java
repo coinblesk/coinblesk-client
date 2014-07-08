@@ -218,7 +218,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		timer.start();
 	}
-
+	
+	/**
+	 * Launches request to update exchange rate.
+	 */
 	protected void launchRequest() {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
@@ -467,7 +470,12 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		}
 	};
 
-	protected void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
+	/**
+	 * Launches request to send a new transaction to the server.
+	 * 
+	 * @param serverPaymentRequest object with transaction details
+	 */
+	private void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
 		if (ClientController.isOnline()) {
 			CreateTransactionTransferObject ctto = null;
 			try {
@@ -480,7 +488,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		}
 	}
 
-	protected void showSuccessDialog(Object object, boolean isSending) {
+	/**
+	 * Shows a dialog indicating if transaction was successful or not.
+	 * 
+	 * @param object (object with {@link PaymentResponse})
+	 * @param isSending (isSending = true if initiator sends bitcoins, false if initiator requests bitcoins)
+	 */
+	private void showSuccessDialog(Object object, boolean isSending) {
 		dismissNfcInProgressDialog();
 		String answer;
 		if (object == null || !(object instanceof PaymentResponse)) {

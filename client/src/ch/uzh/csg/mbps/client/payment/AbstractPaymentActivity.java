@@ -81,6 +81,12 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 		return progressDialog;
 	}
 
+	/**
+	 * Displays a custom dialog with a given message and an image indicating if task was successful or not.
+	 * 
+	 * @param message to be displayed to the user
+	 * @param isSuccessful boolean to indicate if task was successful
+	 */
 	protected void showDialog(String message, boolean isSuccessful) {
 		
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);

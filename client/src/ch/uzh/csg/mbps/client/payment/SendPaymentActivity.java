@@ -158,8 +158,14 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			}
 		}
 	}
-
-	protected void startTimer(long duration, long interval) {
+	
+	/**
+	 * Start Timer for Session Countdown in Options Menu.
+	 * 
+	 * @param duration Time left in milliseconds.
+	 * @param interval Interval in which timer is updated in milliseconds.
+	 */
+	private void startTimer(long duration, long interval) {
 		if (timer != null) {
 			timer.cancel();
 		}
@@ -177,7 +183,10 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		timer.start();
 	}
 
-	protected void launchRequest() {
+	/**
+	 * Launches request for updating Exchange Rate
+	 */
+	private void launchRequest() {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
 			RequestTask getExchangeRate = new ExchangeRateRequestTask(this);
@@ -185,7 +194,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		}
 	}
 
-	protected void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
+	private void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
 			CreateTransactionTransferObject ctto = null;
@@ -387,7 +396,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 
 	}
 
-	public void createTransaction(){
+	private void createTransaction(){
 		CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
 		if (!receiverUsernameEditText.getText().toString().isEmpty() && !(amountBTC == null)) {
 			if(receiverUsernameEditText.getText().toString().equals(ClientController.getStorageHandler().getUserAccount().getUsername())){
