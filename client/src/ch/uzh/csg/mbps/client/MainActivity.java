@@ -549,11 +549,17 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		this.recreate();
 	}
 
-	protected void showSuccessDialog(Object object, boolean isSending) {
+	/**
+	 * Shows a dialog indicating if transaction was successful or not.
+	 * @param object (object with {@link PaymentResponse})
+	 * @param isSending (isSending = true if initiator sends bitcoins, false if initiator requests bitcoins)
+	 */
+	private void showSuccessDialog(Object object, boolean isSending) {
 		dismissNfcInProgressDialog();
 		String answer;
 		if (object == null || !(object instanceof PaymentResponse)) {
 			answer = getResources().getString(R.string.error_transaction_failed);
+			showDialog(answer, false);
 		} else {
 			PaymentResponse pr = (PaymentResponse) object;
 			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
@@ -577,8 +583,8 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue,
 						pr.getUsernamePayer());
 			}
+			showDialog(answer, true);
 		}
-		showDialog(answer, true);
 	}
 
 }

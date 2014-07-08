@@ -1,7 +1,7 @@
 package ch.uzh.csg.mbps.client;
 
 import java.util.Iterator;
-
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -20,6 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import ch.uzh.csg.mbps.client.util.ClientController;
 
+/**
+ * Activity for showing and modifying address book contacts. 
+ *
+ */
 public class AddressBookActivity extends AbstractAsyncActivity {
 
 	@Override
@@ -82,6 +86,7 @@ public class AddressBookActivity extends AbstractAsyncActivity {
 		createAddressBookEntries();
 	}
 
+	@SuppressLint("InflateParams")
 	private void createAddressBookEntries() {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		LinearLayout parent = (LinearLayout) findViewById(R.id.addressBookActivity_linearLayout);

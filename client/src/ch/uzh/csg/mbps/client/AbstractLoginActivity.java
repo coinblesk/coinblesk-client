@@ -46,6 +46,9 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 	
 	protected boolean clientControllerInitialized = false;
 	
+	/**
+	 * Launch Sign in request to connect to server and launch session.
+	 */
 	protected void launchSignInRequest() {
 		showLoadingProgressDialog();
 		TimeHandler.getInstance().setStartActivity(this);
@@ -54,6 +57,12 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		signIn.execute();
 	}
 	
+	/**
+	 * Launches Sign In Request with Context as parameter. Used for Reconnecting
+	 * to Server from Navigation Drawer.
+	 * 
+	 * @param Appliation Context
+	 */
 	protected void launchSignInRequest(Context context) {
 		showLoadingProgressDialog();
 		TimeHandler.getInstance().setStartActivity(context);
@@ -76,6 +85,12 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		return true;
 	}
 	
+	/**
+	 * Initializes option menu items for indicating offline mode, refresh
+	 * session and session countdown.
+	 * 
+	 * @param menu
+	 */
 	protected void initializeMenuItems(Menu menu){
 		menuWarning = menu.findItem(R.id.action_warning);
 		offlineMode = menu.findItem(R.id.menu_offlineMode);
@@ -118,6 +133,12 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		}
 	}
 	
+	/**
+	 * Start Timer for Session Countdown in Options Menu.
+	 * 
+	 * @param duration Time left in milliseconds.
+	 * @param interval Interval in which timer is updated in milliseconds.
+	 */
 	protected void startTimer(long duration, long interval) {
 		if(timer != null){
 			timer.cancel();
@@ -139,6 +160,13 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		timer.start();
 	}
 	
+	/**
+	 * Handles response from http server call. Differentiates the server call
+	 * based on given Type.
+	 * 
+	 * @param response from server
+	 * @param context (application context)
+	 */
 	public void onTaskComplete(CustomResponseObject response, Context context) {
 		if (!clientControllerInitialized) {
 			try {

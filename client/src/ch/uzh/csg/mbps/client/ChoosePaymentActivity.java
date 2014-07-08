@@ -11,6 +11,10 @@ import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
+/**
+ * Activity for selecting which kind of payment shall be initialized.
+ *
+ */
 public class ChoosePaymentActivity extends AbstractLoginActivity {
 	private Button requestPaymentBtn;
 	private Button sendPaymentBtn;
@@ -59,7 +63,6 @@ public class ChoosePaymentActivity extends AbstractLoginActivity {
 	}
 	
 	private void initClickListener() {
-
 		requestPaymentBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				Intent intent = new Intent(ChoosePaymentActivity.this, ReceivePaymentActivity.class);
@@ -82,8 +85,9 @@ public class ChoosePaymentActivity extends AbstractLoginActivity {
 			}
 		});
 	}
-
+	
 	public void onTaskComplete(CustomResponseObject response) {
 		super.onTaskComplete(response, getApplicationContext());
 	}
+	
 }

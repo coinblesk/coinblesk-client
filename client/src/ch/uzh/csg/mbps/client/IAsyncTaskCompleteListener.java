@@ -7,7 +7,9 @@ package ch.uzh.csg.mbps.client;
  * @param <T> generic placeholder for the returned type
  */
 public interface IAsyncTaskCompleteListener<T> {
-
+	/**
+	 * Handles response form server after http server call.
+	 */
 	public void onTaskComplete(T response);
 
 }
