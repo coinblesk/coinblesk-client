@@ -280,7 +280,6 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 	
-	//TODO jeton: remove key number! only one server key saved anyway!
 	/**
 	 * Returns the server's {@link CustomPublicKey} with the key number provided
 	 * from the given xml string.
@@ -288,15 +287,13 @@ public class InternalXMLData {
 	 * @param xml
 	 *            the xml string to read out the server's
 	 *            {@link CustomPublicKey} from
-	 * @param keyNumber
-	 *            the key number of the {@link CustomPublicKey} to be retrieved
 	 * @return the server's {@link CustomPublicKey} or null, if this field is
 	 *         not set or no {@link CustomPublicKey} with the provided key
 	 *         number could be found
 	 * @throws Exception
 	 *             an xml exception
 	 */
-	protected CustomPublicKey getServerPublicKey(String xml, byte keyNumber) throws Exception {
+	protected CustomPublicKey getServerPublicKey(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
 		String textContent;

@@ -247,7 +247,7 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	public boolean saveServerPublicKey(CustomPublicKey publicKey) {
 		this.serverPublicKey = publicKey;
 		try {
-			if (xmlData.getServerPublicKey(currentXML, publicKey.getKeyNumber()) == null) {
+			if (xmlData.getServerPublicKey(currentXML) == null) {
 				// only save the public key if it is not already saved (i.e., a new one)
 				currentXML = xmlData.setServerPublicKey(currentXML, publicKey);
 				encryptAndSave();
@@ -259,24 +259,13 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	}
 	
 	/**
-	 * Returns the server's {@link CustomPublicKey} with the key number 1 or
-	 * null, if there is no {@link CustomPublicKey} with the key number 1.
+	 * Returns the server's {@link CustomPublicKey} or null, if there is no
+	 * {@link CustomPublicKey} stored.
 	 */
 	public CustomPublicKey getServerPublicKey() {
-		return getServerPublicKey((byte) 1);
-	}
-
-	/**
-	 * Returns the server's {@link CustomPublicKey} with the given key number or
-	 * null, if there is no {@link CustomPublicKey} with the given key number.
-	 * 
-	 * @param keyNumber
-	 *            the key number of the {@link CustomPublicKey} to return
-	 */
-	public CustomPublicKey getServerPublicKey(byte keyNumber) {
 		if (serverPublicKey == null) {
 			try {
-				serverPublicKey = xmlData.getServerPublicKey(currentXML, keyNumber);
+				serverPublicKey = xmlData.getServerPublicKey(currentXML);
 			} catch (Exception e) {
 			}
 		}
@@ -511,9 +500,10 @@ public class InternalStorageHandler implements IPersistencyHandler {
 		if (persistedPaymentRequests.contains(paymentRequest))
 			return true;
 		
+		persistedPaymentRequests.add(paymentRequest);
 		try {
 			currentXML = xmlData.addPersistedPaymentRequest(currentXML, paymentRequest);
-			persistedPaymentRequests.add(paymentRequest);
+			encryptAndSave();
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -531,9 +521,10 @@ public class InternalStorageHandler implements IPersistencyHandler {
 		if (!persistedPaymentRequests.contains(paymentRequest))
 			return true;
 		
+		persistedPaymentRequests.remove(paymentRequest);
 		try {
 			currentXML = xmlData.deletePersistedPaymentRequest(currentXML, paymentRequest);
-			persistedPaymentRequests.remove(paymentRequest);
+			encryptAndSave();
 			return true;
 		} catch (Exception e) {
 			return false;
