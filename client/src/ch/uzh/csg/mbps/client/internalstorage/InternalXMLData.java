@@ -4,6 +4,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -21,10 +22,12 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import android.annotation.SuppressLint;
+import ch.uzh.csg.mbps.customserialization.Currency;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.util.Converter;
+import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
 /**
  * Generates a xml data string and offers the functionality to manipulate the
@@ -63,6 +66,11 @@ public class InternalXMLData {
 	private static final String KEYPAIR_PRIVKEY = "privatekey";
 
 	private static final String PENDING_REQUESTS = "pending-requests";
+	private static final String PENDING_REQUEST = "pending-request";
+	private static final String PENDING_REQUEST_USERNAME_PAYEE = "username-payee";
+	private static final String PENDING_REQUEST_CURRENCY = "currency";
+	private static final String PENDING_REQUEST_AMOUNT = "amount";
+	private static final String PENDING_REQUEST_TIMESTAMP = "timestamp";
 
 	private static final String ADDRESS_BOOK = "address-book";
 	private static final String TRUSTED_CONTACTS = "trusted-contacts";
@@ -253,14 +261,17 @@ public class InternalXMLData {
 					
 					if (n.getNodeName().equals(SERVER_KEY_KEY_NR)) {
 						n.setTextContent(Byte.toString(publicKey.getKeyNumber()));
+						continue;
 					}
 					
 					if (n.getNodeName().equals(SERVER_KEY_PKIALGORITHM)) {
 						n.setTextContent(Byte.toString(publicKey.getPkiAlgorithm()));
+						continue;
 					}
 
 					if (n.getNodeName().equals(SERVER_KEY_BASE64)) {
 						n.setTextContent(publicKey.getPublicKey());
+						continue;
 					}
 				}
 				break;
@@ -269,6 +280,7 @@ public class InternalXMLData {
 		return xmlToString(doc);
 	}
 	
+	//TODO jeton: remove key number! only one server key saved anyway!
 	/**
 	 * Returns the server's {@link CustomPublicKey} with the key number provided
 	 * from the given xml string.
@@ -287,51 +299,44 @@ public class InternalXMLData {
 	protected CustomPublicKey getServerPublicKey(String xml, byte keyNumber) throws Exception {
 		Document doc = stringToXml(xml);
 
-		byte pkiAlgorithm = 0;
-		String key = null;
-
+		String textContent;
+		
 		Node serverElement = doc.getElementsByTagName(SERVER).item(0);
 		NodeList serverNodes = serverElement.getChildNodes();
 		for (int i=0; i<serverNodes.getLength(); i++) {
 			Node node = serverNodes.item(i);
 			if (node.getNodeName().equals(SERVER_KEY)) {
 				NodeList serverKeyNodes = node.getChildNodes();
-				for (int j=0; j<serverKeyNodes.getLength(); j++) {
-					Node n = serverKeyNodes.item(j);
-					String textContent;
-					if (n.getNodeName().equals(SERVER_KEY_KEY_NR)) {
-						textContent = n.getTextContent();
-						if (textContent == null || textContent.isEmpty())
-							return null;
-						
-						byte b = Byte.parseByte(textContent);
-						if (b != keyNumber)
-							continue;
-					}
-					
-					if (n.getNodeName().equals(SERVER_KEY_PKIALGORITHM)) {
-						textContent = n.getTextContent();
-						if (textContent == null || textContent.isEmpty())
-							return null;
-						
-						pkiAlgorithm = Byte.parseByte(textContent);
-					}
-
-					if (n.getNodeName().equals(SERVER_KEY_BASE64)) {
-						textContent = n.getTextContent();
-						if (textContent == null || textContent.isEmpty())
-							return null;
-						
-						key = textContent;
-					}
-				}
-				break;
+				if (serverKeyNodes.getLength() != 3)
+					return null;
+				
+				Node n = serverKeyNodes.item(0);
+				assert n.getNodeName().equals(SERVER_KEY_KEY_NR);
+				textContent = n.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					continue;
+				
+				byte keyNr = Byte.parseByte(textContent);
+				
+				n = serverKeyNodes.item(1);
+				assert n.getNodeName().equals(SERVER_KEY_PKIALGORITHM);
+				textContent = n.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					continue;
+				
+				byte pkiAlgorithm = Byte.parseByte(textContent);
+				
+				n = serverKeyNodes.item(2);
+				assert n.getNodeName().equals(SERVER_KEY_BASE64);
+				if (textContent == null || textContent.isEmpty())
+					continue;
+				
+				String publicKey = textContent;
+				
+				return new CustomPublicKey(keyNr, pkiAlgorithm, publicKey);
 			}
 		}
-		if (pkiAlgorithm == 0 || key == null)
-			return null;
-		else
-			return new CustomPublicKey(keyNumber, pkiAlgorithm, key);
+		return null;
 	}
 
 	/**
@@ -356,19 +361,23 @@ public class InternalXMLData {
 
 			if (node.getNodeName().equals(USER_ID)) {
 				node.setTextContent(Long.toString(userAccount.getId()));
+				continue;
 			}
 
 			if (node.getNodeName().equals(USER_NAME)) {
 				node.setTextContent(userAccount.getUsername());
+				continue;
 			}
 
 			if (node.getNodeName().equals(USER_BALANCE)) {
 				long balance = Converter.getLongFromBigDecimal(userAccount.getBalance());
 				node.setTextContent(Long.toString(balance));
+				continue;
 			}
 
 			if (node.getNodeName().equals(USER_PAYMENT_ADRESS)) {
 				node.setTextContent(userAccount.getPaymentAddress());
+				continue;
 			}
 		}
 		return xmlToString(doc);
@@ -404,6 +413,7 @@ public class InternalXMLData {
 					return null;
 				
 				userId = Long.parseLong(textContent);
+				continue;
 			}
 
 			if (node.getNodeName().equals(USER_NAME)) {
@@ -412,6 +422,7 @@ public class InternalXMLData {
 					return null;
 				
 				username = textContent;
+				continue;
 			}
 
 			if (node.getNodeName().equals(USER_BALANCE)) {
@@ -420,6 +431,7 @@ public class InternalXMLData {
 					return null;
 				
 				balance = Converter.getBigDecimalFromLong(Long.parseLong(textContent));
+				continue;
 			}
 
 			if (node.getNodeName().equals(USER_PAYMENT_ADRESS)) {
@@ -428,6 +440,7 @@ public class InternalXMLData {
 					return null;
 				
 				paymentAddress = textContent;
+				continue;
 			}
 		}
 
@@ -466,18 +479,22 @@ public class InternalXMLData {
 
 			if (node.getNodeName().equals(KEYPAIR_PKIALGORITHM)) {
 				node.setTextContent(Byte.toString(customKeyPair.getPkiAlgorithm()));
+				continue;
 			}
 
 			if (node.getNodeName().equals(KEYPAIR_KEYNR)) {
 				node.setTextContent(Byte.toString(customKeyPair.getKeyNumber()));
+				continue;
 			}
 
 			if (node.getNodeName().equals(KEYPAIR_PUBKEY)) {
 				node.setTextContent(customKeyPair.getPublicKey());
+				continue;
 			}
 
 			if (node.getNodeName().equals(KEYPAIR_PRIVKEY)) {
 				node.setTextContent(customKeyPair.getPrivateKey());
+				continue;
 			}
 		}
 		return xmlToString(doc);
@@ -512,6 +529,7 @@ public class InternalXMLData {
 					return null;
 				
 				pkiAlgorithm = Byte.parseByte(textContent);
+				continue;
 			}
 
 			if (node.getNodeName().equals(KEYPAIR_KEYNR)) {
@@ -520,6 +538,7 @@ public class InternalXMLData {
 					return null;
 				
 				keyNumber = Byte.parseByte(textContent);
+				continue;
 			}
 
 			if (node.getNodeName().equals(KEYPAIR_PUBKEY)) {
@@ -528,6 +547,7 @@ public class InternalXMLData {
 					return null;
 				
 				publicKey = textContent;
+				continue;
 			}
 
 			if (node.getNodeName().equals(KEYPAIR_PRIVKEY)) {
@@ -536,6 +556,7 @@ public class InternalXMLData {
 					return null;
 				
 				privateKey = textContent;
+				continue;
 			}
 		}
 		
@@ -743,6 +764,163 @@ public class InternalXMLData {
 			}
 		}
 		return xmlToString(doc);		
+	}
+	
+	/**
+	 * Returns all stored {@link PersistedPaymentRequest}s from the given xml
+	 * string.
+	 * 
+	 * @param xml
+	 *            the xml string to read out the {@link PersistedPaymentRequest}
+	 *            s from
+	 * @return a set of {@link PersistedPaymentRequest} or an empty set, if
+	 *         there are not {@link PersistedPaymentRequest}s
+	 * @throws Exception
+	 *             an xml exception or if the stored code cannot be mapped to a {@link Currency}
+	 */
+	protected Set<PersistedPaymentRequest> getPersistedPaymentRequests(String xml) throws Exception {
+		Document doc = stringToXml(xml);
+		
+		Set<PersistedPaymentRequest> set = new LinkedHashSet<PersistedPaymentRequest>();
+		
+		Node pendingRequestsElement = doc.getElementsByTagName(PENDING_REQUESTS).item(0);
+		NodeList pendingRequestsNodes = pendingRequestsElement.getChildNodes();
+		
+		String username;
+		Currency currency;
+		long amount;
+		long timestamp;
+		
+		String textContent;
+		
+		for (int i=0; i<pendingRequestsNodes.getLength(); i++) {
+			Node pendingRequestNode = pendingRequestsNodes.item(i);
+			if (pendingRequestNode.getNodeName().equals(PENDING_REQUEST)) {
+				NodeList nodeList = pendingRequestNode.getChildNodes();
+				if (nodeList.getLength() != 4)
+					continue;
+				
+				Node n = nodeList.item(0);
+				assert n.getNodeName().equals(PENDING_REQUEST_USERNAME_PAYEE);
+				textContent = n.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					continue;
+				
+				username = textContent;
+				
+				n = nodeList.item(1);
+				assert n.getNodeName().equals(PENDING_REQUEST_CURRENCY);
+				textContent = n.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					continue;
+				
+				currency = Currency.getCurrency(Byte.parseByte(textContent));
+				
+				n = nodeList.item(2);
+				assert n.getNodeName().equals(PENDING_REQUEST_AMOUNT);
+				textContent = n.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					continue;
+				
+				amount = Long.parseLong(textContent);
+				
+				n = nodeList.item(3);
+				assert n.getNodeName().equals(PENDING_REQUEST_TIMESTAMP);
+				textContent = n.getTextContent();
+				if (textContent == null || textContent.isEmpty())
+					continue;
+				
+				timestamp = Long.parseLong(textContent);
+				
+				set.add(new PersistedPaymentRequest(username, currency, amount, timestamp));
+			}
+		}
+		return set;
+	}
+
+	/**
+	 * Adds the {@link PersistedPaymentRequest} to the xml and returns the
+	 * updated xml string. Assure that you are not adding a
+	 * {@link PersistedPaymentRequest} which is already contained in the set.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param persistedRequest
+	 *            the {@link PersistedPaymentRequest} to be added
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
+	protected String addPersistedPaymentRequest(String xml, PersistedPaymentRequest persistedRequest) throws Exception {
+		Document doc = stringToXml(xml);
+		
+		Node pendingRequestsElement = doc.getElementsByTagName(PENDING_REQUESTS).item(0);
+		
+		Element pendingRequestNode = doc.createElement(PENDING_REQUEST);
+		
+		Element usernameElement = doc.createElement(PENDING_REQUEST_USERNAME_PAYEE);
+		usernameElement.setTextContent(persistedRequest.getUsername());
+		pendingRequestNode.appendChild(usernameElement);
+		
+		Element currencyElement = doc.createElement(PENDING_REQUEST_CURRENCY);
+		currencyElement.setTextContent(String.valueOf(persistedRequest.getCurrency().getCode()));
+		pendingRequestNode.appendChild(currencyElement);
+		
+		Element amountElement = doc.createElement(PENDING_REQUEST_AMOUNT);
+		amountElement.setTextContent(String.valueOf(persistedRequest.getAmount()));
+		pendingRequestNode.appendChild(amountElement);
+		
+		Element timestampElement = doc.createElement(PENDING_REQUEST_TIMESTAMP);
+		timestampElement.setTextContent(String.valueOf(persistedRequest.getTimestamp()));
+		pendingRequestNode.appendChild(timestampElement);
+		
+		pendingRequestsElement.appendChild(pendingRequestNode);
+		
+		return xmlToString(doc);
+	}
+	
+	/**
+	 * Removes the {@link PersistedPaymentRequest} from the xml and returns the
+	 * updated xml string. Assure that you are not trying to delete a
+	 * {@link PersistedPaymentRequest} which is not contained in the set.
+	 * 
+	 * @param xml
+	 *            the xml string to be updated
+	 * @param persistedRequest
+	 *            the {@link PersistedPaymentRequest} to be removed
+	 * @return the updated xml string
+	 * @throws Exception
+	 *             an xml exception
+	 */
+	protected String deletePersistedPaymentRequest(String xml, PersistedPaymentRequest persistedRequest) throws Exception {
+		Document doc = stringToXml(xml);
+		
+		Node pendingRequestsElement = doc.getElementsByTagName(PENDING_REQUESTS).item(0);
+		NodeList pendingRequestsNodes = pendingRequestsElement.getChildNodes();
+		for (int i=0; i<pendingRequestsNodes.getLength(); i++) {
+			Node pendingRequestNode = pendingRequestsNodes.item(i);
+			
+			NodeList childNodes = pendingRequestNode.getChildNodes();
+			String username = childNodes.item(0).getTextContent();
+			if (username == null || username.isEmpty() || !username.equals(persistedRequest.getUsername())) {
+				continue;
+			}
+			String currency = childNodes.item(1).getTextContent();
+			if (currency == null || currency.isEmpty() || Byte.parseByte(currency) != persistedRequest.getCurrency().getCode()) {
+				continue;
+			}
+			String amount = childNodes.item(2).getTextContent();
+			if (amount == null || amount.isEmpty() || Long.parseLong(amount) != persistedRequest.getAmount()) {
+				continue;
+			}
+			String timestamp = childNodes.item(3).getTextContent();
+			if (timestamp == null || timestamp.isEmpty() || Long.parseLong(timestamp) != persistedRequest.getTimestamp()) {
+				continue;
+			}
+			pendingRequestsElement.removeChild(pendingRequestNode);
+		}
+
+		return xmlToString(doc);
 	}
 
 }

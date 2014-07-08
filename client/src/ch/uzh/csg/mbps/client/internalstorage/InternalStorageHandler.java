@@ -11,9 +11,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import android.content.Context;
+import ch.uzh.csg.mbps.customserialization.Currency;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
+import ch.uzh.csg.paymentlib.persistency.IPersistencyHandler;
+import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
 /**
  * Handles storing and retrieving user information which needs to be persisted
@@ -23,16 +26,7 @@ import ch.uzh.csg.mbps.model.UserAccount;
  * @author Jeton Memeti
  * 
  */
-public class InternalStorageHandler {
-
-	/*
-	 * TODO jeton: implement IPersistencyHandler
-	 * 
-	 * regarding PersistedPaymentRequests: when saving each time adding a
-	 * persisted crap, it takes way too long because of the encryption!!!
-	 * 
-	 * --> extract save and document!!!
-	 */
+public class InternalStorageHandler implements IPersistencyHandler {
 
 	private Context context;
 	private String fileName;
@@ -49,6 +43,7 @@ public class InternalStorageHandler {
 	private String serverIp;
 	private Set<String> addressbook;
 	private Set<String> trustedAddressbook;
+	private Set<PersistedPaymentRequest> persistedPaymentRequests = null;
 
 	/**
 	 * Instantiates a new {@link InternalStorageHandler}.
@@ -334,7 +329,7 @@ public class InternalStorageHandler {
 			} catch (Exception e) {
 			}
 		}
-		return  addressbook;
+		return addressbook;
 	}
 	
 	/**
@@ -494,6 +489,72 @@ public class InternalStorageHandler {
 	 */
 	public boolean isTrustedContact(String username) {
 		return getTrustedAddressbook().contains(username);
+	}
+	
+	private void initPersistedPaymentRequests() {
+		if (persistedPaymentRequests == null) {
+			try {
+				persistedPaymentRequests = xmlData.getPersistedPaymentRequests(currentXML);
+			} catch (Exception e) {
+			}
+		}
+	}
+
+	/**
+	 * See javadoc of {@link IPersistencyHandler}
+	 */
+	public boolean addPersistedPaymentRequest(PersistedPaymentRequest paymentRequest) {
+		initPersistedPaymentRequests();
+		if (persistedPaymentRequests == null)
+			return false;
+		
+		if (persistedPaymentRequests.contains(paymentRequest))
+			return true;
+		
+		try {
+			currentXML = xmlData.addPersistedPaymentRequest(currentXML, paymentRequest);
+			persistedPaymentRequests.add(paymentRequest);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	/**
+	 * See javadoc of {@link IPersistencyHandler}
+	 */
+	public boolean deletePersistedPaymentRequest(PersistedPaymentRequest paymentRequest) {
+		initPersistedPaymentRequests();
+		if (persistedPaymentRequests == null)
+			return false;
+		
+		if (!persistedPaymentRequests.contains(paymentRequest))
+			return true;
+		
+		try {
+			currentXML = xmlData.deletePersistedPaymentRequest(currentXML, paymentRequest);
+			persistedPaymentRequests.remove(paymentRequest);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * See javadoc of {@link IPersistencyHandler}
+	 */
+	public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
+		initPersistedPaymentRequests();
+		if (persistedPaymentRequests == null)
+			return null;
+		
+		// timestamp -1 will be ignored in the equals method
+		PersistedPaymentRequest toSearchFor = new PersistedPaymentRequest(username, currency, amount, -1);
+		for (PersistedPaymentRequest ppr : persistedPaymentRequests) {
+			if (ppr.equals(toSearchFor))
+				return ppr;
+		}
+		return null;
 	}
 
 }

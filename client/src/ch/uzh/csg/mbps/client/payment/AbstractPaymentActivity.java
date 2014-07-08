@@ -12,9 +12,8 @@ import android.os.Build;
 import android.provider.Settings;
 import ch.uzh.csg.mbps.client.AbstractLoginActivity;
 import ch.uzh.csg.mbps.client.R;
-import ch.uzh.csg.mbps.customserialization.Currency;
+import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.paymentlib.persistency.IPersistencyHandler;
-import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
 /**
  * This is the abstract base class of the payment activities (receive and pay).
@@ -27,7 +26,7 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 	private boolean destroyed = false;
 	protected boolean paymentAccepted = false;
 	
-
+	protected IPersistencyHandler persistencyHandler = ClientController.getStorageHandler();
 
 	/**
 	 * Reset the UI after a successful or failed transaction.
@@ -118,27 +117,6 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 	protected void resetStates() {
 		paymentAccepted = false;
 	}
-
-	//TODO jeton: add to xml
-	protected IPersistencyHandler persistencyHandler = new IPersistencyHandler() {
-
-		//			@Override
-		public PersistedPaymentRequest getPersistedPaymentRequest(String username, Currency currency, long amount) {
-			//				Log.i(TAG, "getPersistedPaymentRequest");
-			return null;
-		}
-
-		//			@Override
-		public void delete(PersistedPaymentRequest paymentRequest) {
-			//				Log.i(TAG, "delete");
-		}
-
-		//			@Override
-		public void add(PersistedPaymentRequest paymentRequest) {
-			//				Log.i(TAG, "add");
-		}
-
-	};
 
 	/**
 	 * Create an NFC adapter, if NFC is enabled, return the adapter, otherwise
