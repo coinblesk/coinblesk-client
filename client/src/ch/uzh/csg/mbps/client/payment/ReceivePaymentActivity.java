@@ -84,6 +84,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private TextView sessionCountdown;
 	private CountDownTimer timer;
 
+	private NfcAdapter nfcAdapter;
 	private IServerResponseListener responseListener;
 
 
@@ -383,7 +384,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		PrivateKey privateKey = ch.uzh.csg.mbps.client.security.KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
 		final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
 
-		NfcAdapter nfcAdapter = createAdapter(ReceivePaymentActivity.this);
+		nfcAdapter = createAdapter(ReceivePaymentActivity.this);
 		if (nfcAdapter == null) {
 			return;
 		}
@@ -488,7 +489,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		else {
 			PaymentResponse pr = (PaymentResponse) object;
 			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
-
+			
 			if(isSending){
 				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),

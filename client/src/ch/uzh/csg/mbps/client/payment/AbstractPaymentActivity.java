@@ -26,6 +26,7 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 	private ProgressDialog progressDialog;
 	private boolean destroyed = false;
 	protected boolean paymentAccepted = false;
+	
 
 
 	/**
@@ -141,7 +142,7 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 	 * @return
 	 */
 	protected NfcAdapter createAdapter(Context context) {
-		final NfcAdapter nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(getApplicationContext());
+		NfcAdapter nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(getApplicationContext());
 		if (nfcAdapter == null) {
 			showDialog(getResources().getString(R.string.nfc_enable_title), R.drawable.ic_alerts_and_states_warning, getResources().getString(R.string.nfc_no_adapter));
 			return null;

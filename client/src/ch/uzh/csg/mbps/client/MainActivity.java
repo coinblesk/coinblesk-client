@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
+import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -81,6 +82,8 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 	private PopupWindow popupWindow;
 	public static Boolean isFirstTime;
 	AnimationDrawable nfcActivityAnimation;
+	
+	private NfcAdapter nfcAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -387,7 +390,11 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 	}
 
 	private void initializeNFC() {
-		createAdapter(MainActivity.this);
+		nfcAdapter = createAdapter(MainActivity.this);
+		if (nfcAdapter == null) {
+			return;
+		}
+		
 		try {
 			PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey().getPublicKey());
 			final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
