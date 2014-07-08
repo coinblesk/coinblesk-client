@@ -352,7 +352,10 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		return 0;
 	}
 
-
+	/**
+	 * Show first time information dialog if application is started for the
+	 * first time to inform user about NFC handling.
+	 */
 	private void showFirstTimeInformation(){	
 		if(isFirstTime == null){
 			SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -389,6 +392,9 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		}
 	}
 
+	/**
+	 * Initializes NFC adapter and user payment information.
+	 */
 	private void initializeNFC() {
 		nfcAdapter = createAdapter(MainActivity.this);
 		if (nfcAdapter == null) {
@@ -406,6 +412,9 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		}
 	}
 
+	/**
+	 * Handler responsible for managing events received by NFC Payment Library.
+	 */
 	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
 		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
 
@@ -459,6 +468,9 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		}
 	};
 
+	/**
+	 * Prompts user if an incoming payment request shall be accepted or not.
+	 */
 	private IUserPromptPaymentRequest userPrompt = new IUserPromptPaymentRequest() {
 
 		public boolean isPaymentAccepted() {
@@ -477,6 +489,13 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		}
 	};
 
+	/**
+	 * Checks if auto accepting of payments are enabled for given username and amount.
+	 * 
+	 * @param username
+	 * @param amount
+	 * @return boolean if transaction shall be autoaccepted
+	 */
 	private boolean checkAutoAccept(String username, long amount){
 		if (exchangeRate != null){
 			BigDecimal amountChf = CurrencyViewHandler.getAmountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount));
@@ -495,6 +514,14 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 		}
 	}
 
+	/**
+	 * Opens dialog to prompt user if he wants to accept or reject an incoming payment request.
+	 * 
+	 * @param username
+	 * @param currency
+	 * @param amount
+	 * @param answer2
+	 */
 	private void showCustomDialog(String username, Currency currency, long amount, final IUserPromptAnswer answer2) {
 		LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		ViewGroup group = (ViewGroup) findViewById(R.id.pay_payment_popup);
