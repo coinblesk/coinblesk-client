@@ -125,8 +125,8 @@
     <string name="sendPayment_error_user">Fehler. Sie können keine Transaktion an sich selber versenden.</string>
 
     <!-- Payment Notifications -->
-    <string name="payment_notification_success_payer">Sie haben %1$s BTC an %2$s gesendet.</string>
-    <string name="payment_notification_success_payee">Sie haben %1$s BTC von %2$s erhalten.</string>
+    <string name="payment_notification_success_payer">Sie haben %1$s an %2$s gesendet.</string>
+    <string name="payment_notification_success_payee">Sie haben %1$s von %2$s erhalten.</string>
 
     <!-- Spinner currency -->
     <string name="textView_currency">Währung</string>

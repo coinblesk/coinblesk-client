@@ -108,7 +108,7 @@ public class CurrencyViewHandler {
 	 * two digits. Returns a string to represent a bitcoin amount in CHF.
 	 * 
 	 * @param exchangeRate The rate of one bitcoin in relation to CHF.
-	 * @param amountBtc  The amount to transform to CHF.
+	 * @param amountBtc  The amount to transform to CHF (in BTC).
 	 * @return the given bitcoin amount represented in CHF.
 	 */
 	public static BigDecimal getAmountInCHF(BigDecimal exchangeRate, BigDecimal amountBtc) {

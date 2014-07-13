@@ -65,7 +65,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 	private String[] currencies = { "CHF", "BTC" };
 	protected CalculatorDialog calculatorDialogFragment;
 	protected static BigDecimal amountBTC = BigDecimal.ZERO;
-	protected static BigDecimal inputUnitValue = BigDecimal.ZERO;
+	protected static BigDecimal amountCHF = BigDecimal.ZERO;
 	private BigDecimal exchangeRate;
 	private EditText sendAmount;
 	private TextView descriptionOfInputUnit;
@@ -241,11 +241,13 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 					TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
 					balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
-
+					BigDecimal amountBtc = Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount());
+					
 					String s = String.format(getResources().getString(R.string.payment_notification_success_payer),
-							CurrencyFormatter.formatBTC(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount())),
+							CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")",
 							paymentResponsePayer.getUsernamePayee());
 					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
+					
 					boolean saved = ClientController.getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
 					if (!saved) {
 						displayResponse(getResources().getString(R.string.error_xmlSave_failed));
@@ -285,9 +287,8 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		amountBTC = BigDecimal.ZERO;
 		if (Constants.inputUnit.equals(INPUT_UNIT_CHF)) {
 			try {
-				BigDecimal amountChf = CurrencyFormatter.getBigDecimalChf(sendAmount.getText().toString());
-				inputUnitValue = amountChf;
-				amountBTC = CurrencyViewHandler.getBitcoinExchangeValue(exchangeRate, amountChf);
+				amountCHF = CurrencyFormatter.getBigDecimalChf(sendAmount.getText().toString());
+				amountBTC = CurrencyViewHandler.getBitcoinExchangeValue(exchangeRate, amountCHF);
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_CHFinBTC), amountBTC, getApplicationContext());
 			} catch (NumberFormatException e) {
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_CHFinBTC), BigDecimal.ZERO, getApplicationContext());
@@ -295,8 +296,8 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		} else {
 			try{
 				BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(sendAmount.getText().toString());
-				inputUnitValue = BigDecimal.ZERO;
 				amountBTC = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
+				amountCHF = CurrencyViewHandler.getAmountInCHF(exchangeRate, amountBTC);
 				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.sendPayment_CHFinBTC), exchangeRate, amountBTC);
 			} catch(NumberFormatException e) {
 				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.sendPayment_CHFinBTC), exchangeRate, amountBTC);
@@ -412,7 +413,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 						Currency.BTC, 
 						Converter.getLongFromBigDecimal(amountBTC),
 						Currency.CHF, 
-						Converter.getLongFromBigDecimal(inputUnitValue), 
+						Converter.getLongFromBigDecimal(amountCHF), 
 						System.currentTimeMillis());
 
 				paymentRequestPayer.sign(KeyHandler.decodePrivateKey(ckp.getPrivateKey()));
