@@ -307,6 +307,7 @@
     <string name="addressBook_addContact_cancel">Cancel</string>
     <string name="addressBook_addContact_title">Save new contact</string>
     <string name="addressBook_addContact_message">Please enter the username of the contact you would like to save:</string>
+    <string name="addressBook_removeAllUntrusted_question">Do you really want to remove all unfavored contacts from your address book?</string>
 
     <!-- History Transaction Strings -->
     <string name="history_from">From:</string>

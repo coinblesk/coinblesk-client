@@ -306,6 +306,7 @@
     <string name="addressBook_addContact_cancel">Abbrechen</string>
     <string name="addressBook_addContact_title">Neuen Kontakt speichern</string>
     <string name="addressBook_addContact_message">Geben Sie bitte den Benutzername des Konakts ein den sie gerne speichern möchten:</string>
+     <string name="addressBook_removeAllUntrusted_question">Wollen Sie wirklich alle nicht favorisierten Kontakte von ihrem Addressbuch entfernen?</string>
 
     <!-- History Transaction Strings -->
     <string name="history_from">Von:</string>

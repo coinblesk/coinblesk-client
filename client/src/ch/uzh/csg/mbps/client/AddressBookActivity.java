@@ -53,34 +53,50 @@ public class AddressBookActivity extends AbstractAsyncActivity {
 
 				alert.setPositiveButton(getString(R.string.addressBook_addContact_save),
 						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								String username = input.getText().toString();
-								boolean saved = ClientController.getStorageHandler().addAddressBookEntry(username);
-								if (!saved) {
-									Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show(); 
-								}
-								createAddressBookEntries();
-							}
-						});
+					public void onClick(DialogInterface dialog, int whichButton) {
+						String username = input.getText().toString();
+						boolean saved = ClientController.getStorageHandler().addAddressBookEntry(username);
+						if (!saved) {
+							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show(); 
+						}
+						createAddressBookEntries();
+					}
+				});
 				alert.setNegativeButton(getString(R.string.addressBook_addContact_cancel),
 						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								// Dialog canceled
-							}
-						});
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Dialog canceled
+					}
+				});
 				alert.show();
 			}
 		});
-		
+
 		Button removeUntrusted = (Button) findViewById(R.id.addressBook_removeButton);
 		removeUntrusted.setOnClickListener(new OnClickListener() {
-			
+
 			public void onClick(View v) {
-				boolean saved = ClientController.getStorageHandler().removeAllUntrustedAddressBookEntries();
-				if (!saved) {
-					Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
-				}
-				createAddressBookEntries();
+				AlertDialog.Builder alert = new AlertDialog.Builder(v.getContext());
+				alert.setTitle(getString(R.string.addressBook_removeAllUntrustedButton));
+				alert.setMessage(getString(R.string.addressBook_removeAllUntrusted_question));
+
+				alert.setPositiveButton(getString(R.string.dialog_yes),
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						boolean saved = ClientController.getStorageHandler().removeAllUntrustedAddressBookEntries();
+						if (!saved) {
+							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
+						}
+						createAddressBookEntries();
+					}
+				});
+				alert.setNegativeButton(getString(R.string.addressBook_addContact_cancel),
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Dialog canceled
+					}
+				});
+				alert.show();
 			}
 		});
 		createAddressBookEntries();
