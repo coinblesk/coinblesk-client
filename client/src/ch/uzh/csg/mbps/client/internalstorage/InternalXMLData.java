@@ -42,7 +42,7 @@ import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
  * @author Jeton Memeti
  * 
  */
-@SuppressLint("DefaultLocale")
+@SuppressLint({ "DefaultLocale", "Assert" })
 public class InternalXMLData {
 	private static final String ROOT = "persisted-data";
 	
@@ -325,6 +325,7 @@ public class InternalXMLData {
 				
 				n = serverKeyNodes.item(2);
 				assert n.getNodeName().equals(SERVER_KEY_BASE64);
+				textContent = n.getTextContent();
 				if (textContent == null || textContent.isEmpty())
 					continue;
 				

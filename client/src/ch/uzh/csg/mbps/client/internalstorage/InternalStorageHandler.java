@@ -243,11 +243,8 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	public boolean saveServerPublicKey(CustomPublicKey publicKey) {
 		this.serverPublicKey = publicKey;
 		try {
-			if (xmlData.getServerPublicKey(currentXML) == null) {
-				// only save the public key if it is not already saved (i.e., a new one)
-				currentXML = xmlData.setServerPublicKey(currentXML, publicKey);
-				encryptAndSave();
-			}
+			currentXML = xmlData.setServerPublicKey(currentXML, publicKey);
+			encryptAndSave();
 			return true;
 		} catch (Exception e) {
 			return false;
