@@ -59,10 +59,10 @@
 
     <!-- Main View Strings -->
     <string name="mainActivityTextView">Overview</string>
-    <string name="payButton">Create new transaction</string>
+    <string name="payButton">Create new Transaction</string>
     <string name="lastFewTransactionsTitle">Your last %1$s transactions:</string>
     <string name="mainActivity_processTransactionTitle">Process Transaction</string>
-    <string name="mainActivity_processTransactionInstruction">(Hold devices together to process transaction initiated by counterparty)</string>
+    <string name="mainActivity_processTransactionInstruction">Hold devices together to process transaction initiated by counterparty</string>
     <string name="mainActivity_or">OR</string>
 
     <!-- Drawer Navigation -->
@@ -92,7 +92,7 @@
 
     <!-- Abstract Payment -->
     <string name="payment_failure">Payment failed</string>
-    <string name="payment_success">Payment was successful</string>
+    <string name="payment_success">Payment successful</string>
 
     <!-- Pay Payment Strings -->
     <string name="payPayment_exchangeRate">Exchange Rate:</string>
@@ -242,7 +242,7 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
-    <string name="establishNfcConnectionInfo">Establish now NFC connection (Hold devices together)</string>
+    <string name="establishNfcConnectionInfo">Establish NFC connection now (Hold devices together)</string>
     <string name="nfc_in_progress_dialog">Payment in progress - Keep NFC connection</string>
     <string name="menu_offlineModeText">Offline Mode</string>
 

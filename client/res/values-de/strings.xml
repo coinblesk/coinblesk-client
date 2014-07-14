@@ -62,7 +62,7 @@
     <string name="payButton">Neue Transaktion erstellen</string>
     <string name="lastFewTransactionsTitle">Ihre letzten %1$s Transaktionen:</string>
     <string name="mainActivity_processTransactionTitle">Transaktion ausführen</string>
-    <string name="mainActivity_processTransactionInstruction">(Geräte zusammenhalten um bereits eingeleitete Transaktion zu verarbeiten)</string>
+    <string name="mainActivity_processTransactionInstruction">Geräte zusammenhalten um bereits eingeleitete Transaktion zu verarbeiten</string>
     <string name="mainActivity_or">ODER</string>
 
     <!-- Drawer Navigation -->
