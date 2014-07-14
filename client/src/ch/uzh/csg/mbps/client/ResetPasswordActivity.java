@@ -1,6 +1,7 @@
 package ch.uzh.csg.mbps.client;
 
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,6 +29,16 @@ public class ResetPasswordActivity extends AbstractAsyncActivity implements IAsy
 		
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		initClickListener();
+	}
+	
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+    	return false;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		return false;
 	}
 	
 	private void initClickListener(){
