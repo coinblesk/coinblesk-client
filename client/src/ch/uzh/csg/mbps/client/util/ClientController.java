@@ -49,7 +49,16 @@ public class ClientController {
 	 */
 	public static boolean init(Context context, String username, String password) throws WrongPasswordException {
 		internalStorageHandler = new InternalStorageHandler(context, username, password);
-		return internalStorageHandler.init();
+		try {
+			return internalStorageHandler.init();
+		} catch (Exception e) {
+			if (e instanceof WrongPasswordException) {
+				throw new WrongPasswordException(e.getMessage());
+			}
+			else {
+				return false;
+			}
+		}
 	}
 	
 	/**

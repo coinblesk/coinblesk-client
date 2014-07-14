@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -408,6 +409,8 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 			final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
 			new PaymentRequestHandler(this, eventHandler, userInfos, serverInfos, userPrompt, persistencyHandler);
 		} catch (Exception e) {
+			//TODO simon: fix!
+			Log.e("main nfc", "initialize nfc", e);
 			displayResponse(getResources().getString(R.string.error_nfc_initializing));
 		}
 	}

@@ -75,26 +75,22 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	 * 
 	 * @return
 	 * @throws WrongPasswordException
+	 * @throws IOException 
 	 */
-	public boolean init() throws WrongPasswordException {
-		try {
-			if (fileExists()) {
-				BufferedReader reader = new BufferedReader(new InputStreamReader(context.openFileInput(fileName)));
-				String line;
-				String content = "";
-				while ((line = reader.readLine()) != null) {
-					content += line;
-				}
-				reader.close();
-				
-				currentXML = encrypter.decrypt(content, password, xmlData.getRootElementName());
-			} else {
-				currentXML = xmlData.createEmptyXML();
+	public boolean init() throws Exception {
+		if (fileExists()) {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(context.openFileInput(fileName)));
+			String line;
+			String content = "";
+			while ((line = reader.readLine()) != null) {
+				content += line;
 			}
+			reader.close();
+			
+			currentXML = encrypter.decrypt(content, password, xmlData.getRootElementName());
 			return true;
-		} catch (WrongPasswordException e) {
-			throw new WrongPasswordException(e.getMessage());
-		} catch (Exception e) {
+		} else {
+			currentXML = xmlData.createEmptyXML();
 			return false;
 		}
 	}

@@ -2,10 +2,13 @@ package ch.uzh.csg.mbps.client.internalstorage;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
@@ -81,13 +84,15 @@ public class InternalStorageEncrypter {
 	 *             if the provided password does not match
 	 * @throws CorruptFileException
 	 *             if the stored file is corrupt and cannot be decrypted
+	 * @throws NoSuchPaddingException 
+	 * @throws NoSuchProviderException 
+	 * @throws NoSuchAlgorithmException 
 	 */
-	protected String decrypt(String ciphertext, String password, String rootElementName) throws WrongPasswordException, CorruptFileException {
+	protected String decrypt(String ciphertext, String password, String rootElementName) throws WrongPasswordException, Exception {
 	    String[] fields = ciphertext.split(DELIMITER);
 	    if (fields.length != 3)
 	        throw new CorruptFileException();
 	    
-	    try {
 	        byte[] salt = Base64.decode(fields[0]);
 	        byte[] iv = Base64.decode(fields[1]);
 	        byte[] cipherBytes = Base64.decode(fields[2]);
@@ -97,24 +102,20 @@ public class InternalStorageEncrypter {
 	        IvParameterSpec ivParams = new IvParameterSpec(iv);
 	        cipher.init(Cipher.DECRYPT_MODE, key, ivParams);
 	        
-	        byte[] xmlBytes = cipher.doFinal(cipherBytes);
-	        String xml = new String(xmlBytes, Charset.forName("UTF-8"));
-	        
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	        DocumentBuilder builder = factory.newDocumentBuilder();
-	        InputSource is = new InputSource(new StringReader(xml));
-	        Document doc = builder.parse(is);
-	        
-			if (doc.getDocumentElement().getNodeName().equals(rootElementName)) {
-				return xml;
-			} else {
-				throw new WrongPasswordException("The password "+password+" is invalid.");
-			}
-	    } catch (Exception e) {
-	    	if (e instanceof WrongPasswordException)
-	    		throw (WrongPasswordException) e;
-	    	return null;
-	    }
+	        try {
+	        	byte[] xmlBytes = cipher.doFinal(cipherBytes);
+	        	String xml = new String(xmlBytes, Charset.forName("UTF-8"));
+	        	
+	        	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	        	DocumentBuilder builder = factory.newDocumentBuilder();
+	        	InputSource is = new InputSource(new StringReader(xml));
+	        	Document doc = builder.parse(is);
+	        	
+	        	if (doc.getDocumentElement().getNodeName().equals(rootElementName))
+	        		return xml;
+	        } catch (Exception e) {
+	        }
+	        throw new WrongPasswordException("The password is invalid.");
 	}
 	
 	private SecretKey getKey(byte[] salt, String password) throws Exception {

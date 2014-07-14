@@ -34,18 +34,18 @@ import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
 public abstract class AbstractLoginActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
 	protected static String username;
 	protected static String password;
-	
+
 	private MenuItem menuWarning;
 	private MenuItem offlineMode;
 	private MenuItem sessionCountdownMenuItem;
 	private MenuItem sessionRefreshMenuItem;
 	private TextView sessionCountdown;
 	private CountDownTimer timer;
-	
+
 	protected static CustomKeyPair customKeyPair;
-	
-	protected boolean clientControllerInitialized = false;
-	
+
+	private boolean clientControllerInitialized = false;
+
 	/**
 	 * Launch Sign in request to connect to server and launch session.
 	 */
@@ -56,7 +56,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		RequestTask signIn = new SignInRequestTask(this, user);
 		signIn.execute();
 	}
-	
+
 	/**
 	 * Launches Sign In Request with Context as parameter. Used for Reconnecting
 	 * to Server from Navigation Drawer.
@@ -70,7 +70,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		RequestTask signIn = new SignInRequestTask(this, user);
 		signIn.execute();
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -84,7 +84,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		invalidateOptionsMenu();
 		return true;
 	}
-	
+
 	/**
 	 * Initializes option menu items for indicating offline mode, refresh
 	 * session and session countdown.
@@ -96,7 +96,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		offlineMode = menu.findItem(R.id.menu_offlineMode);
 		TextView offlineModeTV = (TextView) offlineMode.getActionView();
 		offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
-		
+
 		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
 				launchSignInRequest();
@@ -115,7 +115,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 			}
 		});
 	}
-	
+
 	@Override
 	public void invalidateOptionsMenu() {
 		if(menuWarning != null){
@@ -132,7 +132,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 			}
 		}
 	}
-	
+
 	/**
 	 * Start Timer for Session Countdown in Options Menu.
 	 * 
@@ -159,7 +159,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 
 		timer.start();
 	}
-	
+
 	/**
 	 * Handles response from http server call. Differentiates the server call
 	 * based on given Type.
@@ -171,16 +171,13 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		if (!clientControllerInitialized) {
 			try {
 				boolean init = ClientController.init(context, username, password);
-				if (!init) {
-					displayResponse(context.getResources().getString(R.string.error_xmlSave_failed));
-				}
-				clientControllerInitialized = true;
+				clientControllerInitialized = init;
 			} catch (WrongPasswordException e) {
 				displayResponse(context.getResources().getString(R.string.invalid_password));
-				return;
+				clientControllerInitialized = false;
 			}
 		}
-		
+
 		if (response.isSuccessful()) {
 			if (response.getType() == Type.LOGIN) {
 				launchReadRequest();
@@ -190,7 +187,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 					showDialog(context.getResources().getString(R.string.invalid_client_version_title), R.drawable.ic_alerts_and_states_warning, context.getResources().getString(R.string.invalid_client_version));
 					return;
 				}
-				
+
 				boolean saved = ClientController.getStorageHandler().saveServerPublicKey(response.getServerPublicKey());
 				if (!saved) {
 					displayResponse(context.getResources().getString(R.string.error_xmlSave_failed));
@@ -199,14 +196,14 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 				if (!saved) {
 					displayResponse(context.getResources().getString(R.string.error_xmlSave_failed));
 				}
-				
+
 				CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
 				if (ckp == null) {
 					try {
 						KeyPair keyPair = KeyHandler.generateKeyPair();
 						ckp = new CustomKeyPair(PKIAlgorithm.DEFAULT.getCode(), (byte) 0, KeyHandler.encodePublicKey(keyPair.getPublic()), KeyHandler.encodePrivateKey(keyPair.getPrivate()));
 						customKeyPair = ckp;
-						
+
 						launchCommitKeyRequest(ckp);
 						return;
 					} catch (Exception e) {
@@ -218,13 +215,13 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 			} else if (response.getType() == Type.SAVE_PUBLIC_KEY) {
 				String keyNr = response.getMessage();
 				byte keyNumber = Byte.parseByte(keyNr);
-				
+
 				CustomKeyPair ckp = new CustomKeyPair(customKeyPair.getPkiAlgorithm(), keyNumber, customKeyPair.getPublicKey(), customKeyPair.getPrivateKey());
 				boolean saved = ClientController.getStorageHandler().saveKeyPair(ckp);
 				if (!saved) {
 					displayResponse(context.getResources().getString(R.string.error_xmlSave_failed));
 				}
-				
+
 				dismissProgressDialog();
 				ClientController.setOnlineMode(true);
 				launchMainActivity(context);
@@ -237,7 +234,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 			displayResponse(response.getMessage());
 		}
 	}
-	
+
 	/**
 	 * This method is called, when the server request fails. The user
 	 * informations are retrieved from the internal storage.
@@ -249,17 +246,17 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 			displayResponse(context.getResources().getString(R.string.establish_internet_connection));
 		}
 	}
-	
+
 	private void launchReadRequest() {		
 		RequestTask read = new ReadRequestTask(this);
 		read.execute();
 	}
-	
+
 	private void launchCommitKeyRequest(CustomKeyPair ckp) {
 		CustomPublicKey cpk = new CustomPublicKey(ckp.getKeyNumber(), ckp.getPkiAlgorithm(), ckp.getPublicKey());
 		new CommitPublicKeyRequestTask(this, cpk).execute();
 	}
-	
+
 	private void launchMainActivity(Context context){
 		storeUsernameIntoSharedPref(context);
 		Intent intent = new Intent(context.getApplicationContext(), MainActivity.class);
@@ -268,7 +265,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		context.startActivity(intent);
 		finish();
 	}
-	
+
 	/**
 	 * Stores the username of the authenticated user.
 	 */
@@ -278,5 +275,5 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 		editor.putString(context.getResources().getString(R.string.stored_username), username);
 		editor.commit();
 	}
-	
+
 }
