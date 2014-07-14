@@ -45,6 +45,10 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 	protected static CustomKeyPair customKeyPair;
 
 	private boolean clientControllerInitialized = false;
+	
+	public static void updatePassword(){
+		password = ClientController.getStorageHandler().getUserAccount().getPassword();
+	}
 
 	/**
 	 * Launch Sign in request to connect to server and launch session.

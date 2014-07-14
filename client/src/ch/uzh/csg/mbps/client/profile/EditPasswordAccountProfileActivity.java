@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
+import ch.uzh.csg.mbps.client.AbstractLoginActivity;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.request.RequestTask;
@@ -76,6 +77,7 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity im
     public void onTaskComplete(CustomResponseObject response) {
 		if (response.isSuccessful()) {
 			boolean saved = ClientController.getStorageHandler().setUserPassword(password);
+			AbstractLoginActivity.updatePassword();
 			if (!saved) {
 				displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 			}
