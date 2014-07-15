@@ -401,6 +401,10 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 			return;
 		}
 		
+		//TODO simon: test out
+		//disable android beam (touch to beam screen)
+		nfcAdapter.setNdefPushMessage(null, this, this);
+		
 		try {
 			PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey().getPublicKey());
 			final ServerInfos serverInfos = new ServerInfos(publicKeyServer);

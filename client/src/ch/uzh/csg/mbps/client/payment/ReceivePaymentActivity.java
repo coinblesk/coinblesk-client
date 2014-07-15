@@ -391,7 +391,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		if (nfcAdapter == null) {
 			return;
 		}
-
+		
 		if(isSendingMode){
 			try {
 				new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);

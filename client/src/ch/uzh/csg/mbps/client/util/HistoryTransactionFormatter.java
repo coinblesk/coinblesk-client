@@ -55,13 +55,16 @@ public class HistoryTransactionFormatter {
 	private static String formatHistoryNormalTransaction(HistoryTransaction tx, Context context) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(sdf.format(tx.getTimestamp()));
-		sb.append("\n");
-		sb.append(context.getResources().getString(R.string.history_from) + " ");
+		sb.append(" " + context.getResources().getString(R.string.history_from) + " ");
 		sb.append(tx.getBuyer());
+//		sb.append("\n");
 		sb.append(", " + context.getResources().getString(R.string.history_to) + " ");
 		sb.append(tx.getSeller());
 		sb.append(", " + context.getResources().getString(R.string.history_amount) + " ");
 		sb.append(CurrencyViewHandler.formatBTCAsString(tx.getAmount(), context));
+		if(tx.getInputCurrency() != null) {
+			sb.append(" (" + tx.getInputCurrencyAmount()  + " " + tx.getInputCurrency() + ")");
+		}
 		return sb.toString();
 	}
 }
