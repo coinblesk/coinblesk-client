@@ -282,8 +282,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		} else {
 			try{
 				BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(receiveAmount.getText().toString());
-				inputUnitValue = BigDecimal.ZERO;
 				amountBTC = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
+				inputUnitValue = CurrencyViewHandler.getAmountInCHF(exchangeRate, amountBTC);
 				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.receivePayment_CHFinBTC), exchangeRate, amountBTC);
 			} catch(NumberFormatException e) {
 				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.receivePayment_CHFinBTC), exchangeRate, amountBTC);
@@ -315,7 +315,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 				PaymentInfos paymentInfos;
 				try {
-					paymentInfos = new PaymentInfos(Currency.BTC, Converter.getLongFromBigDecimal(amountBTC));
+					paymentInfos = new PaymentInfos(Currency.BTC, Converter.getLongFromBigDecimal(amountBTC), Currency.CHF, Converter.getLongFromBigDecimal(inputUnitValue));
 					initializeNFC(paymentInfos);
 				} catch (Exception e) {
 					displayResponse(getResources().getString(R.string.unexcepted_error));
