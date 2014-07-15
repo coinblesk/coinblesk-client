@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -179,6 +181,11 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 	}
 
 	private void initializeGui() {
+		// display red action bar when running on testserver
+		if(Constants.BASE_URI.contains("clone")) {
+			ActionBar bar = getActionBar();
+			bar.setBackgroundDrawable(new ColorDrawable(Color.RED));
+		}
 		createNewTransactionBtn = (Button) findViewById(R.id.createNewTransactionButton);
 
 		//create animated nfc activity image
