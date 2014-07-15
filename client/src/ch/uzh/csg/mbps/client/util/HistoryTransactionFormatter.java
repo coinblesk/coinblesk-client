@@ -57,7 +57,6 @@ public class HistoryTransactionFormatter {
 		sb.append(sdf.format(tx.getTimestamp()));
 		sb.append(" " + context.getResources().getString(R.string.history_from) + " ");
 		sb.append(tx.getBuyer());
-//		sb.append("\n");
 		sb.append(", " + context.getResources().getString(R.string.history_to) + " ");
 		sb.append(tx.getSeller());
 		sb.append(", " + context.getResources().getString(R.string.history_amount) + " ");
