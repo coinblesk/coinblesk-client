@@ -45,7 +45,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 	protected static CustomKeyPair customKeyPair;
 
 	private boolean clientControllerInitialized = false;
-	
+
 	public static void updatePassword(){
 		password = ClientController.getStorageHandler().getUserAccount().getPassword();
 	}
@@ -230,8 +230,9 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 				ClientController.setOnlineMode(true);
 				launchMainActivity(context);
 			}
-		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR) || response.getMessage().equals(Constants.CONNECTION_ERROR) ) {
 			dismissProgressDialog();
+			displayResponse(getResources().getString(R.string.no_connection_server));
 			launchOfflineMode(context);
 		} else {
 			dismissProgressDialog();

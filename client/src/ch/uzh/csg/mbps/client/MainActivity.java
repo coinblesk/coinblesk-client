@@ -256,7 +256,7 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 			reload(getIntent());
 			lastTransactionsTitle.setVisibility(View.INVISIBLE);
 			invalidateOptionsMenu();
-			displayResponse(response.getMessage());
+			displayResponse(getResources().getString(R.string.no_connection_server));
 		} else {
 			super.onTaskComplete(response, getApplicationContext());
 		}
