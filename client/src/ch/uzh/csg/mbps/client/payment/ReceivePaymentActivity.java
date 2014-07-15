@@ -112,7 +112,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		receiveAmount.setFocusable(false);
 
 		descriptionOfInputUnit = (TextView)findViewById(R.id.receivePayment_enterAmountIn);
-		launchRequest();
 
 		Spinner spinner = (Spinner) findViewById(R.id.receivePayment_currencySpinner);
 		spinner.setAdapter(new MyAdapter(this, R.layout.spinner_currency, strings));
@@ -138,8 +137,17 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	@Override
 	public void onResume() {
-		super.onResume();
+		checkOnlineModeAndProceed();
 		invalidateOptionsMenu();
+		super.onResume();
+	}
+
+	private void checkOnlineModeAndProceed() {
+		if (ClientController.isOnline()) {
+			launchRequest();
+		} else {
+			launchOfflineMode(getApplicationContext());
+		}
 	}
 
 	@Override
@@ -231,6 +239,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	}
 
 	public void onTaskComplete(CustomResponseObject response) {
+		dismissProgressDialog();
+		dismissNfcInProgressDialog();
 		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));	
 		if (response.getType() == Type.EXCHANGE_RATE) {
 			if (response.isSuccessful()) {
@@ -260,12 +270,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				return;
 			}
 			responseListener.onServerResponse(serverPaymentResponse);
-		} 
+		} else if (response.getMessage() != null && (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR))) {
+			displayResponse(getResources().getString(R.string.no_connection_server));
+			finish();
+			launchActivity(this, MainActivity.class);
+		}
 		else {
 			displayResponse(response.getMessage());
 		}
-		dismissProgressDialog();
-		dismissNfcInProgressDialog();
 	}
 
 	private void refreshCurrencyTextViews() {

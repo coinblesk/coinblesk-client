@@ -244,7 +244,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 	 * This method is called, when the server request fails. The user
 	 * informations are retrieved from the internal storage.
 	 */
-	private void launchOfflineMode(Context context) {
+	protected void launchOfflineMode(Context context) {
 		if (ClientController.getStorageHandler().getUserAccount() != null) {
 			launchMainActivity(context);
 		} else {

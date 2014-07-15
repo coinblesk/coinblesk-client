@@ -68,6 +68,7 @@ public class ChoosePaymentActivity extends AbstractLoginActivity {
 				Intent intent = new Intent(ChoosePaymentActivity.this, ReceivePaymentActivity.class);
 				intent.putExtra("isSend", false);
 				startActivity(intent);
+				finish();
 			}
 		});
 
@@ -76,12 +77,14 @@ public class ChoosePaymentActivity extends AbstractLoginActivity {
 				Intent intent = new Intent(ChoosePaymentActivity.this, ReceivePaymentActivity.class);
 				intent.putExtra("isSend", true);
 				startActivity(intent);
+				finish();
 			}
 		});
 
 		requestPaymentNoNfcBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				launchActivity(ChoosePaymentActivity.this, SendPaymentActivity.class);
+				finish();
 			}
 		});
 	}

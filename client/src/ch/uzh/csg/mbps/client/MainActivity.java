@@ -253,10 +253,10 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 			}
 		} else if (response.getMessage() != null && (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR))) {
 			dismissProgressDialog();
-			reload(getIntent());
-			lastTransactionsTitle.setVisibility(View.INVISIBLE);
+			launchOfflineMode(getApplicationContext());
 			invalidateOptionsMenu();
 			displayResponse(getResources().getString(R.string.no_connection_server));
+			lastTransactionsTitle.setVisibility(View.INVISIBLE);
 		} else {
 			super.onTaskComplete(response, getApplicationContext());
 		}
