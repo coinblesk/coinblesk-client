@@ -138,7 +138,10 @@
     <string name="copy_clipboard">Address copied to clipboard</string>
     <string name="payIn_sendMail">Send to Email</string>
     <string name="payIn_addressTitle">Bitcoin Address:</string>
-
+    <string name="payIn_showQR">Show QR Code</string>
+    <string name="payIn_closeQR">Close</string>
+	<string name="payIn_qr_error">Error: Can\'t create QR code.</string>
+    
     <!-- PayOut Strings -->
     <string name="setting_payOut_balance_title">Balance limit in Bitcoins</string>
     <string name="setting_payOut_balance_Value">Min. Value is at 0.0001 BTC</string>

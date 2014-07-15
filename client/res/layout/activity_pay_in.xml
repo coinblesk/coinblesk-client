@@ -30,30 +30,37 @@
         android:id="@+id/payIn_addressTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
         android:layout_marginTop="15dp"
         android:text="@string/payIn_addressTitle"
-        android:textSize="@dimen/textSizeBig" />
+        android:textSize="@dimen/textSizeBig"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/payIn_address"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" 
+        android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
         android:id="@+id/payIn_copyButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="10dp"
         android:text="@string/payIn_copy" />
 
     <Button
         android:id="@+id/payIn_sendMail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
         android:text="@string/payIn_sendMail" />
+
+    <Button
+        android:id="@+id/payIn_showQRButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/payIn_showQR" />
 
 </LinearLayout>

@@ -138,6 +138,9 @@
     <string name="copy_clipboard">Adresse in Zwischenablage gespeichert</string>
     <string name="payIn_sendMail">Adresse als Email erhalten</string>
     <string name="payIn_addressTitle">Bitcoin Adresse:</string>
+    <string name="payIn_showQR">QR Code anzeigen</string>
+    <string name="payIn_closeQR">Schliessen</string>
+    <string name="payIn_qr_error">Probleme beim Erstellen des QR Codes.</string>
 
     <!-- PayOut Strings -->
     <string name="setting_payOut_balance_title">Kontostand Limite in Bitcoins</string>
