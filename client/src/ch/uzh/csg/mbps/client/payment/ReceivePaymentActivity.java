@@ -136,7 +136,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		}
 	}
-	
+
 	@Override
 	public void onPause() {
 		if (paymentRequestInitializer != null){
@@ -237,7 +237,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		timer.start();
 	}
-	
+
 	/**
 	 * Launches request to update exchange rate.
 	 */
@@ -336,14 +336,17 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				receiveAmount.setText(Constants.inputValueCalculator.toString());
 				refreshCurrencyTextViews();
 
-				PaymentInfos paymentInfos;
-				try {
-					paymentInfos = new PaymentInfos(Currency.BTC, Converter.getLongFromBigDecimal(amountBTC), Currency.CHF, Converter.getLongFromBigDecimal(inputUnitValue));
-					initializeNFC(paymentInfos);
-				} catch (Exception e) {
-					displayResponse(getResources().getString(R.string.unexcepted_error));
+				if(amountBTC.compareTo(BigDecimal.ZERO) > 0) {
+					PaymentInfos paymentInfos;
+					try {
+						paymentInfos = new PaymentInfos(Currency.BTC, Converter.getLongFromBigDecimal(amountBTC), Currency.CHF, Converter.getLongFromBigDecimal(inputUnitValue));
+						initializeNFC(paymentInfos);
+					} catch (Exception e) {
+						displayResponse(getResources().getString(R.string.unexcepted_error));
+					}
+					showNfcInstructions();
 				}
-				showNfcInstructions();
+
 			}
 		});
 	}
@@ -414,7 +417,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		if (nfcAdapter == null) {
 			return;
 		}
-		
+
 		if(isSendingMode){
 			try {
 				if (paymentRequestInitializer == null) {
@@ -540,7 +543,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		else {
 			PaymentResponse pr = (PaymentResponse) object;
 			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
-			
+
 			if(isSending){
 				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
