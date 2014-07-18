@@ -86,6 +86,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	private NfcAdapter nfcAdapter;
 	private IServerResponseListener responseListener;
+	private PaymentRequestInitializer paymentRequestInitializer;
+	private boolean serverResponseSuccessful = false;
 
 
 	protected static final String INPUT_UNIT_CHF = "CHF";
@@ -133,6 +135,15 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		else{
 
 		}
+	}
+	
+	@Override
+	public void onPause() {
+		if (paymentRequestInitializer != null){
+			paymentRequestInitializer.disable();
+			paymentRequestInitializer = null;
+		}
+		super.onPause();
 	}
 
 	@Override
@@ -406,7 +417,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		
 		if(isSendingMode){
 			try {
-				new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
+				if (paymentRequestInitializer == null) {
+					paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
+				} else {
+					paymentRequestInitializer.setPaymentInfos(paymentInfos);
+				}
 			} catch (Exception e) {
 				displayResponse(getResources().getString(R.string.unexcepted_error));
 				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
@@ -414,7 +429,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		}
 		else {
 			try {
-				new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
+				if (paymentRequestInitializer == null) {
+					paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
+				} else {
+					paymentRequestInitializer.setPaymentInfos(paymentInfos);
+				}
 			} catch (Exception e) {
 				displayResponse(getResources().getString(R.string.unexcepted_error));
 				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
@@ -451,8 +470,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 						showDialog(getResources().getString(R.string.transaction_server_rejected), false);
 						break;
 					case UNEXPECTED_ERROR:
-						dismissNfcInProgressDialog();
-						showDialog(getResources().getString(R.string.error_transaction_failed), false);
+						if (!serverResponseSuccessful) {
+							dismissNfcInProgressDialog();
+							showDialog("unexpected error", false);
+						}
+						break;
+					case INIT_FAILED:
+						//ignore
 						break;
 					default:
 						break;
@@ -471,6 +495,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				}
 				break;
 			case SUCCESS:
+				serverResponseSuccessful = true;
 				showSuccessDialog(object, isSendingMode);
 				break;
 			case INITIALIZED:

@@ -456,7 +456,10 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 						break;
 					case UNEXPECTED_ERROR:
 						dismissNfcInProgressDialog();
-						showDialog(getResources().getString(R.string.error_transaction_failed), false);
+						showDialog("unexpected error", false);
+						break;
+					case INIT_FAILED:
+						//ignore
 						break;
 					default:
 						break;
