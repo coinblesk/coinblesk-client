@@ -475,7 +475,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					case UNEXPECTED_ERROR:
 						if (!serverResponseSuccessful) {
 							dismissNfcInProgressDialog();
-							showDialog("unexpected error", false);
+							showDialog(getResources().getString(R.string.error_transaction_failed), false);
 						}
 						break;
 					case INIT_FAILED:
