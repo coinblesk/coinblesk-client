@@ -98,7 +98,7 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 			.setIcon(getResources().getIdentifier("ic_payment_failed", "drawable", getPackageName()));
 		}
 		builder.setMessage(message);
-		builder.setCancelable(true);
+		builder.setCancelable(false);
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.cancel();
