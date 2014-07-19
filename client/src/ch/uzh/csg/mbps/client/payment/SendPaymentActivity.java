@@ -238,6 +238,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					refreshCurrencyTextViews();
 					BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance()
 							.subtract(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount()));
+					ClientController.getStorageHandler().getUserAccount().setBalance(balance);
 					CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 					TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
 					balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");

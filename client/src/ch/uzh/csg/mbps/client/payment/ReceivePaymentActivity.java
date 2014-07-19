@@ -280,6 +280,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				displayResponse(getResources().getString(R.string.error_transaction_failed));
 				return;
 			}
+			if(response.getBalance() != null) {
+				ClientController.getStorageHandler().setUserBalance(CurrencyFormatter.getBigDecimalBtc(response.getBalance()));
+			}
 			responseListener.onServerResponse(serverPaymentResponse);
 		} else if (response.getMessage() != null && (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR))) {
 			displayResponse(getResources().getString(R.string.no_connection_server));
@@ -474,8 +477,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 						break;
 					case UNEXPECTED_ERROR:
 						if (!serverResponseSuccessful) {
-							dismissNfcInProgressDialog();
-							showDialog(getResources().getString(R.string.error_transaction_failed), false);
+//							dismissNfcInProgressDialog();
+//							showDialog(getResources().getString(R.string.error_transaction_failed), false);
 						}
 						break;
 					case INIT_FAILED:
