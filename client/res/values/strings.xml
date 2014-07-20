@@ -245,6 +245,7 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
+    <string name="dialog_close">Close</string>
     <string name="establishNfcConnectionInfo">Establish NFC connection now (Hold devices together)</string>
     <string name="nfc_in_progress_dialog">Payment in progress - Keep NFC connection</string>
     <string name="menu_offlineModeText">Offline Mode</string>
