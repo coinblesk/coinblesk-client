@@ -408,7 +408,6 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 			return;
 		}
 		
-		//TODO simon: test out
 		//disable android beam (touch to beam screen)
 		nfcAdapter.setNdefPushMessage(null, this, this);
 		

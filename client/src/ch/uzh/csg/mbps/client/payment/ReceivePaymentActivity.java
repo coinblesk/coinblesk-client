@@ -421,6 +421,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			return;
 		}
 
+		//disable android beam (touch to beam screen)
+		nfcAdapter.setNdefPushMessage(null, this, this);
+		
 		if(isSendingMode){
 			try {
 				if (paymentRequestInitializer == null) {
@@ -477,8 +480,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 						break;
 					case UNEXPECTED_ERROR:
 						if (!serverResponseSuccessful) {
-//							dismissNfcInProgressDialog();
-//							showDialog(getResources().getString(R.string.error_transaction_failed), false);
+							dismissNfcInProgressDialog();
+							showDialog(getResources().getString(R.string.error_transaction_failed), false);
 						}
 						break;
 					case INIT_FAILED:
