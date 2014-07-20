@@ -111,7 +111,7 @@ public class RegistrationActivity extends AbstractAsyncActivity implements IAsyn
 		Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.createAccountSuccessful)
 				.setMessage(message)
-				.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
+				.setPositiveButton(R.string.dialog_close, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							finish();
 						}
