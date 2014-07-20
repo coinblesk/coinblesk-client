@@ -48,9 +48,7 @@ public class CustomRestTemplate extends RestTemplate {
 			return super.exchange(url, httpMethod, requestEntity, CustomResponseObject.class).getBody();
 		} catch (Exception e) {
 			ClientController.setOnlineMode(false);
-			//TODO simon: check if it makes sense, like this after launching offline mode user has 10minutes until he gets logged out.
 			TimeHandler.getInstance().setStartTime();
-			//			TimeHandler.getInstance().terminateSession();
 			return new CustomResponseObject(false, Constants.REST_CLIENT_ERROR, Type.OTHER);
 		}
     }
