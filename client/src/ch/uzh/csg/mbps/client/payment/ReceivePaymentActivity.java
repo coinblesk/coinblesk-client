@@ -391,7 +391,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	}
 	
 	private void hideNfcInstructions() {
-		nfcActivityAnimation.stop();
 		findViewById(R.id.receivePayment_establishNfcConnectionInfo)
 				.setVisibility(View.INVISIBLE);
 		findViewById(R.id.receivePayment_nfcIcon).setVisibility(View.INVISIBLE);
