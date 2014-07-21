@@ -152,10 +152,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	@Override
 	public void onPause() {
-		if (paymentRequestInitializer != null){
-			paymentRequestInitializer.disable();
-			paymentRequestInitializer = null;
-		}
+		clearPaymentInfos();
 		super.onPause();
 	}
 
@@ -379,6 +376,20 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		} else {
 			hideNfcInstructions();
 		}
+	}
+	
+	private void clearPaymentInfos() {
+		if (paymentRequestInitializer != null){
+			paymentRequestInitializer.disable();
+			paymentRequestInitializer = null;
+		}
+		receiveAmount = "0";
+		if (isPortrait) {
+			receiveAmountEditText.setText(receiveAmount);
+		} else {
+			receiveAmountTextView.setText(receiveAmount);
+		}
+		refreshCurrencyTextViews();
 	}
 
 	private void showNfcInstructions(){
@@ -690,40 +701,29 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	private void registerListeners() {
 
+		enterTotal.setText(getResources().getString(R.string.enter_total_tablet));
 		enterTotal.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				calcLogic(EQUALS);
-				String calculatedValues = calcDialogDisplay.getText()
-						.toString();
-				if (calculatedValues.length() == 0
-						|| calculatedValues.contentEquals("")) {
+				String calculatedValues = calcDialogDisplay.getText().toString();
+				if (calculatedValues.length() == 0 || calculatedValues.contentEquals("")) {
 					calculatedValues = "0.0";
 				}
 				BigDecimal displayAmount = new BigDecimal(calculatedValues);
-				calculatedValues = displayAmount.add(mensaButtonAmount)
-						.toString();
+				calculatedValues = displayAmount.add(mensaButtonAmount).toString();
 
 				try {
-					if (Constants.inputUnit
-							.equals(ReceivePaymentActivity.INPUT_UNIT_CHF)) {
-						Constants.inputValueCalculator = CurrencyFormatter
-								.getBigDecimalChf(calculatedValues);
+					if (Constants.inputUnit.equals(ReceivePaymentActivity.INPUT_UNIT_CHF)) {
+						Constants.inputValueCalculator = CurrencyFormatter.getBigDecimalChf(calculatedValues);
 					} else {
-						SharedPreferences settings = PreferenceManager
-								.getDefaultSharedPreferences(getApplicationContext());
-						String bitcoinUnit = settings.getString("bitcoin_list",
-								"");
+						SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+						String bitcoinUnit = settings.getString("bitcoin_list",	"");
 						if (bitcoinUnit.equals(Constants.MILI_BTC)) {
-							Constants.inputValueCalculator = new BigDecimal(
-									calculatedValues).setScale(5,
-									RoundingMode.HALF_UP);
+							Constants.inputValueCalculator = new BigDecimal(calculatedValues).setScale(5, RoundingMode.HALF_UP);
 						} else if (bitcoinUnit.equals(Constants.MICRO_BTC)) {
-							Constants.inputValueCalculator = new BigDecimal(
-									calculatedValues).setScale(2,
-									RoundingMode.HALF_UP);
+							Constants.inputValueCalculator = new BigDecimal(calculatedValues).setScale(2, RoundingMode.HALF_UP);
 						} else {
-							Constants.inputValueCalculator = CurrencyFormatter
-									.getBigDecimalBtc(calculatedValues);
+							Constants.inputValueCalculator = CurrencyFormatter.getBigDecimalBtc(calculatedValues);
 						}
 					}
 					initializePayment();
@@ -736,6 +736,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		allClear.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				clearCalculator();
+				clearPaymentInfos();
+				hideNfcInstructions();
 			}
 		});
 

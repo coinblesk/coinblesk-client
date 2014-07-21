@@ -272,6 +272,7 @@
 
     <!-- Calculator Dialog -->
     <string name="enter_total">Enter</string>
+    <string name="enter_total_tablet">Init Payment</string>
     <string name="all_clear">AC</string>
     <string name="calcDialog_title">Please enter amount:</string>
 
