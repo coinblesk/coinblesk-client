@@ -4,17 +4,20 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+import android.text.method.DigitsKeyListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +33,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 import ch.uzh.csg.mbps.client.CurrencyViewHandler;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.MainActivity;
@@ -71,7 +75,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	protected static BigDecimal amountBTC = BigDecimal.ZERO;
 	protected static BigDecimal inputUnitValue = BigDecimal.ZERO;
 	private BigDecimal exchangeRate;
-	private EditText receiveAmount;
+	private String receiveAmount = "0";
+	private TextView receiveAmountTextView;
+	private EditText receiveAmountEditText;
 	private TextView descriptionOfInputUnit;
 	private SharedPreferences settings;
 	AnimationDrawable nfcActivityAnimation;
@@ -88,6 +94,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private IServerResponseListener responseListener;
 	private PaymentRequestInitializer paymentRequestInitializer;
 	private boolean serverResponseSuccessful = false;
+	private static boolean isPortrait  = false;
 
 
 	protected static final String INPUT_UNIT_CHF = "CHF";
@@ -98,20 +105,16 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_receive_payment);
 		setScreenOrientation();
+		if (getResources().getBoolean(R.bool.portrait_only)) {
+			isPortrait = true;
+		} else {
+			isPortrait = false;
+		}
 
 		Constants.inputUnit = INPUT_UNIT_CHF;
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		exchangeRate = BigDecimal.ZERO;
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
-
-		receiveAmount = (EditText) findViewById(R.id.receivePayment_amountText);
-		receiveAmount.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				openCalculatorDialog();			
-			}
-		});
-
-		receiveAmount.setFocusable(false);
 
 		descriptionOfInputUnit = (TextView)findViewById(R.id.receivePayment_enterAmountIn);
 
@@ -132,8 +135,18 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			logo.setImageResource(R.drawable.ic_pay_payment_big);
 			getActionBar().setTitle(getResources().getString(R.string.title_activity_send_payment));			
 		}
-		else{
-
+		
+		if (isPortrait) {
+			receiveAmountEditText = (EditText) findViewById(R.id.receivePayment_amountText);
+			receiveAmountEditText.setFocusable(false);
+			receiveAmountEditText.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					openCalculatorDialog();			
+				}
+			});
+		} else {
+			receiveAmountTextView = (TextView) findViewById(R.id.receivePayment_amount);
+			initializeCalculator();
 		}
 	}
 
@@ -298,7 +311,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		amountBTC = BigDecimal.ZERO;
 		if (Constants.inputUnit.equals(INPUT_UNIT_CHF)) {
 			try {
-				BigDecimal amountChf = CurrencyFormatter.getBigDecimalChf(receiveAmount.getText().toString());
+				BigDecimal amountChf = CurrencyFormatter.getBigDecimalChf(receiveAmount);
 				inputUnitValue = amountChf;
 				amountBTC = CurrencyViewHandler.getBitcoinExchangeValue(exchangeRate, amountChf);
 				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_CHFinBTC), amountBTC, getApplicationContext());
@@ -307,7 +320,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			}
 		} else {
 			try{
-				BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(receiveAmount.getText().toString());
+				BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(receiveAmount);
 				amountBTC = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
 				inputUnitValue = CurrencyViewHandler.getAmountInCHF(exchangeRate, amountBTC);
 				CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.receivePayment_CHFinBTC), exchangeRate, amountBTC);
@@ -336,34 +349,62 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		newFragment.setOnDismissListener(new OnDismissListener() {
 
 			public void onDismiss(DialogInterface dialog) {
-				receiveAmount.setText(Constants.inputValueCalculator.toString());
-				refreshCurrencyTextViews();
-
-				if(amountBTC.compareTo(BigDecimal.ZERO) > 0) {
-					PaymentInfos paymentInfos;
-					try {
-						paymentInfos = new PaymentInfos(Currency.BTC, Converter.getLongFromBigDecimal(amountBTC), Currency.CHF, Converter.getLongFromBigDecimal(inputUnitValue));
-						initializeNFC(paymentInfos);
-					} catch (Exception e) {
-						displayResponse(getResources().getString(R.string.unexcepted_error));
-					}
-					showNfcInstructions();
-				}
-
+				initializePayment();
 			}
 		});
+	}
+	
+	private void initializePayment() {
+		receiveAmount = Constants.inputValueCalculator.toString();
+		if (isPortrait) {
+			receiveAmountEditText.setText(receiveAmount);
+		} else {
+			receiveAmountTextView.setText(receiveAmount);
+		}
+		refreshCurrencyTextViews();
+
+		if (amountBTC.compareTo(BigDecimal.ZERO) > 0) {
+			PaymentInfos paymentInfos;
+			try {
+				paymentInfos = new PaymentInfos(Currency.BTC,
+						Converter.getLongFromBigDecimal(amountBTC),
+						Currency.CHF,
+						Converter.getLongFromBigDecimal(inputUnitValue));
+				initializeNFC(paymentInfos);
+			} catch (Exception e) {
+				displayResponse(getResources().getString(
+						R.string.unexcepted_error));
+			}
+			showNfcInstructions();
+		} else {
+			hideNfcInstructions();
+		}
 	}
 
 	private void showNfcInstructions(){
 		findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.VISIBLE);;
 		ImageView nfcActivity = (ImageView) findViewById(R.id.receivePayment_nfcIcon);
+		nfcActivity.setVisibility(View.VISIBLE);
 		nfcActivity.setBackgroundResource(R.drawable.animation_nfc);
 		nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
 		nfcActivityAnimation.start();
 	}
+	
+	private void hideNfcInstructions() {
+		nfcActivityAnimation.stop();
+		findViewById(R.id.receivePayment_establishNfcConnectionInfo)
+				.setVisibility(View.INVISIBLE);
+		findViewById(R.id.receivePayment_nfcIcon).setVisibility(View.INVISIBLE);
+	}
 
 	protected void refreshActivity() {
-		receiveAmount.setText("");
+		receiveAmount = "0";
+		if (isPortrait)
+			receiveAmountEditText.setText("");
+		else {
+			receiveAmountTextView.setText("");
+			clearCalculator();
+		}
 		this.recreate();
 	}
 
@@ -401,7 +442,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			else
 				Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
 
-			descriptionOfInputUnit.setText(Constants.inputUnit);
+			if(isPortrait) {
+				descriptionOfInputUnit.setText(Constants.inputUnit);
+			}
 			refreshCurrencyTextViews();
 		}
 
@@ -564,5 +607,458 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			}
 		}
 		showDialog(answer, true);
+	}
+	
+	//Tablet View, define more or adapt here and in sw720dp\activity_receive_payment toggle buttons for quickly entering fixed prices as in shops etc.
+	
+	private EditText calcDialogDisplay;
+	private TextView enterTotal;
+	private TextView allClear;
+	private TextView seven;
+	private TextView eight;
+	private TextView nine;
+	private TextView four;
+	private TextView five;
+	private TextView six;
+	private TextView multiply;
+	private TextView one;
+	private TextView two;
+	private TextView three;
+	private TextView subtract;
+	private TextView decimal;
+	private TextView zero;
+	private TextView equals;
+	private TextView addition;
+
+	private ToggleButton menu_student;
+	private ToggleButton menu_employee;
+	private ToggleButton menu_external;
+	private ToggleButton drink;
+	private ToggleButton coffee;
+
+	private ArrayList<Float> mathVariables = new ArrayList<Float>();
+	private float mathVariable1;
+	private float mathVariable2;
+
+	private int currentOperation = 0;
+	private int nextOperation;
+
+	private final static int ADD = 1;
+	private final static int SUBTRACT = 2;
+	private final static int MULTIPLY = 3;
+	private final static int EQUALS = 5;
+
+	private final static int CLEAR = 1;
+	private final static int DONT_CLEAR = 0;
+	private int clearCalcDisplay = 0;
+
+	private BigDecimal mensaButtonAmount = BigDecimal.ZERO;
+
+	private void initializeCalculator() {
+
+		this.setTitle(getResources().getString(R.string.calcDialog_title));
+
+		calcDialogDisplay = (EditText) findViewById(R.id.calc_dialog_display);
+		enterTotal = (TextView) findViewById(R.id.enter_total);
+		allClear = (TextView) findViewById(R.id.all_clear);
+		seven = (TextView) findViewById(R.id.seven);
+		eight = (TextView) findViewById(R.id.eight);
+		nine = (TextView) findViewById(R.id.nine);
+		four = (TextView) findViewById(R.id.four);
+		five = (TextView) findViewById(R.id.five);
+		six = (TextView) findViewById(R.id.six);
+		multiply = (TextView) findViewById(R.id.multiply);
+		one = (TextView) findViewById(R.id.one);
+		two = (TextView) findViewById(R.id.two);
+		three = (TextView) findViewById(R.id.three);
+		subtract = (TextView) findViewById(R.id.subtract);
+		decimal = (TextView) findViewById(R.id.decimal);
+		zero = (TextView) findViewById(R.id.zero);
+		equals = (TextView) findViewById(R.id.equals);
+		addition = (TextView) findViewById(R.id.addition);
+
+		calcDialogDisplay.setKeyListener(DigitsKeyListener.getInstance(true,
+				true));
+
+		initializeMensaButtons();
+		
+		if(isSendingMode || !Constants.IS_MENSA_MODE) {
+			disableMensaButtons();
+		}
+
+		registerListeners();
+	}
+
+	private void registerListeners() {
+
+		enterTotal.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				calcLogic(EQUALS);
+				String calculatedValues = calcDialogDisplay.getText()
+						.toString();
+				if (calculatedValues.length() == 0
+						|| calculatedValues.contentEquals("")) {
+					calculatedValues = "0.0";
+				}
+				BigDecimal displayAmount = new BigDecimal(calculatedValues);
+				calculatedValues = displayAmount.add(mensaButtonAmount)
+						.toString();
+
+				try {
+					if (Constants.inputUnit
+							.equals(ReceivePaymentActivity.INPUT_UNIT_CHF)) {
+						Constants.inputValueCalculator = CurrencyFormatter
+								.getBigDecimalChf(calculatedValues);
+					} else {
+						SharedPreferences settings = PreferenceManager
+								.getDefaultSharedPreferences(getApplicationContext());
+						String bitcoinUnit = settings.getString("bitcoin_list",
+								"");
+						if (bitcoinUnit.equals(Constants.MILI_BTC)) {
+							Constants.inputValueCalculator = new BigDecimal(
+									calculatedValues).setScale(5,
+									RoundingMode.HALF_UP);
+						} else if (bitcoinUnit.equals(Constants.MICRO_BTC)) {
+							Constants.inputValueCalculator = new BigDecimal(
+									calculatedValues).setScale(2,
+									RoundingMode.HALF_UP);
+						} else {
+							Constants.inputValueCalculator = CurrencyFormatter
+									.getBigDecimalBtc(calculatedValues);
+						}
+					}
+					initializePayment();
+				} catch (Exception e) {
+					Constants.inputValueCalculator = BigDecimal.ZERO;
+				}
+			}
+		});
+
+		allClear.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				clearCalculator();
+			}
+		});
+
+		seven.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR)
+					calcDialogDisplay.setText("");
+
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("7");
+			}
+		});
+
+		eight.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR)
+					calcDialogDisplay.setText("");
+
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("8");
+			}
+		});
+
+		nine.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR)
+					calcDialogDisplay.setText("");
+
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("9");
+			}
+		});
+
+		four.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR) {
+					calcDialogDisplay.setText("");
+				}
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("4");
+			}
+		});
+
+		five.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR) {
+					calcDialogDisplay.setText("");
+				}
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("5");
+			}
+		});
+
+		six.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR) {
+					calcDialogDisplay.setText("");
+				}
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("6");
+			}
+		});
+
+		multiply.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				calcLogic(MULTIPLY);
+			}
+		});
+
+		one.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR) {
+					calcDialogDisplay.setText("");
+				}
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("1");
+			}
+		});
+
+		two.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR) {
+					calcDialogDisplay.setText("");
+				}
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("2");
+			}
+		});
+
+		three.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR) {
+					calcDialogDisplay.setText("");
+				}
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("3");
+			}
+		});
+
+		subtract.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				calcLogic(SUBTRACT);
+			}
+		});
+
+		decimal.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR) {
+					calcDialogDisplay.setText("");
+				}
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append(".");
+			}
+		});
+
+		zero.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (clearCalcDisplay == CLEAR) {
+					calcDialogDisplay.setText("");
+				}
+				clearCalcDisplay = DONT_CLEAR;
+				calcDialogDisplay.append("0");
+			}
+		});
+
+		equals.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				calcLogic(EQUALS);
+
+			}
+		});
+
+		addition.setOnClickListener(new View.OnClickListener() {
+
+			public void onClick(View v) {
+				calcLogic(ADD);
+			}
+		});
+	}
+
+	private void clearCalculator() {
+		calcDialogDisplay.setText("");
+		mathVariable1 = 0;
+		mathVariable2 = 0;
+		mathVariables.removeAll(mathVariables);
+		currentOperation = 0;
+		nextOperation = 0;
+		
+		clearMensaButtons();
+	}
+
+	private void calcLogic(int operator) {
+		try {
+			mathVariables.add(Float.parseFloat(calcDialogDisplay.getText()
+					.toString()));
+		} catch (NumberFormatException e) {
+			// do nothing
+		}
+
+		if (operator != EQUALS) {
+			nextOperation = operator;
+		} else if (operator == EQUALS) {
+			nextOperation = 0;
+		}
+
+		switch (currentOperation) {
+		case ADD:
+			if (mathVariables.size() < 2) {
+				break;
+			}
+			mathVariable1 = mathVariables.get(0);
+			mathVariable2 = mathVariables.get(1);
+
+			mathVariables.removeAll(mathVariables);
+
+			mathVariables.add(mathVariable1 + mathVariable2);
+
+			calcDialogDisplay.setText(String.valueOf(mathVariables.get(0)));
+			break;
+		case SUBTRACT:
+			if (mathVariables.size() < 2) {
+				break;
+			}
+			mathVariable1 = mathVariables.get(0);
+			mathVariable2 = mathVariables.get(1);
+
+			mathVariables.removeAll(mathVariables);
+
+			mathVariables.add(mathVariable1 - mathVariable2);
+
+			calcDialogDisplay.setText(String.valueOf(mathVariables.get(0)));
+			break;
+		case MULTIPLY:
+			if (mathVariables.size() < 2) {
+				break;
+			}
+			mathVariable1 = mathVariables.get(0);
+			mathVariable2 = mathVariables.get(1);
+
+			mathVariables.removeAll(mathVariables);
+
+			mathVariables.add(mathVariable1 * mathVariable2);
+
+			calcDialogDisplay.setText(String.valueOf(mathVariables.get(0)));
+			break;
+		}
+
+		clearCalcDisplay = CLEAR;
+		currentOperation = nextOperation;
+		if (operator == EQUALS) {
+			mathVariable1 = 0;
+			mathVariable2 = 0;
+			mathVariables.removeAll(mathVariables);
+		}
+	}
+
+	private void initializeMensaButtons() {
+		menu_student = (ToggleButton) findViewById(R.id.mensa_menu_student);
+		menu_student.setVisibility(View.VISIBLE);
+		menu_student.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				if (menu_student.isChecked()) {
+					menu_student.setTextColor(Color.CYAN);
+					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
+							"5.40"));
+				} else {
+					menu_student.setTextColor(Color.BLACK);
+					mensaButtonAmount = mensaButtonAmount
+							.subtract(new BigDecimal("5.40"));
+				}
+			}
+		});
+		
+		menu_employee = (ToggleButton) findViewById(R.id.mensa_menu_employee);
+		menu_employee.setVisibility(View.VISIBLE);
+		menu_employee.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				if (menu_employee.isChecked()) {
+					menu_employee.setTextColor(Color.CYAN);
+					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
+							"7.00"));
+				} else {
+					menu_employee.setTextColor(Color.BLACK);
+					mensaButtonAmount = mensaButtonAmount
+							.subtract(new BigDecimal("7.00"));
+				}
+			}
+		});
+		
+		menu_external = (ToggleButton) findViewById(R.id.mensa_menu_external);
+		menu_external.setVisibility(View.VISIBLE);
+		menu_external.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				if (menu_external.isChecked()) {
+					menu_external.setTextColor(Color.CYAN);
+					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
+							"10.50"));
+				} else {
+					menu_external.setTextColor(Color.BLACK);
+					mensaButtonAmount = mensaButtonAmount
+							.subtract(new BigDecimal("10.50"));
+				}
+			}
+		});
+
+		drink = (ToggleButton) findViewById(R.id.mensa_drink);
+		drink.setVisibility(View.VISIBLE);
+		drink.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				if (drink.isChecked()) {
+					drink.setTextColor(Color.CYAN);
+					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
+							"2.30"));
+				} else {
+					drink.setTextColor(Color.BLACK);
+					mensaButtonAmount = mensaButtonAmount
+							.subtract(new BigDecimal("2.30"));
+				}
+			}
+		});
+
+		coffee = (ToggleButton) findViewById(R.id.mensa_coffe);
+		coffee.setVisibility(View.VISIBLE);
+		coffee.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				if (coffee.isChecked()) {
+					coffee.setTextColor(Color.CYAN);
+					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
+							"1.50"));
+				} else {
+					coffee.setTextColor(Color.BLACK);
+					mensaButtonAmount = mensaButtonAmount
+							.subtract(new BigDecimal("1.50"));
+				}
+			}
+		});
+	}
+	
+	private void disableMensaButtons() {
+		menu_student.setEnabled(false);
+		menu_student.setVisibility(View.INVISIBLE);
+		menu_employee.setEnabled(false);
+		menu_employee.setVisibility(View.INVISIBLE);
+		menu_external.setEnabled(false);
+		menu_external.setVisibility(View.INVISIBLE);
+		coffee.setEnabled(false);
+		coffee.setVisibility(View.INVISIBLE);
+		drink.setEnabled(false);
+		drink.setVisibility(View.INVISIBLE);
+	}
+	
+	private void clearMensaButtons(){
+		mensaButtonAmount = BigDecimal.ZERO;
+		menu_student.setChecked(false);
+		menu_student.setTextColor(Color.BLACK);
+		menu_employee.setChecked(false);
+		menu_employee.setTextColor(Color.BLACK);
+		menu_external.setChecked(false);
+		menu_external.setTextColor(Color.BLACK);
+		coffee.setChecked(false);
+		coffee.setTextColor(Color.BLACK);
+		drink.setChecked(false);
+		drink.setTextColor(Color.BLACK);
 	}
 }

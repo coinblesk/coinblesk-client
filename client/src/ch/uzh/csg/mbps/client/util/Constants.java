@@ -64,5 +64,9 @@ public class Constants {
 	
 	public static BigDecimal inputValueCalculator = BigDecimal.ZERO;
 	public static String inputUnit = "CHF";
+	
+	//TODO simon: put to false when generating apk for play-store
+	//shows (true) or hides (false) buttons specially created for shops etc.
+	public static boolean IS_MENSA_MODE = true;
 
 }
