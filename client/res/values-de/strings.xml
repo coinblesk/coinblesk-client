@@ -47,6 +47,14 @@
     <string name="signUpTermOfUseTextView">AGB lesen</string>
     <string name="signUpCheckBox">Ich stimme den AGBs zu</string>
     <string name="signUpAgreeBtn">Registrieren</string>
+    <string name="registration_field_not_empty">Bitte alle Felder ausfüllen.</string>
+    <string name="registration_email_not_valid">E-Mail Adresse ist nicht gültig.</string>
+    <string name="registration_password_lenght_error">Passwort ungültig. Bitte verwenden Sie ein Passwort mit 4 bis 20 Zeichen.</string>
+    <string name="registration_username_error">Benutzername ungültig. \nNur Buchstaben und Nummern mit minimal 4 Zeichen sind erlaubt.</string>
+    <string name="registration_tou_not_accepted">Bitte lesen und akzeptieren Sie die AGB.</string>
+    <string name="registration_password_not_equal">Passwörter stimmen nicht überein. Bitte erneut versuchen.</string>
+   
+    <string name="registration_successful">Ihr Konto wurde erfolgreich erstellt. Bitte prüfen Sie ihre Emails um ihr Konto zu aktivieren. Ohne Aktivierung können Sie sich nicht anmelden.</string>
     <!-- Popup Window -->
     <string name="termOfUseTitleView">Allgemeine Geschäfts- und Nutzungsbedingungen</string>
     <string name="termOfUseTextView">Diese Applikation wurde als Teil eines Masterprojektes am Institut für Informatik an der 

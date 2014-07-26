@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.profile.EditPasswordAccountProfileActivity;
+import android.content.Context;
 import android.util.Pair;
 import android.widget.CheckBox;
 
@@ -54,7 +56,7 @@ public class CheckFormatHandler {
 	 *            The checkbox of the term of use.
 	 * @return Returns true if all requirements are met.
 	 */
-	public static Pair<Boolean,String> checkRegistrationInputs(String username, String email, String password, String confirmPassword, CheckBox termOfUseChecked){
+	public static Pair<Boolean,String> checkRegistrationInputs(Context context, String username, String email, String password, String confirmPassword, CheckBox termOfUseChecked){
 		ArrayList<String> editTexts = new ArrayList<String>();
 		editTexts.add(username);
 		editTexts.add(email);
@@ -63,27 +65,27 @@ public class CheckFormatHandler {
 
 		// Checks if any field is empty
 		if (!fieldsNotEmpty(editTexts)) {
-			return new Pair<Boolean, String>(false, Constants.FIELDS_NOT_EMPTY_FALSE);
+			return new Pair<Boolean, String>(false, context.getResources().getString(R.string.registration_field_not_empty));
 		}
 		// Checks if username has correct format
 		else if (!isUsernameValid(username)) {
-			return new Pair<Boolean, String>(false, Constants.IS_USERNAME_VALID_FALSE);
+			return new Pair<Boolean, String>(false, context.getResources().getString(R.string.registration_username_error));
 		}
 		// Checks if the email address has a valid form
 		else if (!isEmailValid(email)) {
-			return new Pair<Boolean, String>(false, Constants.EMAIL_IS_VALID_FALSE);
+			return new Pair<Boolean, String>(false, context.getResources().getString(R.string.registration_email_not_valid));
 		}
 		// checks if the password has a minimum length of 4 characters
 		else if (!isPasswordLengthValid(password)) {
-			return new Pair<Boolean, String>(false, Constants.IS_PASSWORD_LENGTH_VALID_FALSE);
+			return new Pair<Boolean, String>(false, context.getResources().getString(R.string.registration_password_lenght_error));
 		}
 		// Checks if password and confirm password are the same
 		else if (!passwordsAreEqual(password, confirmPassword)) {
-			return new Pair<Boolean, String>(false, Constants.PASSWORD_ARE_EQUAL_FALSE);
+			return new Pair<Boolean, String>(false,context.getResources().getString(R.string.registration_password_not_equal));
 		}
 		// Checks if term of use is accepted
 		else if (!isTermOfUseAccepted(termOfUseChecked)) {
-			return new Pair<Boolean, String>(false, Constants.IS_TERM_OF_USE_ACCEPTED_FALSE);
+			return new Pair<Boolean, String>(false, context.getResources().getString(R.string.registration_tou_not_accepted));
 		} else {
 			return new Pair<Boolean, String>(true, "OK");
 		}
@@ -101,18 +103,18 @@ public class CheckFormatHandler {
 	 * @return Returns true if all fields are filled, have length of four
 	 *         characters and password and confirmation password are the same.
 	 */
-	public static Pair<Boolean, String> checkUpdateInputs(String password, String confirmPassword) {
+	public static Pair<Boolean, String> checkUpdateInputs(Context context, String password, String confirmPassword) {
 		// Checks if any field is empty
 		if (password.isEmpty() || confirmPassword.isEmpty()) {
-			return new Pair<Boolean, String>(false, Constants.FIELDS_NOT_EMPTY_FALSE);
+			return new Pair<Boolean, String>(false, context.getResources().getString(R.string.registration_field_not_empty));
 		}
 		// checks if the password has a minimum length of 4 characters
 		else if (!isPasswordLengthValid(password)) {
-			return new Pair<Boolean, String>(false, Constants.IS_PASSWORD_LENGTH_VALID_FALSE);
+			return new Pair<Boolean, String>(false, context.getResources().getString(R.string.registration_password_lenght_error));
 		}
 		// Checks if password and confirm password are the same
 		else if (!passwordsAreEqual(password, confirmPassword)) {
-			return new Pair<Boolean, String>(false, Constants.PASSWORD_ARE_EQUAL_FALSE);
+			return new Pair<Boolean, String>(false, context.getResources().getString(R.string.registration_password_not_equal));
 		} else {
 			return new Pair<Boolean, String>(true, "OK");
 		}

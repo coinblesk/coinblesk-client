@@ -45,12 +45,6 @@ public class Constants {
 	public static final String MILI_BTC = "0";
 	public static final String MICRO_BTC = "1";
 	
-	public static final String EMAIL_IS_VALID_FALSE ="E-Mail address is not valid!";
-	public static final String FIELDS_NOT_EMPTY_FALSE = "Please fill out all fields!";
-	public static final String IS_PASSWORD_LENGTH_VALID_FALSE = "Password has an invalid form! Please insert a password with a length of 4 until 20 characters!";
-	public static final String IS_USERNAME_VALID_FALSE = "Username has an invalid form!\nOnly letters and numbers with a minimum length of 4 charcters are excepted!.";
-	public static final String IS_TERM_OF_USE_ACCEPTED_FALSE = "Please read and accept the term of use!";
-	public static final String PASSWORD_ARE_EQUAL_FALSE = "The entered passwords do not match, please try again!";
 	public static final String USERNAME_PATTERN = "^[A-Za-z0-9_-]{3,25}$";
 	public static final String TIME_SESSION_EXPIRED = "Time is expired";
 	public static final String NO_COOKIE_STORED = "No Cookie stored!";

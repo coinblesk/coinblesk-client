@@ -66,7 +66,7 @@ public class RegistrationActivity extends AbstractAsyncActivity implements IAsyn
 	  	createAccountBtn.setOnClickListener(new View.OnClickListener() {
 	  		public void onClick(View v) {
 	  			initInputInformation();
-	  			Pair<Boolean, String> responseContent = CheckFormatHandler.checkRegistrationInputs(username, email, password, confirmPassword, termOfUseChecked);
+	  			Pair<Boolean, String> responseContent = CheckFormatHandler.checkRegistrationInputs(getApplicationContext(), username, email, password, confirmPassword, termOfUseChecked);
 				if (responseContent.first) {
 					launchCreateRequest();
 				} else {
@@ -101,7 +101,7 @@ public class RegistrationActivity extends AbstractAsyncActivity implements IAsyn
 	public void onTaskComplete(CustomResponseObject response) {
 		dismissProgressDialog();
 		if (response.isSuccessful()) {
-			buildDialog(response.getMessage());
+			buildDialog(getResources().getString(R.string.registration_successful));
 		}else{
 			displayResponse(response.getMessage());			
 		}

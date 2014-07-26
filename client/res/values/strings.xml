@@ -47,6 +47,14 @@
     <string name="signUpTermOfUseTextView">Read term and conditions</string>
     <string name="signUpCheckBox">I agree to the term of Service</string>
     <string name="signUpAgreeBtn">Sign up</string>
+    <string name="registration_field_not_empty">Please fill out all fields.</string>
+    <string name="registration_email_not_valid">E-Mail address is not valid.</string>
+    <string name="registration_password_lenght_error">Password has an invalid form! Please insert a password with a length of 4 until 20 characters.</string>
+    <string name="registration_username_error">Username has an invalid form!\nOnly letters and numbers with a minimum length of 4 charcters are excepted.</string>
+    <string name="registration_tou_not_accepted">Please read and accept the term of use.</string>
+    <string name="registration_password_not_equal">The entered passwords do not match, please try again.</string>
+    <string name="registration_successful">Your Account has successfully been created. Please check your emails to verify your account. Ohne Verifikation können Sie sich nicht anmelden.</string>
+    
     <!-- Popup Window -->
     <string name="termOfUseTitleView">Terms and Conditions</string>
     <string name="termOfUseTextView">This application was developed as part of a Master Project at the Institute for 

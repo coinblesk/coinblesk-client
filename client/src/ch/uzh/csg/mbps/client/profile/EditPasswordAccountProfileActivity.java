@@ -59,7 +59,7 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity im
 		password = ((EditText) findViewById(R.id.updatePasswordEditText)).getText().toString();
 		String confirmPassword = ((EditText) findViewById(R.id.updatePasswordConfirmEditText)).getText().toString();
 		// Checks if the format is corrected and if the confirmation password equals to the inserted password 
-		Pair<Boolean, String> responseContent = CheckFormatHandler.checkUpdateInputs(password, confirmPassword);
+		Pair<Boolean, String> responseContent = CheckFormatHandler.checkUpdateInputs(getApplicationContext(), password, confirmPassword);
 		if (responseContent.first) {
 			UserAccount user = new UserAccount(null, null, password);
 			launchRequest(user);

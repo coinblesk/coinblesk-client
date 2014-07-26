@@ -8,7 +8,6 @@ import android.widget.EditText;
 import ch.uzh.csg.mbps.client.request.PasswordResetRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.CheckFormatHandler;
-import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
@@ -60,7 +59,7 @@ public class ResetPasswordActivity extends AbstractAsyncActivity implements IAsy
 			RequestTask resetPW = new PasswordResetRequestTask(this, user);
 			resetPW.execute();
 		} else {
-			displayResponse(Constants.EMAIL_IS_VALID_FALSE);
+			displayResponse(getResources().getString(R.string.registration_email_not_valid));
 		}
 	}
     
