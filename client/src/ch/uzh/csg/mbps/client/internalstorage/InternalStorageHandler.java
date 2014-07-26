@@ -380,8 +380,12 @@ public class InternalStorageHandler implements IPersistencyHandler {
 		Set<String> trustedAddressBook = new TreeSet<String>(getTrustedAddressbook());
 		Set<String> addressesToRemove = new TreeSet<String>(getAddressBook());
 
-		boolean removed = addressesToRemove.removeAll(trustedAddressBook);
-		if(removed){
+		boolean removed = false;
+		if (!trustedAddressBook.isEmpty()) {
+			removed = addressesToRemove.removeAll(trustedAddressBook);
+		} 
+		
+		if(removed || trustedAddressBook.isEmpty()){
 			try {
 				for (Iterator<String> it = addressesToRemove.iterator(); it.hasNext();) {
 					String username = it.next();
