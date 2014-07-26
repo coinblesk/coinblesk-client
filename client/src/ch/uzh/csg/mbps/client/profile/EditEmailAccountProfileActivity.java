@@ -67,6 +67,7 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity imple
 	}
     
     public void onTaskComplete(CustomResponseObject response) {
+    	dismissProgressDialog();
 		if (response.isSuccessful()) {
 			String saveEmail = ((EditText) findViewById(R.id.updateEmailEditText)).getText().toString();
 			
@@ -74,14 +75,15 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity imple
 			if (!saved) {
 				displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 			}
-			
 			finish();
+			displayResponse(getResources().getString(R.string.updateAccount_successful));
 		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+			displayResponse(response.getMessage());
 			reload(getIntent());
 			invalidateOptionsMenu();
+		} else {
+			displayResponse(response.getMessage());
 		}
-		dismissProgressDialog();
-		displayResponse(response.getMessage());
 	}
 	
 	private void checkOnlineModeAndProceed() {

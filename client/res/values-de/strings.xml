@@ -239,6 +239,7 @@
     <string name="updatePasswordConfirmTextView">Passwort bestätigen:</string>
     <string name="updatePasswordConfirmEditText">Passwort bestätigen</string>
     <string name="updatePasswordBtn">Änderungen speichern</string>
+    <string name="updateAccount_successful">Ihr Konto wurde erfolgreich aktualisiert.</string>
 
     <!-- Icon & other Strings -->
     <string name="action_settings">Einstellungen</string>

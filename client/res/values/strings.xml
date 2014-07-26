@@ -240,6 +240,7 @@
     <string name="updatePasswordConfirmTextView">Please confirm the password:</string>
     <string name="updatePasswordConfirmEditText">confirmpassword</string>
     <string name="updatePasswordBtn">Submit Change</string>
+    <string name="updateAccount_successful">Your account has successfully been updated.</string>
 
     <!-- Icon & other Strings -->
     <string name="action_settings">Settings</string>
