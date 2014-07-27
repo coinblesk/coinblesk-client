@@ -175,6 +175,9 @@
     <string name="payOut_ButtonScanQRText">Scan QR</string>
     <string name="payOut_NoQRCode">Bitcoin Adresse konnte nicht gescannt werden.</string>
     <string name="payOut_enterAmount">Betrag eingeben</string>
+    <string name="payOut_successful">Ihre Auszahlung von %1$s wurde erfolgreich ans Bitcoin Netzwerk gesendet.</string>
+    <string name="payOut_error_balance">Auszahlung nicht erfolgreich. Ihr Kontostand ist tiefer als ihr gewünschter Auszahlungsbetrag.</string>
+    <string name="payOut_error_address">Auszahlung nicht erfolgreich. Die Bitcoin Adresse ist ungültig.</string>
 
     <!-- Payou out Rules -->
     <string name="insert_payout_address">Bitte Auszahlungs-Adresse eingeben!</string>

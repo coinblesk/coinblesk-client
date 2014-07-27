@@ -173,7 +173,8 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payout_exchangeRate));
 				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance());
 			} else {
-				showDialog("Pay out", getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()),response.getMessage());
+				String message = String.format(getResources().getString(R.string.payOut_successful), response.getMessage());
+				showDialog(getResources().getString(R.string.title_activity_pay_out), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), message);
 				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
 				
 				boolean saved = ClientController.getStorageHandler().setUserBalance(balance.subtract(payOutAmount));
@@ -192,10 +193,16 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 			exchangeRate = BigDecimal.ZERO;
 			reload(getIntent());
 			invalidateOptionsMenu();
-		} else {
+		} else if (response.getType() == Type.EXCHANGE_RATE && !response.isSuccessful()){
 			exchangeRate = BigDecimal.ZERO;
 			displayResponse(response.getMessage());
 			chfBalance.setText("");
+		} else if (response.getType() == Type.PAYOUT_ERROR_ADDRESS) {
+			displayResponse(getResources().getString(R.string.payOut_error_address));
+		} else if (response.getType() == Type.PAYOUT_ERROR_BALANCE) {
+			displayResponse(getResources().getString(R.string.payOut_error_balance));
+		} else {
+			displayResponse(response.getMessage());
 		}
 		dismissProgressDialog();
 	}
