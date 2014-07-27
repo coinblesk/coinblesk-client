@@ -131,6 +131,9 @@
     <string name="sendPayment_selectReceiver">Empfänger auswählen</string>
     <string name="sendPayment_error">Probleme beim Erstellen der Transaktion. Bitte versuchen Sie es später erneut.</string>
     <string name="sendPayment_error_user">Fehler. Sie können keine Transaktion an sich selber versenden.</string>
+    <string name="sendPayment_dialog_title">Transaktion überprüfen</string>
+    <string name="sendPayment_dialog_message">Durch Ihre Bestätigung werden %1$s an %2$s gesendet.</string>
+    <string name="sendPayment_dialog_confirm">Senden</string>
 
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">Sie haben %1$s an %2$s gesendet.</string>

@@ -17,11 +17,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -123,7 +123,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 		offlineMode = menu.findItem(R.id.menu_offlineMode);
 		TextView offlineModeTV = (TextView) offlineMode.getActionView();
 		offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
-		
+
 		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
 				launchRequest();
@@ -158,7 +158,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			}
 		}
 	}
-	
+
 	/**
 	 * Start Timer for Session Countdown in Options Menu.
 	 * 
@@ -243,12 +243,12 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 					TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
 					balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
 					BigDecimal amountBtc = Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount());
-					
+
 					String s = String.format(getResources().getString(R.string.payment_notification_success_payer),
 							CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")",
 							paymentResponsePayer.getUsernamePayee());
 					showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
-					
+
 					boolean saved = ClientController.getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
 					if (!saved) {
 						displayResponse(getResources().getString(R.string.error_xmlSave_failed));
@@ -384,7 +384,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 				// hide virtual keyboard
 				InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-				createTransaction();
+				showConfirmationDialog();	
 			}
 		});
 
@@ -396,6 +396,37 @@ public class SendPaymentActivity extends AbstractAsyncActivity implements IAsync
 			}
 		});
 
+	}
+
+	private void showConfirmationDialog() {
+		String username;
+		String amount;
+		String message;
+		if (!receiverUsernameEditText.getText().toString().isEmpty() && !(amountBTC == null || amountBTC.compareTo(BigDecimal.ZERO) == 0)) {
+			username = receiverUsernameEditText.getText().toString();
+			amount = CurrencyViewHandler.formatBTCAsString(amountBTC, this) + " (" +CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBTC) + ")";
+			message = String.format(getString(R.string.sendPayment_dialog_message), amount , username);
+		} else {
+			displayResponse(getString(R.string.fill_necessary_fields));
+			return;
+		}
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		alert.setTitle(getString(R.string.sendPayment_dialog_title));
+		alert.setMessage(message);
+
+		alert.setPositiveButton(getString(R.string.sendPayment_dialog_confirm), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				createTransaction();
+			}
+		});
+		
+		alert.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				// Dialog canceled
+			}
+		});
+		alert.show();
 	}
 
 	private void createTransaction(){

@@ -131,6 +131,9 @@
     <string name="sendPayment_selectReceiver">Select receiver</string>
     <string name="sendPayment_error">Problems occurred while sending your transaction. Please try again later.</string>
     <string name="sendPayment_error_user">Error. You can not send a transaction to yourself.</string>
+    <string name="sendPayment_dialog_title">Confirm Transaction</string>
+    <string name="sendPayment_dialog_message">By your confirmation %1$s are sent to %2$s.</string>
+    <string name="sendPayment_dialog_confirm">Send</string>
 
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">You paid %1$s to %2$s</string>
