@@ -329,11 +329,21 @@
             android:layout_marginTop="10dp"
             android:layout_toRightOf="@+id/receivePayment_numPadLayout"
             android:gravity="center" >
+            
+               <TextView
+                android:id="@+id/receivePayment_list"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:textSize="@dimen/calc_dialog_text_size"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="48dp" />
 
             <ToggleButton
                 android:id="@+id/mensa_menu_student"
-                android:layout_width="200dp"
+                android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_toRightOf="@+id/receivePayment_list"
                 android:textOff="Menü 5.40"
                 android:textOn="Menü 5.40"
                 android:textSize="@dimen/calc_dialog_text_size" 
@@ -341,9 +351,10 @@
             
              <ToggleButton
                 android:id="@+id/mensa_menu_employee"
-                android:layout_width="200dp"
+                android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
                 android:layout_below="@+id/mensa_menu_student"
+                android:layout_alignLeft="@+id/mensa_menu_student"
                 android:textOff="Menü 7.00"
                 android:textOn="Menü 7.00"
                 android:visibility="invisible"
@@ -351,9 +362,10 @@
              
               <ToggleButton
                 android:id="@+id/mensa_menu_external"
-                android:layout_width="200dp"
+                android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
                 android:layout_below="@+id/mensa_menu_employee"
+                android:layout_alignLeft="@+id/mensa_menu_student"
                 android:textOff="Menü 10.50"
                 android:textOn="Menü 10.50"
                 android:visibility="invisible"
@@ -361,7 +373,7 @@
 
             <ToggleButton
                 android:id="@+id/mensa_coffe"
-                android:layout_width="200dp"
+                android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
                 android:layout_toRightOf="@+id/mensa_menu_student"
                 android:textOff="Kaffee 1.50"
@@ -371,7 +383,7 @@
 
             <ToggleButton
                 android:id="@+id/mensa_drink"
-                android:layout_width="200dp"
+                android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
                 android:layout_below="@+id/mensa_coffe"
                 android:layout_alignLeft="@+id/mensa_coffe"
@@ -379,6 +391,9 @@
                 android:textOn="Getränk 2.30"
                 android:visibility="invisible"
                 android:textSize="@dimen/calc_dialog_text_size" />
+
+         
+
         </RelativeLayout>
 
 

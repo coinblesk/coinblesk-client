@@ -135,7 +135,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			logo.setImageResource(R.drawable.ic_pay_payment_big);
 			getActionBar().setTitle(getResources().getString(R.string.title_activity_send_payment));			
 		}
-		
+
 		if (isPortrait) {
 			receiveAmountEditText = (EditText) findViewById(R.id.receivePayment_amountText);
 			receiveAmountEditText.setFocusable(false);
@@ -350,7 +350,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			}
 		});
 	}
-	
+
 	private void initializePayment() {
 		receiveAmount = Constants.inputValueCalculator.toString();
 		if (isPortrait) {
@@ -377,7 +377,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			hideNfcInstructions();
 		}
 	}
-	
+
 	private void clearPaymentInfos() {
 		if (paymentRequestInitializer != null){
 			paymentRequestInitializer.disable();
@@ -400,10 +400,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
 		nfcActivityAnimation.start();
 	}
-	
+
 	private void hideNfcInstructions() {
 		findViewById(R.id.receivePayment_establishNfcConnectionInfo)
-				.setVisibility(View.INVISIBLE);
+		.setVisibility(View.INVISIBLE);
 		findViewById(R.id.receivePayment_nfcIcon).setVisibility(View.INVISIBLE);
 	}
 
@@ -476,14 +476,15 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		//disable android beam (touch to beam screen)
 		nfcAdapter.setNdefPushMessage(null, this, this);
-		
+
 		if(isSendingMode){
 			try {
-				if (paymentRequestInitializer == null) {
-					paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
-				} else {
-					paymentRequestInitializer.setPaymentInfos(paymentInfos);
+				if (paymentRequestInitializer != null) {
+					paymentRequestInitializer.disable(); 
+					paymentRequestInitializer = null;
 				}
+				paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
+				paymentRequestInitializer.enableNfc();
 			} catch (Exception e) {
 				displayResponse(getResources().getString(R.string.unexcepted_error));
 				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
@@ -491,11 +492,12 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		}
 		else {
 			try {
-				if (paymentRequestInitializer == null) {
-					paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
-				} else {
-					paymentRequestInitializer.setPaymentInfos(paymentInfos);
+				if (paymentRequestInitializer != null) {
+					paymentRequestInitializer.disable(); 
+					paymentRequestInitializer = null;
 				}
+				paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
+				paymentRequestInitializer.enableNfc();
 			} catch (Exception e) {
 				displayResponse(getResources().getString(R.string.unexcepted_error));
 				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
@@ -533,8 +535,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 						break;
 					case UNEXPECTED_ERROR:
 						if (!serverResponseSuccessful) {
-							dismissNfcInProgressDialog();
-							showDialog(getResources().getString(R.string.error_transaction_failed), false);
+							//							dismissNfcInProgressDialog();
+							//							showDialog(getResources().getString(R.string.error_transaction_failed), false);
 						}
 						break;
 					case INIT_FAILED:
@@ -558,16 +560,44 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				break;
 			case SUCCESS:
 				serverResponseSuccessful = true;
+				//				Log.d(TAG, "tx was successul");
 				showSuccessDialog(object, isSendingMode);
+				//				new Thread(new TerminateLater(paymentRequestInitializer)).start();
+				if (paymentRequestInitializer != null)
+					paymentRequestInitializer.disableNfc(); 
 				break;
 			case INITIALIZED:
 				showNfcProgressDialog(true);
 				break;
-			default:
+			default: 
 				break;
 			}
 		}
 	};
+
+	//	private static final String TAG = "ReceivePaymentActivity";
+	//	
+	//	private class TerminateLater implements Runnable {
+	//		
+	//		private PaymentRequestInitializer initializer;
+	//		
+	//		private TerminateLater(PaymentRequestInitializer initializer) {
+	//			this.initializer = initializer;
+	//		}
+	//
+	//		public void run() {
+	//			try {
+	//				Thread.sleep(200);
+	//				if (initializer != null)
+	//					initializer.disableNfc(); 
+	//			} catch (InterruptedException e) {
+	//				// TODO Auto-generated catch block
+	//				e.printStackTrace();
+	//			}
+	//			
+	//		}
+	//		
+	//	}
 
 	/**
 	 * Launches request to send a new transaction to the server.
@@ -618,9 +648,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		}
 		showDialog(answer, true);
 	}
-	
+
 	//Tablet View, define more or adapt here and in sw720dp\activity_receive_payment toggle buttons for quickly entering fixed prices as in shops etc.
-	
+
 	private EditText calcDialogDisplay;
 	private TextView enterTotal;
 	private TextView allClear;
@@ -639,6 +669,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private TextView zero;
 	private TextView equals;
 	private TextView addition;
+
+	private TextView list;
 
 	private ToggleButton menu_student;
 	private ToggleButton menu_employee;
@@ -686,12 +718,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		zero = (TextView) findViewById(R.id.zero);
 		equals = (TextView) findViewById(R.id.equals);
 		addition = (TextView) findViewById(R.id.addition);
+		list = (TextView) findViewById(R.id.receivePayment_list);
+
 
 		calcDialogDisplay.setKeyListener(DigitsKeyListener.getInstance(true,
 				true));
 
 		initializeMensaButtons();
-		
+
 		if(isSendingMode || !Constants.IS_MENSA_MODE) {
 			disableMensaButtons();
 		}
@@ -704,10 +738,15 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		enterTotal.setText(getResources().getString(R.string.enter_total_tablet));
 		enterTotal.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				if (!calcDialogDisplay.getText().toString().contentEquals("")) {
+					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + "-----------" + " \n");
+				}
 				calcLogic(EQUALS);
 				String calculatedValues = calcDialogDisplay.getText().toString();
 				if (calculatedValues.length() == 0 || calculatedValues.contentEquals("")) {
-					calculatedValues = "0.0";
+					calculatedValues = "0.00";
+				} else {
+					list.append("= " + calculatedValues + " \n" + "===========" + " \n");
 				}
 				BigDecimal displayAmount = new BigDecimal(calculatedValues);
 				calculatedValues = displayAmount.add(mensaButtonAmount).toString();
@@ -803,6 +842,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		multiply.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " * ");
 				calcLogic(MULTIPLY);
 			}
 		});
@@ -839,6 +879,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		subtract.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " - ");
 				calcLogic(SUBTRACT);
 			}
 		});
@@ -865,27 +906,30 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		equals.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " = ");
 				calcLogic(EQUALS);
-
+				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n");
 			}
 		});
 
 		addition.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
+				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " + ");
 				calcLogic(ADD);
 			}
 		});
 	}
 
 	private void clearCalculator() {
+		list.setText("");
 		calcDialogDisplay.setText("");
 		mathVariable1 = 0;
 		mathVariable2 = 0;
 		mathVariables.removeAll(mathVariables);
 		currentOperation = 0;
 		nextOperation = 0;
-		
+
 		clearMensaButtons();
 	}
 
@@ -908,6 +952,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			if (mathVariables.size() < 2) {
 				break;
 			}
+
 			mathVariable1 = mathVariables.get(0);
 			mathVariable2 = mathVariables.get(1);
 
@@ -970,7 +1015,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				}
 			}
 		});
-		
+
 		menu_employee = (ToggleButton) findViewById(R.id.mensa_menu_employee);
 		menu_employee.setVisibility(View.VISIBLE);
 		menu_employee.setOnClickListener(new OnClickListener() {
@@ -986,7 +1031,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				}
 			}
 		});
-		
+
 		menu_external = (ToggleButton) findViewById(R.id.mensa_menu_external);
 		menu_external.setVisibility(View.VISIBLE);
 		menu_external.setOnClickListener(new OnClickListener() {
@@ -1035,7 +1080,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			}
 		});
 	}
-	
+
 	private void disableMensaButtons() {
 		menu_student.setEnabled(false);
 		menu_student.setVisibility(View.INVISIBLE);
@@ -1048,7 +1093,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		drink.setEnabled(false);
 		drink.setVisibility(View.INVISIBLE);
 	}
-	
+
 	private void clearMensaButtons(){
 		mensaButtonAmount = BigDecimal.ZERO;
 		menu_student.setChecked(false);
