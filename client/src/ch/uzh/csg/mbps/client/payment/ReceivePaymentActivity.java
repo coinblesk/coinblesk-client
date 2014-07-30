@@ -560,9 +560,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				break;
 			case SUCCESS:
 				serverResponseSuccessful = true;
-				//				Log.d(TAG, "tx was successul");
 				showSuccessDialog(object, isSendingMode);
-				//				new Thread(new TerminateLater(paymentRequestInitializer)).start();
 				if (paymentRequestInitializer != null)
 					paymentRequestInitializer.disableNfc(); 
 				break;
@@ -574,30 +572,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			}
 		}
 	};
-
-	//	private static final String TAG = "ReceivePaymentActivity";
-	//	
-	//	private class TerminateLater implements Runnable {
-	//		
-	//		private PaymentRequestInitializer initializer;
-	//		
-	//		private TerminateLater(PaymentRequestInitializer initializer) {
-	//			this.initializer = initializer;
-	//		}
-	//
-	//		public void run() {
-	//			try {
-	//				Thread.sleep(200);
-	//				if (initializer != null)
-	//					initializer.disableNfc(); 
-	//			} catch (InterruptedException e) {
-	//				// TODO Auto-generated catch block
-	//				e.printStackTrace();
-	//			}
-	//			
-	//		}
-	//		
-	//	}
 
 	/**
 	 * Launches request to send a new transaction to the server.

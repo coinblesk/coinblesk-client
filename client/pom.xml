@@ -10,8 +10,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<platform.version> 4.0.1.2
-		</platform.version>
+		<platform.version>4.0.1.2</platform.version>
 		<android.plugin.version>3.5.3</android.plugin.version>
 	</properties>
 
@@ -61,7 +60,7 @@
 		<dependency>
 			<groupId>ch.uzh.csg</groupId>
 			<artifactId>nfcpaymentlib</artifactId>
-			<version>0.1.1</version>
+			<version>0.1.2</version>
 		</dependency>
 
 		<!-- QR Code Scanner -->
