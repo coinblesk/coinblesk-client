@@ -11,7 +11,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
@@ -29,11 +28,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 import ch.uzh.csg.mbps.client.CurrencyViewHandler;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.MainActivity;
@@ -535,8 +535,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 						break;
 					case UNEXPECTED_ERROR:
 						if (!serverResponseSuccessful) {
-							//							dismissNfcInProgressDialog();
-							//							showDialog(getResources().getString(R.string.error_transaction_failed), false);
+							dismissNfcInProgressDialog();
+							showDialog(getResources().getString(R.string.error_transaction_failed), false);
 						}
 						break;
 					case INIT_FAILED:
@@ -646,11 +646,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	private TextView list;
 
-	private ToggleButton menu_student;
-	private ToggleButton menu_employee;
-	private ToggleButton menu_external;
-	private ToggleButton drink;
-	private ToggleButton coffee;
+	private Button menu_student;
+	private Button menu_employee;
+	private Button menu_external;
+	private Button drink;
+	private Button coffee;
 
 	private ArrayList<Float> mathVariables = new ArrayList<Float>();
 	private float mathVariable1;
@@ -658,6 +658,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	private int currentOperation = 0;
 	private int nextOperation;
+	private boolean wasEqualsBefore = false;
 
 	private final static int ADD = 1;
 	private final static int SUBTRACT = 2;
@@ -701,7 +702,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		initializeMensaButtons();
 
 		if(isSendingMode || !Constants.IS_MENSA_MODE) {
-			disableMensaButtons();
+			removeMensaButtons();
 		}
 
 		registerListeners();
@@ -712,19 +713,25 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		enterTotal.setText(getResources().getString(R.string.enter_total_tablet));
 		enterTotal.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (!calcDialogDisplay.getText().toString().contentEquals("")) {
+				enableMensaButtons();
+				boolean wasEqualsBeforeTmp = wasEqualsBefore;
+				if (!calcDialogDisplay.getText().toString().contentEquals("") && !wasEqualsBeforeTmp && !calcDialogDisplay.getText().toString().contentEquals("0.00")) {
 					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + "-----------" + " \n");
 				}
 				calcLogic(EQUALS);
 				String calculatedValues = calcDialogDisplay.getText().toString();
 				if (calculatedValues.length() == 0 || calculatedValues.contentEquals("")) {
 					calculatedValues = "0.00";
-				} else {
-					list.append("= " + calculatedValues + " \n" + "===========" + " \n");
-				}
+				} 
 				BigDecimal displayAmount = new BigDecimal(calculatedValues);
 				calculatedValues = displayAmount.add(mensaButtonAmount).toString();
+				
+				if(!wasEqualsBeforeTmp) {
+						list.append("= " + calculatedValues + " \n" + "===========" + " \n");
+				}
 
+				scrollDown();
+				
 				try {
 					if (Constants.inputUnit.equals(ReceivePaymentActivity.INPUT_UNIT_CHF)) {
 						Constants.inputValueCalculator = CurrencyFormatter.getBigDecimalChf(calculatedValues);
@@ -748,6 +755,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		allClear.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				enableMensaButtons();
 				clearCalculator();
 				clearPaymentInfos();
 				hideNfcInstructions();
@@ -816,8 +824,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		multiply.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " * ");
-				calcLogic(MULTIPLY);
+				try {
+					disableMensaButtons();
+					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " * ");
+					calcLogic(MULTIPLY);
+				} catch (NumberFormatException e) {
+					// do nothing
+				}
 			}
 		});
 
@@ -853,8 +866,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		subtract.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " - ");
-				calcLogic(SUBTRACT);
+				try {
+					disableMensaButtons();
+					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " - ");
+					calcLogic(SUBTRACT);
+					scrollDown();
+				} catch (NumberFormatException e) {
+					//do nothing
+				}
 			}
 		});
 
@@ -880,22 +899,50 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		equals.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " = ");
-				calcLogic(EQUALS);
-				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n");
+				try {
+					enableMensaButtons();
+					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + "-----------" + " \n" + " = ");
+					calcLogic(EQUALS);
+					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
+					value = value.add(mensaButtonAmount);
+					list.append(value.toString() + " \n" + "===========" + " \n");
+					wasEqualsBefore = true;
+					scrollDown();
+			} catch (NumberFormatException e) {
+				// do nothing
+			}
 			}
 		});
 
 		addition.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
-				list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " + ");
-				calcLogic(ADD);
+				try {
+					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n");
+					calcLogic(ADD);
+					calcDialogDisplay.setText("0.00");
+					scrollDown();
+				} catch (NumberFormatException e) {
+					//do nothing
+				}
 			}
 		});
 	}
+	
+	/**
+	 * Scrolls List TextView down to the bottom when adding text to TextView.
+	 */
+	private void scrollDown() {
+		final ScrollView scroller = (ScrollView) findViewById(R.id.receivePayment_listScrollView);
+		scroller.post(new Runnable() { 
+		    public void run() { 
+		        scroller.fullScroll(ScrollView.FOCUS_DOWN); 
+		    } 
+		}); 
+	}
 
 	private void clearCalculator() {
+		mensaButtonAmount = BigDecimal.ZERO;
 		list.setText("");
 		calcDialogDisplay.setText("");
 		mathVariable1 = 0;
@@ -904,7 +951,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		currentOperation = 0;
 		nextOperation = 0;
 
-		clearMensaButtons();
 	}
 
 	private void calcLogic(int operator) {
@@ -971,91 +1017,64 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			mathVariable2 = 0;
 			mathVariables.removeAll(mathVariables);
 		}
+		wasEqualsBefore = false;
+	}
+	
+	private void addMensaButtonAmount(String amount) {
+		try {
+			BigDecimal value = new BigDecimal(amount);
+			mensaButtonAmount = mensaButtonAmount.add(value);
+			list.append(value.toString() + " \n");
+			wasEqualsBefore = false;
+			scrollDown();
+		} catch (NumberFormatException e) {
+			//do nothing
+		}
 	}
 
 	private void initializeMensaButtons() {
-		menu_student = (ToggleButton) findViewById(R.id.mensa_menu_student);
+		menu_student = (Button) findViewById(R.id.mensa_menu_student);
 		menu_student.setVisibility(View.VISIBLE);
 		menu_student.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (menu_student.isChecked()) {
-					menu_student.setTextColor(Color.CYAN);
-					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
-							"5.40"));
-				} else {
-					menu_student.setTextColor(Color.BLACK);
-					mensaButtonAmount = mensaButtonAmount
-							.subtract(new BigDecimal("5.40"));
+					addMensaButtonAmount("5.40");
 				}
-			}
 		});
 
-		menu_employee = (ToggleButton) findViewById(R.id.mensa_menu_employee);
+		menu_employee = (Button) findViewById(R.id.mensa_menu_employee);
 		menu_employee.setVisibility(View.VISIBLE);
 		menu_employee.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (menu_employee.isChecked()) {
-					menu_employee.setTextColor(Color.CYAN);
-					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
-							"7.00"));
-				} else {
-					menu_employee.setTextColor(Color.BLACK);
-					mensaButtonAmount = mensaButtonAmount
-							.subtract(new BigDecimal("7.00"));
-				}
+					addMensaButtonAmount("7.00");
 			}
 		});
 
-		menu_external = (ToggleButton) findViewById(R.id.mensa_menu_external);
+		menu_external = (Button) findViewById(R.id.mensa_menu_external);
 		menu_external.setVisibility(View.VISIBLE);
 		menu_external.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (menu_external.isChecked()) {
-					menu_external.setTextColor(Color.CYAN);
-					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
-							"10.50"));
-				} else {
-					menu_external.setTextColor(Color.BLACK);
-					mensaButtonAmount = mensaButtonAmount
-							.subtract(new BigDecimal("10.50"));
-				}
+					addMensaButtonAmount("10.50");
 			}
 		});
 
-		drink = (ToggleButton) findViewById(R.id.mensa_drink);
+		drink = (Button) findViewById(R.id.mensa_drink);
 		drink.setVisibility(View.VISIBLE);
 		drink.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (drink.isChecked()) {
-					drink.setTextColor(Color.CYAN);
-					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
-							"2.30"));
-				} else {
-					drink.setTextColor(Color.BLACK);
-					mensaButtonAmount = mensaButtonAmount
-							.subtract(new BigDecimal("2.30"));
-				}
+					addMensaButtonAmount("2.30");
 			}
 		});
 
-		coffee = (ToggleButton) findViewById(R.id.mensa_coffe);
+		coffee = (Button) findViewById(R.id.mensa_coffe);
 		coffee.setVisibility(View.VISIBLE);
 		coffee.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (coffee.isChecked()) {
-					coffee.setTextColor(Color.CYAN);
-					mensaButtonAmount = mensaButtonAmount.add(new BigDecimal(
-							"1.50"));
-				} else {
-					coffee.setTextColor(Color.BLACK);
-					mensaButtonAmount = mensaButtonAmount
-							.subtract(new BigDecimal("1.50"));
-				}
+					addMensaButtonAmount("1.50");
 			}
 		});
 	}
 
-	private void disableMensaButtons() {
+	private void removeMensaButtons() {
 		menu_student.setEnabled(false);
 		menu_student.setVisibility(View.INVISIBLE);
 		menu_employee.setEnabled(false);
@@ -1067,18 +1086,24 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		drink.setEnabled(false);
 		drink.setVisibility(View.INVISIBLE);
 	}
+	
+	private void disableMensaButtons() {
+		if(Constants.IS_MENSA_MODE){
+			menu_student.setEnabled(false);
+			menu_employee.setEnabled(false);
+			menu_external.setEnabled(false);
+			coffee.setEnabled(false);
+			drink.setEnabled(false);
+		}
+	}
 
-	private void clearMensaButtons(){
-		mensaButtonAmount = BigDecimal.ZERO;
-		menu_student.setChecked(false);
-		menu_student.setTextColor(Color.BLACK);
-		menu_employee.setChecked(false);
-		menu_employee.setTextColor(Color.BLACK);
-		menu_external.setChecked(false);
-		menu_external.setTextColor(Color.BLACK);
-		coffee.setChecked(false);
-		coffee.setTextColor(Color.BLACK);
-		drink.setChecked(false);
-		drink.setTextColor(Color.BLACK);
+	private void enableMensaButtons() {
+		if (Constants.IS_MENSA_MODE) {
+			menu_student.setEnabled(true);
+			menu_employee.setEnabled(true);
+			menu_external.setEnabled(true);
+			coffee.setEnabled(true);
+			drink.setEnabled(true);
+		}
 	}
 }

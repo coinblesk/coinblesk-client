@@ -1,4 +1,4 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,10 +7,6 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ReceivePaymentActivity" >
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
 
         <TextView
             android:id="@+id/receivePayment_title"
@@ -330,65 +326,65 @@
             android:layout_toRightOf="@+id/receivePayment_numPadLayout"
             android:gravity="center" >
             
+            <ScrollView
+                android:id="@+id/receivePayment_listScrollView"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true" 
+                android:layout_height="300dp"
+                android:layout_width="180dp">
                <TextView
                 android:id="@+id/receivePayment_list"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
                 android:textSize="@dimen/calc_dialog_text_size"
-                android:layout_alignParentTop="true"
                 android:layout_marginLeft="48dp" />
+            </ScrollView>
 
-            <ToggleButton
+            <Button
                 android:id="@+id/mensa_menu_student"
                 android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
-                android:layout_toRightOf="@+id/receivePayment_list"
-                android:textOff="Menü 5.40"
-                android:textOn="Menü 5.40"
+                android:layout_toRightOf="@id/receivePayment_listScrollView"
+                android:text="Menü 5.40"
                 android:textSize="@dimen/calc_dialog_text_size" 
                 android:visibility="invisible"/>
             
-             <ToggleButton
+             <Button
                 android:id="@+id/mensa_menu_employee"
                 android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
                 android:layout_below="@+id/mensa_menu_student"
                 android:layout_alignLeft="@+id/mensa_menu_student"
-                android:textOff="Menü 7.00"
-                android:textOn="Menü 7.00"
+                android:text="Menü 7.00"
                 android:visibility="invisible"
                 android:textSize="@dimen/calc_dialog_text_size" />
              
-              <ToggleButton
+              <Button
                 android:id="@+id/mensa_menu_external"
                 android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
                 android:layout_below="@+id/mensa_menu_employee"
                 android:layout_alignLeft="@+id/mensa_menu_student"
-                android:textOff="Menü 10.50"
-                android:textOn="Menü 10.50"
+                android:text="Menü 10.50"
                 android:visibility="invisible"
                 android:textSize="@dimen/calc_dialog_text_size" />
 
-            <ToggleButton
+            <Button
                 android:id="@+id/mensa_coffe"
                 android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
                 android:layout_toRightOf="@+id/mensa_menu_student"
-                android:textOff="Kaffee 1.50"
-                android:textOn="Kaffee 1.50"
+                android:text="Kaffee 1.50"
                 android:visibility="invisible"
                 android:textSize="@dimen/calc_dialog_text_size" />
 
-            <ToggleButton
+            <Button
                 android:id="@+id/mensa_drink"
                 android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
                 android:layout_below="@+id/mensa_coffe"
                 android:layout_alignLeft="@+id/mensa_coffe"
-                android:textOff="Getränk 2.30"
-                android:textOn="Getränk 2.30"
+                android:text="Getränk 2.30"
                 android:visibility="invisible"
                 android:textSize="@dimen/calc_dialog_text_size" />
 
@@ -398,5 +394,3 @@
 
 
     </RelativeLayout>
-
-</ScrollView>
