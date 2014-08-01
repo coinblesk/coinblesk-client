@@ -70,7 +70,7 @@ import ch.uzh.csg.paymentlib.messages.PaymentError;
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
  */
 public class ReceivePaymentActivity extends AbstractPaymentActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
-	private String[] strings = { "CHF", "BTC" };
+	private String[] strings = { "CHF", "Rp", "BTC" };
 	protected CalculatorDialog newFragment;
 	protected static BigDecimal amountBTC = BigDecimal.ZERO;
 	protected static BigDecimal inputUnitValue = BigDecimal.ZERO;
@@ -122,6 +122,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		spinner.setAdapter(new MyAdapter(this, R.layout.spinner_currency, strings));
 		spinner.setOnItemSelectedListener(spinnerListener);
 		spinner.setSelection(0);
+		if(Constants.IS_MENSA_MODE) {
+			isRpInputMode = true;
+			spinner.setSelection(1);
+		}
 
 		refreshCurrencyTextViews();
 
@@ -447,10 +451,21 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
 
 		public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-			if (pos == 0)
+			if (pos == 0) {
 				Constants.inputUnit = INPUT_UNIT_CHF;
-			else
+				isRpInputMode = false;
+				adaptCalculatorToRpMode();
+			}
+			else if (pos == 1) {
+				Constants.inputUnit = INPUT_UNIT_CHF;
+				isRpInputMode = true;
+				adaptCalculatorToRpMode();
+				
+			} else {
 				Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
+				isRpInputMode = false;
+				adaptCalculatorToRpMode();
+			}
 
 			if(isPortrait) {
 				descriptionOfInputUnit.setText(Constants.inputUnit);
@@ -659,6 +674,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private int currentOperation = 0;
 	private int nextOperation;
 	private boolean wasEqualsBefore = false;
+	private boolean isRpInputMode = false;
 
 	private final static int ADD = 1;
 	private final static int SUBTRACT = 2;
@@ -704,8 +720,17 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		if(isSendingMode || !Constants.IS_MENSA_MODE) {
 			removeMensaButtons();
 		}
+		
+		adaptCalculatorToRpMode();
 
 		registerListeners();
+	}
+	
+	private void adaptCalculatorToRpMode(){
+		if(isRpInputMode)
+			decimal.setText("00");
+		else
+			decimal.setText(".");
 	}
 
 	private void registerListeners() {
@@ -716,7 +741,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 				enableMensaButtons();
 				boolean wasEqualsBeforeTmp = wasEqualsBefore;
 				if (!calcDialogDisplay.getText().toString().contentEquals("") && !wasEqualsBeforeTmp && !calcDialogDisplay.getText().toString().contentEquals("0.00")) {
-					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + "-----------" + " \n");
+					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
+					if(isRpInputMode) 
+						value = value.divide(new BigDecimal("100"));
+					list.append(value.toPlainString() + " \n" + "-----------" + " \n");
 				}
 				calcLogic(EQUALS);
 				String calculatedValues = calcDialogDisplay.getText().toString();
@@ -724,6 +752,12 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					calculatedValues = "0.00";
 				} 
 				BigDecimal displayAmount = new BigDecimal(calculatedValues);
+				
+				if (isRpInputMode) {
+					displayAmount = displayAmount.divide(new BigDecimal(100));
+				}
+				
+				
 				calculatedValues = displayAmount.add(mensaButtonAmount).toString();
 				
 				if(!wasEqualsBeforeTmp) {
@@ -826,7 +860,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			public void onClick(View v) {
 				try {
 					disableMensaButtons();
-					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " * ");
+					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
+					if(isRpInputMode) {
+						value = value.divide(new BigDecimal(100));
+					}
+					list.append(value.toString() + " \n" + " * ");
 					calcLogic(MULTIPLY);
 				} catch (NumberFormatException e) {
 					// do nothing
@@ -868,7 +906,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			public void onClick(View v) {
 				try {
 					disableMensaButtons();
-					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + " - ");
+					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
+					if(isRpInputMode) {
+						value = value.divide(new BigDecimal(100));
+					}
+					list.append(value.toString() + " \n" + " - ");
 					calcLogic(SUBTRACT);
 					scrollDown();
 				} catch (NumberFormatException e) {
@@ -879,11 +921,15 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		decimal.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (clearCalcDisplay == CLEAR) {
-					calcDialogDisplay.setText("");
+				if(!isRpInputMode) {
+					if (clearCalcDisplay == CLEAR) {
+						calcDialogDisplay.setText("");
+					}
+					clearCalcDisplay = DONT_CLEAR;
+					calcDialogDisplay.append(".");
+				} else {
+					calcDialogDisplay.append("00");
 				}
-				clearCalcDisplay = DONT_CLEAR;
-				calcDialogDisplay.append(".");
 			}
 		});
 
@@ -901,11 +947,18 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			public void onClick(View v) {
 				try {
 					enableMensaButtons();
-					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n" + "-----------" + " \n" + " = ");
-					calcLogic(EQUALS);
 					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
-					value = value.add(mensaButtonAmount);
-					list.append(value.toString() + " \n" + "===========" + " \n");
+					if(isRpInputMode) {
+						value = value.divide(new BigDecimal(100));
+					}
+					list.append(value.toString() + " \n" + "-----------" + " \n" + " = ");
+					calcLogic(EQUALS);
+					BigDecimal value2 = new BigDecimal(calcDialogDisplay.getText().toString());
+					if(isRpInputMode) {
+						value2 = value2.divide(new BigDecimal(100));
+					}
+					value2 = value2.add(mensaButtonAmount);
+					list.append(value2.toString() + " \n" + "===========" + " \n");
 					wasEqualsBefore = true;
 					scrollDown();
 			} catch (NumberFormatException e) {
@@ -918,7 +971,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 			public void onClick(View v) {
 				try {
-					list.append(new BigDecimal(calcDialogDisplay.getText().toString()).toString() + " \n");
+					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
+					if(isRpInputMode) {
+						value = value.divide(new BigDecimal(100));
+					}
+					list.append(value.toPlainString() + " \n");
 					calcLogic(ADD);
 					calcDialogDisplay.setText("0.00");
 					scrollDown();
