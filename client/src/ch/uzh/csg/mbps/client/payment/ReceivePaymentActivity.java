@@ -387,6 +387,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			paymentRequestInitializer.disable();
 			paymentRequestInitializer = null;
 		}
+		hideNfcInstructions();
 		receiveAmount = "0";
 		if (isPortrait) {
 			receiveAmountEditText.setText(receiveAmount);
@@ -638,7 +639,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		showDialog(answer, true);
 	}
 
-	//Tablet View, define more or adapt here and in sw720dp\activity_receive_payment toggle buttons for quickly entering fixed prices as in shops etc.
+	//Tablet View, define more or adapt buttons for quickly entering fixed prices as in shops etc. here and in sw720dp\activity_receive_payment 
 
 	private EditText calcDialogDisplay;
 	private TextView enterTotal;
@@ -789,15 +790,16 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		allClear.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				enableMensaButtons();
 				clearCalculator();
 				clearPaymentInfos();
-				hideNfcInstructions();
 			}
 		});
 
 		seven.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR)
 					calcDialogDisplay.setText("");
 
@@ -808,6 +810,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		eight.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR)
 					calcDialogDisplay.setText("");
 
@@ -818,6 +821,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		nine.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR)
 					calcDialogDisplay.setText("");
 
@@ -828,6 +832,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		four.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR) {
 					calcDialogDisplay.setText("");
 				}
@@ -838,6 +843,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		five.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR) {
 					calcDialogDisplay.setText("");
 				}
@@ -848,6 +854,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		six.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR) {
 					calcDialogDisplay.setText("");
 				}
@@ -858,6 +865,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		multiply.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				try {
 					disableMensaButtons();
 					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
@@ -874,6 +882,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		one.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR) {
 					calcDialogDisplay.setText("");
 				}
@@ -884,6 +893,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		two.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR) {
 					calcDialogDisplay.setText("");
 				}
@@ -894,6 +904,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		three.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR) {
 					calcDialogDisplay.setText("");
 				}
@@ -905,6 +916,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		subtract.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				try {
+					resetNfc();
 					disableMensaButtons();
 					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
 					if(isRpInputMode) {
@@ -921,6 +933,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		decimal.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if(!isRpInputMode) {
 					if (clearCalcDisplay == CLEAR) {
 						calcDialogDisplay.setText("");
@@ -935,6 +948,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		zero.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				resetNfc();
 				if (clearCalcDisplay == CLEAR) {
 					calcDialogDisplay.setText("");
 				}
@@ -946,6 +960,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		equals.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				try {
+					resetNfc();
 					enableMensaButtons();
 					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
 					if(isRpInputMode) {
@@ -971,6 +986,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 			public void onClick(View v) {
 				try {
+					resetNfc();
 					BigDecimal value = new BigDecimal(calcDialogDisplay.getText().toString());
 					if(isRpInputMode) {
 						value = value.divide(new BigDecimal(100));
@@ -1094,7 +1110,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		menu_student.setVisibility(View.VISIBLE);
 		menu_student.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-					addMensaButtonAmount("5.40");
+				resetNfc();
+				addMensaButtonAmount("5.40");
 				}
 		});
 
@@ -1102,7 +1119,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		menu_employee.setVisibility(View.VISIBLE);
 		menu_employee.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-					addMensaButtonAmount("7.00");
+				resetNfc();
+				addMensaButtonAmount("7.00");
 			}
 		});
 
@@ -1110,7 +1128,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		menu_external.setVisibility(View.VISIBLE);
 		menu_external.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-					addMensaButtonAmount("10.50");
+				resetNfc();
+				addMensaButtonAmount("10.50");
 			}
 		});
 
@@ -1118,7 +1137,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		drink.setVisibility(View.VISIBLE);
 		drink.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-					addMensaButtonAmount("2.30");
+				resetNfc();
+				addMensaButtonAmount("2.30");
 			}
 		});
 
@@ -1126,7 +1146,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		coffee.setVisibility(View.VISIBLE);
 		coffee.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-					addMensaButtonAmount("1.50");
+				resetNfc();
+				addMensaButtonAmount("1.50");
 			}
 		});
 	}
@@ -1161,6 +1182,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			menu_external.setEnabled(true);
 			coffee.setEnabled(true);
 			drink.setEnabled(true);
+		}
+	}
+	
+	private void resetNfc() {
+		if (paymentRequestInitializer != null){
+			paymentRequestInitializer.disable();
+			paymentRequestInitializer = null;
+			hideNfcInstructions();
 		}
 	}
 }
