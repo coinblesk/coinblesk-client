@@ -70,7 +70,10 @@ import ch.uzh.csg.paymentlib.messages.PaymentError;
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
  */
 public class ReceivePaymentActivity extends AbstractPaymentActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
-	private String[] strings = { "CHF", "Rp", "BTC" };
+	private String[] strings;
+	private String[] stringsNormal = { "CHF", "BTC" };
+	private String[] stringsTablet = { "CHF", "Rp", "BTC" };
+
 	protected CalculatorDialog newFragment;
 	protected static BigDecimal amountBTC = BigDecimal.ZERO;
 	protected static BigDecimal inputUnitValue = BigDecimal.ZERO;
@@ -107,7 +110,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		setScreenOrientation();
 		if (getResources().getBoolean(R.bool.portrait_only)) {
 			isPortrait = true;
+			strings = stringsNormal;
 		} else {
+			strings = stringsTablet;
 			isPortrait = false;
 		}
 
@@ -122,7 +127,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		spinner.setAdapter(new MyAdapter(this, R.layout.spinner_currency, strings));
 		spinner.setOnItemSelectedListener(spinnerListener);
 		spinner.setSelection(0);
-		if(Constants.IS_MENSA_MODE) {
+		if(Constants.IS_MENSA_MODE && !isPortrait) {
 			isRpInputMode = true;
 			spinner.setSelection(1);
 		}
@@ -452,20 +457,33 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	private OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
 
 		public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-			if (pos == 0) {
-				Constants.inputUnit = INPUT_UNIT_CHF;
-				isRpInputMode = false;
-				adaptCalculatorToRpMode();
-			}
-			else if (pos == 1) {
-				Constants.inputUnit = INPUT_UNIT_CHF;
-				isRpInputMode = true;
-				adaptCalculatorToRpMode();
-				
+			if(isPortrait){
+				if (pos == 0) {
+					Constants.inputUnit = INPUT_UNIT_CHF;
+					isRpInputMode = false;
+					adaptCalculatorToRpMode();
+				} else {
+					Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
+					isRpInputMode = false;
+					adaptCalculatorToRpMode();
+				}
 			} else {
-				Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
-				isRpInputMode = false;
-				adaptCalculatorToRpMode();
+				if (pos == 0) {
+					Constants.inputUnit = INPUT_UNIT_CHF;
+					isRpInputMode = false;
+					adaptCalculatorToRpMode();
+				}
+				else if (pos == 1) {
+					Constants.inputUnit = INPUT_UNIT_CHF;
+					isRpInputMode = true;
+					adaptCalculatorToRpMode();
+
+				} else {
+					Constants.inputUnit = CurrencyViewHandler.getBitcoinUnit(getApplicationContext());
+					isRpInputMode = false;
+					adaptCalculatorToRpMode();
+					disableMensaButtons();
+				}
 			}
 
 			if(isPortrait) {
@@ -721,17 +739,19 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		if(isSendingMode || !Constants.IS_MENSA_MODE) {
 			removeMensaButtons();
 		}
-		
+
 		adaptCalculatorToRpMode();
 
 		registerListeners();
 	}
-	
+
 	private void adaptCalculatorToRpMode(){
-		if(isRpInputMode)
-			decimal.setText("00");
-		else
-			decimal.setText(".");
+		if(!isPortrait) {
+			if(isRpInputMode)
+				decimal.setText("00");
+			else
+				decimal.setText(".");
+		}
 	}
 
 	private void registerListeners() {
@@ -753,20 +773,20 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					calculatedValues = "0.00";
 				} 
 				BigDecimal displayAmount = new BigDecimal(calculatedValues);
-				
+
 				if (isRpInputMode) {
 					displayAmount = displayAmount.divide(new BigDecimal(100));
 				}
-				
-				
+
+
 				calculatedValues = displayAmount.add(mensaButtonAmount).toString();
-				
+
 				if(!wasEqualsBeforeTmp) {
-						list.append("= " + calculatedValues + " \n" + "===========" + " \n");
+					list.append("= " + calculatedValues + " \n" + "===========" + " \n");
 				}
 
 				scrollDown();
-				
+
 				try {
 					if (Constants.inputUnit.equals(ReceivePaymentActivity.INPUT_UNIT_CHF)) {
 						Constants.inputValueCalculator = CurrencyFormatter.getBigDecimalChf(calculatedValues);
@@ -976,9 +996,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 					list.append(value2.toString() + " \n" + "===========" + " \n");
 					wasEqualsBefore = true;
 					scrollDown();
-			} catch (NumberFormatException e) {
-				// do nothing
-			}
+				} catch (NumberFormatException e) {
+					// do nothing
+				}
 			}
 		});
 
@@ -1001,16 +1021,16 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			}
 		});
 	}
-	
+
 	/**
 	 * Scrolls List TextView down to the bottom when adding text to TextView.
 	 */
 	private void scrollDown() {
 		final ScrollView scroller = (ScrollView) findViewById(R.id.receivePayment_listScrollView);
 		scroller.post(new Runnable() { 
-		    public void run() { 
-		        scroller.fullScroll(ScrollView.FOCUS_DOWN); 
-		    } 
+			public void run() { 
+				scroller.fullScroll(ScrollView.FOCUS_DOWN); 
+			} 
 		}); 
 	}
 
@@ -1092,7 +1112,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		}
 		wasEqualsBefore = false;
 	}
-	
+
 	private void addMensaButtonAmount(String amount) {
 		try {
 			BigDecimal value = new BigDecimal(amount);
@@ -1112,7 +1132,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			public void onClick(View v) {
 				resetNfc();
 				addMensaButtonAmount("5.40");
-				}
+			}
 		});
 
 		menu_employee = (Button) findViewById(R.id.mensa_menu_employee);
@@ -1164,7 +1184,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		drink.setEnabled(false);
 		drink.setVisibility(View.INVISIBLE);
 	}
-	
+
 	private void disableMensaButtons() {
 		if(Constants.IS_MENSA_MODE){
 			menu_student.setEnabled(false);
@@ -1184,7 +1204,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 			drink.setEnabled(true);
 		}
 	}
-	
+
 	private void resetNfc() {
 		if (paymentRequestInitializer != null){
 			paymentRequestInitializer.disable();
