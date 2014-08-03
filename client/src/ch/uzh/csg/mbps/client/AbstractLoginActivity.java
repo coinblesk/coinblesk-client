@@ -172,11 +172,13 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 	 * @param context (application context)
 	 */
 	public void onTaskComplete(CustomResponseObject response, Context context) {
+		boolean wrongPassword = false;
 		if (!clientControllerInitialized) {
 			try {
 				boolean init = ClientController.init(context, username, password);
 				clientControllerInitialized = init;
 			} catch (WrongPasswordException e) {
+				wrongPassword = true;
 				displayResponse(context.getResources().getString(R.string.invalid_password));
 				clientControllerInitialized = false;
 			}
@@ -236,7 +238,8 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 			launchOfflineMode(context);
 		} else if (response.getMessage().equals("UNAUTHORIZED")) {
 			dismissProgressDialog();
-			displayResponse(getResources().getString(R.string.error_login));
+			if (!wrongPassword)
+				displayResponse(getResources().getString(R.string.error_login));
 		} else {
 			dismissProgressDialog();
 			displayResponse(response.getMessage());
