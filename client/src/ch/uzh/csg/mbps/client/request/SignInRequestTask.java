@@ -51,7 +51,7 @@ public class SignInRequestTask extends RequestTask {
 		} catch (RestClientException e) {
 			if (e instanceof HttpClientErrorException) {
 				if (((HttpClientErrorException) e).getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-					return new CustomResponseObject(false, "Invalid username or password!", Type.LOGIN);
+					return new CustomResponseObject(false, "UNAUTHORIZED", Type.LOGIN);
 				}
 			}
 		}

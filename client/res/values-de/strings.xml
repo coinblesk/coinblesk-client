@@ -53,8 +53,8 @@
     <string name="registration_username_error">Benutzername ungültig. \nNur Buchstaben und Nummern mit minimal 4 Zeichen sind erlaubt.</string>
     <string name="registration_tou_not_accepted">Bitte lesen und akzeptieren Sie die AGB.</string>
     <string name="registration_password_not_equal">Passwörter stimmen nicht überein. Bitte erneut versuchen.</string>
-   
-    <string name="registration_successful">Ihr Konto wurde erfolgreich erstellt. Bitte prüfen Sie ihre Emails um ihr Konto zu aktivieren. Ohne Aktivierung können Sie sich nicht anmelden.</string>
+    <string name="registration_successful"> Bitte prüfen Sie ihre Emails um ihr Konto zu aktivieren. Ihr Konto wurde erfolgreich erstellt. Ohne Aktivierung können Sie sich nicht anmelden.</string>
+    
     <!-- Popup Window -->
     <string name="termOfUseTitleView">Allgemeine Geschäfts- und Nutzungsbedingungen</string>
     <string name="termOfUseTextView">Diese Applikation wurde als Teil eines Masterprojektes am Institut für Informatik an der 
@@ -347,6 +347,7 @@
     <string name="unexcepted_error">Ein unerwarteter Fehler trat auf. Bitte versuchen Sie es erneut.</string>
     <string name="transaction_server_rejected">Die Transaktion wurde vom Server zurückgewiesen. Bitte versuchen Sie es erneut.</string>
     <string name="error_nfc_initializing">Fehler bei Initialisierung von NFC. Zahlungen können eventuell nicht durchgeführt werden.</string>
+    <string name="error_login">Falscher Benutzername, falsches Passwort oder Emailadresse wurde nicht verifiziert.</string>
     
     <!-- NFC Activation -->
     <string name="nfc_enable_title">NFC Information</string>

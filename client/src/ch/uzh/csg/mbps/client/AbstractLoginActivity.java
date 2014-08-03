@@ -234,6 +234,9 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 			dismissProgressDialog();
 			displayResponse(getResources().getString(R.string.no_connection_server));
 			launchOfflineMode(context);
+		} else if (response.getMessage().equals("UNAUTHORIZED")) {
+			dismissProgressDialog();
+			displayResponse(getResources().getString(R.string.error_login));
 		} else {
 			dismissProgressDialog();
 			displayResponse(response.getMessage());
