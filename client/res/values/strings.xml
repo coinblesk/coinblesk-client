@@ -347,6 +347,7 @@
     <string name="session_expired">Session expired!</string>
     <string name="unexcepted_error">An unexpected error occurred. Please try again</string>
     <string name="transaction_server_rejected">The server rejected the transaction. Please try again.</string>
+    <string name="transaction_server_rejected_balance">The server rejected the transaction. Payer has insufficient funds.</string>
     <string name="error_nfc_initializing">Error occurred while preparing for NFC Payments. Payments eventually can\'t be done properly.</string>
      <string name="error_login">Wrong username, wrong password or unverified email address.</string>
      

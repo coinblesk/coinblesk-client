@@ -346,6 +346,7 @@
     <string name="session_expired">Session ist abgelaufen!</string>
     <string name="unexcepted_error">Ein unerwarteter Fehler trat auf. Bitte versuchen Sie es erneut.</string>
     <string name="transaction_server_rejected">Die Transaktion wurde vom Server zurückgewiesen. Bitte versuchen Sie es erneut.</string>
+    <string name="transaction_server_rejected_balance">Die Transaktion wurde vom Server zurückgewiesen. Käufer hat ungenügende Kontendeckung.</string>
     <string name="error_nfc_initializing">Fehler bei Initialisierung von NFC. Zahlungen können eventuell nicht durchgeführt werden.</string>
     <string name="error_login">Falscher Benutzername, falsches Passwort oder Emailadresse wurde nicht verifiziert.</string>
     
