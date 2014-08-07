@@ -216,7 +216,9 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 			String result = scanResult.getContents();
 			try {
 				if (result.substring(0, 8).equalsIgnoreCase("bitcoin:")){
-					String btcAddress = result.substring(8, 42);
+					String addressAndMore = result.substring(8);
+					String[] resultArray = addressAndMore.split("\\?");
+					String btcAddress = resultArray[0];
 					payoutAddress.setText(btcAddress);
 				}
 			} catch (Exception e) {
