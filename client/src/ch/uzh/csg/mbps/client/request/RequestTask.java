@@ -1,13 +1,21 @@
 package ch.uzh.csg.mbps.client.request;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minidev.json.JSONObject;
+
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 
 import android.os.AsyncTask;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
+import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
 import ch.uzh.csg.mbps.client.servercomm.CustomRestTemplate;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
@@ -44,10 +52,11 @@ public abstract class RequestTask extends AsyncTask<Void, Void, CustomResponseOb
 		
 		CustomRestTemplate restTemplate = new CustomRestTemplate();
 		//Create a list for the message converters
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		//List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 		//Add the Jackson Message converter
-		messageConverters.add(new MappingJacksonHttpMessageConverter());
-		restTemplate.setMessageConverters(messageConverters);
+		//messageConverters.add(new MappingJacksonHttpMessageConverter());
+		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+		//restTemplate.setMessageConverters(messageConverters);
 		
 		return responseService(restTemplate);
 	}
@@ -77,4 +86,13 @@ public abstract class RequestTask extends AsyncTask<Void, Void, CustomResponseOb
 	 */
 	protected abstract CustomResponseObject responseService(CustomRestTemplate restTemplate);
 	
+	public HttpPost createPost(String url, JSONObject jsonObject) throws UnsupportedEncodingException {
+		HttpPost post = new HttpPost(url);
+        post.addHeader(CookieHandler.COOKIE_STRING, CookieHandler.JSESSIONID_STRING + CookieHandler.getCookie());
+        post.addHeader("Content-Type", "application/json;charset=UTF-8");
+        post.addHeader("Accept", "application/json");
+        StringEntity userEntity = new StringEntity(jsonObject.toString(), "UTF-8");
+        post.setEntity(userEntity);
+        return post;
+	}
 }

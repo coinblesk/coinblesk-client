@@ -19,9 +19,9 @@ import ch.uzh.csg.mbps.responseobject.PayOutRulesTransferObject;
  * appropriate HTTPHeaders containing the header and the needed HTTPEntity.
  */
 public class CookieHandler {
-	private static final String COOKIE_STRING = "Cookie";
-	private static final String JSESSIONID_STRING = "JSESSIONID=";
-	private static final String SET_COOKIE_STRING = "Set-Cookie";
+	public static final String COOKIE_STRING = "Cookie";
+	public static final String JSESSIONID_STRING = "JSESSIONID=";
+	public static final String SET_COOKIE_STRING = "Set-Cookie";
 	
 	private static String COOKIE;
 	

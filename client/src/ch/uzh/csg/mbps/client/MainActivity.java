@@ -6,6 +6,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import android.app.ActionBar;
 import android.content.Context;
@@ -273,9 +274,9 @@ public class MainActivity extends AbstractPaymentActivity implements IAsyncTaskC
 	 * @return ArrayList<AbstractHistory>
 	 */
 	private ArrayList<AbstractHistory> extractLastFewTransactions(GetHistoryTransferObject hto) {
-		ArrayList<HistoryTransaction> transactionHistory = hto.getTransactionHistory();
-		ArrayList<HistoryPayInTransaction> payInTransactionHistory = hto.getPayInTransactionHistory();
-		ArrayList<HistoryPayOutTransaction> payOutTransactionHistory = hto.getPayOutTransactionHistory();
+		List<HistoryTransaction> transactionHistory = hto.getTransactionHistory();
+		List<HistoryPayInTransaction> payInTransactionHistory = hto.getPayInTransactionHistory();
+		List<HistoryPayOutTransaction> payOutTransactionHistory = hto.getPayOutTransactionHistory();
 
 		ArrayList<AbstractHistory> history = new ArrayList<AbstractHistory>();
 		history.addAll(transactionHistory);

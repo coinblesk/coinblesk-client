@@ -215,6 +215,10 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity implem
 					} catch (Exception e) {
 						displayResponse(context.getResources().getString(R.string.error_xmlSave_failed));
 					}
+				} else if (response.getMessage() == null) {
+					customKeyPair = ckp;
+					launchCommitKeyRequest(ckp);
+					return;
 				}
 				ClientController.setOnlineMode(true);
 				launchMainActivity(context);
