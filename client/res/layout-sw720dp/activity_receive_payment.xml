@@ -89,7 +89,8 @@
             android:id="@+id/receivePayment_BTCIncFee"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/receivePayment_amount"
+            android:layout_below="@+id/receivePayment_amount"
+            android:layout_marginLeft="5dp"
             android:layout_toRightOf="@+id/receivePayment_amount" />
 
         <TextView
@@ -107,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/receivePayment_currencySpinner"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:gravity="center" >
 
             <LinearLayout
