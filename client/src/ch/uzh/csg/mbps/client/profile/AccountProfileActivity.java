@@ -99,6 +99,7 @@ public class AccountProfileActivity extends AbstractAsyncActivity {
 		showLoadingProgressDialog();
 		RequestTask<TransferObject, TransferObject> delete = new DeleteRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 			public void onTaskComplete(TransferObject response) {
+				dismissProgressDialog();
 				if (response.isSuccessful()) {
 					ClientController.clear();
 					launchActivity();
@@ -106,7 +107,6 @@ public class AccountProfileActivity extends AbstractAsyncActivity {
 					reload(getIntent());
 					invalidateOptionsMenu();
 				}
-				dismissProgressDialog();
 				displayResponse(response.getMessage());
             }
 		}

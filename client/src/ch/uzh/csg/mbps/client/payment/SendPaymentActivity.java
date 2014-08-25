@@ -190,6 +190,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 			showLoadingProgressDialog();
 			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 				public void onTaskComplete(TransferObject response) {
+					dismissProgressDialog();
 					if (!response.isSuccessful()) {
 						displayResponse(response.getMessage());
 						return;
@@ -231,6 +232,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 			
 			RequestTask<TransactionObject, TransactionObject> transactionRequest = new TransactionRequestTask(new IAsyncTaskCompleteListener<TransactionObject>() {
 				public void onTaskComplete(TransactionObject response) {
+					dismissProgressDialog();
 					if (!response.isSuccessful()) {
 						displayResponse(response.getMessage());
 						return;
@@ -243,6 +245,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 	}
 	
 	private void onTaskCompletTransaction(byte[] serverPaymentResponseBytes) {
+		dismissProgressDialog();
 		if(ClientController.isOnline()){
 			startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 		}
@@ -284,8 +287,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 			showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, paymentResponsePayer.getReason());
 		}
 	}
-
-	
 
 	private void refreshCurrencyTextViews() {
 		amountBTC = BigDecimal.ZERO;
@@ -398,7 +399,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 				dialog.show(getFragmentManager(), "sendPaymentActivity");
 			}
 		});
-
 	}
 
 	private void showConfirmationDialog() {

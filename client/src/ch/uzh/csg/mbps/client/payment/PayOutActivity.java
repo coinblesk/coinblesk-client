@@ -148,6 +148,7 @@ public class PayOutActivity extends AbstractAsyncActivity {
 			RequestTask payOut = new PayOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 
 				public void onTaskComplete(TransferObject response) {
+					dismissProgressDialog();
 					String message = String.format(getResources().getString(R.string.payOut_successful), response.getMessage());
 					showDialog(getResources().getString(R.string.title_activity_pay_out), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), message);
 					BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
@@ -188,6 +189,7 @@ public class PayOutActivity extends AbstractAsyncActivity {
 			showLoadingProgressDialog();
 			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 				public void onTaskComplete(TransferObject response) {
+					dismissProgressDialog();
 					if (!response.isSuccessful()) {
 						exchangeRate = BigDecimal.ZERO;
 						displayResponse(response.getMessage());
@@ -211,11 +213,11 @@ public class PayOutActivity extends AbstractAsyncActivity {
 	 * Catches Result from Barcode-Scanner and sets PayOut address.
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		  IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-		  if (scanResult != null) {
+		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+		if (scanResult != null) {
 			String result = scanResult.getContents();
 			try {
-				if (result.substring(0, 8).equalsIgnoreCase("bitcoin:")){
+				if (result.substring(0, 8).equalsIgnoreCase("bitcoin:")) {
 					String addressAndMore = result.substring(8);
 					String[] resultArray = addressAndMore.split("\\?");
 					String btcAddress = resultArray[0];
@@ -224,6 +226,7 @@ public class PayOutActivity extends AbstractAsyncActivity {
 			} catch (Exception e) {
 				displayResponse(getResources().getString(R.string.payOut_NoQRCode));
 			}
-		  }
 		}
+	}
+	
 }

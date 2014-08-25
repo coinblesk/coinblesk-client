@@ -99,7 +99,7 @@ public class RegistrationActivity extends AbstractAsyncActivity {
 		user.setPassword(password);
 		
 		RequestTask<UserAccountObject, TransferObject> signUp = new SignUpRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
-			
+			@Override
 			public void onTaskComplete(TransferObject response) {
 				dismissProgressDialog();
 				if (response.isSuccessful()) {
@@ -107,7 +107,6 @@ public class RegistrationActivity extends AbstractAsyncActivity {
 				}else{
 					displayResponse(response.getMessage());			
 				}
-				
 			}
 		}, user, new TransferObject());
 		signUp.execute();

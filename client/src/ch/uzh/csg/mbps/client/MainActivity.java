@@ -108,7 +108,6 @@ public class MainActivity extends AbstractPaymentActivity {
 		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalanceBTC(), getApplicationContext());
 		checkOnlineModeAndProceed();
 		invalidateOptionsMenu();
-
 	}
 
 	@Override
@@ -232,13 +231,15 @@ public class MainActivity extends AbstractPaymentActivity {
 				TextView lastTransactionsTitle = (TextView) findViewById(R.id.mainActivity_lastTransactionsTitle);
 				String s = String.format(getResources().getString(R.string.lastFewTransactionsTitle), getNumberOfLastTransactions());
 				lastTransactionsTitle.setText(s);
+				
+				dismissProgressDialog();
+				
 				if(response.isSuccessful()) {
-					dismissProgressDialog();
 					exchangeRate = response.getExchangeRate();
 					ArrayList<AbstractHistory> transactions = extractLastFewTransactions(response.getGetHistoryTransferObject());
 					ClientController.getStorageHandler().setUserBalance(response.getBalanceBTC());
 					//update gui
-					if(! transactions.isEmpty()){
+					if (!transactions.isEmpty()) {
 						lastTransactionsTitle.setVisibility(View.VISIBLE);
 						createHistoryViews(transactions);
 					}
@@ -251,13 +252,11 @@ public class MainActivity extends AbstractPaymentActivity {
 						startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 					}
 				} else if (response.getMessage() != null && (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR))) {
-					dismissProgressDialog();
 					launchOfflineMode(getApplicationContext());
 					invalidateOptionsMenu();
 					displayResponse(getResources().getString(R.string.no_connection_server));
 					lastTransactionsTitle.setVisibility(View.INVISIBLE);
 				} 
-				
 			}
 		}, new TransferObject(), new MainRequestObject());
 		getMainActivityValues.execute();
