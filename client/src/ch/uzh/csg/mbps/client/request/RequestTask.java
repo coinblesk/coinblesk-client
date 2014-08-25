@@ -262,4 +262,26 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
         	return createFailed( e.getMessage());
         }
 	}
+	
+	public O execLogout() {
+		try {
+        	//request
+			HttpResponse response = executeGet();
+        	//reply
+            StatusLine statusLine = response.getStatusLine();
+            if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+            	TimeHandler.getInstance().setStartTime();
+            	responseObject.setSuccessful(true);
+            	return responseObject;
+            } else {
+                //Closes the connection.
+            	response.getEntity().getContent().close();
+                return createFailed(statusLine.getReasonPhrase());
+            }
+        } catch (Exception e) {
+        	e.printStackTrace();
+        	return createFailed(e.getMessage());
+        }
+	}
+	
 }
