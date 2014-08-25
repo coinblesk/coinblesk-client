@@ -192,7 +192,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
 					if (!response.isSuccessful()) {
-						displayResponse(response.getMessage());
+						displayResponse(getResources().getString(R.string.exchangeRate_error));
 						return;
 					}
 					onTaskCompleteExchangeRate(response.getMessage());
