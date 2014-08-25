@@ -66,7 +66,6 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
     }
 	
 	private void initClickListener() {
-		
 		payOutAddressInput.addTextChangedListener(new TextWatcher() {
 
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -153,6 +152,7 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 		showLoadingProgressDialog();
 		PayOutRuleRequestTask request = new PayOutRuleRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 			public void onTaskComplete(TransferObject response) {
+				dismissProgressDialog();
 				if (response.isSuccessful()) {
 					createRuleView.setText("");
 					launchPayOutRuleGetRequest();
@@ -160,8 +160,6 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 				} else {
 					displayResponse(response.getMessage());
 				}
-				dismissProgressDialog();
-	            
             }
 		}, transferObject, new TransferObject());
 		request.execute();
@@ -186,14 +184,13 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 		PayOutRuleResetRequestTask resetRequest = new PayOutRuleResetRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 
 			public void onTaskComplete(TransferObject response) {
+				dismissProgressDialog();
 				if (response.isSuccessful()) {
 					showDialog(getResources().getString(R.string.defined_rules_title), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), getResources().getString(R.string.reset_pay_out_rules));
 					createRuleView.setText("");
 				} else {
 					displayResponse(response.getMessage());
 				}
-				dismissProgressDialog();
-	            
             }
 		}, new TransferObject(), new TransferObject());
 		resetRequest.execute();
@@ -231,16 +228,16 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 	}
 
 	private void launchPayOutRuleGetRequest() {
+		showLoadingProgressDialog();
 		PayOutRuleGetRequestTask getRequest = new PayOutRuleGetRequestTask(new IAsyncTaskCompleteListener<PayOutRulesTransferObject>() {
 
 			public void onTaskComplete(PayOutRulesTransferObject response) {
+				dismissProgressDialog();
 				if (response.isSuccessful()) {
 					responseComplete(response.getPayOutRulesList());
 				} else {
 					displayResponse(response.getMessage());
 				}
-				dismissProgressDialog();
-	            
             }
 		}, new TransferObject(), new PayOutRulesTransferObject());
 		getRequest.execute();

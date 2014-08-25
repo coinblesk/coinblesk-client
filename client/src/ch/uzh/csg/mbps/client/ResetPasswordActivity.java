@@ -41,13 +41,11 @@ public class ResetPasswordActivity extends AbstractAsyncActivity {
 	}
 	
 	private void initClickListener(){
-		
 		resetPasswordBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				launchRequest();
 			}
 		});
-		
 	}
 
     private void launchRequest() {
@@ -56,7 +54,7 @@ public class ResetPasswordActivity extends AbstractAsyncActivity {
 		if (CheckFormatHandler.isEmailValid(email)) {
 			showLoadingProgressDialog();
 			RequestTask<TransferObject, TransferObject> resetPW = new PasswordResetRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
-				
+				@Override
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
 			    	if (response.isSuccessful()) {

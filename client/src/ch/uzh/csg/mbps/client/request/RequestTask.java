@@ -46,16 +46,12 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	
 	// = new LinkedMultiValueMap<String, String>()
 	
-	
-	
 	public RequestTask(I requestObject, O responseObject, String url, IAsyncTaskCompleteListener<O> callback) {
 		this.requestObject = requestObject;
 		this.responseObject = responseObject;
 		this.url = url;
 		this.callback = callback;
 	}
-	
-	
 	
 	@Override
 	final protected O doInBackground(Void... params) {
@@ -81,7 +77,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	 */
 	@Override
 	final protected void onPostExecute(O result){
-		
 		callback.onTaskComplete(result);
 	}
 	
@@ -236,10 +231,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	        }
 	    } catch (Exception e) {
 	    }
-
 	}
-	
-	
 
 	public O execGet() {
 		try {
@@ -257,12 +249,38 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             	return responseObject;
             } else{
                 //Closes the connection.
+            	ClientController.setOnlineMode(false);
+            	TimeHandler.getInstance().setStartTime();
                 response.getEntity().getContent().close();
                 return createFailed(statusLine.getReasonPhrase());
             }
         } catch (Exception e) {
+        	ClientController.setOnlineMode(false);
+        	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
         	return createFailed( e.getMessage());
         }
 	}
+	
+	public O execLogout() {
+		try {
+        	//request
+			HttpResponse response = executeGet();
+        	//reply
+            StatusLine statusLine = response.getStatusLine();
+            if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+            	TimeHandler.getInstance().setStartTime();
+            	responseObject.setSuccessful(true);
+            	return responseObject;
+            } else {
+                //Closes the connection.
+            	response.getEntity().getContent().close();
+                return createFailed(statusLine.getReasonPhrase());
+            }
+        } catch (Exception e) {
+        	e.printStackTrace();
+        	return createFailed(e.getMessage());
+        }
+	}
+	
 }

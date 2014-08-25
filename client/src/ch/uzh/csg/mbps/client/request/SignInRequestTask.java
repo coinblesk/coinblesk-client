@@ -35,4 +35,5 @@ public class SignInRequestTask extends RequestTask<TransferObject, TransferObjec
 	    postParameters.add(new BasicNameValuePair("j_password", password));
 	    return postParameters;
 	}
+	
 }

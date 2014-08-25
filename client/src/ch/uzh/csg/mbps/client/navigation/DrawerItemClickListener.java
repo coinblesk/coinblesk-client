@@ -21,6 +21,7 @@ import ch.uzh.csg.mbps.client.payment.PayOutActivity;
 import ch.uzh.csg.mbps.client.profile.AccountProfileActivity;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.SignOutRequestTask;
+import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
 import ch.uzh.csg.mbps.client.settings.SettingsActivity;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
@@ -115,18 +116,19 @@ public class DrawerItemClickListener extends AbstractLoginActivity implements On
 
 	private void launchSignOutRequest() {
 		showLoadingProgressDialog();
-		RequestTask<TransferObject,TransferObject> signOut = new SignOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
-
+		RequestTask<TransferObject, TransferObject> signOut = new SignOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+			@Override
 			public void onTaskComplete(TransferObject response) {
 				if(response.isSuccessful()) {
 					TimeHandler.getInstance().terminateSession();
 					updateClientControllerAndFinish();
+					CookieHandler.deleteCookie();
 				} else {
 					dismissProgressDialog();
 					displayResponse(response.getMessage());
 				}
             }
-		}, new TransferObject(), new TransferObject());		
+		}, new TransferObject(), new TransferObject());
 		signOut.execute();
 	}
 

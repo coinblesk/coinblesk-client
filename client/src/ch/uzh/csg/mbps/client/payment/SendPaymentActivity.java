@@ -34,6 +34,7 @@ import android.widget.TextView;
 import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
 import ch.uzh.csg.mbps.client.CurrencyViewHandler;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
+import ch.uzh.csg.mbps.client.MainActivity;
 import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
@@ -190,8 +191,15 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 			showLoadingProgressDialog();
 			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 				public void onTaskComplete(TransferObject response) {
+					dismissProgressDialog();
 					if (!response.isSuccessful()) {
-						displayResponse(response.getMessage());
+						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
+							displayResponse(getResources().getString(R.string.no_connection_server));
+							finish();
+							launchActivity(SendPaymentActivity.this, MainActivity.class);
+						} else {
+							displayResponse(getResources().getString(R.string.exchangeRate_error));
+						}
 						return;
 					}
 					onTaskCompleteExchangeRate(response.getMessage());
@@ -231,6 +239,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 			
 			RequestTask<TransactionObject, TransactionObject> transactionRequest = new TransactionRequestTask(new IAsyncTaskCompleteListener<TransactionObject>() {
 				public void onTaskComplete(TransactionObject response) {
+					dismissProgressDialog();
 					if (!response.isSuccessful()) {
 						displayResponse(response.getMessage());
 						return;
@@ -243,6 +252,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 	}
 	
 	private void onTaskCompletTransaction(byte[] serverPaymentResponseBytes) {
+		dismissProgressDialog();
 		if(ClientController.isOnline()){
 			startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 		}
@@ -284,8 +294,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 			showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, paymentResponsePayer.getReason());
 		}
 	}
-
-	
 
 	private void refreshCurrencyTextViews() {
 		amountBTC = BigDecimal.ZERO;
@@ -398,7 +406,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 				dialog.show(getFragmentManager(), "sendPaymentActivity");
 			}
 		});
-
 	}
 
 	private void showConfirmationDialog() {

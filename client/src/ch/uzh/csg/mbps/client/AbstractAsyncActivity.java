@@ -189,6 +189,4 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
 		}
 	}
 	
-	
-	
 }

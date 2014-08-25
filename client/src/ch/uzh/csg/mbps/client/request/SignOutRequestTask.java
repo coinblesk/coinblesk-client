@@ -1,8 +1,6 @@
 package ch.uzh.csg.mbps.client.request;
 
-import net.minidev.json.JSONObject;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
-import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
 
@@ -17,9 +15,7 @@ public class SignOutRequestTask extends RequestTask<TransferObject, TransferObje
 
 	@Override
 	protected TransferObject responseService(TransferObject tro)  throws Exception {
-		JSONObject jsonObject = new JSONObject();
-		tro.encode(jsonObject);
-		CookieHandler.deleteCookie();
-		return execPost(jsonObject);
+		return execLogout();
 	}
+	
 }

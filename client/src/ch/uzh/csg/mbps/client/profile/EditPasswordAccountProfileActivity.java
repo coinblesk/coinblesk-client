@@ -68,40 +68,34 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity {
 		}
 	}
     
-    
-    
 	public void launchRequest(UserAccount user) {
-
 		showLoadingProgressDialog();
 
 		UserAccountObject userObject = new UserAccountObject();
 		userObject.setUsername(user.getUsername());
 		userObject.setPassword(user.getPassword());
 		userObject.setEmail(user.getEmail());
-		RequestTask<UserAccountObject, TransferObject> request = new UpdateRequestTask(
-		        new IAsyncTaskCompleteListener<TransferObject>() {
-			        public void onTaskComplete(TransferObject response) {
-				        if (!response.isSuccessful()) {
-					        displayResponse(response.getMessage());
-					        reload(getIntent());
-					        invalidateOptionsMenu();
-					        dismissProgressDialog();
-					        return;
-				        }
-				        boolean saved = ClientController.getStorageHandler().setUserPassword(password);
-				        AbstractLoginActivity.updatePassword();
-				        if (!saved) {
-					        displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-				        }
-				        finish();
-				        displayResponse(getResources().getString(R.string.updateAccount_successful));
-				        dismissProgressDialog();
-			        }
-		        }, userObject, new TransferObject());
+		RequestTask<UserAccountObject, TransferObject> request = new UpdateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+			public void onTaskComplete(TransferObject response) {
+				if (!response.isSuccessful()) {
+					displayResponse(response.getMessage());
+					reload(getIntent());
+					invalidateOptionsMenu();
+					dismissProgressDialog();
+					return;
+				}
+				boolean saved = ClientController.getStorageHandler().setUserPassword(password);
+				AbstractLoginActivity.updatePassword();
+				if (!saved) {
+					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+				}
+				finish();
+				displayResponse(getResources().getString(R.string.updateAccount_successful));
+				dismissProgressDialog();
+			}
+		}, userObject, new TransferObject());
 		request.execute();
 
 	}
-    
-    
     
 }

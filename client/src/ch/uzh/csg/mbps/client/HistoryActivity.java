@@ -130,7 +130,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 		sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
 		sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
-				setupSpinner();;
+				setupSpinner();
 				return false;
 			}
 		});
@@ -152,9 +152,9 @@ public class HistoryActivity extends AbstractAsyncActivity {
 				offlineMode.setVisible(true);
 				sessionCountdownMenuItem.setVisible(false);
 				sessionRefreshMenuItem.setVisible(false);
-				 if (filterSpinner != null) {
-	                	filterSpinner.setEnabled(false);
-	                }
+				if (filterSpinner != null) {
+					filterSpinner.setEnabled(false);
+				}
 			}
 		}
 	}

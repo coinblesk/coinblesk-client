@@ -159,11 +159,10 @@ public class PayInActivity extends AbstractAsyncActivity {
 	private void launchRequest() {
 		showLoadingProgressDialog();
 		RequestTask<TransferObject, TransferObject> sendToEmail = new SendPayInAddressByEmail(new IAsyncTaskCompleteListener<TransferObject>() {
-
+			@Override
 			public void onTaskComplete(TransferObject response) {
 				dismissProgressDialog();
 				displayResponse(response.getMessage());
-	            
             }
 		}, new TransferObject(), new TransferObject());
 		sendToEmail.execute();

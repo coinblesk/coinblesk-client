@@ -62,25 +62,26 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity {
     		showLoadingProgressDialog();
     		UserAccountObject user = new UserAccountObject();
     		user.setPassword(emailString);
-    		RequestTask<UserAccountObject, TransferObject> request = new UpdateRequestTask(
-    		        new IAsyncTaskCompleteListener<TransferObject>() {
-    			        public void onTaskComplete(TransferObject response) {
-    				        if (!response.isSuccessful()) {
-    					        displayResponse(response.getMessage());
-    					        reload(getIntent());
-    					        invalidateOptionsMenu();
-    					        return;
-    				        }
-    				        String saveEmail = ((EditText) findViewById(R.id.updateEmailEditText)).getText().toString();
-    						
-    						boolean saved = ClientController.getStorageHandler().setUserEmail(saveEmail);
-    						if (!saved) {
-    							displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-    						}
-    						finish();
-    						displayResponse(getResources().getString(R.string.updateAccount_successful));
-    			        }
-    		        }, user, new TransferObject());
+    		RequestTask<UserAccountObject, TransferObject> request = new UpdateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+    			public void onTaskComplete(TransferObject response) {
+    				dismissProgressDialog();
+    				if (!response.isSuccessful()) {
+    					displayResponse(response.getMessage());
+    					reload(getIntent());
+    					invalidateOptionsMenu();
+    					return;
+    				}
+    				
+    				String saveEmail = ((EditText) findViewById(R.id.updateEmailEditText)).getText().toString();
+    				
+    				boolean saved = ClientController.getStorageHandler().setUserEmail(saveEmail);
+    				if (!saved) {
+    					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+    				}
+    				finish();
+    				displayResponse(getResources().getString(R.string.updateAccount_successful));
+    			}
+    		}, user, new TransferObject());
     		request.execute();
     	}
 	}

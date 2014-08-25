@@ -87,7 +87,6 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 	 * @param isSuccessful boolean to indicate if task was successful
 	 */
 	protected void showDialog(String message, boolean isSuccessful) {
-		
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		if (isSuccessful) {
 			builder.setTitle(getResources().getString(R.string.payment_success))
@@ -160,7 +159,5 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 		});
 		alertbox.show();
 	}
-	
-	
 
 }

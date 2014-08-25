@@ -266,34 +266,38 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 			showLoadingProgressDialog();
 			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 				public void onTaskComplete(TransferObject response) {
+					dismissProgressDialog();
+					dismissNfcInProgressDialog();
 					if (!response.isSuccessful()) {
-						displayResponse(response.getMessage());
+						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
+							displayResponse(getResources().getString(R.string.no_connection_server));
+							finish();
+							launchActivity(ReceivePaymentActivity.this, MainActivity.class);
+						} else {
+							displayResponse(response.getMessage());
+						}
 						return;
+					} 
+					 else {
+						CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
+						//renew Session Timeout Countdown
+						if(ClientController.isOnline()){
+							startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
+						}
+						exchangeRate = new BigDecimal(response.getMessage());
+						CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
+						BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
+						CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
+						TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
+						balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
+						//TODO: finish() on	REST_CLIENT_ERROR and launchActivity(this, MainActivity.class);?
 					}
-					onTaskCompleteExchangeRate(response.getMessage());
 				}
 			}, new TransferObject(), new TransferObject());
 			request.execute();
 		}
 	}
 	
-	private void onTaskCompleteExchangeRate(String exchangeRateNew) {
-		dismissProgressDialog();
-		dismissNfcInProgressDialog();
-		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
-		//renew Session Timeout Countdown
-		if(ClientController.isOnline()){
-			startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
-		}
-		exchangeRate = new BigDecimal(exchangeRateNew);
-		CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
-		BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
-		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
-		TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
-		balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
-		//TODO: finish() on	REST_CLIENT_ERROR and launchActivity(this, MainActivity.class);?
-	}
-
 	private void refreshCurrencyTextViews() {
 		amountBTC = BigDecimal.ZERO;
 		if (Constants.inputUnit.equals(INPUT_UNIT_CHF)) {
