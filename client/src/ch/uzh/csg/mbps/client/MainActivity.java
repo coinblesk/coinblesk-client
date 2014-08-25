@@ -251,7 +251,7 @@ public class MainActivity extends AbstractPaymentActivity {
 					if(ClientController.isOnline()){
 						startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 					}
-				} else if (response.getMessage() != null && (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR))) {
+				} else if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
 					launchOfflineMode(getApplicationContext());
 					invalidateOptionsMenu();
 					displayResponse(getResources().getString(R.string.no_connection_server));

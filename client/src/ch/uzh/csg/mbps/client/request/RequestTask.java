@@ -26,6 +26,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
+import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
 
@@ -249,10 +250,14 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             	return responseObject;
             } else{
                 //Closes the connection.
+            	ClientController.setOnlineMode(false);
+            	TimeHandler.getInstance().setStartTime();
                 response.getEntity().getContent().close();
                 return createFailed(statusLine.getReasonPhrase());
             }
         } catch (Exception e) {
+        	ClientController.setOnlineMode(false);
+        	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
         	return createFailed( e.getMessage());
         }

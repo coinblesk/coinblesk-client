@@ -30,7 +30,7 @@ public class Constants {
 	public static final long CLIENT_CHECK_TIME_INTERVAL = 15 * 1000;
 	
 	//TODO mehmet: one of these seems not to be needed, since the strings are equals!
-	public static final String CONNECTION_ERROR = "Could not establish connection to server! Try again later.";
+	public static final String CONNECTION_ERROR = "Unable to resolve host";
 	public static final String REST_CLIENT_ERROR = "Could not establish connection to server! Try again later.";
 	
 	/*

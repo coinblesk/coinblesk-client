@@ -34,6 +34,7 @@ import android.widget.TextView;
 import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
 import ch.uzh.csg.mbps.client.CurrencyViewHandler;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
+import ch.uzh.csg.mbps.client.MainActivity;
 import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
@@ -192,7 +193,13 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
 					if (!response.isSuccessful()) {
-						displayResponse(getResources().getString(R.string.exchangeRate_error));
+						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
+							displayResponse(getResources().getString(R.string.no_connection_server));
+							finish();
+							launchActivity(SendPaymentActivity.this, MainActivity.class);
+						} else {
+							displayResponse(getResources().getString(R.string.exchangeRate_error));
+						}
 						return;
 					}
 					onTaskCompleteExchangeRate(response.getMessage());

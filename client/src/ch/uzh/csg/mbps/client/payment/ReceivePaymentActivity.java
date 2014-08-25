@@ -269,9 +269,16 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 					dismissProgressDialog();
 					dismissNfcInProgressDialog();
 					if (!response.isSuccessful()) {
-						displayResponse(response.getMessage());
+						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
+							displayResponse(getResources().getString(R.string.no_connection_server));
+							finish();
+							launchActivity(ReceivePaymentActivity.this, MainActivity.class);
+						} else {
+							displayResponse(response.getMessage());
+						}
 						return;
-					} else {
+					} 
+					 else {
 						CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
 						//renew Session Timeout Countdown
 						if(ClientController.isOnline()){
