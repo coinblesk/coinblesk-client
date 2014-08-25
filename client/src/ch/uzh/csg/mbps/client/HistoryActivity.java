@@ -496,8 +496,9 @@ public class HistoryActivity extends AbstractAsyncActivity {
 	private void launchHistoryEmailRequest(int type) {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
-			
-			RequestTask getHistory = new HistoryEmailRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+			TransferObject input = new TransferObject();
+			input.setMessage(Integer.toString(type));
+			RequestTask<TransferObject, TransferObject> getHistory = new HistoryEmailRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 				
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
@@ -510,7 +511,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 					ghto = null;
 					return;
 				}
-			}, new TransferObject(), new TransferObject());
+			}, input, new TransferObject());
 			getHistory.execute();
 		}
 	}

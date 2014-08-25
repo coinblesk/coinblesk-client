@@ -5,7 +5,6 @@ import java.security.KeyPair;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,7 +23,6 @@ import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
-import ch.uzh.csg.mbps.model.UserAccount;
 import ch.uzh.csg.mbps.responseobject.CustomPublicKeyObject;
 import ch.uzh.csg.mbps.responseobject.ReadRequestObject;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
@@ -58,17 +56,15 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 	protected void launchSignInRequest(final Context context) {
 		showLoadingProgressDialog();
 		TimeHandler.getInstance().setStartActivity(this);
-		UserAccount user = new UserAccount(username, null, password);
 		RequestTask<TransferObject, TransferObject> signIn = new SignInRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
-			
+			@Override
 			public void onTaskComplete(TransferObject response) {
+				init();
 				if(response.isSuccessful()) {
-					init();
 					launchReadRequest(context);
 				} else {
 					launchOfflineMode(context);
 				}
-				
 			}
 		}, username, password);
 		signIn.execute();
@@ -175,29 +171,16 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 			}
 		}
 	}
-	
-	/*private void init() { 
-		if (!clientControllerInitialized) {
-			try {
-				boolean init = ClientController.init(context, username, password);
-				clientControllerInitialized = init;
-			} catch (WrongPasswordException e) {
-				wrongPassword = true;
-				displayResponse(context.getResources().getString(R.string.invalid_password));
-				clientControllerInitialized = false;
-			}
-		}
-	}*/
 
 	/**
 	 * This method is called, when the server request fails. The user
 	 * informations are retrieved from the internal storage.
 	 */
 	protected void launchOfflineMode(Context context) {
+		dismissProgressDialog();
 		if (ClientController.getStorageHandler().getUserAccount() != null) {
 			launchMainActivity(context);
 		} else {
-			dismissProgressDialog();
 			displayResponse(context.getResources().getString(R.string.establish_internet_connection));
 		}
 	}
@@ -246,16 +229,18 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 				}
 				ClientController.setOnlineMode(true);
 				launchMainActivity(context);
-				
 			}
 		}, new TransferObject(), new ReadRequestObject());
 		read.execute();
 	}
 
 	private void launchCommitKeyRequest(final Context context, CustomKeyPair ckp) {
+		showLoadingProgressDialog();
+		
 		CustomPublicKey cpk = new CustomPublicKey(ckp.getKeyNumber(), ckp.getPkiAlgorithm(), ckp.getPublicKey());
 		CustomPublicKeyObject cpko = new CustomPublicKeyObject();
 		cpko.setCustomPublicKey(cpk);
+		
 		RequestTask<CustomPublicKeyObject, TransferObject> task = new CommitPublicKeyRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 			@Override
 			public void onTaskComplete(TransferObject response) {
@@ -271,10 +256,8 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 				dismissProgressDialog();
 				ClientController.setOnlineMode(true);
 				launchMainActivity(context);
-				
 			}
 		}, cpko, new CustomPublicKeyObject());
-		
 		task.execute();
 	}
 

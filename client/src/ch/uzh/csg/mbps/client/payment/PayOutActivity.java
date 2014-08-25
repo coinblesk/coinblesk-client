@@ -145,7 +145,7 @@ public class PayOutActivity extends AbstractAsyncActivity {
 			PayOutTransactionObject pot = new PayOutTransactionObject();
 			pot.setAmount(payOutAmount);
 			pot.setBtcAddress(payoutAddress.getText().toString());
-			RequestTask payOut = new PayOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+			RequestTask<PayOutTransactionObject, TransferObject> payOut = new PayOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 
 				public void onTaskComplete(TransferObject response) {
 					String message = String.format(getResources().getString(R.string.payOut_successful), response.getMessage());

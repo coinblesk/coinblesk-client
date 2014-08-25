@@ -56,7 +56,6 @@ import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
 import ch.uzh.csg.mbps.model.HistoryTransaction;
 import ch.uzh.csg.mbps.responseobject.GetHistoryTransferObject;
 import ch.uzh.csg.mbps.responseobject.MainRequestObject;
-import ch.uzh.csg.mbps.responseobject.TransactionObject;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
 import ch.uzh.csg.mbps.util.Converter;
 import ch.uzh.csg.paymentlib.IPaymentEventHandler;
