@@ -16,15 +16,13 @@ import ch.uzh.csg.mbps.client.AbstractAsyncActivity;
 import ch.uzh.csg.mbps.client.CurrencyViewHandler;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.R;
-import ch.uzh.csg.mbps.client.model.PayOutTransaction;
 import ch.uzh.csg.mbps.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.mbps.client.request.PayOutRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
-import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
+import ch.uzh.csg.mbps.responseobject.PayOutTransactionObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -33,7 +31,7 @@ import com.google.zxing.integration.android.IntentResult;
  * This class is a view to send bitcoins from the system to the inserted
  * bitcoin-address.
  */
-public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
+public class PayOutActivity extends AbstractAsyncActivity {
 	public static BigDecimal exchangeRate;
 	private BigDecimal payOutAmount;
 	private Button acceptBtn;
@@ -56,7 +54,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		btcBalance = (TextView) findViewById(R.id.payOut_Balance);
-		CurrencyViewHandler.setBTC(btcBalance, ClientController.getStorageHandler().getUserAccount().getBalance(), getApplicationContext());
+		CurrencyViewHandler.setBTC(btcBalance, ClientController.getStorageHandler().getUserAccount().getBalanceBTC(), getApplicationContext());
 		chfBalance = (TextView) findViewById(R.id.payOut_BalanceCHF);
 		CurrencyViewHandler.clearTextView(chfBalance);
 		
@@ -102,7 +100,7 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 		
 	  	allBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
+				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
 				BigDecimal amount = CurrencyViewHandler.getBTCAmountInDefinedUnit(balance, getApplicationContext());
 				payOutAmount = balance;
 				payoutAmountEditText.setText(amount.toPlainString());
@@ -144,8 +142,30 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 			BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(payoutAmountEditText.getText().toString());
 			payOutAmount = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
 			
-			PayOutTransaction pot = new PayOutTransaction(ClientController.getStorageHandler().getUserAccount().getId(), payOutAmount, payoutAddress.getText().toString());
-			RequestTask payOut = new PayOutRequestTask(this, pot);
+			PayOutTransactionObject pot = new PayOutTransactionObject();
+			pot.setAmount(payOutAmount);
+			pot.setBtcAddress(payoutAddress.getText().toString());
+			RequestTask payOut = new PayOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+
+				public void onTaskComplete(TransferObject response) {
+					String message = String.format(getResources().getString(R.string.payOut_successful), response.getMessage());
+					showDialog(getResources().getString(R.string.title_activity_pay_out), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), message);
+					BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
+					
+					boolean saved = ClientController.getStorageHandler().setUserBalance(balance.subtract(payOutAmount));
+					if (!saved) {
+						displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+					}
+					
+					balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
+					CurrencyViewHandler.setBTC(btcBalance,balance, getApplicationContext());
+					CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
+					chfAmount.setText("");
+					payoutAmountEditText.setText("");
+					payoutAddress.setText("");
+	                
+                }
+			}, pot, new TransferObject());
 			payOut.execute();
 		} else {
 			displayResponse(getResources().getString(R.string.fill_necessary_fields));
@@ -160,51 +180,31 @@ public class PayOutActivity extends AbstractAsyncActivity implements IAsyncTaskC
 		}
 	}
 	
-	private void launchExchangeRateRequest(){
-		showLoadingProgressDialog();
-		RequestTask getExchangeRate = new ExchangeRateRequestTask(this);
-		getExchangeRate.execute();
+	/**
+	 * Launches request for updating Exchange Rate
+	 */
+	public void launchExchangeRateRequest() {
+		if (ClientController.isOnline()) {
+			showLoadingProgressDialog();
+			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+				public void onTaskComplete(TransferObject response) {
+					if (!response.isSuccessful()) {
+						exchangeRate = BigDecimal.ZERO;
+						displayResponse(response.getMessage());
+						chfBalance.setText("");
+						return;
+					}
+					onTaskCompleteExchangeRate(response.getMessage());
+				}
+			},  new TransferObject(),  new TransferObject());
+			request.execute();
+		}
 	}
 	
-	public void onTaskComplete(CustomResponseObject response) {
-		if (response.isSuccessful()) {
-			if (response.getType() == Type.EXCHANGE_RATE) {
-				exchangeRate = new BigDecimal(response.getMessage());
-				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payout_exchangeRate));
-				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalance());
-			} else {
-				String message = String.format(getResources().getString(R.string.payOut_successful), response.getMessage());
-				showDialog(getResources().getString(R.string.title_activity_pay_out), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), message);
-				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
-				
-				boolean saved = ClientController.getStorageHandler().setUserBalance(balance.subtract(payOutAmount));
-				if (!saved) {
-					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-				}
-				
-				balance = ClientController.getStorageHandler().getUserAccount().getBalance();
-				CurrencyViewHandler.setBTC(btcBalance,balance, getApplicationContext());
-				CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
-				chfAmount.setText("");
-				payoutAmountEditText.setText("");
-				payoutAddress.setText("");
-			}
-		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
-			exchangeRate = BigDecimal.ZERO;
-			reload(getIntent());
-			invalidateOptionsMenu();
-		} else if (response.getType() == Type.EXCHANGE_RATE && !response.isSuccessful()){
-			exchangeRate = BigDecimal.ZERO;
-			displayResponse(response.getMessage());
-			chfBalance.setText("");
-		} else if (response.getType() == Type.PAYOUT_ERROR_ADDRESS) {
-			displayResponse(getResources().getString(R.string.payOut_error_address));
-		} else if (response.getType() == Type.PAYOUT_ERROR_BALANCE) {
-			displayResponse(getResources().getString(R.string.payOut_error_balance));
-		} else {
-			displayResponse(response.getMessage());
-		}
-		dismissProgressDialog();
+	private void onTaskCompleteExchangeRate(String exchangeRateNew) {
+		exchangeRate = new BigDecimal(exchangeRateNew);
+		CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payout_exchangeRate));
+		CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalanceBTC());
 	}
 	
 	/**

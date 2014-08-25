@@ -23,7 +23,7 @@ import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.SendPayInAddressByEmail;
 import ch.uzh.csg.mbps.client.util.ClientController;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Writer;
@@ -35,7 +35,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
  * This class is the view for pay ins. It displays the bitcoin address where a
  * user has to transfer bitcoins to in order to pay in into our system.
  */
-public class PayInActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
+public class PayInActivity extends AbstractAsyncActivity {
 	public String payInAddress;
 	private Button copyClipboardBtn;
 	private Button sendAsMailBtn;
@@ -158,13 +158,15 @@ public class PayInActivity extends AbstractAsyncActivity implements IAsyncTaskCo
 
 	private void launchRequest() {
 		showLoadingProgressDialog();
-		RequestTask sendToEmail = new SendPayInAddressByEmail(this);
-		sendToEmail.execute();
-	}
+		RequestTask<TransferObject, TransferObject> sendToEmail = new SendPayInAddressByEmail(new IAsyncTaskCompleteListener<TransferObject>() {
 
-	public void onTaskComplete(CustomResponseObject response) {
-		dismissProgressDialog();
-		displayResponse(response.getMessage());
+			public void onTaskComplete(TransferObject response) {
+				dismissProgressDialog();
+				displayResponse(response.getMessage());
+	            
+            }
+		}, new TransferObject(), new TransferObject());
+		sendToEmail.execute();
 	}
 
 	private void setPaymentAddress() {

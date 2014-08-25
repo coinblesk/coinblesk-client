@@ -18,13 +18,13 @@ import ch.uzh.csg.mbps.client.request.DeleteRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 /**
  * This class is the view for a user's profile informations. The password and
  * email address are editable.
  */
-public class AccountProfileActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
+public class AccountProfileActivity extends AbstractAsyncActivity {
     private ImageButton editEmailImgBtn;
   	private ImageButton editPasswordImgBtn;
 	private Button deleteAccountBtn;
@@ -97,20 +97,21 @@ public class AccountProfileActivity extends AbstractAsyncActivity implements IAs
 	
 	private void launchDeleteRequest() {
 		showLoadingProgressDialog();
-		RequestTask delete = new DeleteRequestTask(this);
-		delete.execute();
-	}
-	
-	public void onTaskComplete(CustomResponseObject response) {
-		if (response.isSuccessful()) {
-			ClientController.clear();
-			launchActivity();
-		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
-			reload(getIntent());
-			invalidateOptionsMenu();
+		RequestTask<TransferObject, TransferObject> delete = new DeleteRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+			public void onTaskComplete(TransferObject response) {
+				if (response.isSuccessful()) {
+					ClientController.clear();
+					launchActivity();
+				} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+					reload(getIntent());
+					invalidateOptionsMenu();
+				}
+				dismissProgressDialog();
+				displayResponse(response.getMessage());
+            }
 		}
-		dismissProgressDialog();
-		displayResponse(response.getMessage());
+		, new TransferObject(), new TransferObject());
+		delete.execute();
 	}
 	
     private void launchActivity() {

@@ -23,16 +23,14 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.SignOutRequestTask;
 import ch.uzh.csg.mbps.client.settings.SettingsActivity;
 import ch.uzh.csg.mbps.client.util.ClientController;
-import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 /**
  * This class represents the navigation drawer. The methods from
  * {@link AbstractAsyncActivity} are not inherited but overridden.
  */
-public class DrawerItemClickListener extends AbstractLoginActivity implements OnItemClickListener, IAsyncTaskCompleteListener<CustomResponseObject> {
+public class DrawerItemClickListener extends AbstractLoginActivity implements OnItemClickListener {
 	private View view;
 	private ProgressDialog dialog;
 
@@ -117,20 +115,19 @@ public class DrawerItemClickListener extends AbstractLoginActivity implements On
 
 	private void launchSignOutRequest() {
 		showLoadingProgressDialog();
-		RequestTask signOut = new SignOutRequestTask(this);		
-		signOut.execute();
-	}
+		RequestTask<TransferObject,TransferObject> signOut = new SignOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 
-	public void onTaskComplete(CustomResponseObject response) {
-		if (response.getType() == Type.LOGOUT) {
-			TimeHandler.getInstance().terminateSession();
-			updateClientControllerAndFinish();
-		} else if (response.getMessage() != null && (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR))) {
-			dismissProgressDialog();
-			displayResponse(response.getMessage());
-		}
-		else
-			super.onTaskComplete(response, getContext());
+			public void onTaskComplete(TransferObject response) {
+				if(response.isSuccessful()) {
+					TimeHandler.getInstance().terminateSession();
+					updateClientControllerAndFinish();
+				} else {
+					dismissProgressDialog();
+					displayResponse(response.getMessage());
+				}
+            }
+		}, new TransferObject(), new TransferObject());		
+		signOut.execute();
 	}
 
 	private void updateClientControllerAndFinish() {

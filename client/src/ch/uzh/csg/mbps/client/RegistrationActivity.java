@@ -22,13 +22,13 @@ import android.widget.TextView;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.SignUpRequestTask;
 import ch.uzh.csg.mbps.client.util.CheckFormatHandler;
-import ch.uzh.csg.mbps.model.UserAccount;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
+import ch.uzh.csg.mbps.responseobject.UserAccountObject;
 
 /**
  * This class is the view where a user can create an account.
  */
-public class RegistrationActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
+public class RegistrationActivity extends AbstractAsyncActivity {
 	private PopupWindow popupWindow;
 	private String username;
 	private String email;
@@ -93,18 +93,24 @@ public class RegistrationActivity extends AbstractAsyncActivity implements IAsyn
 	
 	private void launchCreateRequest() {
 		showLoadingProgressDialog();
-		UserAccount user = new UserAccount(this.username, this.email, this.password);
-		RequestTask signUp = new SignUpRequestTask(this, user);
+		UserAccountObject user = new UserAccountObject();
+		user.setUsername(username);
+		user.setEmail(email);
+		user.setPassword(password);
+		
+		RequestTask<UserAccountObject, TransferObject> signUp = new SignUpRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+			
+			public void onTaskComplete(TransferObject response) {
+				dismissProgressDialog();
+				if (response.isSuccessful()) {
+					buildDialog(getResources().getString(R.string.registration_successful));
+				}else{
+					displayResponse(response.getMessage());			
+				}
+				
+			}
+		}, user, new TransferObject());
 		signUp.execute();
-	}
-	
-	public void onTaskComplete(CustomResponseObject response) {
-		dismissProgressDialog();
-		if (response.isSuccessful()) {
-			buildDialog(getResources().getString(R.string.registration_successful));
-		}else{
-			displayResponse(response.getMessage());			
-		}
 	}
 	
 	private void buildDialog(String message) {

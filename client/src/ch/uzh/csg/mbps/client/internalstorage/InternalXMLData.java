@@ -26,6 +26,7 @@ import ch.uzh.csg.mbps.customserialization.Currency;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
+import ch.uzh.csg.mbps.responseobject.UserAccountObject;
 import ch.uzh.csg.mbps.util.Converter;
 import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
@@ -349,7 +350,7 @@ public class InternalXMLData {
 	 * @throws Exception
 	 *             an xml exception
 	 */
-	protected String setUserAccount(String xml, UserAccount userAccount) throws Exception {
+	protected String setUserAccount(String xml, UserAccountObject userAccount) throws Exception {
 		Document doc = stringToXml(xml);
 
 		Node userAccountElement = doc.getElementsByTagName(USER_ACCOUNT).item(0);
@@ -368,7 +369,7 @@ public class InternalXMLData {
 			}
 
 			if (node.getNodeName().equals(USER_BALANCE)) {
-				long balance = Converter.getLongFromBigDecimal(userAccount.getBalance());
+				long balance = Converter.getLongFromBigDecimal(userAccount.getBalanceBTC());
 				node.setTextContent(Long.toString(balance));
 				continue;
 			}
@@ -391,7 +392,7 @@ public class InternalXMLData {
 	 * @throws Exception
 	 *             an xml exception
 	 */
-	protected UserAccount getUserAccount(String xml) throws Exception {
+	protected UserAccountObject getUserAccount(String xml) throws Exception {
 		Document doc = stringToXml(xml);
 
 		long userId = 0;
@@ -445,10 +446,10 @@ public class InternalXMLData {
 		if (userId == 0 || username == null || balance == null || paymentAddress == null) {
 			return null;
 		} else {
-			UserAccount ua = new UserAccount();
+			UserAccountObject ua = new UserAccountObject();
 			ua.setId(userId);
 			ua.setUsername(username);
-			ua.setBalance(balance);
+			ua.setBalanceBTC(balance);
 			ua.setPaymentAddress(paymentAddress);
 			return ua;
 			

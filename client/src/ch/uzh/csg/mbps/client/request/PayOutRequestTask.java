@@ -1,34 +1,26 @@
 package ch.uzh.csg.mbps.client.request;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-
+import net.minidev.json.JSONObject;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
-import ch.uzh.csg.mbps.client.model.PayOutTransaction;
-import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
-import ch.uzh.csg.mbps.client.servercomm.CustomRestTemplate;
 import ch.uzh.csg.mbps.client.util.Constants;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.PayOutTransactionObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 /**
  * This class sends a request to payout a defined amount of bitcoins to the
  * inserted bitcoin-address.
  */
-public class PayOutRequestTask extends RequestTask {
-	
-	private PayOutTransaction pot;
-	
-	public PayOutRequestTask(IAsyncTaskCompleteListener<CustomResponseObject> cro, PayOutTransaction pot) {
-		this.callback = cro;
-		this.pot = pot;
-		this.url = Constants.BASE_URI_SSL + "/transaction/payOut";
+public class PayOutRequestTask extends RequestTask<PayOutTransactionObject, TransferObject> {
+		
+	public PayOutRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, PayOutTransactionObject input, TransferObject output) {
+		super(input, output, Constants.BASE_URI_SSL + "/transaction/payOut", cro);
 	}
 
 	@Override
-	protected CustomResponseObject responseService(CustomRestTemplate restTemplate) {
-		@SuppressWarnings("rawtypes")
-		HttpEntity requestEntity = CookieHandler.getAuthHeaderPOT(pot);
-		return restTemplate.exchange(url, HttpMethod.POST, requestEntity);
+	protected TransferObject responseService(PayOutTransactionObject tro)  throws Exception {
+		JSONObject jsonObject = new JSONObject();
+		tro.encode(jsonObject);
+		return execPost(jsonObject);
 	}
 
 }

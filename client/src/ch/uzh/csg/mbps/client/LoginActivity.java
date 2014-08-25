@@ -10,13 +10,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
 /**
  * The Login Activity is the first view of the application. The user has to sign
  * in with the username and password to use the application.
  */
-public class LoginActivity extends AbstractLoginActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
+public class LoginActivity extends AbstractLoginActivity {
 	// constant to determine which sub-activity returns
 	private static final int REQUEST_CODE = 1;
 	private Button signInBtn;
@@ -58,10 +57,6 @@ public class LoginActivity extends AbstractLoginActivity implements IAsyncTaskCo
 		return false;
 	}
     
-    public void onTaskComplete(CustomResponseObject response) {
-    	super.onTaskComplete(response, getApplicationContext());
-    }
-    
 	private void retrieveLastSignedUsername() {
 		SharedPreferences sharedPref = getSharedPreferences(getResources().getString(R.string.stored_username), Context.MODE_PRIVATE);
 		String storedUsername = sharedPref.getString(getString(R.string.stored_username), "");
@@ -86,7 +81,7 @@ public class LoginActivity extends AbstractLoginActivity implements IAsyncTaskCo
 					// hide virtual keyboard
 					InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 					inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-					launchSignInRequest();
+					launchSignInRequest(getApplicationContext());
 				}
 			}
 		});

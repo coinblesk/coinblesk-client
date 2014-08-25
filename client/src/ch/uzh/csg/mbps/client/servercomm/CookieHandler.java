@@ -4,15 +4,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-
-import ch.uzh.csg.mbps.client.model.PayOutTransaction;
-import ch.uzh.csg.mbps.keys.CustomPublicKey;
-import ch.uzh.csg.mbps.model.UserAccount;
-import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
-import ch.uzh.csg.mbps.responseobject.PayOutRulesTransferObject;
-
 /**
  * This class is responsible for storing the cookie return by the server in
  * order to launch future requests in the same session. It also returns
@@ -65,110 +56,6 @@ public class CookieHandler {
 	 */
 	public static void deleteCookie(){
 		setCookie("");
-	}
-	
-	/**
-	 * Returns a HttpEntity with the cookie in the entity header. Returns null
-	 * if no cookie is stored.
-	 */
-	@SuppressWarnings("rawtypes")
-	public static HttpEntity getAuthHeader() {
-		return getAuthHeader(null);
-	}
-	
-	/**
-	 * Returns a HttpEntity with the cookie in the entity header and a
-	 * {@link UserAccount} object in the entity body. Returns null if no cookie
-	 * is stored.
-	 * 
-	 * @param updatedAccount
-	 *            the {@link UserAccount} object to be added to the HttpEntity
-	 *            body
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static HttpEntity getAuthHeader(UserAccount updatedAccount) {
-		if (getCookie() == null || getCookie().equals(""))
-			return null;
-		
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(COOKIE_STRING, JSESSIONID_STRING + getCookie());
-		return new HttpEntity(updatedAccount, requestHeaders);
-	}
-	
-	/**
-	 * Returns a HttpEntity with the cookie in the entity header and a
-	 * {@link PayOutTransaction} object in the entity body. Returns null if no
-	 * cookie is stored.
-	 * 
-	 * @param pot
-	 *            the {@link PayOutTransaction} object to be added to the
-	 *            HttpEntity body
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static HttpEntity getAuthHeaderPOT(PayOutTransaction pot) {
-		if (getCookie() == null || getCookie().equals(""))
-			return null;
-		
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(COOKIE_STRING, JSESSIONID_STRING + getCookie());
-		return new HttpEntity(pot, requestHeaders);
-	}
-	
-	/**
-	 * Returns a HttpEntity with the cookie in the entity header and a
-	 * {@link CreateTransactionTransferObject} object in the entity body.
-	 * Returns null if no cookie is stored.
-	 * 
-	 * @param ctto
-	 *            the {@link CreateTransactionTransferObject} object to be added
-	 *            to the HttpEntity body
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static HttpEntity getAuthHeaderCTTO(CreateTransactionTransferObject ctto) {
-		if (getCookie() == null || getCookie().equals(""))
-			return null;
-		
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(COOKIE_STRING, JSESSIONID_STRING + getCookie());
-		return new HttpEntity(ctto, requestHeaders);
-	}
-
-	/**
-	 * Returns a HttpEntity with the cookie in the entity header and a
-	 * {@link PayOutRulesTransferObject} object in the entity body. Returns null
-	 * if no cookie is stored.
-	 * 
-	 * @param porto
-	 *            the {@link PayOutRulesTransferObject} object to be added to
-	 *            the HttpEntity body
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static HttpEntity getAuthHeaderPORTO(PayOutRulesTransferObject porto) {
-		if (getCookie() == null || getCookie().equals(""))
-			return null;
-
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(COOKIE_STRING, JSESSIONID_STRING + getCookie());
-		return new HttpEntity(porto, requestHeaders);
-	}
-
-	/**
-	 * Returns a HttpEntity with the cookie in the entity header and a
-	 * {@link CustomPublicKey} object in the entity body. Return null if no
-	 * cookie is stored.
-	 * 
-	 * @param cpk
-	 *            the {@link CustomPublicKey} object to be added to the
-	 *            HttpEntity body
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static HttpEntity getAuthHeaderCustomPublicKey(CustomPublicKey cpk) {
-		if (getCookie() == null || getCookie().equals(""))
-			return null;
-
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add(COOKIE_STRING, JSESSIONID_STRING + getCookie());
-		return new HttpEntity(cpk, requestHeaders);
 	}
 	
 }

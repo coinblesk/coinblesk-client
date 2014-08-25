@@ -13,14 +13,14 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.UpdateRequestTask;
 import ch.uzh.csg.mbps.client.util.CheckFormatHandler;
 import ch.uzh.csg.mbps.client.util.ClientController;
-import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.model.UserAccount;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
+import ch.uzh.csg.mbps.responseobject.UserAccountObject;
 
 /**
  * This class is the view to set an new password.
  */
-public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
+public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity {
 	private Button saveChangeBtn;
 	private String password;
 
@@ -68,27 +68,40 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity im
 		}
 	}
     
-    private void launchRequest(UserAccount user) {
+    
+    
+	public void launchRequest(UserAccount user) {
+
 		showLoadingProgressDialog();
-		RequestTask update = new UpdateRequestTask(this, user);
-		update.execute();
+
+		UserAccountObject userObject = new UserAccountObject();
+		userObject.setUsername(user.getUsername());
+		userObject.setPassword(user.getPassword());
+		userObject.setEmail(user.getEmail());
+		RequestTask<UserAccountObject, TransferObject> request = new UpdateRequestTask(
+		        new IAsyncTaskCompleteListener<TransferObject>() {
+			        public void onTaskComplete(TransferObject response) {
+				        if (!response.isSuccessful()) {
+					        displayResponse(response.getMessage());
+					        reload(getIntent());
+					        invalidateOptionsMenu();
+					        dismissProgressDialog();
+					        return;
+				        }
+				        boolean saved = ClientController.getStorageHandler().setUserPassword(password);
+				        AbstractLoginActivity.updatePassword();
+				        if (!saved) {
+					        displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+				        }
+				        finish();
+				        displayResponse(getResources().getString(R.string.updateAccount_successful));
+				        dismissProgressDialog();
+			        }
+		        }, userObject, new TransferObject());
+		request.execute();
+
 	}
     
-    public void onTaskComplete(CustomResponseObject response) {
-		if (response.isSuccessful()) {
-			boolean saved = ClientController.getStorageHandler().setUserPassword(password);
-			AbstractLoginActivity.updatePassword();
-			if (!saved) {
-				displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-			}
-			finish();
-			displayResponse(getResources().getString(R.string.updateAccount_successful));
-		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
-			reload(getIntent());
-			invalidateOptionsMenu();
-			displayResponse(response.getMessage());
-		}
-		dismissProgressDialog();
-	}
+    
     
 }

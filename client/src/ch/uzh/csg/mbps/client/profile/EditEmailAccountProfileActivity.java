@@ -11,14 +11,13 @@ import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.UpdateRequestTask;
 import ch.uzh.csg.mbps.client.util.CheckFormatHandler;
 import ch.uzh.csg.mbps.client.util.ClientController;
-import ch.uzh.csg.mbps.client.util.Constants;
-import ch.uzh.csg.mbps.model.UserAccount;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
+import ch.uzh.csg.mbps.responseobject.UserAccountObject;
 
 /**
  * This class is the view to set an new email address.
  */
-public class EditEmailAccountProfileActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject>{
+public class EditEmailAccountProfileActivity extends AbstractAsyncActivity {
 	private Button saveChangeBtn;
 	
 	@Override
@@ -61,29 +60,29 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity imple
     		displayResponse(getResources().getString(R.string.same_email_address));
     	} else {
     		showLoadingProgressDialog();
-    		RequestTask update = new UpdateRequestTask(this, new UserAccount(null, emailString, null));
-    		update.execute();
+    		UserAccountObject user = new UserAccountObject();
+    		user.setPassword(emailString);
+    		RequestTask<UserAccountObject, TransferObject> request = new UpdateRequestTask(
+    		        new IAsyncTaskCompleteListener<TransferObject>() {
+    			        public void onTaskComplete(TransferObject response) {
+    				        if (!response.isSuccessful()) {
+    					        displayResponse(response.getMessage());
+    					        reload(getIntent());
+    					        invalidateOptionsMenu();
+    					        return;
+    				        }
+    				        String saveEmail = ((EditText) findViewById(R.id.updateEmailEditText)).getText().toString();
+    						
+    						boolean saved = ClientController.getStorageHandler().setUserEmail(saveEmail);
+    						if (!saved) {
+    							displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+    						}
+    						finish();
+    						displayResponse(getResources().getString(R.string.updateAccount_successful));
+    			        }
+    		        }, user, new TransferObject());
+    		request.execute();
     	}
-	}
-    
-    public void onTaskComplete(CustomResponseObject response) {
-    	dismissProgressDialog();
-		if (response.isSuccessful()) {
-			String saveEmail = ((EditText) findViewById(R.id.updateEmailEditText)).getText().toString();
-			
-			boolean saved = ClientController.getStorageHandler().setUserEmail(saveEmail);
-			if (!saved) {
-				displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-			}
-			finish();
-			displayResponse(getResources().getString(R.string.updateAccount_successful));
-		} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
-			displayResponse(response.getMessage());
-			reload(getIntent());
-			invalidateOptionsMenu();
-		} else {
-			displayResponse(response.getMessage());
-		}
 	}
 	
 	private void checkOnlineModeAndProceed() {

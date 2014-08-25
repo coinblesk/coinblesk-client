@@ -1,29 +1,21 @@
 package ch.uzh.csg.mbps.client.request;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
-import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
-import ch.uzh.csg.mbps.client.servercomm.CustomRestTemplate;
 import ch.uzh.csg.mbps.client.util.Constants;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 /**
  * This class sends the request to delete the account of the authenticated user.
  */
-public class DeleteRequestTask extends RequestTask {
+public class DeleteRequestTask extends RequestTask<TransferObject, TransferObject> {
 	
-	public DeleteRequestTask(IAsyncTaskCompleteListener<CustomResponseObject> cro) {
-		this.callback = cro;
-		this.url = Constants.BASE_URI_SSL + "/user/delete/";
+	public DeleteRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, TransferObject input, TransferObject output) {
+		super(input, output, Constants.BASE_URI_SSL + "/user/delete/", cro);
 	}
-	
+
 	@Override
-	protected CustomResponseObject responseService(CustomRestTemplate restTemplate) {
-		@SuppressWarnings("rawtypes")
-		HttpEntity requestEntity = CookieHandler.getAuthHeader();
-		return restTemplate.exchange(url, HttpMethod.POST, requestEntity);
+	protected TransferObject responseService(TransferObject to) {
+		return execGet();
 	}
 
 }

@@ -15,10 +15,12 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import org.apache.commons.codec.binary.Base64;
+
+
 import org.spongycastle.jce.ECNamedCurveTable;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.util.encoders.Base64;
 
 import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
 import ch.uzh.csg.mbps.customserialization.exceptions.UnknownPKIAlgorithmException;
@@ -79,7 +81,7 @@ public class KeyHandler {
 	 * Encodes the given PrivateKey into a String using Base64 encoding.
 	 */
 	public static String encodePrivateKey(PrivateKey privateKey) {
-		byte[] privateEncoded = Base64.encodeBase64(privateKey.getEncoded());
+		byte[] privateEncoded = Base64.encode(privateKey.getEncoded());
 		return new String(privateEncoded);
 	}
 	
@@ -87,7 +89,7 @@ public class KeyHandler {
 	 * Encodes the given PublicKey into a String using Base64 encoding.
 	 */
 	public static String encodePublicKey(PublicKey publicKey) {
-		byte[] publicEncoded = Base64.encodeBase64(publicKey.getEncoded());
+		byte[] publicEncoded = Base64.encode(publicKey.getEncoded());
 		return new String(publicEncoded);
 	}
 	
@@ -123,7 +125,7 @@ public class KeyHandler {
 		if (algorithm.getCode() != PKIAlgorithm.DEFAULT.getCode())
 			throw new UnknownPKIAlgorithmException();
 		
-		byte[] decoded = Base64.decodeBase64(publicKeyEncoded.getBytes());
+		byte[] decoded = Base64.decode(publicKeyEncoded.getBytes());
 		EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(decoded);
 		
 		KeyFactory keyFactory = KeyFactory.getInstance(algorithm.getKeyPairAlgorithm(), SECURITY_PROVIDER);
@@ -163,7 +165,7 @@ public class KeyHandler {
 		if (algorithm.getCode() != PKIAlgorithm.DEFAULT.getCode())
 			throw new UnknownPKIAlgorithmException();
 		
-		byte[] decoded = Base64.decodeBase64(privateKeyEncoded.getBytes());
+		byte[] decoded = Base64.decode(privateKeyEncoded.getBytes());
 		EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoded);
 		
 		KeyFactory keyFactory = KeyFactory.getInstance(algorithm.getKeyPairAlgorithm(), SECURITY_PROVIDER);

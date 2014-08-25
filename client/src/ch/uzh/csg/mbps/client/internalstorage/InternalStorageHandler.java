@@ -15,6 +15,7 @@ import ch.uzh.csg.mbps.customserialization.Currency;
 import ch.uzh.csg.mbps.keys.CustomKeyPair;
 import ch.uzh.csg.mbps.keys.CustomPublicKey;
 import ch.uzh.csg.mbps.model.UserAccount;
+import ch.uzh.csg.mbps.responseobject.UserAccountObject;
 import ch.uzh.csg.paymentlib.persistency.IPersistencyHandler;
 import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
@@ -37,7 +38,7 @@ public class InternalStorageHandler implements IPersistencyHandler {
 
 	private String currentXML;
 	
-	private UserAccount userAccount;
+	private UserAccountObject userAccount;
 	private CustomKeyPair userKeyPair;
 	private CustomPublicKey serverPublicKey;
 	private String serverIp;
@@ -134,7 +135,7 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	 * @return true if the file was saved, false if it is just set temporarily
 	 *         but could not be persisted
 	 */
-	public boolean saveUserAccount(UserAccount userAccount) {
+	public boolean saveUserAccount(UserAccountObject userAccount) {
 		this.userAccount = userAccount;
 		try {
 			currentXML = xmlData.setUserAccount(currentXML, userAccount);
@@ -148,7 +149,7 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	/**
 	 * Returns the {@link UserAccount} from internal storage.
 	 */
-	public UserAccount getUserAccount() {
+	public UserAccountObject getUserAccount() {
 		if (userAccount == null) {
 			try {
 				userAccount = xmlData.getUserAccount(currentXML);
@@ -195,7 +196,7 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	 *         but could not be persisted
 	 */
 	public boolean setUserBalance(BigDecimal balance) {
-		userAccount.setBalance(balance);
+		userAccount.setBalanceBTC(balance);
 		return saveUserAccount(userAccount);
 	}
 	

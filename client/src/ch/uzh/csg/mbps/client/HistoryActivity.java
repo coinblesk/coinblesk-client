@@ -11,8 +11,8 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -33,14 +33,15 @@ import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
 import ch.uzh.csg.mbps.model.HistoryTransaction;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.GetHistoryTransferObject;
+import ch.uzh.csg.mbps.responseobject.HistoryTransferRequestObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 /**
  * This class is a UI class, showing the history of transactions of the
  * authenticated user.
  */
-public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
+public class HistoryActivity extends AbstractAsyncActivity {
 	private GetHistoryTransferObject ghto;
 	private Spinner filterSpinner;
 	
@@ -230,39 +231,35 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 			this.txPayInPage = txPayInPage;
 			this.txPayOutPage = txPayOutPage;
 			
-			RequestTask getHistory = new HistoryRequestTask(this, txPage, txPayInPage, txPayOutPage);
+			HistoryTransferRequestObject request = new HistoryTransferRequestObject();
+			request.setTxPage(txPage);
+			request.setTxPayInPage(txPayInPage);
+			request.setTxPayOutPage(txPayOutPage);
+			HistoryRequestTask getHistory = new HistoryRequestTask(new IAsyncTaskCompleteListener<GetHistoryTransferObject>() {
+				
+				public void onTaskComplete(GetHistoryTransferObject response) {
+					dismissProgressDialog();
+					
+					if (response.isSuccessful()) {
+						//renew Session Timeout Countdown
+						if(ClientController.isOnline()){
+							startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
+						}
+						ghto = response;
+						if (ghto != null) {
+							writeHistory();
+						}
+					} else {
+						ghto = null;
+						if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+							reload(getIntent());
+							invalidateOptionsMenu();
+						}
+					}
+					
+				}
+			}, request, new GetHistoryTransferObject());
 			getHistory.execute();
-		}
-	}
-	
-	public void onTaskComplete(CustomResponseObject response) {
-		dismissProgressDialog();
-		
-		if (response.getType() == CustomResponseObject.Type.HISTORY_EMAIL) {
-			//renew Session Timeout Countdown
-			if(ClientController.isOnline()){
-				startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
-			}
-			displayResponse(response.getMessage());
-			ghto = null;
-			return;
-		}
-		
-		if (response.isSuccessful()) {
-			//renew Session Timeout Countdown
-			if(ClientController.isOnline()){
-				startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
-			}
-			ghto = response.getGetHistoryTO();
-			if (ghto != null) {
-				writeHistory();
-			}
-		} else {
-			ghto = null;
-			if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
-				reload(getIntent());
-				invalidateOptionsMenu();
-			}
 		}
 	}
 
@@ -500,7 +497,20 @@ public class HistoryActivity extends AbstractAsyncActivity implements IAsyncTask
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
 			
-			RequestTask getHistory = new HistoryEmailRequestTask(this, type);
+			RequestTask getHistory = new HistoryEmailRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+				
+				public void onTaskComplete(TransferObject response) {
+					dismissProgressDialog();
+					
+					//renew Session Timeout Countdown
+					if(ClientController.isOnline()){
+						startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
+					}
+					displayResponse(response.getMessage());
+					ghto = null;
+					return;
+				}
+			}, new TransferObject(), new TransferObject());
 			getHistory.execute();
 		}
 	}

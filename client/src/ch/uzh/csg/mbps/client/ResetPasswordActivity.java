@@ -8,13 +8,13 @@ import android.widget.EditText;
 import ch.uzh.csg.mbps.client.request.PasswordResetRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.CheckFormatHandler;
-import ch.uzh.csg.mbps.model.UserAccount;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.TransactionObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 /**
  * This class allows to reset a user's password.
  */
-public class ResetPasswordActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
+public class ResetPasswordActivity extends AbstractAsyncActivity {
 
 	private Button resetPasswordBtn;
 	
@@ -55,27 +55,26 @@ public class ResetPasswordActivity extends AbstractAsyncActivity implements IAsy
     	
 		if (CheckFormatHandler.isEmailValid(email)) {
 			showLoadingProgressDialog();
-			UserAccount user = new UserAccount(null, email, null);
-			RequestTask resetPW = new PasswordResetRequestTask(this, user);
+			RequestTask<TransferObject, TransferObject> resetPW = new PasswordResetRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+				
+				public void onTaskComplete(TransferObject response) {
+					dismissProgressDialog();
+			    	if (response.isSuccessful()) {
+			    		displayResponse(response.getMessage());
+			    		launchLoginActivity();
+			    	} else {
+			    		displayResponse(response.getMessage());
+			    	}
+				}
+			}, new TransactionObject(), new TransactionObject());
 			resetPW.execute();
 		} else {
 			displayResponse(getResources().getString(R.string.registration_email_not_valid));
 		}
 	}
-    
-    public void onTaskComplete(CustomResponseObject response) {
-    	dismissProgressDialog();
-    	if (response.isSuccessful()) {
-    		displayResponse(response.getMessage());
-    		launchLoginActivity();
-    	} else {
-    		displayResponse(response.getMessage());
-    	}
-    }
 
 	private void launchLoginActivity(){
 		super.finish();
 		launchActivity(this, LoginActivity.class);
 	}
-	
 }

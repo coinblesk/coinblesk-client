@@ -9,7 +9,6 @@ import ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity;
 import ch.uzh.csg.mbps.client.payment.SendPaymentActivity;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 
 /**
  * Activity for selecting which kind of payment shall be initialized.
@@ -51,7 +50,7 @@ public class ChoosePaymentActivity extends AbstractLoginActivity {
 	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		initializeMenuItems(menu);
+		initializeMenuItems(menu, getApplicationContext());
 		
 		//renew Session Timeout Countdown
 		if(ClientController.isOnline()){
@@ -88,9 +87,4 @@ public class ChoosePaymentActivity extends AbstractLoginActivity {
 			}
 		});
 	}
-	
-	public void onTaskComplete(CustomResponseObject response) {
-		super.onTaskComplete(response, getApplicationContext());
-	}
-	
 }

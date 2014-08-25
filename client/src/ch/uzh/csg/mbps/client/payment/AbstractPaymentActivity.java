@@ -160,5 +160,7 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 		});
 		alertbox.show();
 	}
+	
+	
 
 }

@@ -52,9 +52,9 @@ import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
 import ch.uzh.csg.mbps.customserialization.PaymentResponse;
 import ch.uzh.csg.mbps.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.mbps.customserialization.ServerPaymentResponse;
-import ch.uzh.csg.mbps.responseobject.CreateTransactionTransferObject;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject.Type;
+import ch.uzh.csg.mbps.customserialization.exceptions.NotSignedException;
+import ch.uzh.csg.mbps.responseobject.TransactionObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 import ch.uzh.csg.mbps.util.Converter;
 import ch.uzh.csg.paymentlib.IPaymentEventHandler;
 import ch.uzh.csg.paymentlib.IServerResponseListener;
@@ -69,7 +69,7 @@ import ch.uzh.csg.paymentlib.messages.PaymentError;
 /**
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
  */
-public class ReceivePaymentActivity extends AbstractPaymentActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
+public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	private String[] strings;
 	private String[] stringsNormal = { "CHF", "BTC" };
 	private String[] stringsTablet = { "CHF", "Rp", "BTC" };
@@ -174,7 +174,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 	private void checkOnlineModeAndProceed() {
 		if (ClientController.isOnline()) {
-			launchRequest();
+			launchExchangeRateRequest();
 		} else {
 			launchOfflineMode(getApplicationContext());
 		}
@@ -202,7 +202,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 
 		menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
-				launchRequest();
+				launchExchangeRateRequest();
 				return false;
 			}
 		});
@@ -213,7 +213,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
 		sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
-				launchRequest();
+				launchExchangeRateRequest();
 				return false;
 			}
 		});
@@ -257,60 +257,41 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 		timer.start();
 	}
 
+	
 	/**
-	 * Launches request to update exchange rate.
+	 * Launches request for updating Exchange Rate
 	 */
-	protected void launchRequest() {
+	public void launchExchangeRateRequest() {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
-			RequestTask getExchangeRate = new ExchangeRateRequestTask(this);
-			getExchangeRate.execute();
+			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+				public void onTaskComplete(TransferObject response) {
+					if (!response.isSuccessful()) {
+						displayResponse(response.getMessage());
+						return;
+					}
+					onTaskCompleteExchangeRate(response.getMessage());
+				}
+			}, new TransferObject(), new TransferObject());
+			request.execute();
 		}
 	}
-
-	public void onTaskComplete(CustomResponseObject response) {
+	
+	private void onTaskCompleteExchangeRate(String exchangeRateNew) {
 		dismissProgressDialog();
 		dismissNfcInProgressDialog();
-		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));	
-		if (response.getType() == Type.EXCHANGE_RATE) {
-			if (response.isSuccessful()) {
-				//renew Session Timeout Countdown
-				if(ClientController.isOnline()){
-					startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
-				}
-				exchangeRate = new BigDecimal(response.getMessage());
-				CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
-				BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalance();
-				CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
-				TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
-				balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
-			} else if(response.getMessage().equals(Constants.REST_CLIENT_ERROR)){
-				displayResponse(getResources().getString(R.string.no_connection_server));
-				finish();
-				launchActivity(this, MainActivity.class);
-			}
-		} else if (response.getType() == Type.CREATE_TRANSACTION && response.isSuccessful()) {
-
-			byte[] serverPaymentResponseBytes = response.getServerPaymentResponse();
-			ServerPaymentResponse serverPaymentResponse = null;
-			try {
-				serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
-			} catch (Exception e) {
-				displayResponse(getResources().getString(R.string.error_transaction_failed));
-				return;
-			}
-			if(response.getBalance() != null) {
-				ClientController.getStorageHandler().setUserBalance(CurrencyFormatter.getBigDecimalBtc(response.getBalance()));
-			}
-			responseListener.onServerResponse(serverPaymentResponse);
-		} else if (response.getMessage() != null && (response.getMessage().equals(Constants.CONNECTION_ERROR) || response.getMessage().equals(Constants.REST_CLIENT_ERROR))) {
-			displayResponse(getResources().getString(R.string.no_connection_server));
-			finish();
-			launchActivity(this, MainActivity.class);
+		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
+		//renew Session Timeout Countdown
+		if(ClientController.isOnline()){
+			startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 		}
-		else {
-			displayResponse(response.getMessage());
-		}
+		exchangeRate = new BigDecimal(exchangeRateNew);
+		CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
+		BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
+		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
+		TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
+		balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
+		//TODO: finish() on	REST_CLIENT_ERROR and launchActivity(this, MainActivity.class);?
 	}
 
 	private void refreshCurrencyTextViews() {
@@ -619,16 +600,53 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity implements I
 	 */
 	private void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
 		if (ClientController.isOnline()) {
-			CreateTransactionTransferObject ctto = null;
+			showLoadingProgressDialog();
+			TransactionObject tro = new TransactionObject();
 			try {
-				ctto = new CreateTransactionTransferObject(serverPaymentRequest);
-			} catch (Exception e ) {
-				displayResponse("Internal Error");
-			}
-			RequestTask transactionRequest = new TransactionRequestTask(this, ctto);
+	            tro.setServerPaymentResponse(serverPaymentRequest.encode());
+            } catch (NotSignedException e) {
+	            e.printStackTrace();
+	            displayResponse(e.getMessage());
+				return;
+            }
+			
+			RequestTask<TransactionObject, TransactionObject> transactionRequest = new TransactionRequestTask(new IAsyncTaskCompleteListener<TransactionObject>() {
+				public void onTaskComplete(TransactionObject response) {
+					if (!response.isSuccessful()) {
+						displayResponse(response.getMessage());
+						return;
+					}
+					onTaskCompletTransaction(response.getServerPaymentResponse(), response.getBalanceBTC());
+                }
+			}, tro, new TransactionObject());
 			transactionRequest.execute();
 		}
 	}
+	
+	private void onTaskCompletTransaction(byte[] serverPaymentResponseBytes, BigDecimal balance) {
+		dismissProgressDialog();
+		dismissNfcInProgressDialog();
+		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));	
+		
+		ServerPaymentResponse serverPaymentResponse = null;
+		try {
+			serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
+		} catch (Exception e) {
+			displayResponse(getResources().getString(R.string.error_transaction_failed));
+			return;
+		}
+		if(balance != null) {
+			ClientController.getStorageHandler().setUserBalance(balance);
+		}
+		responseListener.onServerResponse(serverPaymentResponse);
+		
+		//on error?
+		//displayResponse(getResources().getString(R.string.no_connection_server));
+		//finish();
+		//launchActivity(this, MainActivity.class);
+	}
+	
+	
 
 	/**
 	 * Shows a dialog indicating if transaction was successful or not.

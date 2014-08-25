@@ -1,34 +1,25 @@
 package ch.uzh.csg.mbps.client.request;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-
+import net.minidev.json.JSONObject;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
-import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
-import ch.uzh.csg.mbps.client.servercomm.CustomRestTemplate;
 import ch.uzh.csg.mbps.client.util.Constants;
-import ch.uzh.csg.mbps.model.UserAccount;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
+import ch.uzh.csg.mbps.responseobject.UserAccountObject;
 
 /**
  * This class sends an update request. The update requests are changing the email
  * address or defining a new password.
  */
-public class UpdateRequestTask extends RequestTask {
-	
-	private UserAccount user;
-	
-	public UpdateRequestTask(IAsyncTaskCompleteListener<CustomResponseObject> cb, UserAccount user) {
-		this.callback = cb;
-		this.user = user;
-		this.url = Constants.BASE_URI_SSL + "/user/update";
+public class UpdateRequestTask extends RequestTask<UserAccountObject, TransferObject> {	
+	public UpdateRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, UserAccountObject input, TransferObject output) {
+		super(input, output, Constants.BASE_URI_SSL + "/user/update", cro);
 	}
 
 	@Override
-	protected CustomResponseObject responseService(CustomRestTemplate restTemplate) {
-		@SuppressWarnings("rawtypes")
-		HttpEntity requestEntity = CookieHandler.getAuthHeader(user);
-		return restTemplate.exchange(url, HttpMethod.POST, requestEntity);
+	protected TransferObject responseService(UserAccountObject muao)  throws Exception {		
+		JSONObject jsonObject = new JSONObject();
+		muao.encode(jsonObject);
+		return execPost(jsonObject);
 	}
 
 }

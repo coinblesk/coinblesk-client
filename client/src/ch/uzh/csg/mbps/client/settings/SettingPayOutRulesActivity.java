@@ -25,13 +25,13 @@ import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.client.util.CurrencyFormatter;
 import ch.uzh.csg.mbps.model.PayOutRule;
-import ch.uzh.csg.mbps.responseobject.CustomResponseObject;
 import ch.uzh.csg.mbps.responseobject.PayOutRulesTransferObject;
+import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 /**
  * This class is the view the pay out rules are defined.
  */
-public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements IAsyncTaskCompleteListener<CustomResponseObject> {
+public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 	private static String payOutAddress;
 	private Button saveRuleBtn;
 	private Button resetRuleBtn;
@@ -142,61 +142,68 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements
 	
 	private void initBalanceRuleRequest() {
 		PayOutRulesTransferObject transferObject = new PayOutRulesTransferObject();
-		
+		List<PayOutRule> list = new ArrayList<PayOutRule>(1);
 		PayOutRule balance = new PayOutRule(ClientController.getStorageHandler().getUserAccount().getId(), CustomOnItemSelectedListener.getBalanceAmount(), payOutAddress);
-		transferObject.setPayOutRule(balance);
+		list.add(balance);
+		transferObject.setPayOutRulesList(list);
 		launchPayOutRuleRequest(transferObject);
 	}
     
 	private void launchPayOutRuleRequest(PayOutRulesTransferObject transferObject) {
 		showLoadingProgressDialog();
-		PayOutRuleRequestTask request = new PayOutRuleRequestTask(this, transferObject);
+		PayOutRuleRequestTask request = new PayOutRuleRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+			public void onTaskComplete(TransferObject response) {
+				if (response.isSuccessful()) {
+					createRuleView.setText("");
+					launchPayOutRuleGetRequest();
+					showDialog(getResources().getString(R.string.defined_rules_title), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), getResources().getString(R.string.defined_successfully));
+				} else {
+					displayResponse(response.getMessage());
+				}
+				dismissProgressDialog();
+	            
+            }
+		}, transferObject, new TransferObject());
 		request.execute();
 	}
     
 	private void initDayTimeRequest() {
 		PayOutRulesTransferObject transferObject = new PayOutRulesTransferObject();
-		
+		List<PayOutRule> list = new ArrayList<PayOutRule>();
 		//Get for every day all time slots
 		for (int day : CustomOnItemSelectedListener.getDaySelections()) {
 			for (TextView hour : CustomOnItemSelectedListener.getTimeSelections()) {
 				PayOutRule dayTime = new PayOutRule(ClientController.getStorageHandler().getUserAccount().getId(), Integer.parseInt(hour.getText().toString()), day, payOutAddress);
-				transferObject.setPayOutRule(dayTime);
+				list.add(dayTime);
 			}
 		}
-		
+		transferObject.setPayOutRulesList(list);
 		launchPayOutRuleRequest(transferObject);
 	}
 	
 	private void launchResetRequest() {
 		showLoadingProgressDialog();
-		PayOutRuleResetRequestTask resetRequest = new PayOutRuleResetRequestTask(this);
+		PayOutRuleResetRequestTask resetRequest = new PayOutRuleResetRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+
+			public void onTaskComplete(TransferObject response) {
+				if (response.isSuccessful()) {
+					showDialog(getResources().getString(R.string.defined_rules_title), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), getResources().getString(R.string.reset_pay_out_rules));
+					createRuleView.setText("");
+				} else {
+					displayResponse(response.getMessage());
+				}
+				dismissProgressDialog();
+	            
+            }
+		}, new TransferObject(), new TransferObject());
 		resetRequest.execute();
 	}
 	
-	public void onTaskComplete(CustomResponseObject response) {
-		if (response.isSuccessful()) {
-			if (response.getPayOutRulesTO() != null) {
-				responseComplete(response.getPayOutRulesTO());
-			} else if (response.getMessage().equals(CREATION_SUCCESS)) {
-				createRuleView.setText("");
-				launchPayOutRuleGetRequest();
-				showDialog(getResources().getString(R.string.defined_rules_title), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), getResources().getString(R.string.defined_successfully));
-			} else if (response.getMessage().equals(RESET_SUCCESS)) {
-				showDialog(getResources().getString(R.string.defined_rules_title), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), getResources().getString(R.string.reset_pay_out_rules));
-				createRuleView.setText("");
-			}
-		} else {
-			displayResponse(response.getMessage());
-		}
-		dismissProgressDialog();
-	}
-	
-	private void responseComplete(PayOutRulesTransferObject porto) {
+	private void responseComplete(List<PayOutRule> rules) {
 		List<String> payOutRuleList = new ArrayList<String>();
 		
-		for (PayOutRule rule : porto.getPayOutRulesList()) {
-			if (rule.getBalanceLimit() == null) {
+		for (PayOutRule rule : rules) {
+			if (rule.getBalanceLimitBTC() == null) {
 				payOutRuleList.add(createDayTimeView(rule));
 			} else {
 				payOutRuleList.add(createBalanceView(rule));
@@ -224,7 +231,18 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements
 	}
 
 	private void launchPayOutRuleGetRequest() {
-		PayOutRuleGetRequestTask getRequest = new PayOutRuleGetRequestTask(this);
+		PayOutRuleGetRequestTask getRequest = new PayOutRuleGetRequestTask(new IAsyncTaskCompleteListener<PayOutRulesTransferObject>() {
+
+			public void onTaskComplete(PayOutRulesTransferObject response) {
+				if (response.isSuccessful()) {
+					responseComplete(response.getPayOutRulesList());
+				} else {
+					displayResponse(response.getMessage());
+				}
+				dismissProgressDialog();
+	            
+            }
+		}, new TransferObject(), new PayOutRulesTransferObject());
 		getRequest.execute();
 	}
 
@@ -321,7 +339,7 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity implements
 	private String createBalanceView(PayOutRule rule) {
 		String text = getResources().getString(R.string.display_balance_rule)+"\n";
 		text += getResources().getString(R.string.display_address) + rule.getPayoutAddress() + "\n";
-		text += getResources().getString(R.string.display_balance) + rule.getBalanceLimit() + " BTC\n";
+		text += getResources().getString(R.string.display_balance) + rule.getBalanceLimitBTC() + " BTC\n";
 		return text;
 	}
 	
