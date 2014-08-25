@@ -26,7 +26,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
-import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
 
