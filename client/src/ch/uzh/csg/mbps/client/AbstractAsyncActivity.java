@@ -23,8 +23,8 @@ import ch.uzh.csg.mbps.client.util.CustomDialogFragment;
  * tablet and sets the orientation appropriately.
  */
 public abstract class AbstractAsyncActivity extends FragmentActivity {
-	private MenuItem menuWarning; 
-    private MenuItem offlineMode; 
+	private MenuItem menuWarning;
+    private MenuItem offlineMode;
     
 	private ProgressDialog progressDialog;
 	private boolean destroyed = false;

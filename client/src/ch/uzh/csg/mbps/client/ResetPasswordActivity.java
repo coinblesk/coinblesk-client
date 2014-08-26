@@ -8,7 +8,6 @@ import android.widget.EditText;
 import ch.uzh.csg.mbps.client.request.PasswordResetRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.util.CheckFormatHandler;
-import ch.uzh.csg.mbps.responseobject.TransactionObject;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
 
 /**
@@ -53,6 +52,10 @@ public class ResetPasswordActivity extends AbstractAsyncActivity {
     	
 		if (CheckFormatHandler.isEmailValid(email)) {
 			showLoadingProgressDialog();
+			
+			TransferObject request = new TransferObject();
+			request.setMessage(email);
+			
 			RequestTask<TransferObject, TransferObject> resetPW = new PasswordResetRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 				@Override
 				public void onTaskComplete(TransferObject response) {
@@ -64,7 +67,7 @@ public class ResetPasswordActivity extends AbstractAsyncActivity {
 			    		displayResponse(response.getMessage());
 			    	}
 				}
-			}, new TransactionObject(), new TransactionObject());
+			}, request, new TransferObject());
 			resetPW.execute();
 		} else {
 			displayResponse(getResources().getString(R.string.registration_email_not_valid));

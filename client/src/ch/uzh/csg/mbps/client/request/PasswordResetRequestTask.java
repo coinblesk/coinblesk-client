@@ -1,5 +1,6 @@
 package ch.uzh.csg.mbps.client.request;
 
+import net.minidev.json.JSONObject;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
@@ -15,8 +16,10 @@ public class PasswordResetRequestTask extends RequestTask<TransferObject, Transf
 	}
 
 	@Override
-	protected TransferObject responseService(TransferObject tro) {
-		return execGet();
+	protected TransferObject responseService(TransferObject tro) throws Exception {
+		JSONObject jsonObject = new JSONObject();
+		tro.encode(jsonObject);
+		return execResetPassword(jsonObject);
 	}
 
 }

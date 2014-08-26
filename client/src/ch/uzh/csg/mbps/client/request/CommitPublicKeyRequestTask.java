@@ -21,7 +21,7 @@ public class CommitPublicKeyRequestTask extends RequestTask<CustomPublicKeyObjec
 	}
 
 	@Override
-	protected TransferObject responseService(CustomPublicKeyObject tro)  throws Exception {
+	protected TransferObject responseService(CustomPublicKeyObject tro) throws Exception {
 		JSONObject jsonObject = new JSONObject();
 		tro.encode(jsonObject);
 		return execPost(jsonObject);

@@ -89,13 +89,12 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity {
 				if (!saved) {
 					displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 				}
-				finish();
 				displayResponse(getResources().getString(R.string.updateAccount_successful));
 				dismissProgressDialog();
+				finish();
 			}
 		}, userObject, new TransferObject());
 		request.execute();
-
 	}
     
 }

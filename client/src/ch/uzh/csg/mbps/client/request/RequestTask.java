@@ -36,6 +36,8 @@ import ch.uzh.csg.mbps.responseobject.TransferObject;
  */
 public abstract class RequestTask<I extends TransferObject, O extends TransferObject> extends AsyncTask<Void, Void, O> {
 	
+	//TODO: clean up! comments/logs
+	
 	final private I requestObject;
 	final private O responseObject;
 	final private String url;
@@ -99,8 +101,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 		HttpPost post = new HttpPost(url);
         post.addHeader(CookieHandler.COOKIE_STRING, CookieHandler.JSESSIONID_STRING + CookieHandler.getCookie());
         
-        
-        if(postParameters!=null && !postParameters.isEmpty()) {
+		if (postParameters != null && !postParameters.isEmpty()) {
         	post.setEntity(new UrlEncodedFormEntity(postParameters));
         } else if (jsonObject != null) {
         	post.addHeader("Content-Type", "application/json;charset=UTF-8");
@@ -158,6 +159,8 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	public O execPost(JSONObject jsonObject) {
 		try {
         	//request
+			
+			//TODO: is this needed?
 			requestObject.encode(jsonObject);
         	HttpResponse response = executePost(jsonObject);
         	//reply
@@ -213,22 +216,17 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	
 	private void parseSessionID(HttpResponse response) {
 	    try {
-
 	        Header header = response.getFirstHeader("Set-Cookie");
 
 	        String value = header.getValue();
 	        if (value.contains("JSESSIONID")) {
 	            int index = value.indexOf("JSESSIONID=");
-
 	            int endIndex = value.indexOf(";", index);
-
-	            String sessionID = value.substring(
-	                    index + "JSESSIONID=".length(), endIndex);
+	            String sessionID = value.substring(index + "JSESSIONID=".length(), endIndex);
 
 	            if (sessionID != null) {
 	            	CookieHandler.setCookie(sessionID);
 	            }
-
 	        }
 	    } catch (Exception e) {
 	    }
@@ -283,5 +281,66 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
         	return createFailed(e.getMessage());
         }
 	}
+	
+	public O execResetPassword(JSONObject jsonObject) {
+//		try {
+//        	//request
+//			HttpClient httpclient = new DefaultHttpClient();
+//			HttpGet get = new HttpGet(url);
+//			get.addHeader("Accept", "application/json");
+//			HttpUriRequest request = get;
+//			
+//			HttpResponse response = httpclient.execute(request);
+//			
+//        	//reply
+//            StatusLine statusLine = response.getStatusLine();
+//            if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+//            	TimeHandler.getInstance().setStartTime();
+//            	responseObject.setSuccessful(true);
+//            	return responseObject;
+//            } else {
+//                //Closes the connection.
+//            	response.getEntity().getContent().close();
+//                return createFailed(statusLine.getReasonPhrase());
+//            }
+//        } catch (Exception e) {
+//        	e.printStackTrace();
+//        	return createFailed(e.getMessage());
+//        }
+		
+		try {
+	    	//request
+//			requestObject.encode(jsonObject);
+			
+			HttpClient httpclient = new DefaultHttpClient();
+			
+			HttpPost post = new HttpPost(url);
+        	post.addHeader("Content-Type", "application/json;charset=UTF-8");
+            post.addHeader("Accept", "application/json");
+        	post.setEntity(new StringEntity(jsonObject.toString(), "UTF-8"));
+			
+			HttpResponse response = httpclient.execute(post);
+			
+	    	//reply
+	        StatusLine statusLine = response.getStatusLine();
+	        if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+	        	TimeHandler.getInstance().setStartTime();
+	        	HttpEntity entity1 = response.getEntity();
+	        	String responseString = EntityUtils.toString(entity1);
+	        	if(responseString != null && responseString.trim().length() > 0) {
+	        		responseObject.decode(responseString);
+	        	}
+	        	return responseObject;
+	        } else{
+	            //Closes the connection.
+	            response.getEntity().getContent().close();
+	            return createFailed(statusLine.getReasonPhrase());
+	        }
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    	return createFailed( e.getMessage());
+	    }
+	}
+	
 	
 }
