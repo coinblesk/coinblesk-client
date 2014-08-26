@@ -545,5 +545,10 @@ public class InternalStorageHandler implements IPersistencyHandler {
 		}
 		return null;
 	}
+	
+	public Set<PersistedPaymentRequest> getPersistedPaymentRequests() {
+		initPersistedPaymentRequests();
+		return persistedPaymentRequests;
+	}
 
 }
