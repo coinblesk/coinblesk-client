@@ -23,7 +23,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import android.os.AsyncTask;
-import android.util.Log;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
 import ch.uzh.csg.mbps.client.util.ClientController;
@@ -36,18 +35,10 @@ import ch.uzh.csg.mbps.responseobject.TransferObject;
  */
 public abstract class RequestTask<I extends TransferObject, O extends TransferObject> extends AsyncTask<Void, Void, O> {
 	
-	//TODO: clean up! comments/logs
-	
 	final private I requestObject;
 	final private O responseObject;
 	final private String url;
 	final private IAsyncTaskCompleteListener<O> callback;
-	
-	//List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
-    //postParameters.add(new BasicNameValuePair("param1", "param1_value"));
-    //postParameters.add(new BasicNameValuePair("param2", "param2_value"));
-	
-	// = new LinkedMultiValueMap<String, String>()
 	
 	public RequestTask(I requestObject, O responseObject, String url, IAsyncTaskCompleteListener<O> callback) {
 		this.requestObject = requestObject;
@@ -127,41 +118,29 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	}
 	
 	private HttpResponse executePost(List<NameValuePair> postParameters) throws ClientProtocolException, IOException {
-		final long start = System.currentTimeMillis();
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost post = createPost(url, null, postParameters);
 		HttpResponse response = httpclient.execute(post);
-		final long diff = System.currentTimeMillis() - start;
-		Log.i("ch.uzh.csg.mbps.client.request.RequestTask", "request Post completed in "+diff+"ms");
 		return response;
     }
 	
 	public HttpResponse executePost(JSONObject jsonObject) throws ClientProtocolException, IOException {
-		final long start = System.currentTimeMillis();
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost post = createPost(url, jsonObject, null);
 		HttpResponse response = httpclient.execute(post);
-		final long diff = System.currentTimeMillis() - start;
-		Log.i("ch.uzh.csg.mbps.client.request.RequestTask", "request Post completed in "+diff+"ms");
 		return response;
 	}
 	
 	public HttpResponse executeGet() throws ClientProtocolException, IOException {
-		final long start = System.currentTimeMillis();
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpUriRequest request = createGet(url);
 		HttpResponse response = httpclient.execute(request);
-		final long diff = System.currentTimeMillis() - start;
-		Log.i("ch.uzh.csg.mbps.client.request.RequestTask", "request Get completed in "+diff+"ms");
 		return response;
 	}
 	
 	public O execPost(JSONObject jsonObject) {
 		try {
         	//request
-			
-			//TODO: is this needed?
-			requestObject.encode(jsonObject);
         	HttpResponse response = executePost(jsonObject);
         	//reply
             StatusLine statusLine = response.getStatusLine();
@@ -283,37 +262,9 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	}
 	
 	public O execResetPassword(JSONObject jsonObject) {
-//		try {
-//        	//request
-//			HttpClient httpclient = new DefaultHttpClient();
-//			HttpGet get = new HttpGet(url);
-//			get.addHeader("Accept", "application/json");
-//			HttpUriRequest request = get;
-//			
-//			HttpResponse response = httpclient.execute(request);
-//			
-//        	//reply
-//            StatusLine statusLine = response.getStatusLine();
-//            if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-//            	TimeHandler.getInstance().setStartTime();
-//            	responseObject.setSuccessful(true);
-//            	return responseObject;
-//            } else {
-//                //Closes the connection.
-//            	response.getEntity().getContent().close();
-//                return createFailed(statusLine.getReasonPhrase());
-//            }
-//        } catch (Exception e) {
-//        	e.printStackTrace();
-//        	return createFailed(e.getMessage());
-//        }
-		
 		try {
 	    	//request
-//			requestObject.encode(jsonObject);
-			
 			HttpClient httpclient = new DefaultHttpClient();
-			
 			HttpPost post = new HttpPost(url);
         	post.addHeader("Content-Type", "application/json;charset=UTF-8");
             post.addHeader("Accept", "application/json");
@@ -341,6 +292,5 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	    	return createFailed( e.getMessage());
 	    }
 	}
-	
 	
 }
