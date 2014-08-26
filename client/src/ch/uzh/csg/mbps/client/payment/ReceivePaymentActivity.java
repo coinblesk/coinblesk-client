@@ -363,7 +363,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 				initializeNFC(paymentInfos);
 			} catch (Exception e) {
 				displayResponse(getResources().getString(
-						R.string.unexcepted_error) + e.getMessage());
+						R.string.unexcepted_error));
 			}
 			showNfcInstructions();
 		} else {
