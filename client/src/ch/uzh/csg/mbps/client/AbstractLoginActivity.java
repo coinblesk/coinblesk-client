@@ -60,7 +60,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 		RequestTask<TransferObject, TransferObject> signIn = new SignInRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 			@Override
 			public void onTaskComplete(TransferObject response) {
-				init();
+				init(context);
 				if(response.isSuccessful()) {
 					launchReadRequest(context);
 				} else {
@@ -160,8 +160,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 		timer.start();
 	}
 	
-	public void init() {	    
-	    Context context = getApplicationContext();
+	public void init(Context context) {	    
 	    if (!clientControllerInitialized) {
 			try {
 				boolean init = ClientController.init(context, username, password);
