@@ -149,22 +149,29 @@ public class PayOutActivity extends AbstractAsyncActivity {
 
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
-					String message = String.format(getResources().getString(R.string.payOut_successful), response.getMessage());
-					showDialog(getResources().getString(R.string.title_activity_pay_out), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), message);
-					BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
-					
-					boolean saved = ClientController.getStorageHandler().setUserBalance(balance.subtract(payOutAmount));
-					if (!saved) {
-						displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+					if(response.isSuccessful()){
+						String message = String.format(getResources().getString(R.string.payOut_successful), response.getMessage());
+						showDialog(getResources().getString(R.string.title_activity_pay_out), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), message);
+						BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
+						
+						boolean saved = ClientController.getStorageHandler().setUserBalance(balance.subtract(payOutAmount));
+						if (!saved) {
+							displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+						}
+						
+						balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
+						CurrencyViewHandler.setBTC(btcBalance,balance, getApplicationContext());
+						CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
+						chfAmount.setText("");
+						payoutAmountEditText.setText("");
+						payoutAddress.setText("");
+					} else if (response.getMessage().equals("PAYOUT_ERROR_ADDRESS")) {
+						displayResponse(getResources().getString(R.string.payOut_error_address));
+					} else if (response.getMessage().equals("PAYOUT_ERROR_BALANCE")) {
+						displayResponse(getResources().getString(R.string.payOut_error_balance));
+					} else {
+						displayResponse(response.getMessage());
 					}
-					
-					balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
-					CurrencyViewHandler.setBTC(btcBalance,balance, getApplicationContext());
-					CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
-					chfAmount.setText("");
-					payoutAmountEditText.setText("");
-					payoutAddress.setText("");
-	                
                 }
 			}, pot, new TransferObject());
 			payOut.execute();
