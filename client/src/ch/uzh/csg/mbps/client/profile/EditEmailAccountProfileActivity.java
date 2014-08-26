@@ -61,7 +61,7 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity {
     	} else {
     		showLoadingProgressDialog();
     		UserAccountObject user = new UserAccountObject();
-    		user.setPassword(emailString);
+    		user.setEmail(emailString);
     		RequestTask<UserAccountObject, TransferObject> request = new UpdateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
     			public void onTaskComplete(TransferObject response) {
     				dismissProgressDialog();
