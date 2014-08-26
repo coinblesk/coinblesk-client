@@ -345,7 +345,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	}
 
 	private void initializePayment() {
-		receiveAmount = Constants.inputValueCalculator.toString();
+		receiveAmount = Constants.inputValueCalculator.toPlainString();
 		if (isPortrait) {
 			receiveAmountEditText.setText(receiveAmount);
 		} else {
@@ -363,7 +363,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 				initializeNFC(paymentInfos);
 			} catch (Exception e) {
 				displayResponse(getResources().getString(
-						R.string.unexcepted_error));
+						R.string.unexcepted_error) + e.getMessage());
 			}
 			showNfcInstructions();
 		} else {
