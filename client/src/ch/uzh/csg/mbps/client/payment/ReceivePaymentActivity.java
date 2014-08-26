@@ -290,7 +290,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 						CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
 						TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
 						balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
-						//TODO: finish() on	REST_CLIENT_ERROR and launchActivity(this, MainActivity.class);?
 					}
 				}
 			}, new TransferObject(), new TransferObject());
@@ -617,7 +616,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 			RequestTask<TransactionObject, TransactionObject> transactionRequest = new TransactionRequestTask(new IAsyncTaskCompleteListener<TransactionObject>() {
 				public void onTaskComplete(TransactionObject response) {
 					if (!response.isSuccessful()) {
-						displayResponse(response.getMessage());
+						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
+							displayResponse(getResources().getString(R.string.no_connection_server));
+							finish();
+							launchActivity(ReceivePaymentActivity.this, MainActivity.class);
+						} else {
+							displayResponse(response.getMessage());
+						}
 						return;
 					}
 					onTaskCompletTransaction(response.getServerPaymentResponse(), response.getBalanceBTC());
@@ -643,11 +648,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 			ClientController.getStorageHandler().setUserBalance(balance);
 		}
 		responseListener.onServerResponse(serverPaymentResponse);
-		
-		//on error?
-		//displayResponse(getResources().getString(R.string.no_connection_server));
-		//finish();
-		//launchActivity(this, MainActivity.class);
 	}
 	
 	

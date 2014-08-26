@@ -222,7 +222,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 		CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
 		TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
 		balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
-		//TODO: finish() on	REST_CLIENT_ERROR and launchActivity(this, MainActivity.class);?
 	}
 
 	private void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
@@ -241,7 +240,13 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 				public void onTaskComplete(TransactionObject response) {
 					dismissProgressDialog();
 					if (!response.isSuccessful()) {
-						displayResponse(response.getMessage());
+						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
+							displayResponse(getResources().getString(R.string.no_connection_server));
+							finish();
+							launchActivity(SendPaymentActivity.this, MainActivity.class);
+						} else {
+							displayResponse(response.getMessage());
+						}
 						return;
 					}
 					onTaskCompletTransaction(response.getServerPaymentResponse());
