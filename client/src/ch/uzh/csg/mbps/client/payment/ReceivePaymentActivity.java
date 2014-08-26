@@ -345,7 +345,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	}
 
 	private void initializePayment() {
-		receiveAmount = Constants.inputValueCalculator.toString();
+		receiveAmount = Constants.inputValueCalculator.toPlainString();
 		if (isPortrait) {
 			receiveAmountEditText.setText(receiveAmount);
 		} else {

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import android.app.ActionBar;
 import android.content.Context;
@@ -22,6 +23,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,6 +41,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener;
 import ch.uzh.csg.mbps.client.payment.AbstractPaymentActivity;
+import ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity;
 import ch.uzh.csg.mbps.client.request.MainActivityRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.security.KeyHandler;
@@ -50,6 +53,8 @@ import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.customserialization.Currency;
 import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
 import ch.uzh.csg.mbps.customserialization.PaymentResponse;
+import ch.uzh.csg.mbps.customserialization.ServerPaymentRequest;
+import ch.uzh.csg.mbps.customserialization.exceptions.UnknownCurrencyException;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
@@ -64,9 +69,12 @@ import ch.uzh.csg.paymentlib.IUserPromptAnswer;
 import ch.uzh.csg.paymentlib.IUserPromptPaymentRequest;
 import ch.uzh.csg.paymentlib.PaymentEvent;
 import ch.uzh.csg.paymentlib.PaymentRequestHandler;
+import ch.uzh.csg.paymentlib.PaymentRequestInitializer;
+import ch.uzh.csg.paymentlib.PaymentRequestInitializer.PaymentType;
 import ch.uzh.csg.paymentlib.container.ServerInfos;
 import ch.uzh.csg.paymentlib.container.UserInfos;
 import ch.uzh.csg.paymentlib.messages.PaymentError;
+import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
 /**
  * This class shows the main view of the user with the balance of the user's
@@ -251,6 +259,8 @@ public class MainActivity extends AbstractPaymentActivity {
 					if(ClientController.isOnline()){
 						startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 					}
+					Set<PersistedPaymentRequest> requests = ClientController.getStorageHandler().getPersistedPaymentRequests();
+					removePersistedPaymentRequests(response.getGetHistoryTransferObject().getTransactionHistory(), requests);
 				} else if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
 					launchOfflineMode(getApplicationContext());
 					invalidateOptionsMenu();
@@ -258,9 +268,34 @@ public class MainActivity extends AbstractPaymentActivity {
 					lastTransactionsTitle.setVisibility(View.INVISIBLE);
 				} 
 			}
+
+			
 		}, new TransferObject(), new MainRequestObject());
 		getMainActivityValues.execute();
 	}
+	
+	/**
+	 * This will remove the persisted request entries that we received from the server. If the server confirms, we can remove this request.
+	 */
+	private void removePersistedPaymentRequests(List<HistoryTransaction> transactionHistory, Set<PersistedPaymentRequest> requests) {
+        for(HistoryTransaction transaction: transactionHistory) {
+        	for(PersistedPaymentRequest request:requests) {
+        		if(request.getAmount() == Converter.getLongFromBigDecimal(transaction.getAmount())) {
+        			if(request.getUsername().equals(transaction.getSeller())) {
+        				try {
+	                        if(request.getCurrency().getCurrencyCode().equals("BTC")) {
+	                        	ClientController.getStorageHandler().deletePersistedPaymentRequest(request);
+	                        	Log.e("ASDF2", "removed: "+request);
+	                        }
+                        } catch (UnknownCurrencyException e) {
+	                        
+                        }
+        			}
+        		}
+        	}
+        }
+        
+    }
 
 	/**
 	 * Sort HistoryTransactions received from server according to timestamp and

@@ -328,7 +328,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 		calculatorDialogFragment.setOnDismissListener(new OnDismissListener() {
 
 			public void onDismiss(DialogInterface dialog) {
-				sendAmount.setText(Constants.inputValueCalculator.toString());
+				sendAmount.setText(Constants.inputValueCalculator.toPlainString());
 				refreshCurrencyTextViews();
 			}
 		});
