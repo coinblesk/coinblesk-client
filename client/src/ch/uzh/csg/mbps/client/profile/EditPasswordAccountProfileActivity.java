@@ -74,7 +74,6 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity {
 		UserAccountObject userObject = new UserAccountObject();
 		userObject.setUsername(user.getUsername());
 		userObject.setPassword(user.getPassword());
-		userObject.setEmail(user.getEmail());
 		RequestTask<UserAccountObject, TransferObject> request = new UpdateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 			public void onTaskComplete(TransferObject response) {
 				if (!response.isSuccessful()) {
