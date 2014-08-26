@@ -377,6 +377,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 			paymentRequestInitializer = null;
 		}
 		hideNfcInstructions();
+		Constants.inputValueCalculator = BigDecimal.ZERO;
 		receiveAmount = "0";
 		if (isPortrait) {
 			receiveAmountEditText.setText(receiveAmount);
@@ -474,6 +475,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 				descriptionOfInputUnit.setText(Constants.inputUnit);
 			}
 			refreshCurrencyTextViews();
+			initializePayment();
 		}
 
 		public void onNothingSelected(AdapterView<?> parent) {
