@@ -41,6 +41,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 	private MenuItem sessionRefreshMenuItem;
 	private TextView sessionCountdown;
 	private CountDownTimer timer;
+	private boolean wrongPassword = false;
 
 	protected static CustomKeyPair customKeyPair;
 
@@ -166,6 +167,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 				boolean init = ClientController.init(context, username, password);
 				clientControllerInitialized = init;
 			} catch (WrongPasswordException e) {
+				wrongPassword = true;
 				displayResponse(context.getResources().getString(R.string.invalid_password));
 				clientControllerInitialized = false;
 			}
@@ -181,6 +183,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 		if (ClientController.getStorageHandler().getUserAccount() != null) {
 			launchMainActivity(context);
 		} else {
+			if(!wrongPassword)
 			displayResponse(context.getResources().getString(R.string.establish_internet_connection));
 		}
 	}
