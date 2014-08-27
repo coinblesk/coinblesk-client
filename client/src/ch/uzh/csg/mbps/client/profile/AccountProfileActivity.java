@@ -101,16 +101,18 @@ public class AccountProfileActivity extends AbstractAsyncActivity {
 			public void onTaskComplete(TransferObject response) {
 				dismissProgressDialog();
 				if (response.isSuccessful()) {
+					//TODO: delete xml file?
 					ClientController.clear();
 					launchActivity();
-				} else if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+				} else if (response.getMessage().equals(Constants.CONNECTION_ERROR)) {
 					reload(getIntent());
 					invalidateOptionsMenu();
+				} else {
+					//TODO: what else? fix
 				}
 				displayResponse(response.getMessage());
             }
-		}
-		, new TransferObject(), new TransferObject());
+		} , new TransferObject(), new TransferObject());
 		delete.execute();
 	}
 	

@@ -268,17 +268,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
 					dismissNfcInProgressDialog();
-					if (!response.isSuccessful()) {
-						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
-							displayResponse(getResources().getString(R.string.no_connection_server));
-							finish();
-							launchActivity(ReceivePaymentActivity.this, MainActivity.class);
-						} else {
-							displayResponse(response.getMessage());
-						}
-						return;
-					} 
-					 else {
+					if (response.isSuccessful()) {
 						CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
 						//renew Session Timeout Countdown
 						if(ClientController.isOnline()){
@@ -290,6 +280,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 						CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
 						TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
 						balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
+					} else {
+						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
+							displayResponse(getResources().getString(R.string.no_connection_server));
+							finish();
+							launchActivity(ReceivePaymentActivity.this, MainActivity.class);
+						} else {
+							displayResponse(response.getMessage());
+						}
 					}
 				}
 			}, new TransferObject(), new TransferObject());

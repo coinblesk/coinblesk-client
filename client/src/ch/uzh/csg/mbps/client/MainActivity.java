@@ -41,7 +41,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener;
 import ch.uzh.csg.mbps.client.payment.AbstractPaymentActivity;
-import ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity;
 import ch.uzh.csg.mbps.client.request.MainActivityRequestTask;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.security.KeyHandler;
@@ -53,7 +52,6 @@ import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.customserialization.Currency;
 import ch.uzh.csg.mbps.customserialization.PKIAlgorithm;
 import ch.uzh.csg.mbps.customserialization.PaymentResponse;
-import ch.uzh.csg.mbps.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.mbps.customserialization.exceptions.UnknownCurrencyException;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
@@ -69,8 +67,6 @@ import ch.uzh.csg.paymentlib.IUserPromptAnswer;
 import ch.uzh.csg.paymentlib.IUserPromptPaymentRequest;
 import ch.uzh.csg.paymentlib.PaymentEvent;
 import ch.uzh.csg.paymentlib.PaymentRequestHandler;
-import ch.uzh.csg.paymentlib.PaymentRequestInitializer;
-import ch.uzh.csg.paymentlib.PaymentRequestInitializer.PaymentType;
 import ch.uzh.csg.paymentlib.container.ServerInfos;
 import ch.uzh.csg.paymentlib.container.UserInfos;
 import ch.uzh.csg.paymentlib.messages.PaymentError;
@@ -268,8 +264,6 @@ public class MainActivity extends AbstractPaymentActivity {
 					lastTransactionsTitle.setVisibility(View.INVISIBLE);
 				} 
 			}
-
-			
 		}, new TransferObject(), new MainRequestObject());
 		getMainActivityValues.execute();
 	}

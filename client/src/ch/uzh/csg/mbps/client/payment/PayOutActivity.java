@@ -197,23 +197,19 @@ public class PayOutActivity extends AbstractAsyncActivity {
 			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
-					if (!response.isSuccessful()) {
+					if (response.isSuccessful()) {
+						exchangeRate = new BigDecimal(response.getMessage());
+						CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payout_exchangeRate));
+						CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalanceBTC());
+					} else {
 						exchangeRate = BigDecimal.ZERO;
 						displayResponse(response.getMessage());
 						chfBalance.setText("");
-						return;
 					}
-					onTaskCompleteExchangeRate(response.getMessage());
 				}
 			},  new TransferObject(),  new TransferObject());
 			request.execute();
 		}
-	}
-	
-	private void onTaskCompleteExchangeRate(String exchangeRateNew) {
-		exchangeRate = new BigDecimal(exchangeRateNew);
-		CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payout_exchangeRate));
-		CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalanceBTC());
 	}
 	
 	/**

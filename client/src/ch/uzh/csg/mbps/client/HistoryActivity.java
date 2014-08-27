@@ -251,12 +251,11 @@ public class HistoryActivity extends AbstractAsyncActivity {
 						}
 					} else {
 						ghto = null;
-						if (response.getMessage().equals(Constants.REST_CLIENT_ERROR)) {
+						if (response.getMessage().equals(Constants.CONNECTION_ERROR)) {
 							reload(getIntent());
 							invalidateOptionsMenu();
 						}
 					}
-					
 				}
 			}, request, new GetHistoryTransferObject());
 			getHistory.execute();
@@ -499,7 +498,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 			TransferObject input = new TransferObject();
 			input.setMessage(Integer.toString(type));
 			RequestTask<TransferObject, TransferObject> getHistory = new HistoryEmailRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
-				
+				@Override
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
 					

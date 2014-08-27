@@ -20,6 +20,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
 import android.os.AsyncTask;
@@ -34,6 +37,9 @@ import ch.uzh.csg.mbps.responseobject.TransferObject;
  * to notify the caller when the response arrives. 
  */
 public abstract class RequestTask<I extends TransferObject, O extends TransferObject> extends AsyncTask<Void, Void, O> {
+	
+	private static final int HTTP_CONNECTION_TIMEOUT = 3 * 1000;
+	private static final int HTTP_SOCKET_TIMEOUT = 5 * 1000;
 	
 	final private I requestObject;
 	final private O responseObject;
@@ -105,7 +111,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	private static HttpGet createGet(String url) throws UnsupportedEncodingException {
 		HttpGet get = new HttpGet(url);
 		get.addHeader(CookieHandler.COOKIE_STRING, CookieHandler.JSESSIONID_STRING + CookieHandler.getCookie());
-		//get.addHeader("Content-Type", "application/json;charset=UTF-8");
 		get.addHeader("Accept", "application/json");
         return get;
 	}
@@ -118,24 +123,31 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	}
 	
 	private HttpResponse executePost(List<NameValuePair> postParameters) throws ClientProtocolException, IOException {
-		HttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = createDefaultHttpClient();
 		HttpPost post = createPost(url, null, postParameters);
 		HttpResponse response = httpclient.execute(post);
 		return response;
     }
 	
 	public HttpResponse executePost(JSONObject jsonObject) throws ClientProtocolException, IOException {
-		HttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = createDefaultHttpClient();
 		HttpPost post = createPost(url, jsonObject, null);
 		HttpResponse response = httpclient.execute(post);
 		return response;
 	}
 	
 	public HttpResponse executeGet() throws ClientProtocolException, IOException {
-		HttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = createDefaultHttpClient();
 		HttpUriRequest request = createGet(url);
 		HttpResponse response = httpclient.execute(request);
 		return response;
+	}
+	
+	private DefaultHttpClient createDefaultHttpClient() {
+		HttpParams httpParams = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams, HTTP_CONNECTION_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(httpParams, HTTP_SOCKET_TIMEOUT);
+		return new DefaultHttpClient(httpParams);
 	}
 	
 	public O execPost(JSONObject jsonObject) {
@@ -152,14 +164,24 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             		responseObject.decode(responseString);
             	}
             	return responseObject;
-            } else{
+            } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+            	ClientController.setOnlineMode(false);
+	        	TimeHandler.getInstance().setStartTime();
+	        	
+	        	responseObject.setUnauthorized();
+        		responseObject.setMessage(statusLine.getReasonPhrase());
+        		responseObject.setVersion(-1);
+        		return responseObject;
+            } else {
                 //Closes the connection.
                 response.getEntity().getContent().close();
                 return createFailed(statusLine.getReasonPhrase());
             }
         } catch (Exception e) {
+        	ClientController.setOnlineMode(false);
+        	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
-        	return createFailed( e.getMessage());
+        	return createFailed(e.getMessage());
         }
 	}
 	
@@ -182,14 +204,24 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             		responseObject.setSuccessful(true);
             	}
             	return responseObject;
+            } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+            	ClientController.setOnlineMode(false);
+	        	TimeHandler.getInstance().setStartTime();
+	        	
+	        	responseObject.setUnauthorized();
+        		responseObject.setMessage(statusLine.getReasonPhrase());
+        		responseObject.setVersion(-1);
+        		return responseObject;
             } else{
                 //Closes the connection.
                 response.getEntity().getContent().close();
                 return createFailed(statusLine.getReasonPhrase());
             }
         } catch (Exception e) {
+        	ClientController.setOnlineMode(false);
+        	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
-        	return createFailed( e.getMessage());
+        	return createFailed(e.getMessage());
         }
 	}
 	
@@ -225,7 +257,15 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             		responseObject.decode(responseString);
             	}
             	return responseObject;
-            } else{
+            } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+            	ClientController.setOnlineMode(false);
+	        	TimeHandler.getInstance().setStartTime();
+	        	
+	        	responseObject.setUnauthorized();
+        		responseObject.setMessage(statusLine.getReasonPhrase());
+        		responseObject.setVersion(-1);
+        		return responseObject;
+            } else {
                 //Closes the connection.
             	ClientController.setOnlineMode(false);
             	TimeHandler.getInstance().setStartTime();
@@ -236,7 +276,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
         	ClientController.setOnlineMode(false);
         	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
-        	return createFailed( e.getMessage());
+        	return createFailed(e.getMessage());
         }
 	}
 	
@@ -256,6 +296,8 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
                 return createFailed(statusLine.getReasonPhrase());
             }
         } catch (Exception e) {
+        	ClientController.setOnlineMode(false);
+        	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
         	return createFailed(e.getMessage());
         }
@@ -264,7 +306,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	public O execResetPassword(JSONObject jsonObject) {
 		try {
 	    	//request
-			HttpClient httpclient = new DefaultHttpClient();
+			HttpClient httpclient = createDefaultHttpClient();
 			HttpPost post = new HttpPost(url);
         	post.addHeader("Content-Type", "application/json;charset=UTF-8");
             post.addHeader("Accept", "application/json");
@@ -282,14 +324,24 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	        		responseObject.decode(responseString);
 	        	}
 	        	return responseObject;
-	        } else{
+	        } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+	        	ClientController.setOnlineMode(false);
+	        	TimeHandler.getInstance().setStartTime();
+	        	
+	        	responseObject.setUnauthorized();
+        		responseObject.setMessage(statusLine.getReasonPhrase());
+        		responseObject.setVersion(-1);
+        		return responseObject;
+            } else {
 	            //Closes the connection.
 	            response.getEntity().getContent().close();
 	            return createFailed(statusLine.getReasonPhrase());
 	        }
 	    } catch (Exception e) {
+	    	ClientController.setOnlineMode(false);
+        	TimeHandler.getInstance().setStartTime();
 	    	e.printStackTrace();
-	    	return createFailed( e.getMessage());
+	    	return createFailed(e.getMessage());
 	    }
 	}
 	

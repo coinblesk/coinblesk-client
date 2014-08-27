@@ -63,6 +63,9 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 				init(context);
 				if(response.isSuccessful()) {
 					launchReadRequest(context);
+				} else if (response.isUnauthorized()) {
+					dismissProgressDialog();
+					displayResponse(context.getResources().getString(R.string.error_login));
 				} else {
 					launchOfflineMode(context);
 				}
@@ -182,8 +185,8 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 		if (ClientController.getStorageHandler().getUserAccount() != null) {
 			launchMainActivity(context);
 		} else {
-			if(!wrongPassword)
-			displayResponse(context.getResources().getString(R.string.establish_internet_connection));
+			if (!wrongPassword)
+				displayResponse(context.getResources().getString(R.string.establish_internet_connection));
 		}
 	}
 
@@ -246,18 +249,27 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 		RequestTask<CustomPublicKeyObject, TransferObject> task = new CommitPublicKeyRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 			@Override
 			public void onTaskComplete(TransferObject response) {
-				String keyNr = response.getMessage();
-				byte keyNumber = Byte.parseByte(keyNr);
-
-				CustomKeyPair ckp = new CustomKeyPair(customKeyPair.getPkiAlgorithm(), keyNumber, customKeyPair.getPublicKey(), customKeyPair.getPrivateKey());
-				boolean saved = ClientController.getStorageHandler().saveKeyPair(ckp);
-				if (!saved) {
-					displayResponse(context.getResources().getString(R.string.error_xmlSave_failed));
-				}
-
 				dismissProgressDialog();
-				ClientController.setOnlineMode(true);
-				launchMainActivity(context);
+				if (response.isSuccessful()) {
+					String keyNr = response.getMessage();
+					byte keyNumber = Byte.parseByte(keyNr);
+					
+					CustomKeyPair ckp = new CustomKeyPair(customKeyPair.getPkiAlgorithm(), keyNumber, customKeyPair.getPublicKey(), customKeyPair.getPrivateKey());
+					boolean saved = ClientController.getStorageHandler().saveKeyPair(ckp);
+					if (!saved) {
+						displayResponse(context.getResources().getString(R.string.error_xmlSave_failed));
+					}
+					
+					dismissProgressDialog();
+					ClientController.setOnlineMode(true);
+					launchMainActivity(context);
+				} else if (response.isUnauthorized()) {
+					//TODO: what else? fix
+					dismissProgressDialog();
+				} else {
+					//TODO: what else? fix
+					dismissProgressDialog();
+				}
 			}
 		}, cpko, new CustomPublicKeyObject());
 		task.execute();

@@ -192,7 +192,9 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
-					if (!response.isSuccessful()) {
+					if (response.isSuccessful()) {
+						onTaskCompleteExchangeRate(response.getMessage());
+					} else {
 						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
 							displayResponse(getResources().getString(R.string.no_connection_server));
 							finish();
@@ -202,7 +204,6 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 						}
 						return;
 					}
-					onTaskCompleteExchangeRate(response.getMessage());
 				}
 			}, new TransferObject(), new TransferObject());
 			request.execute();

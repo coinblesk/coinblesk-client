@@ -9,7 +9,6 @@ import ch.uzh.csg.mbps.responseobject.TransferObject;
  * This class sends a request to get an email of the desired transactions
  * (common transaction, pay in transaction, pay out transaction).
  */
-//TODO: not used?
 public class HistoryEmailRequestTask extends RequestTask<TransferObject, TransferObject> {
 	
 	public static final int TRANSACTION_HISTORY = 0;

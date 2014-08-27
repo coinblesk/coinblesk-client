@@ -54,8 +54,7 @@ public class ClientController {
 		} catch (Exception e) {
 			if (e instanceof WrongPasswordException) {
 				throw new WrongPasswordException(e.getMessage());
-			}
-			else {
+			} else {
 				return false;
 			}
 		}
