@@ -296,8 +296,10 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 			}
 		} else if (paymentResponsePayer.getStatus() == ServerResponseStatus.DUPLICATE_REQUEST) {
 			showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, getResources().getString(R.string.transaction_duplicate_error));
+		} else if (paymentResponsePayer.getReason().equals("BALANCE")){
+			showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, getResources().getString(R.string.sendPayment_balance_error));
 		} else {
-			showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, paymentResponsePayer.getReason());
+			showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, getResources().getString(R.string.transaction_server_rejected));
 		}
 	}
 

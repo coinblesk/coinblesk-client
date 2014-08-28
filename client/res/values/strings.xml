@@ -134,6 +134,7 @@
     <string name="sendPayment_dialog_title">Confirm Transaction</string>
     <string name="sendPayment_dialog_message">By your confirmation %1$s are sent to %2$s.</string>
     <string name="sendPayment_dialog_confirm">Send</string>
+    <string name="sendPayment_balance_error">Your account has not enough funds to do this transaction.</string>
 
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">You paid %1$s to %2$s</string>

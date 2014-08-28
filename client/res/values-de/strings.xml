@@ -134,6 +134,7 @@
     <string name="sendPayment_dialog_title">Transaktion überprüfen</string>
     <string name="sendPayment_dialog_message">Durch Ihre Bestätigung werden %1$s an %2$s gesendet.</string>
     <string name="sendPayment_dialog_confirm">Senden</string>
+    <string name="sendPayment_balance_error">Ihr Konto verfügt nicht über eine genügende Deckung zur Zahlung dieses Betrags.</string>
 
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">Sie haben %1$s an %2$s gesendet.</string>
