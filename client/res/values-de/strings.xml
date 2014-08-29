@@ -351,7 +351,7 @@
     <string name="transaction_server_rejected_balance">Die Transaktion wurde vom Server zurückgewiesen. Käufer hat ungenügende Kontendeckung.</string>
     <string name="error_nfc_initializing">Fehler bei Initialisierung von NFC. Zahlungen können eventuell nicht durchgeführt werden.</string>
     <string name="error_login">Falscher Benutzername, falsches Passwort oder Emailadresse wurde nicht verifiziert.</string>
-    
+    <string name="error_no_connection_before_login">Verbindung zum Server konnte nicht hergestellt werden.\nBitte überprüfen Sie ihre Internetverbindung.</string>
     <!-- NFC Activation -->
     <string name="nfc_enable_title">NFC Information</string>
     <string name="nfc_enable_message">Um diese Applikation benutzen zu können müssen Sie NFC (Near Field Communication) in den Geräte-Einstellungen aktivieren.</string>

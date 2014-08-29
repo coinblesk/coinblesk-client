@@ -352,7 +352,7 @@
     <string name="transaction_server_rejected_balance">The server rejected the transaction. Payer has insufficient funds.</string>
     <string name="error_nfc_initializing">Error occurred while preparing for NFC Payments. Payments eventually can\'t be done properly.</string>
      <string name="error_login">Wrong username, wrong password or unverified email address.</string>
-     
+     <string name="error_no_connection_before_login">No connection to server.\nPlease check your internet connection.</string>
      <!-- NFC Activation -->
     <string name="nfc_enable_title">NFC Information</string>
     <string name="nfc_enable_message">To use this application you need to enable NFC (Near Field Communication) in your device settings.</string>
