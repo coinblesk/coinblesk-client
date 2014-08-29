@@ -97,6 +97,12 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 		setUpGui();
 		refreshCurrencyTextViews();
 	}
+	
+	@Override
+	public void onPause() {
+		Constants.inputValueCalculator = BigDecimal.ZERO;
+		super.onPause();
+	}
 
 	@Override
 	public void onResume() {
