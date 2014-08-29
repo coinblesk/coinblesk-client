@@ -61,7 +61,7 @@
         Universität Zürich entwickelt.\nWir übernehmen keine Verantwortung für den Verlust Ihrer Bitcoins im Falle eines Systems / Hardware Fehlers 
         oder bei böswilligem Einfluss durch Dritte. Bitte seien Sie sich bewusst, dass diese Applikation immer noch im Beta-Stadium ist und Fehler 
         auftreten können.
-        \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics\nSmartphone Grundlage für animierte NFC Grafik:Smartphone by Matthieu Mercier from The Noun Project</string>
+        \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics\nSmartphone Grundlage für animierte NFC Grafik:Smartphone by Matthieu Mercier from The Noun Project	</string>
     <string name="termOfUseImageCloseBtn">AGBs schliessen</string>
     <string name="createAccountSuccessful">Bestätigung der Registrierung</string>
 
@@ -283,7 +283,8 @@
        Universität Zürich entwickelt.\nWir übernehmen keine Verantwortung für den Verlust Ihrer Bitcoins im Falle eines Systems / Hardware Fehlers 
        oder bei böswilligem Einfluss durch Dritte. Bitte seien Sie sich bewusst, dass diese Applikation immer noch im Beta-Stadium ist und Fehler 
        auftreten können.\n\nKontakt: bitcoin@ifi.uzh.ch\n
-       \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics	</string>
+       \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics\nSmartphone Grundlage für animierte NFC Grafik:Smartphone by Matthieu Mercier from The Noun Project
+	</string>
 
     <!-- Calculator Dialog -->
     <string name="enter_total">Enter</string>

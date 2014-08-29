@@ -284,7 +284,8 @@
          in case of a system/hardware failure or by malicious thirdparty influence. Please be aware that this application is 
          still in its Beta Stadium and failures may occur.\n\n
          Contact: bitcoin@ifi.uzh.ch\n
-         \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics</string>
+         \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics\nSmartphone Base for animated NFC image: Smartphone by Matthieu Mercier from The Noun Project
+	</string>
 
     <!-- Calculator Dialog -->
     <string name="enter_total">Enter</string>
