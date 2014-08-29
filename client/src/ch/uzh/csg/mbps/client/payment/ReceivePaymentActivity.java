@@ -342,6 +342,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		});
 	}
 
+	/**
+	 * Creates PaymentInfos necessary for initializeNFC. Only transaction amount > 0 are accepted.
+	 */
 	private void initializePayment() {
 		receiveAmount = Constants.inputValueCalculator.toPlainString();
 		if (isPortrait) {
@@ -385,6 +388,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		refreshCurrencyTextViews();
 	}
 
+	/**
+	 * Shows the animated NFC image to indicate user that a NFC connection can now be established.
+	 */
 	private void showNfcInstructions(){
 		findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.VISIBLE);;
 		ImageView nfcActivity = (ImageView) findViewById(R.id.receivePayment_nfcIcon);
@@ -480,7 +486,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		}
 	};
 
-
+	/**
+	 * Initializes NFC communication depending on isSendingMode.
+	 * @param paymentInfos details about transaction (currency, amount, input currency and amount)
+	 * @throws Exception
+	 */
 	private void initializeNFC(PaymentInfos paymentInfos) throws Exception {
 		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey().getPublicKey());
 		final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
@@ -523,6 +533,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		}
 	}
 
+	/**
+	 * Handles Events received from the nfcPaymentLibrary. Differs between error and successful cases.
+	 */
 	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
 		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
 
@@ -632,6 +645,12 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		}
 	}
 	
+	/**
+	 * Executed in case of a successfull Transaction Request.
+	 * 
+	 * @param serverPaymentResponseBytes received from the Server
+	 * @param balance received from the server (up to date)
+	 */
 	private void onTaskCompletTransaction(byte[] serverPaymentResponseBytes, BigDecimal balance) {
 		dismissProgressDialog();
 		dismissNfcInProgressDialog();
@@ -1140,6 +1159,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		wasEqualsBefore = false;
 	}
 
+	/**
+	 * Adds the parameter amount to the total Mensa Button amount.
+	 * @param amount to add to mensaButtonAmount
+	 */
 	private void addMensaButtonAmount(String amount) {
 		try {
 			BigDecimal value = new BigDecimal(amount);
@@ -1152,6 +1175,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		}
 	}
 
+	/**
+	 * Initializes the buttons specific for Mensa Tablet.
+	 */
 	private void initializeMensaButtons() {
 		menu_student = (Button) findViewById(R.id.mensa_menu_student);
 		menu_student.setVisibility(View.VISIBLE);
@@ -1199,6 +1225,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		});
 	}
 
+	/**
+	 * Hide all Mensa Buttons.
+	 */
 	private void removeMensaButtons() {
 		menu_student.setEnabled(false);
 		menu_student.setVisibility(View.INVISIBLE);
@@ -1212,6 +1241,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		drink.setVisibility(View.INVISIBLE);
 	}
 
+	/**
+	 * Disables Mensa Buttons (keep visible)
+	 */
 	private void disableMensaButtons() {
 		if(Constants.IS_MENSA_MODE){
 			menu_student.setEnabled(false);
@@ -1222,6 +1254,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		}
 	}
 
+	/**
+	 * Enables all Mensa specific Buttons.
+	 */
 	private void enableMensaButtons() {
 		if (Constants.IS_MENSA_MODE) {
 			menu_student.setEnabled(true);
@@ -1232,6 +1267,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		}
 	}
 
+	/**
+	 * Resets the NFC communication and hides the animated NFC image.
+	 */
 	private void resetNfc() {
 		if (paymentRequestInitializer != null){
 			paymentRequestInitializer.disable();
