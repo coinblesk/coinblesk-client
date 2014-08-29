@@ -22,6 +22,7 @@ import android.widget.TextView;
 import ch.uzh.csg.mbps.client.request.RequestTask;
 import ch.uzh.csg.mbps.client.request.SignUpRequestTask;
 import ch.uzh.csg.mbps.client.util.CheckFormatHandler;
+import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
 import ch.uzh.csg.mbps.responseobject.UserAccountObject;
 
@@ -104,7 +105,9 @@ public class RegistrationActivity extends AbstractAsyncActivity {
 				dismissProgressDialog();
 				if (response.isSuccessful()) {
 					buildDialog(getResources().getString(R.string.registration_successful));
-				}else{
+				} else if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
+					displayResponse(getResources().getString(R.string.error_no_connection_before_login));
+				} else{
 					displayResponse(response.getMessage());			
 				}
 			}
