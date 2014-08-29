@@ -2,10 +2,10 @@
 <resources>
 
     <!-- Name of App -->
-    <string name="app_name">MBPS</string>
+    <string name="app_name">CoinBlesk</string>
 
     <!-- Name of Activities -->
-    <string name="title_activity_login">MBPS</string>
+    <string name="title_activity_login">CoinBlesk</string>
     <string name="title_activity_reset_password">Passwort zurücksetzen</string>
     <string name="title_activity_registration">Registrierung</string>
     <string name="title_activity_main">Kontoübersicht</string>
@@ -17,7 +17,7 @@
     <string name="title_activity_profile_account">Profil</string>
     <string name="title_activity_edit_email_account_profile">Emailadresse ändern</string>
     <string name="title_activity_edit_passwotrd_account_profile">Passwort ändern</string>
-    <string name="title_activity_about">Über MBPS</string>
+    <string name="title_activity_about">Über </string>
     <string name="title_activity_setting_pay_out_rules">Auszahlungs Regeln</string>
     <string name="title_activity_choose_payment">Zahlungsweise auswählen</string>
     <string name="title_activity_address_book">Adressbuch</string>
@@ -338,7 +338,7 @@
     <string name="history_payOutTo">an Adresse:</string>
 
     <!-- Error Strings -->
-    <string name="error_xmlSave_failed">Lokale XML Datei konnte nicht gespeichert werden. Wenn dies öfters geschieht versuchen Sie das Problem durch löschen der MBPS Applikationsdaten in den Android Einstellungen zu beheben.</string>
+    <string name="error_xmlSave_failed">Lokale XML Datei konnte nicht gespeichert werden. Wenn dies öfters geschieht versuchen Sie das Problem durch löschen der CoinBlesk Applikationsdaten in den Android Einstellungen zu beheben.</string>
     <string name="error_transaction_failed">Übermittlungsfehler. Bitte prüfen Sie den Transaktionsverlauf um zu sehen ob ihre Transaktion erfolgreich war oder nicht.</string>
     <string name="transaction_duplicate_error">Diese Transaktion wurde vom Server zurückgewiesen da eine Transaktion mit identischem Zeitstempel bereits verbucht wurde.</string>
     <string name="exchangeRate_error">Der aktuelle Wechselkurs ist momentan nicht verfügbar.</string>
@@ -356,5 +356,5 @@
     <string name="nfc_enable_message">Um diese Applikation benutzen zu können müssen Sie NFC (Near Field Communication) in den Geräte-Einstellungen aktivieren.</string>
     <string name="nfc_enable_button">Geräte Einstellungen öffnen</string>
     <string name="nfc_enable_button_abort">Information schliessen</string>
-    <string name="nfc_no_adapter">This device has no NFC Adapter. A usage of MBPS is therefore not possible.</string>
+    <string name="nfc_no_adapter">Dieses Gerät verüfgt über kein NFC-Modul. Eine Verwendung von CoinBlesk ist aus diesem Grund nicht möglich.</string>
 </resources>

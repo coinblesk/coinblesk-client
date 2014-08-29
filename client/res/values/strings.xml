@@ -2,12 +2,12 @@
 <resources>
 
     <!-- Name of App -->
-    <string name="app_name">MBPS</string>
+    <string name="app_name">CoinBlesk</string>
 
     <!-- Name of Activities -->
-    <string name="title_activity_login">MBPS</string>
-    <string name="title_activity_reset_password">MBPS - Reset Password</string>
-    <string name="title_activity_registration">MBPS - Registration</string>
+    <string name="title_activity_login">CoinBlesk</string>
+    <string name="title_activity_reset_password">Reset Password</string>
+    <string name="title_activity_registration">Registration</string>
     <string name="title_activity_main">Account Overview</string>
     <string name="title_activity_history">History</string>
     <string name="title_activity_receive_payment">Request Bitcoins</string>
@@ -339,7 +339,7 @@
     <string name="history_payOutTo">to address:</string>
 
     <!-- Error Strings -->
-    <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting MBPS app preferences in Android Settings.</string>
+    <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting CoinBlesk app preferences in Android Settings.</string>
     <string name="error_transaction_failed">Transmission error: Please check your history to verify if the transaction was successful or not.</string>
     <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
     <string name="exchangeRate_error">Current exchange rate is not available at the moment.</string>
@@ -357,6 +357,5 @@
     <string name="nfc_enable_message">To use this application you need to enable NFC (Near Field Communication) in your device settings.</string>
     <string name="nfc_enable_button">Open Device Settings</string>
     <string name="nfc_enable_button_abort">Close Information</string>
-    <string name="nfc_no_adapter">Dieses Gerät verüfgt über kein NFC-Modul. Eine Verwendung von MBPS ist aus diesem Grund nicht möglich.</string>
-
+	<string name="nfc_no_adapter">This device has no NFC Adapter. A usage of CoinBlesk is therefore not possible.</string>
 </resources>
