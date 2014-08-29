@@ -185,6 +185,8 @@ public class PayOutActivity extends AbstractAsyncActivity {
 			launchExchangeRateRequest();
 		} else {
 			acceptBtn.setEnabled(false);
+			allBtn.setEnabled(false);
+			
 		}
 	}
 	
