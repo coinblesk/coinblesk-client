@@ -186,6 +186,7 @@ public class PayOutActivity extends AbstractAsyncActivity {
 		} else {
 			acceptBtn.setEnabled(false);
 			allBtn.setEnabled(false);
+			scanQRButton.setEnabled(false);
 			
 		}
 	}
