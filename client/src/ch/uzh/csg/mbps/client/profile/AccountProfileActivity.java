@@ -112,7 +112,7 @@ public class AccountProfileActivity extends AbstractAsyncActivity {
 				}
 				displayResponse(response.getMessage());
             }
-		} , new TransferObject(), new TransferObject());
+		} , new TransferObject(), new TransferObject(), getApplicationContext());
 		delete.execute();
 	}
 	

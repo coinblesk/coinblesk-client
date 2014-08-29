@@ -186,7 +186,7 @@ public class MainActivity extends AbstractPaymentActivity {
 
 	private void initializeGui() {
 		// display red action bar when running on testserver
-		if(Constants.BASE_URI.contains("clone")) {
+		if(Constants.BASE_URI_SSL.contains("clone")) {
 			ActionBar bar = getActionBar();
 			bar.setBackgroundDrawable(new ColorDrawable(Color.RED));
 		}
@@ -264,7 +264,7 @@ public class MainActivity extends AbstractPaymentActivity {
 					lastTransactionsTitle.setVisibility(View.INVISIBLE);
 				} 
 			}
-		}, new TransferObject(), new MainRequestObject());
+		}, new TransferObject(), new MainRequestObject(), getApplicationContext());
 		getMainActivityValues.execute();
 	}
 	

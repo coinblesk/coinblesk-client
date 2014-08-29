@@ -71,7 +71,7 @@ public class ResetPasswordActivity extends AbstractAsyncActivity {
 						displayResponse(response.getMessage());
 					}
 				}
-			}, request, new TransferObject());
+			}, request, new TransferObject(), getApplicationContext());
 			resetPW.execute();
 		} else {
 			displayResponse(getResources().getString(R.string.registration_email_not_valid));

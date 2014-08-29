@@ -128,7 +128,7 @@ public class DrawerItemClickListener extends AbstractLoginActivity implements On
 					displayResponse(response.getMessage());
 				}
             }
-		}, new TransferObject(), new TransferObject());
+		}, new TransferObject(), new TransferObject(), getContext());
 		signOut.execute();
 	}
 

@@ -164,7 +164,7 @@ public class PayInActivity extends AbstractAsyncActivity {
 				dismissProgressDialog();
 				displayResponse(response.getMessage());
             }
-		}, new TransferObject(), new TransferObject());
+		}, new TransferObject(), new TransferObject(), getApplicationContext());
 		sendToEmail.execute();
 	}
 

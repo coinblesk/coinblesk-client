@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.content.Context;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
@@ -18,8 +19,8 @@ public class SignInRequestTask extends RequestTask<TransferObject, TransferObjec
 	final private String username;
 	final private String password;
 	
-	public SignInRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, String username, String password) {
-		super(null, new TransferObject(), Constants.BASE_URI_SSL + "/j_spring_security_check", cro);
+	public SignInRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, String username, String password, Context context) {
+		super(null, new TransferObject(), Constants.BASE_URI_SSL + "/j_spring_security_check", cro, context);
 		this.username = username;
 		this.password = password;
 	}

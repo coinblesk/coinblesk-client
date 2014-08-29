@@ -211,7 +211,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 						return;
 					}
 				}
-			}, new TransferObject(), new TransferObject());
+			}, new TransferObject(), new TransferObject(), getApplicationContext());
 			request.execute();
 		}
 	}
@@ -258,7 +258,7 @@ public class SendPaymentActivity extends AbstractAsyncActivity {
 					}
 					onTaskCompletTransaction(response.getServerPaymentResponse());
                 }
-			}, tro, new TransactionObject());
+			}, tro, new TransactionObject(), getApplicationContext());
 			transactionRequest.execute();
 		}
 	}

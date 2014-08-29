@@ -1,5 +1,6 @@
 package ch.uzh.csg.mbps.client.request;
 
+import android.content.Context;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.responseobject.TransferObject;
@@ -9,8 +10,8 @@ import ch.uzh.csg.mbps.responseobject.TransferObject;
  */
 public class ExchangeRateRequestTask extends RequestTask<TransferObject, TransferObject> {
 	
-	public ExchangeRateRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, TransferObject input, TransferObject output) {
-		super(input, output, Constants.BASE_URI_SSL + "/transaction/exchange-rate/", cro);
+	public ExchangeRateRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, TransferObject input, TransferObject output, Context context) {
+		super(input, output, Constants.BASE_URI_SSL + "/transaction/exchange-rate/", cro, context);
 	}
 
 	@Override

@@ -92,7 +92,7 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity {
 				dismissProgressDialog();
 				finish();
 			}
-		}, userObject, new TransferObject());
+		}, userObject, new TransferObject(), getApplicationContext());
 		request.execute();
 	}
     

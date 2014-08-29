@@ -1,7 +1,9 @@
 package ch.uzh.csg.mbps.client.request;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.KeyStore;
 import java.util.List;
 
 import net.minidev.json.JSONObject;
@@ -18,15 +20,23 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
+import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.client.servercomm.CookieHandler;
 import ch.uzh.csg.mbps.client.util.ClientController;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
@@ -45,12 +55,14 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	final private O responseObject;
 	final private String url;
 	final private IAsyncTaskCompleteListener<O> callback;
+	final private Context context;
 	
-	public RequestTask(I requestObject, O responseObject, String url, IAsyncTaskCompleteListener<O> callback) {
+	public RequestTask(I requestObject, O responseObject, String url, IAsyncTaskCompleteListener<O> callback, Context context) {
 		this.requestObject = requestObject;
 		this.responseObject = responseObject;
 		this.url = url;
 		this.callback = callback;
+		this.context = context;
 	}
 	
 	@Override
@@ -123,31 +135,38 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	}
 	
 	private HttpResponse executePost(List<NameValuePair> postParameters) throws ClientProtocolException, IOException {
-		HttpClient httpclient = createDefaultHttpClient();
+		HttpClient httpclient = createDefaultHttpsClient();
 		HttpPost post = createPost(url, null, postParameters);
 		HttpResponse response = httpclient.execute(post);
 		return response;
     }
 	
 	public HttpResponse executePost(JSONObject jsonObject) throws ClientProtocolException, IOException {
-		HttpClient httpclient = createDefaultHttpClient();
+		HttpClient httpclient = createDefaultHttpsClient();
 		HttpPost post = createPost(url, jsonObject, null);
 		HttpResponse response = httpclient.execute(post);
 		return response;
 	}
 	
 	public HttpResponse executeGet() throws ClientProtocolException, IOException {
-		HttpClient httpclient = createDefaultHttpClient();
+		HttpClient httpclient = createDefaultHttpsClient();
 		HttpUriRequest request = createGet(url);
 		HttpResponse response = httpclient.execute(request);
 		return response;
 	}
 	
-	private DefaultHttpClient createDefaultHttpClient() {
+	/*private DefaultHttpClient createDefaultHttpClient() {
 		HttpParams httpParams = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParams, HTTP_CONNECTION_TIMEOUT);
 		HttpConnectionParams.setSoTimeout(httpParams, HTTP_SOCKET_TIMEOUT);
 		return new DefaultHttpClient(httpParams);
+	}*/
+	
+	private DefaultHttpClient createDefaultHttpsClient() {
+		HttpParams httpParams = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams, HTTP_CONNECTION_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(httpParams, HTTP_SOCKET_TIMEOUT);
+		return new DefaultHttpClient(new MyHttpClient(context).getConnectionManager(), httpParams);
 	}
 	
 	public O execPost(JSONObject jsonObject) {
@@ -243,7 +262,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	    }
 	}
 
-	public O execGet() {
+	public O execGet( ) {
 		try {
         	//request
 			HttpResponse response = executeGet();
@@ -303,10 +322,10 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
         }
 	}
 	
-	public O execResetPassword(JSONObject jsonObject) {
+	public O execResetPassword( JSONObject jsonObject) {
 		try {
 	    	//request
-			HttpClient httpclient = createDefaultHttpClient();
+			HttpClient httpclient = createDefaultHttpsClient();
 			HttpPost post = new HttpPost(url);
         	post.addHeader("Content-Type", "application/json;charset=UTF-8");
             post.addHeader("Accept", "application/json");
@@ -345,4 +364,51 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	    }
 	}
 	
+}
+
+class  MyHttpClient extends DefaultHttpClient {
+ 
+    final Context context;
+ 
+    public MyHttpClient(Context context) {
+        this.context = context;
+    }
+ 
+    @Override
+    protected ClientConnectionManager createClientConnectionManager() {
+        SchemeRegistry registry = new SchemeRegistry();
+        registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+        // Register for port 443 our SSLSocketFactory with our keystore
+        // to the ConnectionManager
+        registry.register(new Scheme("https", newSslSocketFactory(), 443));
+        
+        HttpParams params = new BasicHttpParams(); 
+        return new ThreadSafeClientConnManager(params, registry);
+    }
+ 
+    private SSLSocketFactory newSslSocketFactory() {
+        try {
+            // Get an instance of the Bouncy Castle KeyStore format
+            KeyStore trusted = KeyStore.getInstance("BKS");
+            // Get the raw resource, which contains the keystore with
+            // your trusted certificates (root and any intermediate certs)
+            InputStream in = context.getResources().openRawResource(R.raw.bitcoinkeystore);
+            try {
+                // Initialize the keystore with the provided trusted certificates
+                // Also provide the password of the keystore
+                trusted.load(in, "changeit".toCharArray());
+            } finally {
+                in.close();
+            }
+            // Pass the keystore to the SSLSocketFactory. The factory is responsible
+            // for the verification of the server certificate.
+            SSLSocketFactory sf = new SSLSocketFactory(trusted);
+            // Hostname verification from certificate
+            // http://hc.apache.org/httpcomponents-client-ga/tutorial/html/connmgmt.html#d4e506
+            //sf.setHostnameVerifier(SSLSocketFactory.STRICT_HOSTNAME_VERIFIER);
+            return sf;
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+    }
 }

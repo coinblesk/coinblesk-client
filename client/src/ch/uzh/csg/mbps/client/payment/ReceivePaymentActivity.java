@@ -290,11 +290,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 						}
 					}
 				}
-			}, new TransferObject(), new TransferObject());
+			}, new TransferObject(), new TransferObject(), getApplicationContext());
 			request.execute();
 		}
 	}
 	
+	/**
+	 * Updates GUI based on amount entered through {@link CalculatorDialog}
+	 */
 	private void refreshCurrencyTextViews() {
 		amountBTC = BigDecimal.ZERO;
 		if (Constants.inputUnit.equals(INPUT_UNIT_CHF)) {
@@ -640,7 +643,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 					}
 					onTaskCompletTransaction(response.getServerPaymentResponse(), response.getBalanceBTC());
                 }
-			}, tro, new TransactionObject());
+			}, tro, new TransactionObject(), getApplicationContext());
 			transactionRequest.execute();
 		}
 	}

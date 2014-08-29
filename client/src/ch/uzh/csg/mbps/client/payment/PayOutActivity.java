@@ -173,7 +173,7 @@ public class PayOutActivity extends AbstractAsyncActivity {
 						displayResponse(response.getMessage());
 					}
                 }
-			}, pot, new TransferObject());
+			}, pot, new TransferObject(), getApplicationContext());
 			payOut.execute();
 		} else {
 			displayResponse(getResources().getString(R.string.fill_necessary_fields));
@@ -210,7 +210,7 @@ public class PayOutActivity extends AbstractAsyncActivity {
 						chfBalance.setText("");
 					}
 				}
-			},  new TransferObject(),  new TransferObject());
+			},  new TransferObject(),  new TransferObject(), getApplicationContext());
 			request.execute();
 		}
 	}

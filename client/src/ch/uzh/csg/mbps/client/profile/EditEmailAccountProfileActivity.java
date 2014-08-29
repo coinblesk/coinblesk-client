@@ -81,7 +81,7 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity {
     				finish();
     				displayResponse(getResources().getString(R.string.updateAccount_successful));
     			}
-    		}, user, new TransferObject());
+    		}, user, new TransferObject(), getApplicationContext());
     		request.execute();
     	}
 	}

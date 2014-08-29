@@ -39,9 +39,6 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 	private TextView createRuleView;
 	private Spinner spinner;
 	
-	private static final String CREATION_SUCCESS = "Your new rule has successfully been saved.";
-	private static final String RESET_SUCCESS = "Your payout rules have successfully been reseted.";
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -161,7 +158,7 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 					displayResponse(response.getMessage());
 				}
             }
-		}, transferObject, new TransferObject());
+		}, transferObject, new TransferObject(), getApplicationContext());
 		request.execute();
 	}
     
@@ -192,7 +189,7 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 					displayResponse(response.getMessage());
 				}
             }
-		}, new TransferObject(), new TransferObject());
+		}, new TransferObject(), new TransferObject(), getApplicationContext());
 		resetRequest.execute();
 	}
 	
@@ -239,7 +236,7 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 					displayResponse(response.getMessage());
 				}
             }
-		}, new TransferObject(), new PayOutRulesTransferObject());
+		}, new TransferObject(), new PayOutRulesTransferObject(), getApplicationContext());
 		getRequest.execute();
 	}
 

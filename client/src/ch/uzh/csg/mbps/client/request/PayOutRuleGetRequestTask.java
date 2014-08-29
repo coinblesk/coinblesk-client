@@ -1,5 +1,6 @@
 package ch.uzh.csg.mbps.client.request;
 
+import android.content.Context;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.util.Constants;
 import ch.uzh.csg.mbps.responseobject.PayOutRulesTransferObject;
@@ -11,8 +12,8 @@ import ch.uzh.csg.mbps.responseobject.TransferObject;
  */
 public class PayOutRuleGetRequestTask extends RequestTask <TransferObject, PayOutRulesTransferObject>{
 
-	public PayOutRuleGetRequestTask(IAsyncTaskCompleteListener<PayOutRulesTransferObject> cro, TransferObject input, PayOutRulesTransferObject output) {
-		super(input, output, Constants.BASE_URI_SSL + "/rules/get", cro);
+	public PayOutRuleGetRequestTask(IAsyncTaskCompleteListener<PayOutRulesTransferObject> cro, TransferObject input, PayOutRulesTransferObject output, Context context) {
+		super(input, output, Constants.BASE_URI_SSL + "/rules/get", cro, context);
 	}
 
 	@Override

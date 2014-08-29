@@ -1,5 +1,6 @@
 package ch.uzh.csg.mbps.client.request;
 
+import android.content.Context;
 import net.minidev.json.JSONObject;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.util.Constants;
@@ -12,8 +13,8 @@ import ch.uzh.csg.mbps.responseobject.TransferObject;
  */
 public class PayOutRequestTask extends RequestTask<PayOutTransactionObject, TransferObject> {
 		
-	public PayOutRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, PayOutTransactionObject input, TransferObject output) {
-		super(input, output, Constants.BASE_URI_SSL + "/transaction/payOut", cro);
+	public PayOutRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, PayOutTransactionObject input, TransferObject output, Context context) {
+		super(input, output, Constants.BASE_URI_SSL + "/transaction/payOut", cro, context);
 	}
 
 	@Override

@@ -8,9 +8,9 @@ import java.math.BigDecimal;
  */
 public class Constants {
 //	public static final String BASE_URI = "http://bitcoin.csg.uzh.ch/server";
-//	public static final String BASE_URI_SSL = "https://bitcoin.csg.uzh.ch/server";
-	public static final String BASE_URI = "http://bitcoin-clone1.csg.uzh.ch/server";
-	public static final String BASE_URI_SSL = "http://bitcoin-clone1.csg.uzh.ch/server";
+	public static final String BASE_URI_SSL = "https://bitcoin.csg.uzh.ch/ws/server";
+//	public static final String BASE_URI = "http://bitcoin-clone2.csg.uzh.ch/server";
+//	public static final String BASE_URI_SSL = "http://bitcoin-clone2.csg.uzh.ch/server";
 	
 //	public static final String BASE_URI = "http://192.168.1.49:8080/server";
 //	public static final String BASE_URI_SSL = "http://192.168.1.49:8080/server";

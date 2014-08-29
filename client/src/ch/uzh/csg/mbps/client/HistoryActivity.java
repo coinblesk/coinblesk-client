@@ -257,7 +257,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 						}
 					}
 				}
-			}, request, new GetHistoryTransferObject());
+			}, request, new GetHistoryTransferObject(), getApplicationContext());
 			getHistory.execute();
 		}
 	}
@@ -510,7 +510,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 					ghto = null;
 					return;
 				}
-			}, input, new TransferObject());
+			}, input, new TransferObject(), getApplicationContext());
 			getHistory.execute();
 		}
 	}

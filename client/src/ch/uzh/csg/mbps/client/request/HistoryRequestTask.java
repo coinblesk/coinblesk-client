@@ -1,5 +1,6 @@
 package ch.uzh.csg.mbps.client.request;
 
+import android.content.Context;
 import net.minidev.json.JSONObject;
 import ch.uzh.csg.mbps.client.IAsyncTaskCompleteListener;
 import ch.uzh.csg.mbps.client.util.Constants;
@@ -11,8 +12,8 @@ import ch.uzh.csg.mbps.responseobject.HistoryTransferRequestObject;
  */
 public class HistoryRequestTask extends RequestTask<HistoryTransferRequestObject, GetHistoryTransferObject> {
 	
-	public HistoryRequestTask(IAsyncTaskCompleteListener<GetHistoryTransferObject> cro, HistoryTransferRequestObject input, GetHistoryTransferObject output) {
-		super(input, output, Constants.BASE_URI_SSL + "/transaction/history", cro);
+	public HistoryRequestTask(IAsyncTaskCompleteListener<GetHistoryTransferObject> cro, HistoryTransferRequestObject input, GetHistoryTransferObject output, Context context) {
+		super(input, output, Constants.BASE_URI_SSL + "/transaction/history", cro, context);
 	}
 
 	@Override

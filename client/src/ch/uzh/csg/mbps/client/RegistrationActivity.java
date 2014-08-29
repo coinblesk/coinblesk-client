@@ -111,7 +111,7 @@ public class RegistrationActivity extends AbstractAsyncActivity {
 					displayResponse(response.getMessage());			
 				}
 			}
-		}, user, new TransferObject());
+		}, user, new TransferObject(), getApplicationContext());
 		signUp.execute();
 	}
 	

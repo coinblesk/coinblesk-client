@@ -70,7 +70,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 					launchOfflineMode(context);
 				}
 			}
-		}, username, password);
+		}, username, password, context);
 		signIn.execute();
 	}
 
@@ -235,7 +235,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 				ClientController.setOnlineMode(true);
 				launchMainActivity(context);
 			}
-		}, new TransferObject(), new ReadRequestObject());
+		}, new TransferObject(), new ReadRequestObject(), context);
 		read.execute();
 	}
 
@@ -271,7 +271,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 					dismissProgressDialog();
 				}
 			}
-		}, cpko, new CustomPublicKeyObject());
+		}, cpko, new CustomPublicKeyObject(), context);
 		task.execute();
 	}
 
