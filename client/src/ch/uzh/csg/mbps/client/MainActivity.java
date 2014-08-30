@@ -89,6 +89,7 @@ public class MainActivity extends AbstractPaymentActivity {
 	private PopupWindow popupWindow;
 	public static Boolean isFirstTime;
 	AnimationDrawable nfcActivityAnimation;
+	private boolean isPortrait = true;
 	
 	private NfcAdapter nfcAdapter;
 
@@ -97,6 +98,8 @@ public class MainActivity extends AbstractPaymentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		setScreenOrientation();
+		isPortrait = getResources().getBoolean(R.bool.portrait_only);
+			
 
 		initializeDrawer();
 		initializeGui();
@@ -488,8 +491,14 @@ public class MainActivity extends AbstractPaymentActivity {
 						}
 						break;
 					case UNEXPECTED_ERROR:
-						dismissNfcInProgressDialog();
-						showDialog(getResources().getString(R.string.error_transaction_failed), false);
+						//check if Mensa Tablet (with external reader) is connected, if yes ignore unexpected errors
+						if (Constants.IS_MENSA_MODE && !isPortrait) {
+							break;
+						}
+						else {
+							dismissNfcInProgressDialog();
+							showDialog(getResources().getString(R.string.error_transaction_failed), false);
+						}
 						break;
 					case INIT_FAILED:
 						//ignore

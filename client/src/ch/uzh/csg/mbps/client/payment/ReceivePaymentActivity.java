@@ -573,9 +573,15 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 						}
 						break;
 					case UNEXPECTED_ERROR:
+						//check if Mensa Tablet (with external reader) is connected, if yes ignore unexpected errors
 						if (!serverResponseSuccessful) {
-							dismissNfcInProgressDialog();
-							showDialog(getResources().getString(R.string.error_transaction_failed), false);
+							if (Constants.IS_MENSA_MODE && !isPortrait) {
+								break;
+							}
+							else {
+								dismissNfcInProgressDialog();
+								showDialog(getResources().getString(R.string.error_transaction_failed), false);
+							}
 						}
 						break;
 					case INIT_FAILED:
