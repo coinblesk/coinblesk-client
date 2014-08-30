@@ -56,7 +56,7 @@ public abstract class AbstractLoginActivity extends AbstractAsyncActivity {
 	 */
 	protected void launchSignInRequest(final Context context) {
 		showLoadingProgressDialog();
-		TimeHandler.getInstance().setStartActivity(this);
+		TimeHandler.getInstance().setStartActivity(context);
 		RequestTask<TransferObject, TransferObject> signIn = new SignInRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 			@Override
 			public void onTaskComplete(TransferObject response) {
