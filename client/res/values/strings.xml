@@ -337,7 +337,7 @@
     <string name="history_to">To:</string>
     <string name="history_amount">Amount:</string>
     <string name="history_payIn">PayIn Transaction from BTC network:</string>
-    <string name="history_payInUn">PayIn (unconfirmed):</string>
+    <string name="history_payInUn">PayIn (unconfirmed) from BTC network:</string>
     <string name="history_payOut">PayOut Transaction:</string>
     <string name="history_payOutTo">to address:</string>
 
