@@ -7,6 +7,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.provider.Settings;
@@ -89,6 +92,7 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 	protected void showDialog(String message, boolean isSuccessful) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		if (isSuccessful) {
+			playSound();
 			builder.setTitle(getResources().getString(R.string.payment_success))
 			.setIcon(getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()));
 		}
@@ -112,6 +116,17 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 			}
 		});
 	}
+
+	private void playSound() {
+		try {
+		    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+		    Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+		    r.play();
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+	    
+    }
 
 	protected void resetStates() {
 		paymentAccepted = false;
