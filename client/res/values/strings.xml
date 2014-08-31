@@ -88,7 +88,7 @@
     </string-array>
 
     <!-- History Strings -->
-    <string name="recent_payments">Recent Payments</string>
+    <string name="recent_payments">History</string>
     <string name="history_activity_no_transactions_text">There are no transactions to display.</string>
     <string name="history_activity_get_by_email">Click to receive the complete list of transactions by email.</string>
 

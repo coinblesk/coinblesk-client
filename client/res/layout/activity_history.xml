@@ -15,14 +15,17 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:text="@string/recent_payments"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="54sp"
+        android:textStyle="italic"  />
 
     <Spinner
         android:id="@+id/history_filter_spinner"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" />
+        android:layout_marginBottom="5dp"
+        android:layout_below="@+id/recent_payments_flag" />
 
     <ScrollView
         android:id="@+id/history_payments_content"
