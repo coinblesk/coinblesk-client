@@ -95,6 +95,7 @@
     <string-array name="history_filter">
         <item>Transaction</item>
         <item>Pay In</item>
+        <item>Pay In (unconfirmed)</item>
         <item>Pay Out</item>
     </string-array>
 
@@ -336,6 +337,7 @@
     <string name="history_to">To:</string>
     <string name="history_amount">Amount:</string>
     <string name="history_payIn">PayIn Transaction from BTC network:</string>
+    <string name="history_payInUn">PayIn (unverified) Transaction from BTC network:</string>
     <string name="history_payOut">PayOut Transaction:</string>
     <string name="history_payOutTo">to address:</string>
 

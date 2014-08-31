@@ -31,6 +31,7 @@ import ch.uzh.csg.mbps.client.util.HistoryTransactionFormatter;
 import ch.uzh.csg.mbps.client.util.TimeHandler;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
+import ch.uzh.csg.mbps.model.HistoryPayInTransactionUnverified;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
 import ch.uzh.csg.mbps.model.HistoryTransaction;
 import ch.uzh.csg.mbps.responseobject.GetHistoryTransferObject;
@@ -47,8 +48,9 @@ public class HistoryActivity extends AbstractAsyncActivity {
 	
 	private int txResultsPerPage;
 	private int payInResultsPerPage;
+	private int payInUnverifiedResultsPerPage;
 	private int payOutResultsPerPage;
-	private int txPage, txPayInPage, txPayOutPage = 0;
+	private int txPage, txPayInPage, txPayInUnverifiedPage, txPayOutPage = 0;
 	
 	private MenuItem menuWarning;
 	private MenuItem offlineMode;
@@ -60,7 +62,8 @@ public class HistoryActivity extends AbstractAsyncActivity {
 	private enum Filter {
 		TX(0),
 		PAY_IN(1),
-		PAY_OUT(2);
+		PAY_IN_UN(2),
+		PAY_OUT(3);
 		
 		private int i;
 		
@@ -198,13 +201,16 @@ public class HistoryActivity extends AbstractAsyncActivity {
 			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 				if (pos == Filter.TX.getCode()) {
 					filter = Filter.TX;
-					launchHistoryRequest(0, -1, -1);
+					launchHistoryRequest(0, -1, -1, -1);
 				} else if (pos == Filter.PAY_IN.getCode()) {
 					filter = Filter.PAY_IN;
-					launchHistoryRequest(-1, 0, -1);
+					launchHistoryRequest(-1, 0, -1, -1);
+				} else if (pos == Filter.PAY_IN_UN.getCode()) {
+					filter = Filter.PAY_IN_UN;
+					launchHistoryRequest(-1, -1, 0, -1);
 				} else if (pos == Filter.PAY_OUT.getCode()) {
 					filter = Filter.PAY_OUT;
-					launchHistoryRequest(-1, -1, 0);
+					launchHistoryRequest(-1, -1, -1, 0);
 				}
 			}
 
@@ -219,7 +225,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 	 * only per page (based on the page size defined on the server). If a
 	 * parameter is negative, the given transaction type is not retrieved.
 	 */
-	private void launchHistoryRequest(int txPage, int txPayInPage, int txPayOutPage) {
+	private void launchHistoryRequest(int txPage, int txPayInPage, int txPayInUnverifiedPage, int txPayOutPage) {
 		if (ClientController.isOnline()) {
 			showLoadingProgressDialog();
 			
@@ -229,11 +235,13 @@ public class HistoryActivity extends AbstractAsyncActivity {
 			
 			this.txPage = txPage;
 			this.txPayInPage = txPayInPage;
+			this.txPayInUnverifiedPage = txPayInUnverifiedPage;
 			this.txPayOutPage = txPayOutPage;
 			
 			HistoryTransferRequestObject request = new HistoryTransferRequestObject();
 			request.setTxPage(txPage);
 			request.setTxPayInPage(txPayInPage);
+			request.setTxPayInUnverifiedPage(txPayInUnverifiedPage);
 			request.setTxPayOutPage(txPayOutPage);
 			HistoryRequestTask getHistory = new HistoryRequestTask(new IAsyncTaskCompleteListener<GetHistoryTransferObject>() {
 				
@@ -274,21 +282,28 @@ public class HistoryActivity extends AbstractAsyncActivity {
 			if (ghto.getTransactionHistory().size() > txResultsPerPage)
 				txResultsPerPage = ghto.getTransactionHistory().size();
 			
-			payInResultsPerPage = payOutResultsPerPage = 0;
+			payInResultsPerPage = payInUnverifiedResultsPerPage = payOutResultsPerPage = 0;
 			break;
 		case PAY_IN:
 			history.addAll(ghto.getPayInTransactionHistory());
 			if (ghto.getPayInTransactionHistory().size() > payInResultsPerPage)
 				payInResultsPerPage = ghto.getPayInTransactionHistory().size();
 			
-			txResultsPerPage = payOutResultsPerPage = 0;
+			txResultsPerPage = payInUnverifiedResultsPerPage = payOutResultsPerPage = 0;
+			break;
+		case PAY_IN_UN:
+			history.addAll(ghto.getPayInTransactionUnverifiedHistory());
+			if (ghto.getPayInTransactionUnverifiedHistory().size() > payInUnverifiedResultsPerPage)
+				payInUnverifiedResultsPerPage = ghto.getPayInTransactionUnverifiedHistory().size();
+			
+			txResultsPerPage = payInResultsPerPage = payOutResultsPerPage = 0;
 			break;
 		case PAY_OUT:
 			history.addAll(ghto.getPayOutTransactionHistory());
 			if (ghto.getPayOutTransactionHistory().size() > payOutResultsPerPage)
 				payOutResultsPerPage = ghto.getPayOutTransactionHistory().size();
 			
-			txResultsPerPage = payInResultsPerPage = 0;
+			txResultsPerPage = payInResultsPerPage = payInUnverifiedResultsPerPage = 0;
 			break;
 		}
 		
@@ -368,7 +383,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 				previous.setEnabled(true);
 				previous.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
-						launchHistoryRequest(txPage-1, txPayInPage, txPayOutPage);
+						launchHistoryRequest(txPage-1, txPayInPage, txPayInUnverifiedPage, txPayOutPage);
 					}
 				});
 			}
@@ -382,11 +397,27 @@ public class HistoryActivity extends AbstractAsyncActivity {
 				previous.setEnabled(true);
 				previous.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
-						launchHistoryRequest(txPage, txPayInPage-1, txPayOutPage);
+						launchHistoryRequest(txPage, txPayInPage-1, txPayInUnverifiedPage, txPayOutPage);
 					}
 				});
 			}
 			break;
+			
+		case PAY_IN_UN:
+			if (txPayInUnverifiedPage == 0) {
+				previous.setEnabled(false);
+				previous.setVisibility(View.INVISIBLE);
+			} else {
+				previous.setVisibility(View.VISIBLE);
+				previous.setEnabled(true);
+				previous.setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						launchHistoryRequest(txPage, txPayInPage, txPayInUnverifiedPage-1, txPayOutPage);
+					}
+				});
+			}
+			break;
+			
 		case PAY_OUT:
 			if (txPayOutPage == 0) {
 				previous.setEnabled(false);
@@ -396,7 +427,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 				previous.setEnabled(true);
 				previous.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
-						launchHistoryRequest(txPage, txPayInPage, txPayOutPage-1);
+						launchHistoryRequest(txPage, txPayInPage, txPayInUnverifiedPage, txPayOutPage-1);
 					}
 				});
 			}
@@ -423,7 +454,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 				next.setVisibility(View.VISIBLE);
 				next.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
-						launchHistoryRequest(txPage+1, txPayInPage, txPayOutPage);
+						launchHistoryRequest(txPage+1, txPayInPage, txPayInUnverifiedPage, txPayOutPage);
 					}
 				});
 			} else {
@@ -437,7 +468,21 @@ public class HistoryActivity extends AbstractAsyncActivity {
 				next.setVisibility(View.VISIBLE);
 				next.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
-						launchHistoryRequest(txPage, txPayInPage+1, txPayOutPage);
+						launchHistoryRequest(txPage, txPayInPage+1, txPayInUnverifiedPage, txPayOutPage);
+					}
+				});
+			} else {
+				next.setEnabled(false);
+				next.setVisibility(View.INVISIBLE);
+			}
+			break;
+		case PAY_IN_UN:
+			if (((double) ghto.getNofPayInTransactionsUnverified()) / payInUnverifiedResultsPerPage > txPayInUnverifiedPage+1) {
+				next.setEnabled(true);
+				next.setVisibility(View.VISIBLE);
+				next.setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						launchHistoryRequest(txPage, txPayInPage, txPayInUnverifiedPage + 1, txPayOutPage);
 					}
 				});
 			} else {
@@ -451,7 +496,7 @@ public class HistoryActivity extends AbstractAsyncActivity {
 				next.setVisibility(View.VISIBLE);
 				next.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
-						launchHistoryRequest(txPage, txPayInPage, txPayOutPage+1);
+						launchHistoryRequest(txPage, txPayInPage, txPayInUnverifiedPage, txPayOutPage+1);
 					}
 				});
 			} else {
@@ -481,6 +526,9 @@ public class HistoryActivity extends AbstractAsyncActivity {
 					break;
 				case PAY_IN:
 					launchHistoryEmailRequest(HistoryEmailRequestTask.PAY_IN_HISTORY);
+					break;
+				case PAY_IN_UN:
+					launchHistoryEmailRequest(HistoryEmailRequestTask.PAY_IN_HISTORY_UNVERIFIED);
 					break;
 				case PAY_OUT:
 					launchHistoryEmailRequest(HistoryEmailRequestTask.PAY_OUT_HISTORY);
@@ -524,6 +572,8 @@ public class HistoryActivity extends AbstractAsyncActivity {
 			}
 		} else if (history instanceof HistoryPayInTransaction) {
 			return R.drawable.ic_pay_in;
+		} else if (history instanceof HistoryPayInTransactionUnverified) {
+			return R.drawable.ic_pay_in_un;
 		} else if (history instanceof HistoryPayOutTransaction) {
 			return R.drawable.ic_pay_out;
 		}

@@ -55,6 +55,7 @@ import ch.uzh.csg.mbps.customserialization.PaymentResponse;
 import ch.uzh.csg.mbps.customserialization.exceptions.UnknownCurrencyException;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
+import ch.uzh.csg.mbps.model.HistoryPayInTransactionUnverified;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
 import ch.uzh.csg.mbps.model.HistoryTransaction;
 import ch.uzh.csg.mbps.responseobject.GetHistoryTransferObject;
@@ -307,11 +308,13 @@ public class MainActivity extends AbstractPaymentActivity {
 	private ArrayList<AbstractHistory> extractLastFewTransactions(GetHistoryTransferObject hto) {
 		List<HistoryTransaction> transactionHistory = hto.getTransactionHistory();
 		List<HistoryPayInTransaction> payInTransactionHistory = hto.getPayInTransactionHistory();
+		List<HistoryPayInTransactionUnverified> payInTransactionHistoryUnverified = hto.getPayInTransactionUnverifiedHistory();
 		List<HistoryPayOutTransaction> payOutTransactionHistory = hto.getPayOutTransactionHistory();
 
 		ArrayList<AbstractHistory> history = new ArrayList<AbstractHistory>();
 		history.addAll(transactionHistory);
 		history.addAll(payInTransactionHistory);
+		history.addAll(payInTransactionHistoryUnverified);
 		history.addAll(payOutTransactionHistory);
 		Collections.sort(history, Collections.reverseOrder(new CustomComparator()));
 
@@ -370,6 +373,8 @@ public class MainActivity extends AbstractPaymentActivity {
 			}
 		}else if(history instanceof HistoryPayInTransaction){
 			return R.drawable.ic_pay_in;
+		}else if(history instanceof HistoryPayInTransactionUnverified){
+			return R.drawable.ic_pay_in_un;
 		}else if(history instanceof HistoryPayOutTransaction){
 			return R.drawable.ic_pay_out;
 		}
@@ -385,8 +390,10 @@ public class MainActivity extends AbstractPaymentActivity {
 			}
 		}else if(history instanceof HistoryPayInTransaction){
 			return 1;
-		}else if(history instanceof HistoryPayOutTransaction){
+		}else if(history instanceof HistoryPayInTransactionUnverified){
 			return 2;
+		}else if(history instanceof HistoryPayOutTransaction){
+			return 3;
 		}
 		return 0;
 	}

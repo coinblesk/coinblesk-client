@@ -8,6 +8,7 @@ import ch.uzh.csg.mbps.client.CurrencyViewHandler;
 import ch.uzh.csg.mbps.client.R;
 import ch.uzh.csg.mbps.model.AbstractHistory;
 import ch.uzh.csg.mbps.model.HistoryPayInTransaction;
+import ch.uzh.csg.mbps.model.HistoryPayInTransactionUnverified;
 import ch.uzh.csg.mbps.model.HistoryPayOutTransaction;
 import ch.uzh.csg.mbps.model.HistoryTransaction;
 
@@ -23,12 +24,15 @@ public class HistoryTransactionFormatter {
 	 * @return String representation of HistoryTransaction
 	 */
 	public static String formatHistoryTransaction(AbstractHistory tx, Context context){
-		if(tx instanceof HistoryPayInTransaction)
+		if(tx instanceof HistoryPayInTransaction) {
 			return formatHistoryPayInTransaction((HistoryPayInTransaction) tx, context);
-		else if (tx instanceof HistoryPayOutTransaction)
+		} else if (tx instanceof HistoryPayInTransactionUnverified) {
+			return formatHistoryPayInTransactionUnverified((HistoryPayInTransactionUnverified) tx, context);
+		} else if (tx instanceof HistoryPayOutTransaction) {
 			return formatHistoryPayOuTransaction((HistoryPayOutTransaction) tx, context);
-		else
+		} else {
 			return formatHistoryNormalTransaction((HistoryTransaction) tx, context);
+		}
 	}
 	
 	private static String formatHistoryPayInTransaction(HistoryPayInTransaction tx, Context context) {
@@ -36,6 +40,15 @@ public class HistoryTransactionFormatter {
 		sb.append(sdf.format(tx.getTimestamp()));
 		sb.append("\n");
 		sb.append(context.getResources().getString(R.string.history_payIn) + " \n");
+		sb.append(CurrencyViewHandler.formatBTCAsString(tx.getAmount(), context));
+		return sb.toString();
+	}
+	
+	private static String formatHistoryPayInTransactionUnverified(HistoryPayInTransactionUnverified tx, Context context) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(sdf.format(tx.getTimestamp()));
+		sb.append("\n");
+		sb.append(context.getResources().getString(R.string.history_payInUn) + " \n");
 		sb.append(CurrencyViewHandler.formatBTCAsString(tx.getAmount(), context));
 		return sb.toString();
 	}
