@@ -94,6 +94,7 @@ public class TimeHandler extends HandlerThread{
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(intent);
 				ClientController.clear();
 				terminateSession();
