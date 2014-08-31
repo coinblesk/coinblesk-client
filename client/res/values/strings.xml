@@ -276,8 +276,8 @@
     <string name="optionMenu_offlineModeHint">You are in offline mode. To reconnect open menu and click &quot;Reconnect to server&quot;.</string>
 
     <!-- APDU SERVICE -->
-    <string name="aiddescription">ch.uzh.csg.mbps</string>
-    <string name="servicedesc">MBPS Nfc</string>
+    <string name="aiddescription">ch.uzh.csg.coinblesk</string>
+    <string name="servicedesc">CoinBlesk Nfc</string>
 
     <!-- About Text -->
     <string name="about_text">This application was developed as part of a Master Project at the Institute for 

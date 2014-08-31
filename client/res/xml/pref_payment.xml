@@ -3,8 +3,8 @@
     <Preference android:title="@string/pref_title_payout_rule" >
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="ch.uzh.csg.mbps.client.settings.SettingPayOutRulesActivity"
-            android:targetPackage="ch.uzh.csg.mbps.client" />
+            android:targetClass="ch.uzh.csg.coinblesk.client.settings.SettingPayOutRulesActivity"
+            android:targetPackage="ch.uzh.csg.coinblesk.client" />
     </Preference>
     
     <CheckBoxPreference 

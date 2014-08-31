@@ -276,8 +276,8 @@
     <string name="optionMenu_offlineModeHint">Sie sind im Offline Modus. Um sich zum Server zu verbinden klicken Sie im Menü auf &quot;Mit Server verbinden&quot;.</string>
 
     <!-- APDU SERVICE -->
-    <string name="aiddescription">ch.uzh.csg.mbps</string>
-    <string name="servicedesc">MBPS Nfc</string>
+    <string name="aiddescription">ch.uzh.csg.coinblesk</string>
+    <string name="servicedesc">CoinBlesk Nfc</string>
 
     <!-- About Text -->
     <string name="about_text">       Diese Applikation wurde als Teil eines Masterprojektes am Institut für Informatik an der 

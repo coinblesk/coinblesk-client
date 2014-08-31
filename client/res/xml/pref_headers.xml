@@ -3,9 +3,9 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="ch.uzh.csg.mbps.client.settings.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="ch.uzh.csg.coinblesk.client.settings.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
     <header
-        android:fragment="ch.uzh.csg.mbps.client.settings.SettingsActivity$PaymentPreferenceFragment"
+        android:fragment="ch.uzh.csg.coinblesk.client.settings.SettingsActivity$PaymentPreferenceFragment"
         android:title="@string/pref_header_payments" />
 </preference-headers>

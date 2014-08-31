@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ch.uzh.csg.mbps.client"
+    package="ch.uzh.csg.coinblesk.client"
     android:versionCode="1"
     android:versionName="v1.0" >
 
@@ -23,7 +23,7 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Holo.Light" >
         <activity
-            android:name="ch.uzh.csg.mbps.client.LoginActivity"
+            android:name="ch.uzh.csg.coinblesk.client.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_login" >
             <intent-filter>
@@ -32,103 +32,103 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.RegistrationActivity"
+            android:name="ch.uzh.csg.coinblesk.client.RegistrationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_registration" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.LoginActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.LoginActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.ResetPasswordActivity"
+            android:name="ch.uzh.csg.coinblesk.client.ResetPasswordActivity"
             android:label="@string/title_activity_reset_password" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.LoginActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.LoginActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.MainActivity"
+            android:name="ch.uzh.csg.coinblesk.client.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_main" />
         <activity
-            android:name="ch.uzh.csg.mbps.client.HistoryActivity"
+            android:name="ch.uzh.csg.coinblesk.client.HistoryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_history" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.MainActivity" />
         </activity>
         <!-- Navigation Drawer -->
-        <activity android:name="ch.uzh.csg.mbps.client.navigation.DrawerItemClickListener" >
+        <activity android:name="ch.uzh.csg.coinblesk.client.navigation.DrawerItemClickListener" >
         </activity>
         <!-- Profile -->
         <activity
-            android:name="ch.uzh.csg.mbps.client.profile.AccountProfileActivity"
+            android:name="ch.uzh.csg.coinblesk.client.profile.AccountProfileActivity"
             android:label="@string/title_activity_profile_account" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.MainActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.profile.EditEmailAccountProfileActivity"
+            android:name="ch.uzh.csg.coinblesk.client.profile.EditEmailAccountProfileActivity"
             android:label="@string/title_activity_edit_email_account_profile" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.profile.AccountProfileActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.profile.AccountProfileActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.profile.EditPasswordAccountProfileActivity"
+            android:name="ch.uzh.csg.coinblesk.client.profile.EditPasswordAccountProfileActivity"
             android:label="@string/title_activity_edit_passwotrd_account_profile" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.profile.AccountProfileActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.profile.AccountProfileActivity" />
         </activity>
         <!-- Payment -->
         <activity
-            android:name="ch.uzh.csg.mbps.client.payment.ReceivePaymentActivity"
+            android:name="ch.uzh.csg.coinblesk.client.payment.ReceivePaymentActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_receive_payment" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.MainActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.payment.PayInActivity"
+            android:name="ch.uzh.csg.coinblesk.client.payment.PayInActivity"
             android:label="@string/title_activity_pay_in" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.MainActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.payment.PayOutActivity"
+            android:name="ch.uzh.csg.coinblesk.client.payment.PayOutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_pay_out"
             android:windowSoftInputMode="stateHidden" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.MainActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.settings.SettingsActivity"
+            android:name="ch.uzh.csg.coinblesk.client.settings.SettingsActivity"
             android:label="@string/title_activity_settings" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.MainActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.settings.AboutActivity"
+            android:name="ch.uzh.csg.coinblesk.client.settings.AboutActivity"
             android:label="@string/title_activity_about" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.settings.SettingsActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.settings.SettingsActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.settings.SettingPayOutRulesActivity"
+            android:name="ch.uzh.csg.coinblesk.client.settings.SettingPayOutRulesActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_setting_pay_out_rules" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.settings.SettingsActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.settings.SettingsActivity" />
         </activity>
 
 		<service
@@ -145,29 +145,29 @@
         </service>
 
         <activity
-            android:name="ch.uzh.csg.mbps.client.ChoosePaymentActivity"
+            android:name="ch.uzh.csg.coinblesk.client.ChoosePaymentActivity"
             android:label="@string/title_activity_choose_payment"
-            android:parentActivityName="ch.uzh.csg.mbps.client.MainActivity" >
+            android:parentActivityName="ch.uzh.csg.coinblesk.client.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.MainActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.payment.SendPaymentActivity"
+            android:name="ch.uzh.csg.coinblesk.client.payment.SendPaymentActivity"
             android:label="@string/title_activity_send_payment"
-            android:parentActivityName="ch.uzh.csg.mbps.client.MainActivity"
+            android:parentActivityName="ch.uzh.csg.coinblesk.client.MainActivity"
             android:windowSoftInputMode="stateHidden" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.MainActivity" />
         </activity>
         <activity
-            android:name="ch.uzh.csg.mbps.client.AddressBookActivity"
+            android:name="ch.uzh.csg.coinblesk.client.AddressBookActivity"
             android:label="@string/title_activity_address_book"
-            android:parentActivityName="ch.uzh.csg.mbps.client.MainActivity" >
+            android:parentActivityName="ch.uzh.csg.coinblesk.client.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ch.uzh.csg.mbps.client.MainActivity" />
+                android:value="ch.uzh.csg.coinblesk.client.MainActivity" />
         </activity>
     </application>
 
