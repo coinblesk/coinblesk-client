@@ -740,6 +740,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	private Button menu_external;
 	private Button drink;
 	private Button coffee;
+	private Button coffee2;
 
 	private ArrayList<Float> mathVariables = new ArrayList<Float>();
 	private float mathVariable1;
@@ -1232,6 +1233,15 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 				addMensaButtonAmount("1.50");
 			}
 		});
+		
+		coffee2 = (Button) findViewById(R.id.mensa_coffe2);
+		coffee2.setVisibility(View.VISIBLE);
+		coffee2.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				resetNfc();
+				addMensaButtonAmount("1.70");
+			}
+		});
 	}
 
 	/**
@@ -1246,6 +1256,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		menu_external.setVisibility(View.INVISIBLE);
 		coffee.setEnabled(false);
 		coffee.setVisibility(View.INVISIBLE);
+		coffee2.setEnabled(false);
+		coffee2.setVisibility(View.INVISIBLE);
 		drink.setEnabled(false);
 		drink.setVisibility(View.INVISIBLE);
 	}
@@ -1259,6 +1271,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 			menu_employee.setEnabled(false);
 			menu_external.setEnabled(false);
 			coffee.setEnabled(false);
+			coffee2.setEnabled(false);
 			drink.setEnabled(false);
 		}
 	}
@@ -1272,6 +1285,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 			menu_employee.setEnabled(true);
 			menu_external.setEnabled(true);
 			coffee.setEnabled(true);
+			coffee2.setEnabled(true);
 			drink.setEnabled(true);
 		}
 	}

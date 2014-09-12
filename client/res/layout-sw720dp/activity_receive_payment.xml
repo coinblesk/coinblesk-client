@@ -177,6 +177,7 @@
                 android:layout_below="@+id/one"
                 android:layout_toRightOf="@+id/addition"
                 android:text="@string/enter_total"
+                android:background="#99FF99"
                 android:textSize="@dimen/calc_dialog_text_size" />
 
             <Button
@@ -314,7 +315,7 @@
                 android:layout_above="@+id/six"
                 android:layout_toRightOf="@+id/nine"
                 android:text="@string/all_clear"
-                android:textColor="#ffffff"
+                android:background="#FFFF66"
                 android:textSize="@dimen/calc_dialog_text_size" />
         </RelativeLayout>
 
@@ -378,12 +379,22 @@
                 android:text="Kaffee 1.50"
                 android:visibility="invisible"
                 android:textSize="@dimen/calc_dialog_text_size" />
+            
+             <Button
+                android:id="@+id/mensa_coffe2"
+                android:layout_width="170dp"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@+id/mensa_coffe"
+                android:layout_alignLeft="@+id/mensa_coffe"
+                android:text="Kaffee 1.70"
+                android:visibility="invisible"
+                android:textSize="@dimen/calc_dialog_text_size" />
 
             <Button
                 android:id="@+id/mensa_drink"
                 android:layout_width="170dp"
                 android:layout_height="@dimen/calc_dialog_button_height"
-                android:layout_below="@+id/mensa_coffe"
+                android:layout_below="@+id/mensa_coffe2"
                 android:layout_alignLeft="@+id/mensa_coffe"
                 android:text="Getränk 2.30"
                 android:visibility="invisible"
