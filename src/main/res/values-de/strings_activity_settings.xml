@@ -1,0 +1,31 @@
+<resources>
+
+    <string name="title_activity_settings">CoinBlesk - Einstellungen</string>
+
+    <!-- Strings related to Settings -->
+
+
+    <!-- General settings -->
+    <string name="pref_header_general">Allgemein</string>
+    <string name="pref_title_about_settings">Über</string>
+    <string name="pref_title_bitcoin_unit">Bitcoin Einheit wählen</string>
+
+    <string-array name="pref_bitcoin_unit_list">
+        <item>micro-Bitcoin (μBTC)</item>
+        <item>mili-Bitcoin (mBTC)</item>
+        <item>Bitcoin (BTC)</item>
+    </string-array>
+    <string-array name="pref_bitcoin_unit_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <!-- Payment settings -->
+    <string name="pref_header_payments">Zahlungen</string>
+    <string name="pref_title_payout_rule">Auszahlungs-Regeln erfassen</string>
+	<string name="pref_description_include_fee">Aktiviere Transaktions-Gebühr bei Erhalt von Zahlungen</string>
+    <string name="pref_title_include_fee">Transaktions-Gebühr</string>
+    <string name="pref_title_fee_amount">Gebühr in Prozent (%)</string>
+    <string name="pref_fee_amount">1</string>
+</resources>

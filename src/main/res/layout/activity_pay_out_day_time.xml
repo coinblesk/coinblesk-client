@@ -1,0 +1,124 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:id="@+id/pay_out_day_time"
+    tools:context=".PayOutDayTimeActivity" >
+
+    <TextView
+        android:id="@+id/setting_payOut_day_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#C1CDCD"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:text="@string/setting_payOut_day_title"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <LinearLayout
+        android:id="@+id/setting_payOut_day_linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/setting_payOut_day_title"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical" >
+
+        <CheckBox
+            android:id="@+id/setting_payOut_day_monday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_payOut_day_monday" />
+
+        <CheckBox
+            android:id="@+id/setting_payOut_day_tuesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_payOut_day_tuesday" />
+
+        <CheckBox
+            android:id="@+id/setting_payOut_day_wednesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_payOut_day_wednesday" />
+
+        <CheckBox
+            android:id="@+id/setting_payOut_day_thursday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_payOut_day_thursday" />
+
+        <CheckBox
+            android:id="@+id/setting_payOut_day_friday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_payOut_day_friday" />
+
+        <CheckBox
+            android:id="@+id/setting_payOut_day_saturday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_payOut_day_saturday" />
+
+        <CheckBox
+            android:id="@+id/setting_payOut_day_sunday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_payOut_day_sunday" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/setting_payOut_time_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/setting_payOut_day_linearLayout"
+        android:background="#C1CDCD"
+        android:clickable="true"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:text="@string/setting_payOut_time_title"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/setting_payOut_time_view_0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/setting_payOut_time_title"
+        android:clickable="true"
+        android:visibility="gone"
+        android:drawableRight="@drawable/ic_navigation_cancel_light" />
+
+    <TextView
+        android:id="@+id/setting_payOut_time_view_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:clickable="true"
+        android:visibility="gone"
+        android:drawableRight="@drawable/ic_navigation_cancel_light"
+        android:layout_below="@+id/setting_payOut_time_view_0"/>
+
+    <TextView
+        android:id="@+id/setting_payOut_time_view_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:clickable="true"
+        android:visibility="gone"
+        android:drawableRight="@drawable/ic_navigation_cancel_light"
+        android:layout_below="@+id/setting_payOut_time_view_1"/>
+
+    <TextView
+        android:id="@+id/setting_payOut_time_view_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:clickable="true"
+        android:visibility="gone"
+        android:drawableRight="@drawable/ic_navigation_cancel_light"
+        android:layout_below="@+id/setting_payOut_time_view_2"/>
+
+</RelativeLayout>

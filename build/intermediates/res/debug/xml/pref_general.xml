@@ -1,0 +1,21 @@
+  <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <Preference android:title="@string/pref_title_about_settings" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="ch.uzh.csg.coinblesk.client.settings.AboutActivity"
+            android:targetPackage="ch.uzh.csg.coinblesk.client" />
+    </Preference>
+
+    <ListPreference
+        android:defaultValue="-1"
+        android:entries="@array/pref_bitcoin_unit_list"
+        android:entryValues="@array/pref_bitcoin_unit_values"
+        android:key="bitcoin_list"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_bitcoin_unit" />
+
+
+</PreferenceScreen>
+<!-- From: file:/home/rvoellmy/projects/coinblesk/workspace/app/src/main/res/xml/pref_general.xml -->

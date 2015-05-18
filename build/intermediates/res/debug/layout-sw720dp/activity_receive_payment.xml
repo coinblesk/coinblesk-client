@@ -1,0 +1,408 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".ReceivePaymentActivity" >
+
+        <TextView
+            android:id="@+id/receivePayment_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/receivePayment_charge"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="54sp"
+            android:textStyle="italic" />
+
+        <ImageView
+            android:id="@+id/receivePayment_logo"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/receivePayment_title"
+            android:src="@drawable/ic_receive_payment_big" />
+
+        <TextView
+            android:id="@+id/receivePayment_exchangeRateTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/receivePayment_title"
+            android:layout_marginTop="24dp"
+            android:text="@string/receivePayment_exchangeRate" />
+
+        <TextView
+            android:id="@+id/receivePayment_exchangeRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/receivePayment_exchangeRateTitle"
+            android:layout_toRightOf="@+id/receivePayment_exchangeRateTitle" />
+
+        <TextView
+            android:id="@+id/receivePayment_balanceTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/receivePayment_exchangeRateTitle"
+            android:layout_marginLeft="15dp"
+            android:layout_toRightOf="@+id/receivePayment_exchangeRate"
+            android:text="@string/receivePayment_balanceTitle" />
+
+        <TextView
+            android:id="@+id/receivePayment_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/receivePayment_exchangeRateTitle"
+            android:layout_toRightOf="@+id/receivePayment_balanceTitle" />
+
+        <Spinner
+            android:id="@+id/receivePayment_currencySpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/receivePayment_exchangeRateTitle"
+            android:layout_marginTop="5dp" />
+
+        <TextView
+            android:id="@+id/receivePayment_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/receivePayment_currencySpinner"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/receivePayment_currencySpinner"
+            android:textSize="@dimen/textSizeBig"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/receivePayment_CHFinBTC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/receivePayment_amount"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/receivePayment_amount" />
+
+        <TextView
+            android:id="@+id/receivePayment_BTCIncFee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/receivePayment_amount"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/receivePayment_amount" />
+
+        <TextView
+            android:id="@+id/receivePayment_BTCIncFeeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/receivePayment_BTCIncFee"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/receivePayment_BTCIncFee" />
+
+        <!-- Num-Pad -->
+
+        <RelativeLayout
+            android:id="@+id/receivePayment_numPadLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/receivePayment_currencySpinner"
+            android:layout_marginTop="20dp"
+            android:gravity="center" >
+
+            <LinearLayout
+                android:id="@+id/receivePayment_nfcAnimationLayout"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_above="@+id/calc_dialog_display"
+                android:layout_alignLeft="@+id/enter_total"
+                android:layout_alignRight="@+id/enter_total"
+                android:layout_toRightOf="@+id/all_clear"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/receivePayment_establishNfcConnectionInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:gravity="center"
+                    android:text="@string/establishNfcConnectionInfo"
+                    android:textColor="#33b5e5"
+                    android:textStyle="bold"
+                    android:visibility="invisible" />
+
+                <ImageView
+                    android:id="@+id/receivePayment_nfcIcon"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_marginBottom="15dp" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/calc_dialog_display"
+                android:layout_width="443dp"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/enter_total"
+                android:layout_alignBaseline="@+id/subtract"
+                android:layout_alignLeft="@+id/enter_total"
+                android:layout_alignRight="@+id/enter_total"
+                android:clickable="false"
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:gravity="center"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <EditText
+                android:id="@+id/calc_dialog_display_fake"
+                android:layout_width="443dp"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/enter_total"
+                android:layout_alignLeft="@+id/enter_total"
+                android:layout_alignRight="@+id/enter_total"
+                android:layout_toRightOf="@+id/subtract"
+                android:clickable="false"
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:textSize="@dimen/calc_dialog_text_size"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/enter_total"
+                android:layout_width="250dp"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@+id/one"
+                android:layout_toRightOf="@+id/addition"
+                android:text="@string/enter_total"
+                android:background="#99FF99"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/seven"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:text="7"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/eight"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_toRightOf="@id/seven"
+                android:text="8"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/nine"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_toRightOf="@id/eight"
+                android:text="9"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/four"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/seven"
+                android:text="4"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/five"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/seven"
+                android:layout_toRightOf="@id/four"
+                android:text="5"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/six"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/seven"
+                android:layout_toRightOf="@id/five"
+                android:text="6"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/multiply"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/seven"
+                android:layout_toRightOf="@id/six"
+                android:text="x"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/one"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/four"
+                android:text="1"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/two"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/four"
+                android:layout_toRightOf="@id/one"
+                android:text="2"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/three"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/four"
+                android:layout_toRightOf="@id/two"
+                android:text="3"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/subtract"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/four"
+                android:layout_toRightOf="@id/three"
+                android:text="-"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/decimal"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/one"
+                android:text="."
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/zero"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/one"
+                android:layout_toRightOf="@id/decimal"
+                android:text="0"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/equals"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/one"
+                android:layout_toRightOf="@id/zero"
+                android:text="="
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/addition"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@id/one"
+                android:layout_toRightOf="@id/equals"
+                android:text="+"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/all_clear"
+                android:layout_width="@dimen/calc_dialog_button_width"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_above="@+id/six"
+                android:layout_toRightOf="@+id/nine"
+                android:text="@string/all_clear"
+                android:background="#FFFF66"
+                android:textSize="@dimen/calc_dialog_text_size" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/receivePayment_currencySpinner"
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@+id/receivePayment_numPadLayout"
+            android:gravity="center" >
+            
+            <ScrollView
+                android:id="@+id/receivePayment_listScrollView"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true" 
+                android:layout_height="300dp"
+                android:layout_width="180dp">
+               <TextView
+                android:id="@+id/receivePayment_list"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/calc_dialog_text_size"
+                android:layout_marginLeft="48dp" />
+            </ScrollView>
+
+            <Button
+                android:id="@+id/mensa_menu_student"
+                android:layout_width="170dp"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_toRightOf="@id/receivePayment_listScrollView"
+                android:text="Menü 5.40"
+                android:textSize="@dimen/calc_dialog_text_size" 
+                android:visibility="invisible"/>
+            
+             <Button
+                android:id="@+id/mensa_menu_employee"
+                android:layout_width="170dp"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@+id/mensa_menu_student"
+                android:layout_alignLeft="@+id/mensa_menu_student"
+                android:text="Menü 7.00"
+                android:visibility="invisible"
+                android:textSize="@dimen/calc_dialog_text_size" />
+             
+              <Button
+                android:id="@+id/mensa_menu_external"
+                android:layout_width="170dp"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@+id/mensa_menu_employee"
+                android:layout_alignLeft="@+id/mensa_menu_student"
+                android:text="Menü 10.50"
+                android:visibility="invisible"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/mensa_coffe"
+                android:layout_width="170dp"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_toRightOf="@+id/mensa_menu_student"
+                android:text="Kaffee 1.50"
+                android:visibility="invisible"
+                android:textSize="@dimen/calc_dialog_text_size" />
+            
+             <Button
+                android:id="@+id/mensa_coffe2"
+                android:layout_width="170dp"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@+id/mensa_coffe"
+                android:layout_alignLeft="@+id/mensa_coffe"
+                android:text="Kaffee 1.70"
+                android:visibility="invisible"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+            <Button
+                android:id="@+id/mensa_drink"
+                android:layout_width="170dp"
+                android:layout_height="@dimen/calc_dialog_button_height"
+                android:layout_below="@+id/mensa_coffe2"
+                android:layout_alignLeft="@+id/mensa_coffe"
+                android:text="Getränk 2.30"
+                android:visibility="invisible"
+                android:textSize="@dimen/calc_dialog_text_size" />
+
+         
+
+        </RelativeLayout>
+
+
+    </RelativeLayout><!-- From: file:/home/rvoellmy/projects/coinblesk/workspace/app/src/main/res/layout-sw720dp/activity_receive_payment.xml -->

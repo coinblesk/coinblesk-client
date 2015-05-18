@@ -1,0 +1,16 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/spinner_simple"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="3dip" >
+
+    <TextView
+        android:id="@+id/spinner_simple_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dip"
+        android:text="@string/spinner_simple_textView" >
+    </TextView>
+
+</RelativeLayout><!-- From: file:/home/rvoellmy/projects/coinblesk/workspace/app/src/main/res/layout-sw720dp/spinner_simple.xml -->

@@ -1,0 +1,167 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/pay_payment_popup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".PayPaymentActivity" >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/background_light" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/payPayment_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/payPayment_pay"
+                android:textSize="54sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/payPayment_exchangeRate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/payPayment_title"
+                android:layout_marginTop="18dp"
+                android:text="@string/payPayment_exchangeRate"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/payPayment_exchangeRateValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/payPayment_exchangeRate"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@+id/payPayment_exchangeRate"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/payPayment_balanceDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/payPayment_exchangeRate"
+                android:text="@string/payPayment_balanceDescription"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/payPayment_balanceBTC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/payPayment_balanceDescription"
+                android:layout_alignLeft="@+id/payPayment_exchangeRateValue"
+                android:layout_below="@+id/payPayment_exchangeRate"
+                android:layout_toRightOf="@+id/payPayment_balanceDescription"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/payPayment_balanceCHF"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/payPayment_balanceBTC"
+                android:layout_below="@+id/payPayment_balanceBTC"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/payPayment_balanceDescription"
+                android:layout_marginTop="25dp"
+                android:text="@string/payPayment_paymentDescription"
+                android:textColor="#33b5e5"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/payPayment_usernameTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/textView1"
+                android:layout_marginTop="15dp"
+                android:text="@string/payPayment_usernameTitle"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/payPayment_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/payPayment_usernameTitle"
+                android:layout_alignLeft="@+id/payPayment_amountBTC"
+                android:layout_below="@+id/textView1"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/payPayment_amountBTCTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/payPayment_usernameTitle"
+                android:layout_marginTop="15dp"
+                android:text="@string/payPayment_amountBTCTitle"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/payPayment_amountBTC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/payPayment_amountBTCTitle"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/payPayment_amountBTCTitle"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/payPayment_amountCHF"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/payPayment_amountBTC"
+                android:layout_below="@+id/payPayment_amountBTCTitle"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/payPayment_accept"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/payPayment_amountBTCTitle"
+                android:layout_marginTop="30dp"
+                android:text="@string/payPayment_accept"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/payPayment_reject"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/payPayment_accept"
+                android:text="@string/payPayment_reject"
+                android:textSize="20sp" />
+
+            <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_alignBottom="@+id/payPayment_title"
+                android:layout_alignParentRight="true"
+                android:gravity="right"
+                android:src="@drawable/ic_pay_payment_big" />
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout><!-- From: file:/home/rvoellmy/projects/coinblesk/workspace/app/src/main/res/layout/pay_payment_popup.xml -->

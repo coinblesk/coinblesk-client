@@ -1,0 +1,145 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".SendPaymentActivity" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/sendPayment_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/sendPayment_title"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="54sp"
+            android:textStyle="italic" />
+
+        <ImageView
+            android:id="@+id/sendPayment_logo"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/sendPayment_title"
+            android:src="@drawable/ic_pay_payment_big" />
+
+        <TextView
+            android:id="@+id/sendPayment_exchangeRateTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/sendPayment_title"
+            android:layout_marginTop="24dp"
+            android:text="@string/receivePayment_exchangeRate" />
+
+        <TextView
+            android:id="@+id/sendPayment_exchangeRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/sendPayment_exchangeRateTitle"
+            android:layout_alignLeft="@+id/sendPayment_currencyDescription" />
+
+        <TextView
+            android:id="@+id/sendPayment_balanceTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/sendPayment_exchangeRateTitle"
+            android:layout_marginTop="15dp"
+            android:text="@string/sendPayment_balanceTitle" />
+
+        <TextView
+            android:id="@+id/sendPayment_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/sendPayment_balanceTitle"
+            android:layout_alignLeft="@+id/sendPayment_currencyDescription"/>
+
+        <TextView
+            android:id="@+id/sendPayment_currencyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/sendPayment_balanceTitle"
+            android:layout_marginTop="15dp"
+            android:text="@string/receivePayment_currency" />
+
+        <Spinner
+            android:id="@+id/sendPayment_currencySpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/sendPayment_currencyText" />
+
+        <!-- betrag in -->
+
+        <TextView
+            android:id="@+id/sendPayment_currencyDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/sendPayment_amountText"
+            android:layout_alignBaseline="@+id/sendPayment_currencyText"
+            android:layout_alignLeft="@+id/sendPayment_amountText"
+            android:layout_marginLeft="15dp"
+            android:text="@string/receivePayment_enter" />
+
+        <TextView
+            android:id="@+id/sendPayment_enterAmountIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/sendPayment_currencyText"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/sendPayment_currencyDescription" />
+
+        <EditText
+            android:id="@+id/sendPayment_amountText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/sendPayment_currencySpinner"
+            android:layout_toRightOf="@+id/sendPayment_currencySpinner"
+            android:ems="10"
+            android:hint="@string/receivePayment_amount_hint" />
+
+        <TextView
+            android:id="@+id/sendPayment_CHFinBTC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/sendPayment_amountText"
+            android:layout_below="@+id/sendPayment_amountText" />
+
+        <EditText
+            android:id="@+id/sendPayment_enterReceiver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/sendPayment_addressBookButton"
+            android:layout_below="@+id/sendPayment_CHFinBTC"
+            android:hint="@string/sendPayment_enterUsernameReceiver" />
+        
+         <Button
+            android:id="@+id/sendPayment_addressBookButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/sendPayment_enterReceiver"
+            android:layout_alignParentRight="true"
+            android:text="Addressbook" />
+
+        <Button
+            android:id="@+id/sendPayment_sendButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sendPayment_enterReceiver"
+            android:layout_marginTop="10dp"
+            android:text="@string/sendPayment_sendButton" />
+    </RelativeLayout>
+
+</ScrollView><!-- From: file:/home/rvoellmy/projects/coinblesk/workspace/app/src/main/res/layout/activity_send_payment.xml -->

@@ -1,0 +1,163 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".ReceivePaymentActivity" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/receivePayment_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/receivePayment_charge"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="54sp"
+            android:textStyle="italic" />
+
+        <ImageView
+            android:id="@+id/receivePayment_logo"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/receivePayment_title"
+            android:src="@drawable/ic_receive_payment_big" />
+
+        <TextView
+            android:id="@+id/receivePayment_exchangeRateTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/receivePayment_title"
+            android:layout_marginTop="24dp"
+            android:text="@string/receivePayment_exchangeRate" />
+
+        <TextView
+            android:id="@+id/receivePayment_exchangeRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/receivePayment_exchangeRateTitle"
+            android:layout_alignLeft="@+id/TextView01" />
+
+        <TextView
+            android:id="@+id/receivePayment_balanceTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/receivePayment_exchangeRateTitle"
+            android:layout_marginTop="15dp"
+            android:text="@string/receivePayment_balanceTitle" />
+
+        <TextView
+            android:id="@+id/receivePayment_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/receivePayment_balanceTitle"
+            android:layout_alignLeft="@+id/TextView01" />
+
+        <TextView
+            android:id="@+id/receivePayment_currencyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/receivePayment_balanceTitle"
+            android:layout_marginTop="15dp"
+            android:text="@string/receivePayment_currency" />
+
+        <Spinner
+            android:id="@+id/receivePayment_currencySpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/receivePayment_currencyText" />
+
+        <!-- betrag in -->
+
+        <TextView
+            android:id="@+id/TextView01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/receivePayment_amountText"
+            android:layout_alignBaseline="@+id/receivePayment_currencyText"
+            android:layout_alignLeft="@+id/receivePayment_amountText"
+            android:layout_marginLeft="15dp"
+            android:text="@string/receivePayment_enter" />
+
+        <TextView
+            android:id="@+id/receivePayment_enterAmountIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/receivePayment_currencyText"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/TextView01" />
+
+        <EditText
+            android:id="@+id/receivePayment_amountText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/receivePayment_currencySpinner"
+            android:layout_toRightOf="@+id/receivePayment_currencySpinner"
+            android:ems="10"
+            android:hint="@string/receivePayment_amount_hint" />
+
+        <TextView
+            android:id="@+id/receivePayment_CHFinBTC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/receivePayment_amountText"
+            android:layout_below="@+id/receivePayment_amountText" />
+
+        <TextView
+            android:id="@+id/receivePayment_BTCIncFee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/receivePayment_CHFinBTC"
+            android:layout_below="@+id/receivePayment_CHFinBTC" />
+
+        <TextView
+            android:id="@+id/receivePayment_BTCIncFeeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/receivePayment_BTCIncFee"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/receivePayment_BTCIncFee" />
+
+        <TextView
+            android:id="@+id/receivePayment_establishNfcConnectionInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/receivePayment_CHFinBTC"
+            android:layout_marginTop="30dp"
+            android:gravity="center"
+            android:text="@string/establishNfcConnectionInfo"
+            android:textColor="#33b5e5"
+            android:textStyle="bold"
+            android:visibility="invisible" />
+
+        <LinearLayout
+            android:id="@+id/mainActivity_nfcAnimationLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/receivePayment_establishNfcConnectionInfo"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <ImageView
+                android:id="@+id/receivePayment_nfcIcon"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginTop="10dp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</ScrollView><!-- From: file:/home/rvoellmy/projects/coinblesk/workspace/app/src/main/res/layout/activity_receive_payment.xml -->

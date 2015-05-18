@@ -1,0 +1,58 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <Preference android:title="@string/pref_title_payout_rule" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="ch.uzh.csg.coinblesk.client.settings.SettingPayOutRulesActivity"
+            android:targetPackage="ch.uzh.csg.coinblesk.client" />
+    </Preference>
+    
+    <CheckBoxPreference 
+        android:defaultValue="false"
+        android:key="include_fee"
+        android:summary="@string/pref_description_include_fee"
+        android:title="@string/pref_title_include_fee"/>
+    
+     <EditTextPreference
+        android:defaultValue="@string/pref_fee_amount"
+        android:dependency="include_fee"
+        android:inputType="number"
+        android:key="fee_amount"
+        android:maxLength="2"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_fee_amount" />
+     
+     <CheckBoxPreference 
+        android:defaultValue="false"
+        android:key="auto_accept"
+        android:summary="@string/settings_autoAccept_checkbox_summary"
+        android:title="@string/settings_autoAccept_checkbox_title"/>
+    
+     <EditTextPreference
+        android:defaultValue="@string/settings_autoAccept_editText_defaultValue"
+        android:dependency="auto_accept"
+        android:numeric="integer"
+        android:inputType="number"
+        android:key="auto_accept_amount"
+        android:maxLength="3"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/settings_autoAccept_editText_title" />
+     
+     <EditTextPreference
+        android:defaultValue="3"
+        android:inputType="numberDecimal"
+        android:numeric="integer"
+        android:key="numberOfLastTransactions"
+        android:maxLength="1"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="false"
+        android:title="@string/sharedPreferences_numberOfLastTransactionsTitle" 
+        android:summary="@string/sharedPreferences_numberOfLastTransactionsDescription"/>
+     
+</PreferenceScreen>
+<!-- From: file:/home/rvoellmy/projects/coinblesk/workspace/app/src/main/res/xml/pref_payment.xml -->
