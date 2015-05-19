@@ -204,10 +204,8 @@ public class MainActivity extends AbstractPaymentActivity {
     private void initiateProgressBar() {
         mProgressBar = (ProgressBar) findViewById(R.id.mainActivityBlockchainSyncProgressBar);
         mBlockchainSyncStatusText = (TextView) findViewById(R.id.mainActivityBlockchainSyncText);
-        mProgressBar.setVisibility(View.VISIBLE);
-        mBlockchainSyncStatusText.setVisibility(View.VISIBLE);
 
-        final int updateInterval = 5000; // == 1s
+        final int updateInterval = 3000; // == 1s
         final WalletService walletService = getWalletService();
         final Handler handler = new Handler();
 
@@ -221,7 +219,17 @@ public class MainActivity extends AbstractPaymentActivity {
                     mProgressBar.setVisibility(View.GONE);
                     mBlockchainSyncStatusText.setVisibility(View.GONE);
                 } else {
+
                     double progress = walletService.getSyncProgress().getProgress();
+
+                    // make progress bar visible if it's no already
+                    if ((mProgressBar.getVisibility() != View.VISIBLE ||
+                            mBlockchainSyncStatusText.getVisibility() != View.INVISIBLE) &&
+                            progress > 0) {
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        mBlockchainSyncStatusText.setVisibility(View.VISIBLE);
+                    }
+
                     int progressPercentage = (int) (progress * mProgressBar.getMax()) + 1;
                     progressPercentage = Math.max(0, progressPercentage);
                     LOGGER.debug("Updating blockchain sync progress bar. current progress is {}%", progressPercentage);
