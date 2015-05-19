@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import android.content.Context;
+
+import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.keys.CustomKeyPair;
 import ch.uzh.csg.coinblesk.keys.CustomPublicKey;
@@ -91,7 +93,7 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	 *         but could not be persisted
 	 */
 	public boolean setUserPassword(String password) {
-		userAccount.setPassword(password);
+		getUserAccount().setPassword(password);
 		return saveUserAccount(userAccount);
 	}
 
@@ -104,7 +106,7 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	 *         but could not be persisted
 	 */
 	public boolean setUserEmail(String email) {
-		userAccount.setEmail(email);
+		getUserAccount().setEmail(email);
 		return saveUserAccount(userAccount);
 	}
 
@@ -117,7 +119,7 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	 *         but could not be persisted
 	 */
 	public boolean setUserBalance(BigDecimal balance) {
-		userAccount.setBalanceBTC(balance);
+		getUserAccount().setBalanceBTC(balance);
 		return saveUserAccount(userAccount);
 	}
 	
@@ -465,6 +467,23 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	public Set<PersistedPaymentRequest> getPersistedPaymentRequests() {
 		initPersistedPaymentRequests();
 		return persistedPaymentRequests;
+	}
+
+	public String getWatchingKey() {
+		return data.getServerWatchingKey();
+	}
+
+	public void setWatchingKey(String watchingKey) {
+		data.setServerWatchingKey(watchingKey);
+	}
+
+	public BitcoinNet getBitcoinNet() {
+		String bitcoinNet = data.getBitcoinNet();
+		return BitcoinNet.of(bitcoinNet);
+	}
+
+	public void setBitcoinNet(BitcoinNet bitcoinNet) {
+		data.setBitcoinNet(bitcoinNet.toString());
 	}
 
 }

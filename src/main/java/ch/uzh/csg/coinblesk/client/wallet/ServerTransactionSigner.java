@@ -1,38 +1,36 @@
 package ch.uzh.csg.coinblesk.client.wallet;
 
 import android.content.Context;
+import android.util.Base64;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.ScriptException;
-import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.crypto.ChildNumber;
-import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
-import org.bitcoinj.signers.CustomTransactionSigner;
 import org.bitcoinj.signers.StatelessTransactionSigner;
 import org.bitcoinj.wallet.KeyBag;
 import org.bitcoinj.wallet.RedeemData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import ch.uzh.csg.coinblesk.client.IAsyncTaskCompleteListener;
-import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.responseobject.SignatureRequestTransferObject;
+import ch.uzh.csg.coinblesk.client.request.PayOutRequestTask;
+import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This class sends partially signed transaction to the server. The server will sign the transaction and broadcast it.
+ * Each unspent transaction output can only be used once.
+ * Even though this class implements the {@link StatelessTransactionSigner} interface, it is actually not stateless,
+ * because it needs a {@link Context} to send a request to the server. Serializing the context to permanent storage is
+ * probably not a good idea, which is why this class doesn't implement the serializing methods of the
+ * {@link org.bitcoinj.signers.TransactionSigner} interface.
  */
 public class ServerTransactionSigner extends StatelessTransactionSigner {
 
@@ -42,7 +40,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
     @Override
     public boolean isReady() {
-        return context != null;
+        return true;
     }
 
     @Override
@@ -50,12 +48,10 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
         checkNotNull(context, "Context needs to be initialized in order to perform this request");
 
+        ServerSignatureRequestTransferObject txSigRequest = new ServerSignatureRequestTransferObject();
+
         Transaction tx = propTx.partialTx;
         int numInputs = tx.getInputs().size();
-
-        List<Script> redeemScripts = Lists.newArrayListWithExpectedSize(numInputs);
-        List<List<ChildNumber>> paths = Lists.newArrayListWithExpectedSize(numInputs);
-
         for (int i = 0; i < numInputs; i++) {
             TransactionInput txIn = tx.getInput(i);
             TransactionOutput txOut = txIn.getConnectedOutput();
@@ -64,11 +60,11 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
             }
             Script scriptPubKey = txOut.getScriptPubKey();
             if (!scriptPubKey.isPayToScriptHash()) {
-                LOGGER.warn("ServerTransactionSigner works only with P2SH transactions");
+                LOGGER.warn(this.getClass().getSimpleName() + " works only with P2SH transactions");
                 return false;
             }
 
-            Script inputScript = checkNotNull(txIn.getScriptSig());
+            checkNotNull(txIn.getScriptSig());
 
             try {
                 // We assume if its already signed, its hopefully got a SIGHASH type that will not invalidate when
@@ -87,34 +83,33 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                 continue;
             }
 
-            redeemScripts.set(i, redeemData.redeemScript);
-            paths.set(i, propTx.keyPaths.get(scriptPubKey));
+            txSigRequest.addIndexAndDerivationPath(i, childNumbersToIntArray(propTx.keyPaths.get(scriptPubKey)));
 
         }
 
+        String serializedTx = Base64.encodeToString(tx.bitcoinSerialize(), Base64.DEFAULT);
+        txSigRequest.setPartialTx(serializedTx);
 
-        SignatureRequestParameters params = new SignatureRequestParameters(propTx.keyPaths.get(scriptPubKey), sighash);
-
-        RequestTask<SignatureRequestTransferObject, TransferObject> request = new SignatureRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+        PayOutRequestTask payOutRequestTask = new PayOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
             @Override
-            public void onTaskComplete(TransferObject res) {
-                if(res.isSuccessful()) {
-                    LOGGER.info("Transaction successfully broadcastet");
+            public void onTaskComplete(TransferObject response) {
+                if(response.isSuccessful()) {
+                    LOGGER.info("Transaction signing and broadcast was successful");
                 } else {
-                    LOGGER.error("Transaction failed");
+                    LOGGER.error("Transaction failed with message: " + response.getMessage());
                 }
             }
-        }, params.toTransferObject(), new TransferObject(), context);
-
-        try {
-            request.execute().get();
-        } catch (InterruptedException e) {
-            LOGGER.warn("Task was interrupted", e);
-        } catch (ExecutionException e) {
-            LOGGER.warn("Task failed", e);
-        }
+        }, txSigRequest, new TransferObject(), context);
 
         return true;
+    }
+
+    private int[] childNumbersToIntArray(List<ChildNumber> childNumbers) {
+        int[] path = new int[childNumbers.size()];
+        for(int i = 0; i < childNumbers.size(); i++) {
+            path[i] = childNumbers.get(i).getI();
+        }
+        return path;
     }
 
 

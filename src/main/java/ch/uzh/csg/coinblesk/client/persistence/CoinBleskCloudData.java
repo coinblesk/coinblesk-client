@@ -36,6 +36,8 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     static final String COINBLESK_PREFS_BACKUP_KEY = "CoinBleskPrefs";
 
     private static final String SERVER_IP = "ip";
+    private static final String BITCOIN_NET = "bitcoin-net";
+    private static final String SERVER_WATCHING_KEY = "server-watching-key";
     private static final String PAYMENT_REQUESTS = "payment-requests";
     private static final String USER_ACCOUNT = "user-account";
     private static final String SERVER_PUB_KEY = "server-public-key";
@@ -167,7 +169,10 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     @Override
     public UserAccountObject getUserAccount() {
         String json = prefs.getString(USER_ACCOUNT, null);
-        Preconditions.checkNotNull(json);
+
+        if(json == null) {
+            return null;
+        }
 
         // decrypt encrypted json...
         String decryptedJson;
@@ -210,6 +215,26 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
         String serverIp = prefs.getString(SERVER_IP, null);
         Preconditions.checkNotNull(serverIp);
         return serverIp;
+    }
+
+    @Override
+    public String getServerWatchingKey() {
+        return prefs.getString(SERVER_WATCHING_KEY, null);
+    }
+
+    @Override
+    public void setServerWatchingKey(String serverWatchingKey) {
+        prefs.edit().putString(SERVER_WATCHING_KEY, serverWatchingKey).apply();
+    }
+
+    @Override
+    public String getBitcoinNet() {
+        return prefs.getString(BITCOIN_NET, null);
+    }
+
+    @Override
+    public void setBitcoinNet(String bitcoinNet) {
+        prefs.edit().putString(BITCOIN_NET, bitcoinNet).commit();
     }
 
 

@@ -24,6 +24,7 @@ import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.request.SignUpRequestTask;
 import ch.uzh.csg.coinblesk.client.ui.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.CheckFormatHandler;
+import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.client.R;
@@ -111,11 +112,14 @@ public class RegistrationActivity extends WalletActivity {
 				if (response.isSuccessful()) {
 					buildDialog(getResources().getString(R.string.registration_successful));
 					
-					// initialize wallet
-                    getSharedPreferences("wallet", MODE_PRIVATE).edit().putString("bitcoinnet", response.getBitcoinNet().toString()).commit();
-                    getSharedPreferences("wallet", MODE_PRIVATE).edit().putString("watchingkey", response.getWatchingKey()).commit();
-					
-                    getWalletService().init();
+					// store basic information on the client...
+					ClientController.getStorageHandler().setBitcoinNet(response.getBitcoinNet());
+					ClientController.getStorageHandler().setWatchingKey(response.getWatchingKey());
+
+					// Blockchain synchronization will take some time when first installing the app.
+					// We're actively starting the synchronization here already, so that when
+					// the user first logs in, the app is already partially synchronized...
+                    getWalletService().init(response.getBitcoinNet(), response.getWatchingKey());
 					
 				} else if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
 					displayResponse(getResources().getString(R.string.error_no_connection_before_login));

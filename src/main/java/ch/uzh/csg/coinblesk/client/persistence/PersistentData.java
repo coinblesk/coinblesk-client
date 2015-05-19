@@ -41,10 +41,6 @@ public interface PersistentData {
      * Sets the server's {@link CustomPublicKey} to the xml and returns the
      * updated xml string.
      * 
-     * @param xml
-     *            the xml string to be updated
-     * @param publicKey
-     *            the server's {@link CustomPublicKey} to be added
      * @return the updated xml string
      * @throws Exception
      *             an xml exception
@@ -54,11 +50,6 @@ public interface PersistentData {
     /**
      * Sets the given server IP to the xml and returns the updated xml string.
      * 
-     * @param xml
-     *            the xml string to be updated
-     * @param ip
-     *            the server IP to be added
-     * @return the updated xml string
      * @throws Exception
      *             an xml exception
      */
@@ -67,14 +58,19 @@ public interface PersistentData {
     /**
      * Returns the server IP from the given xml string.
      * 
-     * @param xml
      *            the xml string to read out the server IP from
      * @return the server IP or null, if this field is not set
      * @throws Exception
      *             an xml exception
      */
     String getServerIp() throws Exception;
-    
-    
 
+
+    String getServerWatchingKey();
+
+    void setServerWatchingKey(String serverWatchingKey);
+
+    String getBitcoinNet();
+
+    void setBitcoinNet(String bitcoinNet);
 }

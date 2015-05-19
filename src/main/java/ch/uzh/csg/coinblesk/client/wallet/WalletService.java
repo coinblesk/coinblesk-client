@@ -5,6 +5,7 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Service;
 
@@ -12,11 +13,13 @@ import org.bitcoinj.core.AbstractPeerEventListener;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Block;
+import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.FilteredBlock;
 import org.bitcoinj.core.InsufficientMoneyException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Peer;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.Wallet;
 import org.bitcoinj.core.Wallet.BalanceType;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.kits.WalletAppKit;
@@ -40,6 +43,7 @@ import java.util.Locale;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.model.HistoryPayInTransaction;
 import ch.uzh.csg.coinblesk.model.HistoryPayInTransactionUnverified;
@@ -113,22 +117,15 @@ public class WalletService extends android.app.Service {
         return bitcoinNet.toString().toLowerCase(Locale.ENGLISH) + WALLET_FILES_PREFIX;
     }
 
-    /**
-     * Synchronizes the blockchain and sets up the wallet
-     * 
-     * @return a {@link Service} object
-     */
-    public Service init() {
+    private boolean isWalletReady() {
+        return clientWalletKit != null && clientWalletKit.isRunning();
+    }
 
-        if(clientWalletKit != null && clientWalletKit.isRunning()) {
-            // wallet was already initialized
+    public Service init(BitcoinNet bitcoinNet, final String watchingKey) {
+
+        if(isWalletReady()) {
             return clientWalletKit;
         }
-
-        String bitcoinNetStr = getApplicationContext().getSharedPreferences("wallet", 0).getString("bitcoinnet", null);
-        BitcoinNet bitcoinNet = BitcoinNet.of(bitcoinNetStr);
-        
-        final String watchingKey = getApplicationContext().getSharedPreferences("wallet", 0).getString("watchingkey", null);
 
         params = getNetworkParams(bitcoinNet);
 
@@ -144,7 +141,7 @@ public class WalletService extends android.app.Service {
                         syncProgress.setBlocksRemaining(blocksLeft);
                     }
                 });
-        
+
         // create new wallet if new setup
         if(isNewSetup(bitcoinNet)) {
             clientWalletKit.restoreWalletFromSeed(getWalletSeed());
@@ -167,6 +164,29 @@ public class WalletService extends android.app.Service {
         }, Threading.USER_THREAD);
 
         return initService;
+    }
+
+    /**
+     * Synchronizes the blockchain and sets up the wallet. <strong>Please notice:</strong>
+     * if this is the first time the wallet is set up, you must use {@link WalletService#init(BitcoinNet, String)}
+     * instead. This method assumes that the bitcoin network and the server watching key are already stored on the device
+     * 
+     * @return a {@link Service} object
+     */
+    public Service init() {
+
+        if(isWalletReady()) {
+            return clientWalletKit;
+        }
+
+        BitcoinNet bitcoinNet = ClientController.getStorageHandler().getBitcoinNet();
+        Preconditions.checkNotNull(bitcoinNet, "bitcoin net was not stored in the internal storage");
+
+        String watchingKey = ClientController.getStorageHandler().getWatchingKey();
+        Preconditions.checkNotNull(watchingKey);
+
+        return init(bitcoinNet, watchingKey);
+
     }
 
     private WalletAppKit getAppKit() {
@@ -212,7 +232,7 @@ public class WalletService extends android.app.Service {
         for (TransactionSigner signer : clientWalletKit.wallet().getTransactionSigners()) {
             if (signer instanceof ServerTransactionSigner) {
                 // wallet already set up and restored from disk
-                LOGGER.info("Wallet was already set up and married");
+                LOGGER.debug("Wallet was already set up and married");
                 ((ServerTransactionSigner) signer).setContext(getApplicationContext());
                 return;
             }
@@ -269,9 +289,10 @@ public class WalletService extends android.app.Service {
     }
 
     public void createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
-        Address btcAddress;
-        btcAddress = new Address(params, address);
-        Transaction tx = getAppKit().wallet().createSend(btcAddress, BitcoinUtils.bigDecimalToCoin(amount));
+        Address btcAddress = new Address(params, address);
+        Wallet.SendRequest req = Wallet.SendRequest.to(btcAddress, Coin.parseCoin("0.099"));
+        req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
+        getAppKit().wallet().sendCoinsOffline(req);
     }
 
 

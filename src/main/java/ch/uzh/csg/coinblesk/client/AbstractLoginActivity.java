@@ -1,7 +1,5 @@
 package ch.uzh.csg.coinblesk.client;
 
-import java.security.KeyPair;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +9,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.TextView;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.security.KeyPair;
+
 import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
 import ch.uzh.csg.coinblesk.client.request.CommitPublicKeyRequestTask;
 import ch.uzh.csg.coinblesk.client.request.ReadRequestTask;
@@ -21,7 +25,6 @@ import ch.uzh.csg.coinblesk.client.ui.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.TimeHandler;
-import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.customserialization.PKIAlgorithm;
 import ch.uzh.csg.coinblesk.keys.CustomKeyPair;
 import ch.uzh.csg.coinblesk.keys.CustomPublicKey;
@@ -34,6 +37,9 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
  * relevant information to local xml file.
  */
 public abstract class AbstractLoginActivity extends WalletActivity {
+
+	private final Logger LOGGER = LoggerFactory.getLogger(AbstractLoginActivity.class);
+
 	protected static String username;
 	protected static String password;
 
@@ -69,6 +75,7 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 					dismissProgressDialog();
 					displayResponse(context.getResources().getString(R.string.error_login));
 				} else {
+					LOGGER.info("launching app in offline mode");
 					launchOfflineMode(context);
 				}
 			}
@@ -216,6 +223,21 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 				if (!saved) {
 					displayResponse(context.getResources().getString(R.string.error_xmlSave_failed));
 				}
+
+				// compare the received watching key with the one stored on the client
+				String serverWatchingKey = ClientController.getStorageHandler().getWatchingKey();
+				if(serverWatchingKey == null) {
+					ClientController.getStorageHandler().setWatchingKey(response.getServerWatchingKey());
+				} else {
+					if(!serverWatchingKey.equals(response.getServerWatchingKey())) {
+						// TODO: Handle this terrible event more gracefully
+						throw new IllegalStateException("Stored server watching key does not match the watching key provided by the server.");
+					}
+				}
+
+				// Set the bitcoin network to work with
+				LOGGER.debug("Setting bitcoin net to " + response.getBitcoinNet());
+				ClientController.getStorageHandler().setBitcoinNet(response.getBitcoinNet());
 
 				CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
 				if (ckp == null) {
