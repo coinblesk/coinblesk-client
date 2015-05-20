@@ -116,9 +116,9 @@ public class MainActivity extends AbstractPaymentActivity {
         setScreenOrientation();
         isPortrait = getResources().getBoolean(R.bool.portrait_only);
 
-        initializeDrawer();
         initializeGui();
         initClickListener();
+        initializeDrawer();
         initializeNFC();
 
     }
@@ -262,7 +262,6 @@ public class MainActivity extends AbstractPaymentActivity {
         nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
         nfcActivityAnimation.start();
 
-        CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalanceBTC(), getApplicationContext());
     }
 
     private void initClickListener() {
@@ -297,6 +296,7 @@ public class MainActivity extends AbstractPaymentActivity {
         super.onServiceConnected(name, service);
         loadUserBalance();
         initiateProgressBar();
+
     }
 
 
@@ -310,20 +310,9 @@ public class MainActivity extends AbstractPaymentActivity {
         // update the balance in internal storage for offline use of the app
         ClientController.getStorageHandler().setUserBalance(getWalletService().getUnconfirmedBalance());
 
-        // Display the user balance
-        AsyncTask<Void, Void, String> displayBalanceTask = new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                return getWalletService().getBitcoinAddress();
-            }
+        // display the user balance
+        CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), getWalletService().getUnconfirmedBalance(), getApplicationContext());
 
-            @Override
-            protected void onPostExecute(String address) {
-                CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), getWalletService().getUnconfirmedBalance(), getApplicationContext());
-
-            }
-        };
-        displayBalanceTask.execute();
     }
 
     private void launchRequest() {

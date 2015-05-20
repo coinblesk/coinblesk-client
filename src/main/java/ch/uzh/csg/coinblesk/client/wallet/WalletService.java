@@ -40,6 +40,7 @@ import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.locks.ReentrantLock;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.R;
@@ -52,7 +53,7 @@ import ch.uzh.csg.coinblesk.model.HistoryPayOutTransaction;
 public class WalletService extends android.app.Service {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(WalletService.class);
-    
+
     private final static String WALLET_FILES_PREFIX = "_bitcoinj";
 
     public class BitcoinWalletBinder extends Binder {
@@ -63,15 +64,18 @@ public class WalletService extends android.app.Service {
 
     private final IBinder walletBinder = new BitcoinWalletBinder();
     private WalletAppKit clientWalletKit;
+
+    private final ReentrantLock lock = Threading.lock("WalletService");
+
     private NetworkParameters params;
-    
+
     private SyncProgress syncProgress;
-    
+
     public WalletService() {
         this.syncProgress = new SyncProgress();
     }
 
-    
+
     public SyncProgress getSyncProgress() {
         return syncProgress;
     }
@@ -80,11 +84,11 @@ public class WalletService extends android.app.Service {
      * @return e new wallet seed
      */
     private DeterministicSeed getWalletSeed() {
-        
+
         // bitcoinJ will synchronize 1 week ahead of the specified time because
         // of time skews. So using the current time is absolutely safe
         DeterministicSeed seed = new DeterministicSeed(new SecureRandom(), 256, "", System.currentTimeMillis() / 1000);
-        
+
         return seed;
     }
 
@@ -95,13 +99,13 @@ public class WalletService extends android.app.Service {
     private InputStream getCheckpoints(BitcoinNet bitcoinNet) {
         if (bitcoinNet == BitcoinNet.MAINNET) {
             return getResources().openRawResource(R.raw.checkpoints);
-        } else if(bitcoinNet == BitcoinNet.TESTNET){
+        } else if (bitcoinNet == BitcoinNet.TESTNET) {
             return getResources().openRawResource(R.raw.checkpoints_testnet);
         } else {
             throw new IllegalArgumentException("Can only get checkpoints of testnet and mainnet");
         }
     }
-    
+
     private boolean isNewSetup(final BitcoinNet bitcoinNet) {
         File[] files = getFilesDir().listFiles(new FilenameFilter() {
             @Override
@@ -109,10 +113,10 @@ public class WalletService extends android.app.Service {
                 return filename.startsWith(getWalletFilesPrefix(bitcoinNet));
             }
         });
-        
+
         return files.length == 0;
     }
-    
+
     private String getWalletFilesPrefix(BitcoinNet bitcoinNet) {
         return bitcoinNet.toString().toLowerCase(Locale.ENGLISH) + WALLET_FILES_PREFIX;
     }
@@ -121,31 +125,8 @@ public class WalletService extends android.app.Service {
         return clientWalletKit != null && clientWalletKit.isRunning();
     }
 
-    public Service init(BitcoinNet bitcoinNet, final String watchingKey) {
-
-        if(isWalletReady()) {
-            return clientWalletKit;
-        }
-
-        params = getNetworkParams(bitcoinNet);
-
-        clientWalletKit = new WalletAppKit(params, getFilesDir(), getWalletFilesPrefix(bitcoinNet))
-                .setBlockingStartup(false)
-                .setDownloadListener(new AbstractPeerEventListener() {
-                    @Override
-                    public void onBlocksDownloaded(Peer peer, Block block, FilteredBlock filteredBlock, int blocksLeft) {
-                        LOGGER.debug("{} blocks left to download...", blocksLeft);
-                        if(!syncProgress.hasStarted()) {
-                            syncProgress.setTotalBlocks(blocksLeft);
-                        }
-                        syncProgress.setBlocksRemaining(blocksLeft);
-                    }
-                });
-
-        // create new wallet if new setup
-        if(isNewSetup(bitcoinNet)) {
-            clientWalletKit.restoreWalletFromSeed(getWalletSeed());
-        }
+    private void initNewWallet(final BitcoinNet bitcoinNet, final String watchingKey) {
+        clientWalletKit.restoreWalletFromSeed(getWalletSeed());
 
         // Add checkpoints (this will speed up the blockchain synchronization
         // significantly)
@@ -153,29 +134,72 @@ public class WalletService extends android.app.Service {
             clientWalletKit.setCheckpoints(getCheckpoints(bitcoinNet));
         }
 
-        Service initService = clientWalletKit.startAsync();
-
-        initService.addListener(new Service.Listener() {
+        // marry the wallet to the server and set up the custom transaction signer
+        clientWalletKit.addListener(new Service.Listener() {
             @Override
             public void running() {
                 LOGGER.info("wallet is set up");
+
                 initializeTransactionSigner(watchingKey);
+
+                // allow spending unconfirmed txs on regtest and testnet
+                if (bitcoinNet == BitcoinNet.TESTNET || bitcoinNet == BitcoinNet.REGTEST) {
+                    clientWalletKit.wallet().allowSpendingUnconfirmedTransactions();
+                }
+
+
             }
         }, Threading.USER_THREAD);
+    }
 
-        return initService;
+    public Service init(final BitcoinNet bitcoinNet, final String watchingKey) {
+
+        // we need a lock here to make sure below is not executed multiple times.
+        // Else if two threads at the same time try to bind the service, IllegalStateException
+        // will be thrown
+        lock.lock();
+
+        try {
+            if (isWalletReady()) {
+                return clientWalletKit;
+            }
+
+            params = getNetworkParams(bitcoinNet);
+
+            clientWalletKit = new WalletAppKit(params, getFilesDir(), getWalletFilesPrefix(bitcoinNet))
+                    .setBlockingStartup(false)
+                    .setDownloadListener(new AbstractPeerEventListener() {
+                        @Override
+                        public void onBlocksDownloaded(Peer peer, Block block, FilteredBlock filteredBlock, int blocksLeft) {
+                            LOGGER.debug("{} blocks left to download...", blocksLeft);
+                            if (!syncProgress.hasStarted()) {
+                                syncProgress.setTotalBlocks(blocksLeft);
+                            }
+                            syncProgress.setBlocksRemaining(blocksLeft);
+                        }
+                    });
+
+            // create new wallet if new setup
+            if (isNewSetup(bitcoinNet)) {
+                initNewWallet(bitcoinNet, watchingKey);
+            }
+
+            return clientWalletKit.startAsync();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
      * Synchronizes the blockchain and sets up the wallet. <strong>Please notice:</strong>
      * if this is the first time the wallet is set up, you must use {@link WalletService#init(BitcoinNet, String)}
      * instead. This method assumes that the bitcoin network and the server watching key are already stored on the device
-     * 
+     *
      * @return a {@link Service} object
      */
     public Service init() {
 
-        if(isWalletReady()) {
+        if (isWalletReady()) {
             return clientWalletKit;
         }
 
@@ -198,7 +222,6 @@ public class WalletService extends android.app.Service {
     }
 
     /**
-     * 
      * @return the wallet {@link Service}
      */
     public Service getService() {
@@ -208,7 +231,7 @@ public class WalletService extends android.app.Service {
     /**
      * Returns the mnemonic code of the wallet's keys. This method will not
      * return until the wallet has been initialized
-     * 
+     *
      * @return
      */
     public String getMnemonicSeed() {
@@ -255,87 +278,108 @@ public class WalletService extends android.app.Service {
     }
 
     /**
-     * 
      * @param bitcoinNet
      * @return the {@link NetworkParameters} for a specific network
      */
     private NetworkParameters getNetworkParams(BitcoinNet bitcoinNet) {
         switch (bitcoinNet) {
-        case REGTEST:
-            return RegTestParams.get();
-        case TESTNET:
-            return TestNet3Params.get();
-        case MAINNET:
-            return MainNetParams.get();
-        default:
-            throw new RuntimeException("Please set the server property bitcoin.net to (regtest|testnet|mainnet)");
+            case REGTEST:
+                return RegTestParams.get();
+            case TESTNET:
+                return TestNet3Params.get();
+            case MAINNET:
+                return MainNetParams.get();
+            default:
+                throw new RuntimeException("Please set the server property bitcoin.net to (regtest|testnet|mainnet)");
         }
     }
 
     public String getBitcoinAddress() {
         return getAppKit().wallet().currentReceiveAddress().toString();
     }
-    
+
     /**
-     * 
      * @return the total balance of the user as a friendly string. Includes unconfirmed transactions
      */
     public String getFriendlyBalance() {
         return getAppKit().wallet().getBalance(BalanceType.ESTIMATED).toFriendlyString();
     }
-    
+
     public BigDecimal getUnconfirmedBalance() {
         return BitcoinUtils.coinToBigDecimal(getAppKit().wallet().getBalance(BalanceType.ESTIMATED));
     }
 
     public void createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
         Address btcAddress = new Address(params, address);
-        Wallet.SendRequest req = Wallet.SendRequest.to(btcAddress, Coin.parseCoin("0.099"));
+        Wallet.SendRequest req = Wallet.SendRequest.to(btcAddress, Coin.parseCoin(amount.toString()));
         req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
-        getAppKit().wallet().sendCoinsOffline(req);
+        getAppKit().wallet().completeTx(req);
     }
 
 
     public List<HistoryPayInTransaction> getPayInTransactionHistory(int maxNumberOfTransactions) {
 
         // transform bitcoinj transactions to our transaction history object...
-        List<Transaction> txs = clientWalletKit.wallet().getRecentTransactions(maxNumberOfTransactions, false);
+        List<Transaction> txs = getAppKit().wallet().getRecentTransactions(maxNumberOfTransactions, false);
         List<HistoryPayInTransaction> payIns = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
 
-        for(Transaction tx : txs) {
-            if(tx.getConfidence().getDepthInBlocks() == Constants.MIN_CONFIRMATIONS) {
+        for (Transaction tx : txs) {
+            if (tx.getConfidence().getDepthInBlocks() >= Constants.MIN_CONFIRMATIONS) {
                 BigDecimal amount = BitcoinUtils.coinToBigDecimal(tx.getValueSentToMe(clientWalletKit.wallet()));
                 HistoryPayInTransaction payIn = new HistoryPayInTransaction(tx.getUpdateTime(), amount);
+                payIns.add(payIn);
             }
         }
 
         return payIns;
     }
 
-    public List<HistoryPayInTransactionUnverified> getPayInTransactionUnverifiedHistory() {
-        //TODO
-        return Lists.newArrayList();
+    public List<HistoryPayInTransactionUnverified> getPayInTransactionUnverifiedHistory(int maxNumberOfTransactions) {
+        // transform bitcoinj transactions to our transaction history object...
+        List<Transaction> txs = getAppKit().wallet().getRecentTransactions(maxNumberOfTransactions, false);
+        List<HistoryPayInTransactionUnverified> payIns = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
+
+        for (Transaction tx : txs) {
+            if (tx.getConfidence().getDepthInBlocks() < Constants.MIN_CONFIRMATIONS) {
+                BigDecimal amount = BitcoinUtils.coinToBigDecimal(tx.getValueSentToMe(clientWalletKit.wallet()));
+                HistoryPayInTransactionUnverified payIn = new HistoryPayInTransactionUnverified(tx.getUpdateTime(), amount);
+                payIns.add(payIn);
+            }
+        }
+
+        return payIns;
     }
 
-    public List<HistoryPayOutTransaction> getPayOutTransactionHistory() {
-        //TODO
-        return Lists.newArrayList();
+
+    public List<HistoryPayOutTransaction> getPayOutTransactionHistory(int maxNumberOfTransactions) {
+        // transform bitcoinj transactions to our transaction history object...
+        List<Transaction> txs = getAppKit().wallet().getRecentTransactions(maxNumberOfTransactions, false);
+        List<HistoryPayOutTransaction> payOuts = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
+
+        for (Transaction tx : txs) {
+            BigDecimal amount = BitcoinUtils.coinToBigDecimal(tx.getValueSentToMe(clientWalletKit.wallet()));
+            HistoryPayOutTransaction payOut = new HistoryPayOutTransaction(tx.getUpdateTime(), amount);
+            payOuts.add(payOut);
+        }
+
+        return payOuts;
     }
 
     public TransactionHistory getTransactionHistory() {
         int maxNrOfTxs = 100;
-        //List<HistoryPayInTransaction> payInTransactions, List<HistoryPayInTransactionUnverified> payInTransactionUnverifiedHistory, List<HistoryPayOutTransaction> payOutTransactions
-        return new TransactionHistory(getPayInTransactionHistory(maxNrOfTxs), getPayInTransactionUnverifiedHistory(), getPayOutTransactionHistory());
+        return new TransactionHistory(getPayInTransactionHistory(maxNrOfTxs),
+                getPayInTransactionUnverifiedHistory(maxNrOfTxs),
+                getPayOutTransactionHistory(maxNrOfTxs));
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         return walletBinder;
     }
-    
+
     @Override
     public void onDestroy() {
-        if(clientWalletKit != null) {
+        if (clientWalletKit != null) {
             clientWalletKit.stopAsync();
         }
     }

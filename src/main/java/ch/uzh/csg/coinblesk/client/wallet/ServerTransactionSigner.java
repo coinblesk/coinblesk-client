@@ -87,7 +87,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
         }
 
-        String serializedTx = Base64.encodeToString(tx.bitcoinSerialize(), Base64.DEFAULT);
+        String serializedTx = Base64.encodeToString(tx.bitcoinSerialize(), Base64.NO_WRAP);
         txSigRequest.setPartialTx(serializedTx);
 
         PayOutRequestTask payOutRequestTask = new PayOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
@@ -100,6 +100,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                 }
             }
         }, txSigRequest, new TransferObject(), context);
+        payOutRequestTask.execute();
 
         return true;
     }
