@@ -126,7 +126,7 @@ public class MainActivity extends AbstractPaymentActivity {
     @Override
     public void onResume() {
         super.onResume();
-        CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalanceBTC(), getApplicationContext());
+        //CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalanceBTC(), getApplicationContext());
         checkOnlineModeAndProceed();
         invalidateOptionsMenu();
     }

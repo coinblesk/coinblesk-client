@@ -22,7 +22,6 @@ import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.core.Wallet.BalanceType;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
@@ -63,7 +62,8 @@ public class WalletService extends android.app.Service {
     }
 
     private final IBinder walletBinder = new BitcoinWalletBinder();
-    private WalletAppKit clientWalletKit;
+
+    private CoinBleskWalletAppKit clientWalletKit;
 
     private final ReentrantLock lock = Threading.lock("WalletService");
 
@@ -140,7 +140,7 @@ public class WalletService extends android.app.Service {
             public void running() {
                 LOGGER.info("wallet is set up");
 
-                initializeTransactionSigner(watchingKey);
+                marryWallet(watchingKey);
 
                 // allow spending unconfirmed txs on regtest and testnet
                 if (bitcoinNet == BitcoinNet.TESTNET || bitcoinNet == BitcoinNet.REGTEST) {
@@ -166,7 +166,9 @@ public class WalletService extends android.app.Service {
 
             params = getNetworkParams(bitcoinNet);
 
-            clientWalletKit = new WalletAppKit(params, getFilesDir(), getWalletFilesPrefix(bitcoinNet))
+            clientWalletKit = new CoinBleskWalletAppKit(params, getFilesDir(), getWalletFilesPrefix(bitcoinNet));
+            clientWalletKit
+                    .setAndroidContext(getApplicationContext())
                     .setBlockingStartup(false)
                     .setDownloadListener(new AbstractPeerEventListener() {
                         @Override
@@ -178,6 +180,16 @@ public class WalletService extends android.app.Service {
                             syncProgress.setBlocksRemaining(blocksLeft);
                         }
                     });
+
+            // after the wallet is running
+            clientWalletKit.addListener(new Service.Listener() {
+                @Override
+                public void running() {
+                    clientWalletKit.wallet().allowSpendingUnconfirmedTransactions();
+                    clientWalletKit.peerGroup().setFastCatchupTimeSecs(clientWalletKit.wallet().getEarliestKeyCreationTime());
+                    initTransactionSigner();
+                }
+            }, Threading.USER_THREAD);
 
             // create new wallet if new setup
             if (isNewSetup(bitcoinNet)) {
@@ -213,7 +225,7 @@ public class WalletService extends android.app.Service {
 
     }
 
-    private WalletAppKit getAppKit() {
+    private CoinBleskWalletAppKit getAppKit() {
         if (clientWalletKit == null) {
             init();
             clientWalletKit.awaitRunning();
@@ -245,21 +257,27 @@ public class WalletService extends android.app.Service {
         return clientWalletKit.wallet().getWatchingKey().serializePubB58(clientWalletKit.params());
     }
 
-    /**
-     * Adds the {@link ServerTransactionSigner} to the wallet signers if it
-     * isn't already added.
-     */
-    private void initializeTransactionSigner(final String serverSeed) {
+    private void initTransactionSigner() {
 
-        // check if wallet is already married
         for (TransactionSigner signer : clientWalletKit.wallet().getTransactionSigners()) {
             if (signer instanceof ServerTransactionSigner) {
-                // wallet already set up and restored from disk
-                LOGGER.debug("Wallet was already set up and married");
                 ((ServerTransactionSigner) signer).setContext(getApplicationContext());
                 return;
             }
         }
+
+        ServerTransactionSigner serverTransactionSigner = new ServerTransactionSigner();
+        serverTransactionSigner.setContext(this);
+        clientWalletKit.wallet().addTransactionSigner(serverTransactionSigner);
+    }
+
+    /**
+     * Adds the {@link ServerTransactionSigner} to the wallet signers if it
+     * isn't already added and then marries the wallet to the server key.
+     */
+    private void marryWallet(final String serverSeed) {
+
+        initTransactionSigner();
 
         // new wallet -> setup married wallet
         LOGGER.info("New set up, marrying wallet to the server key");
@@ -296,13 +314,6 @@ public class WalletService extends android.app.Service {
 
     public String getBitcoinAddress() {
         return getAppKit().wallet().currentReceiveAddress().toString();
-    }
-
-    /**
-     * @return the total balance of the user as a friendly string. Includes unconfirmed transactions
-     */
-    public String getFriendlyBalance() {
-        return getAppKit().wallet().getBalance(BalanceType.ESTIMATED).toFriendlyString();
     }
 
     public BigDecimal getUnconfirmedBalance() {
@@ -375,6 +386,13 @@ public class WalletService extends android.app.Service {
     @Override
     public IBinder onBind(Intent intent) {
         return walletBinder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        clientWalletKit.stopAsync();
+
+        return false;
     }
 
     @Override

@@ -160,40 +160,7 @@ public class PayOutActivity extends WalletActivity {
                 displayResponse(getResources().getString(R.string.payOut_error_balance));
             }
 
-            // legacy pay out....
-//			PayOutTransactionObject pot = new PayOutTransactionObject();
-//			pot.setAmount(payOutAmount);
-//			pot.setBtcAddress(payoutAddress.getText().toString());
-//			RequestTask<PayOutTransactionObject, TransferObject> payOut = new PayOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
-//
-//				public void onTaskComplete(TransferObject response) {
-//					dismissProgressDialog();
-//					if(response.isSuccessful()){
-//						String message = String.format(getResources().getString(R.string.payOut_successful), response.getMessage());
-//						showDialog(getResources().getString(R.string.title_activity_pay_out), getResources().getIdentifier("ic_payment_succeeded", "drawable", getPackageName()), message);
-//						BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
-//
-//						boolean saved = ClientController.getStorageHandler().setUserBalance(balance.subtract(payOutAmount));
-//						if (!saved) {
-//							displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-//						}
-//
-//						balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
-//						CurrencyViewHandler.setBTC(btcBalance,balance, getApplicationContext());
-//						CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
-//						chfAmount.setText("");
-//						payoutAmountEditText.setText("");
-//						payoutAddress.setText("");
-//					} else if (response.getMessage().equals("PAYOUT_ERROR_ADDRESS")) {
-//						displayResponse(getResources().getString(R.string.payOut_error_address));
-//					} else if (response.getMessage().equals("PAYOUT_ERROR_BALANCE")) {
-//						displayResponse(getResources().getString(R.string.payOut_error_balance));
-//					} else {
-//						displayResponse(response.getMessage());
-//					}
-//					}
-//				}, pot, new TransferObject(), getApplicationContext());
-//				payOut.execute();
+            dismissProgressDialog();
 
         } else {
             displayResponse(getResources().getString(R.string.fill_necessary_fields));

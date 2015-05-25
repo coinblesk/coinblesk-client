@@ -30,9 +30,10 @@ public class WalletActivity extends AbstractAsyncActivity implements ServiceConn
         BitcoinWalletBinder binder = (BitcoinWalletBinder) service;
         walletService = binder.getService();
     }
-    
+
+    @Override
     public void onServiceDisconnected(ComponentName name) {
-        LOGGER.debug("{} disconnected.", name.toShortString());
+        LOGGER.debug("{} disconnected from the wallet service.", name.toShortString());
     }
     
     
