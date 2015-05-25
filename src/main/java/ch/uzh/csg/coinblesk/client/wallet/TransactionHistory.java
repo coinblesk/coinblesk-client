@@ -1,80 +1,47 @@
 package ch.uzh.csg.coinblesk.client.wallet;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import ch.uzh.csg.coinblesk.model.Transaction;
 
-import ch.uzh.csg.coinblesk.model.HistoryPayInTransaction;
-import ch.uzh.csg.coinblesk.model.HistoryPayInTransactionUnverified;
-import ch.uzh.csg.coinblesk.model.HistoryPayOutTransaction;
-import ch.uzh.csg.coinblesk.model.HistoryTransaction;
-
+/**
+ * Wrapper for a list of transactions. Provides utility methods, eg. for retrieving only a certain kind of transactions.
+ */
 public class TransactionHistory  {
 
-    @Nullable
-    private List<HistoryTransaction> transactionHistory;
+    private List<Transaction> allTransactions;
 
-    private List<HistoryPayInTransaction> payInTransactionHistory;
-    private List<HistoryPayInTransactionUnverified> payInTransactionUnverifiedHistory;
-    private List<HistoryPayOutTransaction> payOutTransactionHistory;
-
-    /**
-     * <Strong>Deprecated:</Strong> HistoryTransactions are not used anymore
-     */
-    @Deprecated
-    public TransactionHistory(List<HistoryTransaction> transactions, List<HistoryPayInTransaction> payInTransactions, List<HistoryPayInTransactionUnverified> payInTransactionUnverifiedHistory, List<HistoryPayOutTransaction> payOutTransactions) {
-        this.transactionHistory = transactions;
-        this.payInTransactionHistory = payInTransactions;
-        this.payInTransactionUnverifiedHistory = payInTransactionUnverifiedHistory;
-        this.payOutTransactionHistory = payOutTransactions;
+    public TransactionHistory(List<Transaction> transactions) {
+        this.allTransactions = transactions;
     }
 
-    public TransactionHistory(List<HistoryPayInTransaction> payInTransactions, List<HistoryPayInTransactionUnverified> payInTransactionUnverifiedHistory, List<HistoryPayOutTransaction> payOutTransactions) {
-        this.payInTransactionHistory = payInTransactions;
-        this.payInTransactionUnverifiedHistory = payInTransactionUnverifiedHistory;
-        this.payOutTransactionHistory = payOutTransactions;
+    public List<Transaction> getPayInTransactions() {
+        return getTransactions(Transaction.TransactionType.PAY_IN);
     }
 
-    /**
-     * The class HistoryTransactions is not used anymore
-     * @return
-     */
-    @Deprecated
-    public List<HistoryTransaction> getTransactionHistory() {
-        return this.transactionHistory;
+    public List<Transaction> getUnverifiedPayInTransactions() {
+        return getTransactions(Transaction.TransactionType.PAY_IN_UNVERIFIED);
     }
 
-    /**
-     * The class HistoryTransactions is not used anymore
-     * @return
-     */
-    @Deprecated
-    public void setTransactionHistory(List<HistoryTransaction> transactionHistory) {
-        this.transactionHistory = transactionHistory;
+    public List<Transaction> getPayOutTransactions() {
+        return getTransactions(Transaction.TransactionType.PAY_OUT);
     }
 
-    public List<HistoryPayInTransaction> getPayInTransactionHistory() {
-        return this.payInTransactionHistory;
+    public List<Transaction> getAllTransactions() {
+        return allTransactions;
     }
 
-    public void setPayInTransactionHistory(List<HistoryPayInTransaction> payInTransactionHistory) {
-        this.payInTransactionHistory = payInTransactionHistory;
+
+        private List<Transaction> getTransactions(Transaction.TransactionType type) {
+        List<Transaction> filteredTxs = new ArrayList<>();
+        for(Transaction tx : allTransactions) {
+            if(tx.getType() == type) {
+                filteredTxs.add(tx);
+            }
+        }
+        return filteredTxs;
     }
 
-    public List<HistoryPayInTransactionUnverified> getPayInTransactionUnverifiedHistory() {
-        return this.payInTransactionUnverifiedHistory;
-    }
-
-    public void setPayInTransactionUnverifiedHistory(List<HistoryPayInTransactionUnverified> payInTransactionUnverifiedHistory) {
-        this.payInTransactionUnverifiedHistory = payInTransactionUnverifiedHistory;
-    }
-
-    public List<HistoryPayOutTransaction> getPayOutTransactionHistory() {
-        return this.payOutTransactionHistory;
-    }
-
-    public void setPayOutTransactionHistory(List<HistoryPayOutTransaction> payOutTransactionHistory) {
-        this.payOutTransactionHistory = payOutTransactionHistory;
-    }
 
 }

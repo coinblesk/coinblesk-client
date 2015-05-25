@@ -17,7 +17,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,37 +41,30 @@ import java.math.BigDecimal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 
-import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
-import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
 import ch.uzh.csg.coinblesk.client.request.MainActivityRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.tools.KeyHandler;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
+import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
+import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
+import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.util.HistoryTransactionFormatter;
+import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.TimeHandler;
+import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.PKIAlgorithm;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
-import ch.uzh.csg.coinblesk.customserialization.exceptions.UnknownCurrencyException;
-import ch.uzh.csg.coinblesk.model.AbstractHistory;
-import ch.uzh.csg.coinblesk.model.HistoryPayInTransaction;
-import ch.uzh.csg.coinblesk.model.HistoryPayInTransactionUnverified;
-import ch.uzh.csg.coinblesk.model.HistoryPayOutTransaction;
-import ch.uzh.csg.coinblesk.model.HistoryTransaction;
-import ch.uzh.csg.coinblesk.responseobject.GetHistoryTransferObject;
+import ch.uzh.csg.coinblesk.model.Transaction;
 import ch.uzh.csg.coinblesk.responseobject.MainRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
@@ -220,12 +212,16 @@ public class MainActivity extends AbstractPaymentActivity {
                 if (this.isInterrupted()) {
                     return;
                 }
-                if (walletService.getSyncProgress().getProgress() >= .999) {
+
+                SyncProgress syncProgress = walletService.getSyncProgress();
+
+                if (syncProgress.isFinished()) {
                     mProgressBar.setVisibility(View.GONE);
                     mBlockchainSyncStatusText.setVisibility(View.GONE);
+                    return;
                 } else {
 
-                    double progress = walletService.getSyncProgress().getProgress();
+                    double progress = syncProgress.getProgress();
 
                     // make progress bar visible if it's no already
                     if ((mProgressBar.getVisibility() != View.VISIBLE ||
@@ -333,13 +329,9 @@ public class MainActivity extends AbstractPaymentActivity {
 
                 if (response.isSuccessful()) {
                     exchangeRate = response.getExchangeRate();
-                    ArrayList<AbstractHistory> transactions = extractLastFewTransactions(response.getGetHistoryTransferObject());
 
                     //update gui
-                    if (!transactions.isEmpty()) {
-                        lastTransactionsTitle.setVisibility(View.VISIBLE);
-                        createHistoryViews(transactions);
-                    }
+                    // TODO: Show latest transactions
                     CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalanceBTC());
                     TextView balanceTv = (TextView) findViewById(R.id.mainActivity_balanceCHF);
                     balanceTv.append(" (1 BTC = " + CurrencyFormatter.formatChf(exchangeRate) + " CHF)");
@@ -348,7 +340,6 @@ public class MainActivity extends AbstractPaymentActivity {
                         startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
                     }
                     Set<PersistedPaymentRequest> requests = ClientController.getStorageHandler().getPersistedPaymentRequests();
-                    removePersistedPaymentRequests(response.getGetHistoryTransferObject().getTransactionHistory(), requests);
                 } else if (response.getMessage() != null && response.getMessage().contains(Constants.CONNECTION_ERROR)) {
                     launchOfflineMode(getApplicationContext());
                     invalidateOptionsMenu();
@@ -360,53 +351,8 @@ public class MainActivity extends AbstractPaymentActivity {
         getMainActivityValues.execute();
     }
 
-    /**
-     * This will remove the persisted request entries that we received from the server. If the server confirms, we can remove this request.
-     */
-    private void removePersistedPaymentRequests(List<HistoryTransaction> transactionHistory, Set<PersistedPaymentRequest> requests) {
-        for (HistoryTransaction transaction : transactionHistory) {
-            for (PersistedPaymentRequest request : requests) {
-                if (request.getAmount() == Converter.getLongFromBigDecimal(transaction.getAmount())) {
-                    if (request.getUsername().equals(transaction.getSeller())) {
-                        try {
-                            if (request.getCurrency().getCurrencyCode().equals("BTC")) {
-                                ClientController.getStorageHandler().deletePersistedPaymentRequest(request);
-                                Log.e("ASDF2", "removed: " + request);
-                            }
-                        } catch (UnknownCurrencyException e) {
-
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Sort HistoryTransactions received from server according to timestamp and
-     * return.
-     *
-     * @return ArrayList<AbstractHistory>
-     */
-    private ArrayList<AbstractHistory> extractLastFewTransactions(GetHistoryTransferObject hto) {
-        List<HistoryTransaction> transactionHistory = hto.getTransactionHistory();
-        List<HistoryPayInTransaction> payInTransactionHistory = hto.getPayInTransactionHistory();
-        List<HistoryPayInTransactionUnverified> payInTransactionHistoryUnverified = hto.getPayInTransactionUnverifiedHistory();
-        List<HistoryPayOutTransaction> payOutTransactionHistory = hto.getPayOutTransactionHistory();
-
-        ArrayList<AbstractHistory> history = new ArrayList<AbstractHistory>();
-        history.addAll(transactionHistory);
-        history.addAll(payInTransactionHistory);
-        history.addAll(payInTransactionHistoryUnverified);
-        history.addAll(payOutTransactionHistory);
-        Collections.sort(history, Collections.reverseOrder(new CustomComparator()));
-
-        return history;
-    }
-
-    private class CustomComparator implements Comparator<AbstractHistory> {
-        public int compare(AbstractHistory o1, AbstractHistory o2) {
+    private class CustomComparator implements Comparator<Transaction> {
+        public int compare(Transaction o1, Transaction o2) {
             return o1.getTimestamp().compareTo(o2.getTimestamp());
         }
     }
@@ -417,7 +363,7 @@ public class MainActivity extends AbstractPaymentActivity {
         return Integer.parseInt(value);
     }
 
-    private void createHistoryViews(ArrayList<AbstractHistory> history) {
+    private void createHistoryViews(ArrayList<Transaction> history) {
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mainActivity_history);
         linearLayout.removeAllViews();
         for (int i = 0; i < getNumberOfLastTransactions(); i++) {
@@ -426,7 +372,6 @@ public class MainActivity extends AbstractPaymentActivity {
                 tView.setGravity(Gravity.LEFT);
                 tView.setTextColor(Color.BLACK);
                 int drawable = getImage(history.get(i));
-                final int historyFilterValue = getHistoryCode(history.get(i));
                 tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
                 tView.setText(HistoryTransactionFormatter.formatHistoryTransaction(history.get(i), getApplicationContext()));
                 tView.setClickable(true);
@@ -438,7 +383,6 @@ public class MainActivity extends AbstractPaymentActivity {
                         handleAsyncTask();
                         Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
                         Bundle b = new Bundle();
-                        b.putInt("filter", historyFilterValue);
                         intent.putExtras(b);
                         startActivity(intent);
                     }
@@ -448,38 +392,17 @@ public class MainActivity extends AbstractPaymentActivity {
         }
     }
 
-    private int getImage(AbstractHistory history) {
-        if (history instanceof HistoryTransaction) {
-            if (((HistoryTransaction) history).getSeller().equals(ClientController.getStorageHandler().getUserAccount().getUsername())) {
-                return R.drawable.ic_receive_payment;
-            } else {
-                return R.drawable.ic_pay_payment;
-            }
-        } else if (history instanceof HistoryPayInTransaction) {
-            return R.drawable.ic_pay_in;
-        } else if (history instanceof HistoryPayInTransactionUnverified) {
-            return R.drawable.ic_pay_in_un;
-        } else if (history instanceof HistoryPayOutTransaction) {
-            return R.drawable.ic_pay_out;
+    private int getImage(Transaction history) {
+        switch(history.getType()) {
+            case PAY_IN:
+                return R.drawable.ic_pay_in;
+            case PAY_IN_UNVERIFIED:
+                return R.drawable.ic_pay_in_un;
+            case PAY_OUT:
+                return R.drawable.ic_pay_out;
+            default:
+                throw new IllegalArgumentException("Unknown transaction type " + history.getType());
         }
-        return 0;
-    }
-
-    private int getHistoryCode(AbstractHistory history) {
-        if (history instanceof HistoryTransaction) {
-            if (((HistoryTransaction) history).getSeller().equals(ClientController.getStorageHandler().getUserAccount().getUsername())) {
-                return 0;
-            } else {
-                return 0;
-            }
-        } else if (history instanceof HistoryPayInTransaction) {
-            return 1;
-        } else if (history instanceof HistoryPayInTransactionUnverified) {
-            return 2;
-        } else if (history instanceof HistoryPayOutTransaction) {
-            return 3;
-        }
-        return 0;
     }
 
     /**

@@ -9,6 +9,10 @@
     <dimen name="calc_dialog_button_height">70dp</dimen>
     
 	<dimen name="textSize">15sp</dimen>
-    <dimen name="textSizeBig">20sp</dimen>    
+    <dimen name="textSizeBig">20sp</dimen>
+
+    <!--cards-->
+    <dimen name="cardPadding">10sp</dimen>
+
 
 </resources>

@@ -45,9 +45,6 @@ import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.model.HistoryPayInTransaction;
-import ch.uzh.csg.coinblesk.model.HistoryPayInTransactionUnverified;
-import ch.uzh.csg.coinblesk.model.HistoryPayOutTransaction;
 
 public class WalletService extends android.app.Service {
 
@@ -75,6 +72,23 @@ public class WalletService extends android.app.Service {
         this.syncProgress = new SyncProgress();
     }
 
+    /**
+     * Check if our chain head is the same as the height of the other peers.
+     * If it is, it means that we are (most likely) finished with syncing
+     * the blockchain.
+     *
+     * @return true if blockchain synchronization is (most likely) finished
+     */
+    public boolean isBlockChainSynced() {
+
+        // check if our chain head is the same as the height of the other peers.
+        // If it is, it means that we are (most likely) finished with syncing
+        // the blockchain, and can return
+        int bestHeight = getAppKit().peerGroup().getMostCommonChainHeight();
+        int ourHeight = getAppKit().chain().getBestChainHeight();
+
+        return bestHeight == ourHeight;
+    }
 
     public SyncProgress getSyncProgress() {
         return syncProgress;
@@ -185,9 +199,7 @@ public class WalletService extends android.app.Service {
             clientWalletKit.addListener(new Service.Listener() {
                 @Override
                 public void running() {
-                    clientWalletKit.wallet().allowSpendingUnconfirmedTransactions();
-                    clientWalletKit.peerGroup().setFastCatchupTimeSecs(clientWalletKit.wallet().getEarliestKeyCreationTime());
-                    initTransactionSigner();
+                    postInit();
                 }
             }, Threading.USER_THREAD);
 
@@ -199,6 +211,25 @@ public class WalletService extends android.app.Service {
             return clientWalletKit.startAsync();
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * This method is called after the wallet has been set up.
+     */
+    private void postInit() {
+        // TODO: only allow for testnet
+        clientWalletKit.wallet().allowSpendingUnconfirmedTransactions();
+
+        // faster syncing....
+        clientWalletKit.peerGroup().setFastCatchupTimeSecs(clientWalletKit.wallet().getEarliestKeyCreationTime());
+
+        // initialize the server transaction signer
+        initTransactionSigner();
+
+        // check if we finished syncing the blockchain
+        if(isBlockChainSynced()) {
+            syncProgress.setFinished();
         }
     }
 
@@ -327,60 +358,43 @@ public class WalletService extends android.app.Service {
         getAppKit().wallet().completeTx(req);
     }
 
-
-    public List<HistoryPayInTransaction> getPayInTransactionHistory(int maxNumberOfTransactions) {
-
-        // transform bitcoinj transactions to our transaction history object...
-        List<Transaction> txs = getAppKit().wallet().getRecentTransactions(maxNumberOfTransactions, false);
-        List<HistoryPayInTransaction> payIns = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
-
-        for (Transaction tx : txs) {
-            if (tx.getConfidence().getDepthInBlocks() >= Constants.MIN_CONFIRMATIONS) {
-                BigDecimal amount = BitcoinUtils.coinToBigDecimal(tx.getValueSentToMe(clientWalletKit.wallet()));
-                HistoryPayInTransaction payIn = new HistoryPayInTransaction(tx.getUpdateTime(), amount);
-                payIns.add(payIn);
-            }
-        }
-
-        return payIns;
-    }
-
-    public List<HistoryPayInTransactionUnverified> getPayInTransactionUnverifiedHistory(int maxNumberOfTransactions) {
-        // transform bitcoinj transactions to our transaction history object...
-        List<Transaction> txs = getAppKit().wallet().getRecentTransactions(maxNumberOfTransactions, false);
-        List<HistoryPayInTransactionUnverified> payIns = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
-
-        for (Transaction tx : txs) {
-            if (tx.getConfidence().getDepthInBlocks() < Constants.MIN_CONFIRMATIONS) {
-                BigDecimal amount = BitcoinUtils.coinToBigDecimal(tx.getValueSentToMe(clientWalletKit.wallet()));
-                HistoryPayInTransactionUnverified payIn = new HistoryPayInTransactionUnverified(tx.getUpdateTime(), amount);
-                payIns.add(payIn);
-            }
-        }
-
-        return payIns;
-    }
-
-
-    public List<HistoryPayOutTransaction> getPayOutTransactionHistory(int maxNumberOfTransactions) {
-        // transform bitcoinj transactions to our transaction history object...
-        List<Transaction> txs = getAppKit().wallet().getRecentTransactions(maxNumberOfTransactions, false);
-        List<HistoryPayOutTransaction> payOuts = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
-
-        for (Transaction tx : txs) {
-            BigDecimal amount = BitcoinUtils.coinToBigDecimal(tx.getValueSentToMe(clientWalletKit.wallet()));
-            HistoryPayOutTransaction payOut = new HistoryPayOutTransaction(tx.getUpdateTime(), amount);
-            payOuts.add(payOut);
-        }
-
-        return payOuts;
-    }
-
     public TransactionHistory getTransactionHistory() {
-        int maxNrOfTxs = 100;
-        return new TransactionHistory(getPayInTransactionHistory(maxNrOfTxs),
-                getPayInTransactionUnverifiedHistory(maxNrOfTxs),
-                getPayOutTransactionHistory(maxNrOfTxs));
+        int maxNumberOfTransactions = 500;
+
+        List<Transaction> txs = getAppKit().wallet().getRecentTransactions(maxNumberOfTransactions, false);
+
+        List<ch.uzh.csg.coinblesk.model.Transaction> allTransactions = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
+
+
+        for (Transaction tx : txs) {
+
+            // get the amount sent to/from our wallet
+            BigDecimal amount = BitcoinUtils.coinToBigDecimal(tx.getValue(getAppKit().wallet()));
+
+            // now let's translate the bitcoinJ Transaction to our simplified Transaction object
+            ch.uzh.csg.coinblesk.model.Transaction transaction = new ch.uzh.csg.coinblesk.model.Transaction();
+            transaction.setAmount(amount.abs());
+            transaction.setTimestamp(tx.getUpdateTime());
+
+            if(amount.signum() < 0) {
+                // negative amount -> pay out
+                transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_OUT);
+            } else {
+                // positive amount -> pay in
+                if(tx.getConfidence().getDepthInBlocks() >= Constants.MIN_CONFIRMATIONS) {
+                    // confirmed tx
+                    transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_IN);
+                } else {
+                    // TODO: work with confidence instead of confirmations
+                    // unconfirmed tx
+                    transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_OUT);
+                }
+            }
+
+            allTransactions.add(transaction);
+        }
+
+        return new TransactionHistory(allTransactions);
     }
 
     @Override
