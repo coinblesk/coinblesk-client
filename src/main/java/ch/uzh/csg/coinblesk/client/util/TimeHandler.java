@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.format.Time;
 import android.util.Log;
-import ch.uzh.csg.coinblesk.client.LoginActivity;
+import ch.uzh.csg.coinblesk.client.ui.authentication.LoginActivity;
 
 /**
  * This class is responsible for the time session on the client site. This class

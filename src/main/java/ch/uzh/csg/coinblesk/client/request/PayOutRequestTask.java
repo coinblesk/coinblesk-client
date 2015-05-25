@@ -2,9 +2,8 @@ package ch.uzh.csg.coinblesk.client.request;
 
 import android.content.Context;
 import net.minidev.json.JSONObject;
-import ch.uzh.csg.coinblesk.client.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.responseobject.PayOutTransactionObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 

@@ -35,8 +35,8 @@ import org.apache.http.util.EntityUtils;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import ch.uzh.csg.coinblesk.client.IAsyncTaskCompleteListener;
-import ch.uzh.csg.coinblesk.client.servercomm.CookieHandler;
+import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.tools.CookieHandler;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.TimeHandler;
 import ch.uzh.csg.coinblesk.client.R;

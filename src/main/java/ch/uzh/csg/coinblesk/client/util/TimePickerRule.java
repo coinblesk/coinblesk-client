@@ -7,7 +7,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.text.format.DateFormat;
-import ch.uzh.csg.coinblesk.client.IAsyncTaskCompleteListener;
 
 /**
  * This class creates the dialog for the time slot selection.
@@ -27,7 +26,7 @@ public class TimePickerRule extends DialogFragment implements CustomTimePickerDi
         final Calendar c = Calendar.getInstance();
         int hour = c.get(Calendar.HOUR_OF_DAY);
 
-        return new CustomTimePickerDialog(getActivity(), this, hour, DateFormat.is24HourFormat(getActivity()));
+        return new CustomTimePickerDialog(getActivity(), this, hour, DateFormat.is24HourFormat(getActivity()));w
     }
 
 	/**

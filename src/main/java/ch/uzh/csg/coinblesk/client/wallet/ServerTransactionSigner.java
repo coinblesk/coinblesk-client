@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import ch.uzh.csg.coinblesk.client.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.request.PayOutRequestTask;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
