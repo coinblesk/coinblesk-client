@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 
 /**
  * The CurrencyViewHandler handles all aspects that includes currencies. The

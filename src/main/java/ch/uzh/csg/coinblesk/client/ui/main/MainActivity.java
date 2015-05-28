@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
@@ -55,8 +55,8 @@ import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.CurrencyFormatter;
-import ch.uzh.csg.coinblesk.client.util.HistoryTransactionFormatter;
+import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.TimeHandler;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
@@ -116,14 +116,12 @@ public class MainActivity extends AbstractPaymentActivity {
         initializeGui();
         initClickListener();
         initializeDrawer();
-        initializeNFC();
 
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        //CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), ClientController.getStorageHandler().getUserAccount().getBalanceBTC(), getApplicationContext());
         checkOnlineModeAndProceed();
         invalidateOptionsMenu();
     }
@@ -235,7 +233,13 @@ public class MainActivity extends AbstractPaymentActivity {
                     progressPercentage = Math.max(0, progressPercentage);
                     LOGGER.debug("Updating blockchain sync progress bar. current progress is {}%", progressPercentage);
                     mProgressBar.setProgress(progressPercentage);
-                    mBlockchainSyncStatusText.setText(String.format("Synchronizing with the Bitcoin Network... (%.1f%%)", progress * 100));
+
+                    // show sync status text
+                    String syncText = String.format(getResources().getString(R.string.bitcoin_synchronizing),
+                            String.format("%.1f", progress * 100));
+                    mBlockchainSyncStatusText.setText(syncText);
+
+
                     handler.postDelayed(this, updateInterval);
                 }
             }
@@ -275,14 +279,14 @@ public class MainActivity extends AbstractPaymentActivity {
     }
 
     private void handleAsyncTask() {
-        if (ClientController.isOnline() && !getMainActivityValues.equals(AsyncTask.Status.FINISHED)) {
+        if (ClientController.isConnectedToServer() && !getMainActivityValues.equals(AsyncTask.Status.FINISHED)) {
             getMainActivityValues.cancel(true);
         }
     }
 
     private void checkOnlineModeAndProceed() {
         CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.mainActivity_balanceCHF));
-        if (ClientController.isOnline()) {
+        if (ClientController.isConnectedToServer()) {
             launchRequest();
         } else {
             createNewTransactionBtn.setEnabled(false);
@@ -295,9 +299,10 @@ public class MainActivity extends AbstractPaymentActivity {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
-        loadUserBalance();
+        displayUserBalance();
         initiateProgressBar();
-
+        createHistoryViews();
+        initializeNFC();
     }
 
 
@@ -306,18 +311,12 @@ public class MainActivity extends AbstractPaymentActivity {
         destroyProgressBar();
     }
 
-    private void loadUserBalance() {
-
-        // update the balance in internal storage for offline use of the app
-        ClientController.getStorageHandler().setUserBalance(getWalletService().getUnconfirmedBalance());
-
+    private void displayUserBalance() {
         // display the user balance
         CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), getWalletService().getUnconfirmedBalance(), getApplicationContext());
-
     }
 
     private void launchRequest() {
-        showLoadingProgressDialog();
         getMainActivityValues = new MainActivityRequestTask(new IAsyncTaskCompleteListener<MainRequestObject>() {
             @Override
             public void onTaskComplete(MainRequestObject response) {
@@ -331,12 +330,11 @@ public class MainActivity extends AbstractPaymentActivity {
                     exchangeRate = response.getExchangeRate();
 
                     //update gui
-                    // TODO: Show latest transactions
-                    CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalanceBTC());
+                    CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, getWalletService().getUnconfirmedBalance());
                     TextView balanceTv = (TextView) findViewById(R.id.mainActivity_balanceCHF);
                     balanceTv.append(" (1 BTC = " + CurrencyFormatter.formatChf(exchangeRate) + " CHF)");
                     //renew Session Timeout Countdown
-                    if (ClientController.isOnline()) {
+                    if (ClientController.isConnectedToServer()) {
                         startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
                     }
                     Set<PersistedPaymentRequest> requests = ClientController.getStorageHandler().getPersistedPaymentRequests();
@@ -363,14 +361,15 @@ public class MainActivity extends AbstractPaymentActivity {
         return Integer.parseInt(value);
     }
 
-    private void createHistoryViews(ArrayList<Transaction> history) {
+    private void createHistoryViews() {
+        List<Transaction> history = getWalletService().getTransactionHistory().getAllTransactions();
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mainActivity_history);
         linearLayout.removeAllViews();
         for (int i = 0; i < getNumberOfLastTransactions(); i++) {
             if (i < history.size()) {
                 TextView tView = new TextView(getApplicationContext());
                 tView.setGravity(Gravity.LEFT);
-                tView.setTextColor(Color.BLACK);
+                tView.setTextColor(Color.DKGRAY);
                 int drawable = getImage(history.get(i));
                 tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
                 tView.setText(HistoryTransactionFormatter.formatHistoryTransaction(history.get(i), getApplicationContext()));
@@ -552,7 +551,7 @@ public class MainActivity extends AbstractPaymentActivity {
                 answer.acceptPayment();
                 showNfcProgressDialog(false);
             } else {
-                showCustomDialog(username, currency, amount, answer);
+                showCustomDialog(username, amount, answer);
             }
         }
     };
@@ -585,11 +584,10 @@ public class MainActivity extends AbstractPaymentActivity {
      * Opens dialog to prompt user if he wants to accept or reject an incoming payment request.
      *
      * @param username
-     * @param currency
      * @param amount
      * @param answer2
      */
-    private void showCustomDialog(String username, Currency currency, long amount, final IUserPromptAnswer answer2) {
+    private void showCustomDialog(String username, long amount, final IUserPromptAnswer answer2) {
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup group = (ViewGroup) findViewById(R.id.pay_payment_popup);
         final View layout = inflater.inflate(R.layout.pay_payment_popup, group);
@@ -606,10 +604,10 @@ public class MainActivity extends AbstractPaymentActivity {
             final TextView exchangeRateTv = (TextView) layout.findViewById(R.id.payPayment_exchangeRateValue);
             CurrencyViewHandler.setExchangeRateView(exchangeRate, exchangeRateTv);
             final TextView balanceTvChf = (TextView) layout.findViewById(R.id.payPayment_balanceCHF);
-            balanceTvChf.setText(CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, ClientController.getStorageHandler().getUserAccount().getBalanceBTC()));
+            balanceTvChf.setText(CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, getWalletService().getUnconfirmedBalance()));
         }
         final TextView balanceTvBtc = (TextView) layout.findViewById(R.id.payPayment_balanceBTC);
-        balanceTvBtc.setText(CurrencyViewHandler.formatBTCAsString(ClientController.getStorageHandler().getUserAccount().getBalanceBTC(), getApplicationContext()));
+        balanceTvBtc.setText(CurrencyViewHandler.formatBTCAsString(getWalletService().getUnconfirmedBalance(), getApplicationContext()));
 
         layout.post(new Runnable() {
             public void run() {
@@ -658,20 +656,18 @@ public class MainActivity extends AbstractPaymentActivity {
         } else {
             PaymentResponse pr = (PaymentResponse) object;
             BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
-            BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
+            BigDecimal balance = getWalletService().getBalance();
             String chfValue = "";
             if (exchangeRate != null) {
                 chfValue = " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")";
             }
 
             if (isSending) {
-                ClientController.getStorageHandler().getUserAccount().setBalanceBTC(balance.subtract(amountBtc));
                 ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
                 answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
                         CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue,
                         pr.getUsernamePayee());
             } else {
-                ClientController.getStorageHandler().getUserAccount().setBalanceBTC(balance.add(amountBtc));
                 ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
                 answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
                         CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue,

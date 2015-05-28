@@ -351,6 +351,10 @@ public class WalletService extends android.app.Service {
         return BitcoinUtils.coinToBigDecimal(getAppKit().wallet().getBalance(BalanceType.ESTIMATED));
     }
 
+    public BigDecimal getBalance() {
+        return BitcoinUtils.coinToBigDecimal(getAppKit().wallet().getBalance(BalanceType.AVAILABLE));
+    }
+
     public void createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
         Address btcAddress = new Address(params, address);
         Wallet.SendRequest req = Wallet.SendRequest.to(btcAddress, Coin.parseCoin(amount.toString()));
@@ -387,7 +391,7 @@ public class WalletService extends android.app.Service {
                 } else {
                     // TODO: work with confidence instead of confirmations
                     // unconfirmed tx
-                    transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_OUT);
+                    transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_IN_UNVERIFIED);
                 }
             }
 

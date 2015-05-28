@@ -69,4 +69,7 @@ public class Constants {
 	//shows (true) or hides (false) buttons specially created for shops etc.
 	public static boolean IS_MENSA_MODE = false;
 
+	// Date format
+	public static String DATE_FORMAT = "dd-MM-yyyy' 'HH:mm:ss";
+
 }

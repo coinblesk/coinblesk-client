@@ -29,6 +29,7 @@ import java.text.DateFormatSymbols;
 import java.util.Calendar;
 
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.util.formatter.TwoDigitFormatter;
 
 /**
  * A view for selecting the time of day, in either 24 hour or AM/PM mode.

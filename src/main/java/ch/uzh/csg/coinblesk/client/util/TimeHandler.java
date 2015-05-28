@@ -79,7 +79,7 @@ public class TimeHandler extends HandlerThread{
 	public boolean determineIfLessThanFiveSecondsLeft(){
 		long now = System.currentTimeMillis();
 		Log.i("LessThanFive", "Time");
-		if ((now - mStartTime) >= (Constants.CLIENT_SESSION_TIMEOUT - Constants.CLIENT_CONNECTION_TIMEOUT) && ClientController.isOnline()) {
+		if ((now - mStartTime) >= (Constants.CLIENT_SESSION_TIMEOUT - Constants.CLIENT_CONNECTION_TIMEOUT) && ClientController.isConnectedToServer()) {
 			return true;
 		}
 		return false;

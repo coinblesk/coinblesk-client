@@ -87,7 +87,7 @@ public class EditEmailAccountProfileActivity extends AbstractAsyncActivity {
 	}
 	
 	private void checkOnlineModeAndProceed() {
-		if(!ClientController.isOnline()){
+		if(!ClientController.isConnectedToServer()){
 			saveChangeBtn.setEnabled(false);
 		}
 	}

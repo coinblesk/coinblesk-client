@@ -22,7 +22,7 @@ import ch.uzh.csg.coinblesk.client.request.PayOutRuleRequestTask;
 import ch.uzh.csg.coinblesk.client.request.PayOutRuleResetRequestTask;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.model.PayOutRule;
 import ch.uzh.csg.coinblesk.responseobject.PayOutRulesTransferObject;
@@ -216,7 +216,7 @@ public class SettingPayOutRulesActivity extends AbstractAsyncActivity {
 	}
 	
 	private void checkOnlineModeAndProceed() {
-		if (ClientController.isOnline()) {
+		if (ClientController.isConnectedToServer()) {
 			launchPayOutRuleGetRequest();
 		} else {
 			saveRuleBtn.setEnabled(false); 

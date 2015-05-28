@@ -1,8 +1,10 @@
-package ch.uzh.csg.coinblesk.client.util;
+package ch.uzh.csg.coinblesk.client.util.formatter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+
+import ch.uzh.csg.coinblesk.client.util.Constants;
 
 public class CurrencyFormatter {
 

@@ -35,7 +35,7 @@ public class ChoosePaymentActivity extends AbstractLoginActivity {
 	}
 
 	private void checkOnlineModeAndProceed() {
-		if(!ClientController.isOnline()){
+		if(!ClientController.isConnectedToServer()){
 			requestPaymentBtn.setEnabled(false);
 			sendPaymentBtn.setEnabled(false);
 			requestPaymentNoNfcBtn.setEnabled(false);
@@ -54,7 +54,7 @@ public class ChoosePaymentActivity extends AbstractLoginActivity {
 		initializeMenuItems(menu, getApplicationContext());
 		
 		//renew Session Timeout Countdown
-		if(ClientController.isOnline()){
+		if(ClientController.isConnectedToServer()){
 			startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 		}
 		

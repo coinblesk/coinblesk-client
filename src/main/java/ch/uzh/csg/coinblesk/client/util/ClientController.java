@@ -1,9 +1,12 @@
 package ch.uzh.csg.coinblesk.client.util;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import android.content.Context;
 import ch.uzh.csg.coinblesk.client.persistence.InternalStorageHandler;
 import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
 
@@ -16,7 +19,7 @@ public class ClientController {
     
     private final static Logger LOGGER  = LoggerFactory.getLogger(ClientController.class);
     
-	private static boolean isOnline = false;
+	private static boolean isConnectedToServer = false;
 	private static InternalStorageHandler internalStorageHandler;
 	
 	/**
@@ -27,11 +30,22 @@ public class ClientController {
 	}
 	
 	public static void setOnlineMode(boolean mode){
-		isOnline = mode;
+		isConnectedToServer = mode;
 	}
 	
-	public static boolean isOnline(){
-		return isOnline;
+	public static boolean isConnectedToServer(){
+		return isConnectedToServer;
+	}
+
+	/**
+	 *
+	 * @param context
+	 * @return true if the client is connected to the internet
+	 */
+	public static boolean isConnectedToInternet(Context context) {
+		ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+		return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 	}
 	
 	/**
@@ -70,7 +84,7 @@ public class ClientController {
 	 * Deletes the temporary information stored in this class.
 	 */
 	public static void clear(){
-		isOnline = false;
+		isConnectedToServer = false;
 		internalStorageHandler = null;
 	}
 

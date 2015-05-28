@@ -134,7 +134,7 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 	@Override
 	public void invalidateOptionsMenu() {
 		if(menuWarning != null){
-			if(ClientController.isOnline()) {
+			if(ClientController.isConnectedToServer()) {
 				menuWarning.setVisible(false);
 				offlineMode.setVisible(false);
 				sessionCountdownMenuItem.setVisible(true);
@@ -178,8 +178,7 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 	public void init(Context context) {	    
 	    if (!clientControllerInitialized) {
 			try {
-				boolean init = ClientController.init(context, username, password);
-				clientControllerInitialized = init;
+				clientControllerInitialized = ClientController.init(context, username, password);
 			} catch (WrongPasswordException e) {
 				wrongPassword = true;
 				displayResponse(context.getResources().getString(R.string.invalid_password));

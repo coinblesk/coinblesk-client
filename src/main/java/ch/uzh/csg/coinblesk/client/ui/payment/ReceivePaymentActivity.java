@@ -1,11 +1,5 @@
 package ch.uzh.csg.coinblesk.client.ui.payment;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -34,17 +28,24 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
+
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
-import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.request.TransactionRequestTask;
 import ch.uzh.csg.coinblesk.client.tools.KeyHandler;
+import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.TimeHandler;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
@@ -98,7 +99,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	private PaymentRequestInitializer paymentRequestInitializer;
 	private boolean serverResponseSuccessful = false;
 	private static boolean isPortrait  = false;
-	
 
 	protected static final String INPUT_UNIT_CHF = "CHF";
 
@@ -174,7 +174,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	}
 
 	private void checkOnlineModeAndProceed() {
-		if (ClientController.isOnline()) {
+		if (ClientController.isConnectedToServer() && walletConnected()) {
 			launchExchangeRateRequest();
 		} else {
 			launchOfflineMode(getApplicationContext());
@@ -223,7 +223,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	@Override
 	public void invalidateOptionsMenu() {
 		if(menuWarning != null){
-			if(ClientController.isOnline()) {
+			if(ClientController.isConnectedToServer()) {
 				menuWarning.setVisible(false);
 				offlineMode.setVisible(false);
 				sessionCountdownMenuItem.setVisible(true);
@@ -263,7 +263,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	 * Launches request for updating Exchange Rate
 	 */
 	public void launchExchangeRateRequest() {
-		if (ClientController.isOnline()) {
+		if (ClientController.isConnectedToServer()) {
 			showLoadingProgressDialog();
 			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
 				public void onTaskComplete(TransferObject response) {
@@ -272,12 +272,12 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 					if (response.isSuccessful()) {
 						CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
 						//renew Session Timeout Countdown
-						if(ClientController.isOnline()){
+						if(ClientController.isConnectedToServer()){
 							startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
 						}
 						exchangeRate = new BigDecimal(response.getMessage());
 						CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
-						BigDecimal balance = ClientController.getStorageHandler().getUserAccount().getBalanceBTC();
+						BigDecimal balance = getWalletService().getBalance();
 						CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
 						TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
 						balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
@@ -625,7 +625,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	 * @param serverPaymentRequest object with transaction details
 	 */
 	private void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
-		if (ClientController.isOnline()) {
+		if (ClientController.isConnectedToServer()) {
 			showLoadingProgressDialog();
 			TransactionObject tro = new TransactionObject();
 			try {
@@ -672,9 +672,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		} catch (Exception e) {
 			displayResponse(getResources().getString(R.string.error_transaction_failed));
 			return;
-		}
-		if(balance != null) {
-			ClientController.getStorageHandler().setUserBalance(balance);
 		}
 		responseListener.onServerResponse(serverPaymentResponse);
 	}

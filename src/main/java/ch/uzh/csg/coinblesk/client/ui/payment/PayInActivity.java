@@ -83,7 +83,7 @@ public class PayInActivity extends WalletActivity {
 
         initClickListener();
 
-        if (!ClientController.isOnline())
+        if (!ClientController.isConnectedToServer())
             sendAsMailBtn.setEnabled(false);
     }
 
@@ -97,7 +97,7 @@ public class PayInActivity extends WalletActivity {
         super.onResume();
         invalidateOptionsMenu();
 
-        if (!ClientController.isOnline())
+        if (!ClientController.isConnectedToServer())
             sendAsMailBtn.setEnabled(false);
     }
 

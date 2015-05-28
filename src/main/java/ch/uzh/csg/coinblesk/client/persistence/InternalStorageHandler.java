@@ -1,14 +1,13 @@
 package ch.uzh.csg.coinblesk.client.persistence;
 
-import java.math.BigDecimal;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
+import android.content.Context;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import android.content.Context;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
@@ -100,7 +99,7 @@ public class InternalStorageHandler implements IPersistencyHandler {
 	/**
 	 * Sets the user's email and saves it to the internal storage.
 	 * 
-	 * @param saveEmail
+	 * @param email
 	 *            the new email address
 	 * @return true if the file was saved, false if it is just set temporarily
 	 *         but could not be persisted
@@ -110,19 +109,6 @@ public class InternalStorageHandler implements IPersistencyHandler {
 		return saveUserAccount(userAccount);
 	}
 
-	/**
-	 * Sets the user's balance and saves it to the internal storage.
-	 * 
-	 * @param balance
-	 *            the new balance
-	 * @return true if the file was saved, false if it is just set temporarily
-	 *         but could not be persisted
-	 */
-	public boolean setUserBalance(BigDecimal balance) {
-		getUserAccount().setBalanceBTC(balance);
-		return saveUserAccount(userAccount);
-	}
-	
 	/**
 	 * Saves the user's {@link CustomKeyPair} to the internal storage.
 	 * 

@@ -189,7 +189,7 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
     @Override
     public void invalidateOptionsMenu() {
         if (menuWarning != null) {
-            if (ClientController.isOnline()) {
+            if (ClientController.isConnectedToServer()) {
                 menuWarning.setVisible(false);
                 offlineMode.setVisible(false);
             } else {

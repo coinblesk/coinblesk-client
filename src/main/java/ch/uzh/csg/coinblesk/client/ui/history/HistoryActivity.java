@@ -33,7 +33,7 @@ public class HistoryActivity extends WalletActivity {
         TransactionHistory txHistory = getWalletService().getTransactionHistory();
 
         // specify an adapter (see also next example)
-        mAdapter = new HistoryAdapter(txHistory);
+        mAdapter = new HistoryAdapter(this, txHistory);
         mRecyclerView.setAdapter(mAdapter);
 
         dismissProgressDialog();
@@ -44,6 +44,9 @@ public class HistoryActivity extends WalletActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
+
+        setScreenOrientation();
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recent_transactions_recycler_view);
 

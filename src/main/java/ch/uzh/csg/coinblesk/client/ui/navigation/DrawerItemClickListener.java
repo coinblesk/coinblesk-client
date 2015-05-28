@@ -92,7 +92,7 @@ public class DrawerItemClickListener extends AbstractLoginActivity implements On
 	}
 
 	protected void launchSignInRequest() {
-		if (!ClientController.isOnline()) {
+		if (!ClientController.isConnectedToServer()) {
 			super.launchSignInRequest(getContext());
 		} else {
 			displayResponse(getContext().getResources().getString(R.string.already_connected_to_server));
@@ -100,7 +100,7 @@ public class DrawerItemClickListener extends AbstractLoginActivity implements On
 	}
 
 	private void launchSignOut() {
-		if (ClientController.isOnline()) {
+		if (ClientController.isConnectedToServer()) {
 			if(!TimeHandler.getInstance().determineIfLessThanFiveSecondsLeft()){
 				launchSignOutRequest();
 			}else{

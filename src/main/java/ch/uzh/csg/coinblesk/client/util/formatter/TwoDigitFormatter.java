@@ -1,4 +1,4 @@
-package ch.uzh.csg.coinblesk.client.util;
+package ch.uzh.csg.coinblesk.client.util.formatter;
 
 import android.widget.NumberPicker.Formatter;
 

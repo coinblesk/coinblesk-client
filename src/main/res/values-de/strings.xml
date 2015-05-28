@@ -61,7 +61,8 @@
         Universität Zürich entwickelt.\nWir übernehmen keine Verantwortung für den Verlust Ihrer Bitcoins im Falle eines Systems / Hardware Fehlers 
         oder bei böswilligem Einfluss durch Dritte. Bitte seien Sie sich bewusst, dass diese Applikation immer noch im Beta-Stadium ist und Fehler 
         auftreten können.
-        \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics\nSmartphone Grundlage für animierte NFC Grafik:Smartphone by Matthieu Mercier from The Noun Project	</string>
+        \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics\nSmartphone Grundlage für animierte NFC Grafik:Smartphone by Matthieu Mercier from The Noun Project
+	</string>
     <string name="termOfUseImageCloseBtn">AGBs schliessen</string>
     <string name="createAccountSuccessful">Bestätigung der Registrierung</string>
 
@@ -360,4 +361,8 @@
     <string name="nfc_enable_button">Geräte Einstellungen öffnen</string>
     <string name="nfc_enable_button_abort">Information schliessen</string>
     <string name="nfc_no_adapter">Dieses Gerät verüfgt über kein NFC-Modul. Eine Verwendung von CoinBlesk ist aus diesem Grund nicht möglich.</string>
+
+    <!--Bitcoin Wallet Strings-->
+    <string name="bitcoin_synchronizing">Synchronisierung mit dem Bitcoin Netzwerk... (%1$s%%)</string>
+
 </resources>

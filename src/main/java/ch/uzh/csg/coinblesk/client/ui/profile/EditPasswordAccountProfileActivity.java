@@ -50,7 +50,7 @@ public class EditPasswordAccountProfileActivity extends AbstractAsyncActivity {
     }
     	
 	private void checkOnlineModeAndProceed() {
-		if(!ClientController.isOnline()){
+		if(!ClientController.isConnectedToServer()){
 			saveChangeBtn.setEnabled(false);
 		}
 	}

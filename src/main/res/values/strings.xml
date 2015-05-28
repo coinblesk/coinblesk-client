@@ -361,4 +361,9 @@
     <string name="nfc_enable_button">Open Device Settings</string>
     <string name="nfc_enable_button_abort">Close Information</string>
 	<string name="nfc_no_adapter">This device has no NFC Adapter. A usage of CoinBlesk is therefore not possible.</string>
+
+    <!--Bitcoin Wallet Strings-->
+    <string name="bitcoin_synchronizing">Synchronizing with Bitcoin network... (%1$s%%)</string>
+
+
 </resources>

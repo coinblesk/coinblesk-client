@@ -1,5 +1,7 @@
 package ch.uzh.csg.coinblesk.client.ui.history;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +12,9 @@ import android.widget.TextView;
 
 import com.google.common.base.Preconditions;
 
+import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.util.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.client.util.formatter.DateFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.TransactionHistory;
 import ch.uzh.csg.coinblesk.model.Transaction;
 
@@ -21,10 +24,12 @@ import ch.uzh.csg.coinblesk.model.Transaction;
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.TransactionHolder> implements Filterable {
 
     private TransactionHistory txHistory;
+    private Context context;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public HistoryAdapter(TransactionHistory txHistory) {
+    public HistoryAdapter(Context context, TransactionHistory txHistory) {
         this.txHistory = txHistory;
+        this.context = context;
     }
 
     // Create new views (invoked by the layout manager)
@@ -44,13 +49,32 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Transact
 
         Transaction tx = txHistory.getAllTransactions().get(position);
 
-        String amount = CurrencyFormatter.formatBTC(tx.getAmount());
-        String date = tx.getTimestamp().toString();
-        String type = tx.getType().toString();
+        CurrencyViewHandler.setBTC(holder.vAmount, tx.getAmount(), context);
+        String date = DateFormatter.formatDate(tx.getTimestamp());
 
-        holder.vAmount.setText(amount);
         holder.vDate.setText(date);
-        holder.vType.setText(type);
+
+        Drawable icon;
+
+        switch(tx.getType()) {
+            case PAY_OUT:
+                holder.vAmount.setTextColor(context.getResources().getColor(R.color.darkred));
+                icon = context.getResources().getDrawable(R.drawable.ic_pay_out, null);
+                break;
+            case PAY_IN:
+                holder.vAmount.setTextColor(context.getResources().getColor(R.color.darkgreen));
+                icon = context.getResources().getDrawable(R.drawable.ic_pay_in, null);
+                break;
+            case PAY_IN_UNVERIFIED:
+                holder.vAmount.setTextColor(context.getResources().getColor(R.color.green));
+                icon = context.getResources().getDrawable(R.drawable.ic_pay_in_un, null);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown transaction type " + tx.getType());
+        }
+
+        // set icon on the right of the card
+        holder.vAmount.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, icon, null);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -67,13 +91,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Transact
     public static class TransactionHolder extends RecyclerView.ViewHolder {
         protected TextView vAmount;
         protected TextView vDate;
-        protected TextView vType;
 
         public TransactionHolder(View v) {
             super(v);
             vAmount =  (TextView) v.findViewById(R.id.transaction_amount);
             vDate =  (TextView) v.findViewById(R.id.transaction_date);
-            vType =  (TextView) v.findViewById(R.id.transaction_type);
         }
     }
 }

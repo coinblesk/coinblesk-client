@@ -127,7 +127,7 @@ public class AccountProfileActivity extends AbstractAsyncActivity {
 	}
 
 	private void checkOnlineModeAndProceed() {
-    	if(!ClientController.isOnline()){
+    	if(!ClientController.isConnectedToServer()){
 			editEmailImgBtn.setEnabled(false);
 			editPasswordImgBtn.setEnabled(false);
 			deleteAccountBtn.setEnabled(false);

@@ -2,6 +2,7 @@ package ch.uzh.csg.coinblesk.client.wallet;
 
 import android.content.Context;
 import android.util.Base64;
+import android.widget.Toast;
 
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Transaction;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.request.PayOutRequestTask;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
@@ -95,8 +97,10 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
             public void onTaskComplete(TransferObject response) {
                 if(response.isSuccessful()) {
                     LOGGER.info("Transaction signing and broadcast was successful");
+                    Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
                 } else {
                     LOGGER.error("Transaction failed with message: " + response.getMessage());
+                    Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
                 }
             }
         }, txSigRequest, new TransferObject(), context);

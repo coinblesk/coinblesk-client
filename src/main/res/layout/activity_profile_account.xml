@@ -97,11 +97,10 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/profileEditPasswordBtn"
             android:layout_centerHorizontal="true"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
             android:layout_marginTop="25dp"
-            android:background="#cc0000"
+            android:background="@color/red"
             android:text="@string/profileEditDeletedUserAccountBtn"
+            android:textColor="@android:color/white"
             android:textStyle="bold" />
     </RelativeLayout>
     <!-- The navigation drawer -->
