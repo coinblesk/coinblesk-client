@@ -3,17 +3,18 @@ package ch.uzh.csg.coinblesk.client.wallet;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Service;
 
-import org.bitcoinj.core.AbstractPeerEventListener;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.DownloadProgressTracker;
 import org.bitcoinj.core.FilteredBlock;
 import org.bitcoinj.core.InsufficientMoneyException;
 import org.bitcoinj.core.NetworkParameters;
@@ -26,6 +27,7 @@ import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.signers.TransactionSigner;
+import org.bitcoinj.store.UnreadableWalletException;
 import org.bitcoinj.utils.Threading;
 import org.bitcoinj.wallet.DeterministicSeed;
 import org.bitcoinj.wallet.MarriedKeyChain;
@@ -59,12 +61,10 @@ public class WalletService extends android.app.Service {
     }
 
     private final IBinder walletBinder = new BitcoinWalletBinder();
-
     private CoinBleskWalletAppKit clientWalletKit;
-
     private final ReentrantLock lock = Threading.lock("WalletService");
-
-    private NetworkParameters params;
+    private BitcoinNet bitcoinNet;
+    private String serverWatchingKey;
 
     private SyncProgress syncProgress;
 
@@ -79,17 +79,16 @@ public class WalletService extends android.app.Service {
      *
      * @return true if blockchain synchronization is (most likely) finished
      */
-    public boolean isBlockChainSynced() {
-
-        // check if our chain head is the same as the height of the other peers.
-        // If it is, it means that we are (most likely) finished with syncing
-        // the blockchain, and can return
-        int bestHeight = getAppKit().peerGroup().getMostCommonChainHeight();
-        int ourHeight = getAppKit().chain().getBestChainHeight();
-
-        return bestHeight == ourHeight;
-    }
-
+//    public boolean isBlockChainSynced() {
+//
+//        // check if our chain head is the same as the height of the other peers.
+//        // If it is, it means that we are (most likely) finished with syncing
+//        // the blockchain, and can return
+//        int bestHeight = getAppKit().peerGroup().getMostCommonChainHeight();
+//        int ourHeight = getAppKit().chain().getBestChainHeight();
+//
+//        return bestHeight == ourHeight;
+//    }
     public SyncProgress getSyncProgress() {
         return syncProgress;
     }
@@ -97,7 +96,7 @@ public class WalletService extends android.app.Service {
     /**
      * @return e new wallet seed
      */
-    private DeterministicSeed getWalletSeed() {
+    private DeterministicSeed getNewWalletSeed() {
 
         // bitcoinJ will synchronize 1 week ahead of the specified time because
         // of time skews. So using the current time is absolutely safe
@@ -120,7 +119,11 @@ public class WalletService extends android.app.Service {
         }
     }
 
-    private boolean isNewSetup(final BitcoinNet bitcoinNet) {
+    /**
+     * @param bitcoinNet
+     * @return true if no wallet is stored on the device
+     */
+    public boolean walletExistsOnDevice(final BitcoinNet bitcoinNet) {
         File[] files = getFilesDir().listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String filename) {
@@ -139,8 +142,14 @@ public class WalletService extends android.app.Service {
         return clientWalletKit != null && clientWalletKit.isRunning();
     }
 
-    private void initNewWallet(final BitcoinNet bitcoinNet, final String watchingKey) {
-        clientWalletKit.restoreWalletFromSeed(getWalletSeed());
+    private void initNewWallet(final BitcoinNet bitcoinNet, final String watchingKey, @Nullable String mnemonic, @Nullable Long creationTime) throws UnreadableWalletException {
+
+        if (null != mnemonic) {
+            clientWalletKit.restoreWalletFromSeed(getNewWalletSeed());
+        } else {
+            Preconditions.checkNotNull(creationTime, "Creation time needed for restoring from seed");
+            DeterministicSeed seed = new DeterministicSeed(mnemonic, null, "", creationTime);
+        }
 
         // Add checkpoints (this will speed up the blockchain synchronization
         // significantly)
@@ -166,7 +175,62 @@ public class WalletService extends android.app.Service {
         }, Threading.USER_THREAD);
     }
 
-    public Service init(final BitcoinNet bitcoinNet, final String watchingKey) {
+    /**
+     * Restores a wallet from an Mnemonic seed.
+     *
+     * @param bitcoinNet
+     * @param watchingKey
+     * @param mnemonic
+     * @param creationTime
+     * @return
+     * @throws UnreadableWalletException
+     */
+    public Service restoreWalletFromSeed(final BitcoinNet bitcoinNet, final String watchingKey, String mnemonic, Long creationTime) throws UnreadableWalletException {
+        return init(bitcoinNet, watchingKey, mnemonic, creationTime);
+    }
+
+
+    private void deleteWallet() {
+        getAppKit().stopAsync();
+        clientWalletKit.awaitTerminated();
+
+        // delete the wallet file and blockstore
+        File[] files = getFilesDir().listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.startsWith(getWalletFilesPrefix(bitcoinNet));
+            }
+        });
+
+        for (File f : files) {
+            f.delete();
+        }
+    }
+
+    /**
+     * Resynchronizes the blockchain by deleting the wallet completely, deleting the blockstore and then restoring from the seed
+     *
+     * @return
+     */
+    public Service resyncBlockchain() {
+
+        // get the data we need to restore the wallet later
+        String mnemonic = getMnemonicSeed();
+        long creationTime = clientWalletKit.wallet().getEarliestKeyCreationTime();
+
+        deleteWallet();
+
+        try {
+            return restoreWalletFromSeed(bitcoinNet, serverWatchingKey, mnemonic, creationTime);
+        } catch (UnreadableWalletException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Service init(final BitcoinNet bitcoinNet, final String watchingKey, @Nullable String mnemonic, @Nullable Long creationTime) throws UnreadableWalletException {
+
+        this.bitcoinNet = bitcoinNet;
+        this.serverWatchingKey = watchingKey;
 
         // we need a lock here to make sure below is not executed multiple times.
         // Else if two threads at the same time try to bind the service, IllegalStateException
@@ -178,13 +242,13 @@ public class WalletService extends android.app.Service {
                 return clientWalletKit;
             }
 
-            params = getNetworkParams(bitcoinNet);
+            NetworkParameters params = getNetworkParams(bitcoinNet);
 
             clientWalletKit = new CoinBleskWalletAppKit(params, getFilesDir(), getWalletFilesPrefix(bitcoinNet));
             clientWalletKit
                     .setAndroidContext(getApplicationContext())
                     .setBlockingStartup(false)
-                    .setDownloadListener(new AbstractPeerEventListener() {
+                    .setDownloadListener(new DownloadProgressTracker() {
                         @Override
                         public void onBlocksDownloaded(Peer peer, Block block, FilteredBlock filteredBlock, int blocksLeft) {
                             LOGGER.debug("{} blocks left to download...", blocksLeft);
@@ -192,6 +256,12 @@ public class WalletService extends android.app.Service {
                                 syncProgress.setTotalBlocks(blocksLeft);
                             }
                             syncProgress.setBlocksRemaining(blocksLeft);
+                        }
+
+                        @Override
+                        protected void doneDownload() {
+                            LOGGER.debug("Blockchain sync finished");
+                            syncProgress.setFinished();
                         }
                     });
 
@@ -204,13 +274,29 @@ public class WalletService extends android.app.Service {
             }, Threading.USER_THREAD);
 
             // create new wallet if new setup
-            if (isNewSetup(bitcoinNet)) {
-                initNewWallet(bitcoinNet, watchingKey);
+            if (walletExistsOnDevice(bitcoinNet)) {
+                initNewWallet(bitcoinNet, watchingKey, mnemonic, creationTime);
             }
 
             return clientWalletKit.startAsync();
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * Sets up the bitcoinj wallet on the device
+     *
+     * @param bitcoinNet  the BitcoinNet
+     * @param watchingKey watching key of the server
+     * @return a {@link Service}
+     */
+    public Service init(final BitcoinNet bitcoinNet, final String watchingKey) {
+        try {
+            return init(bitcoinNet, watchingKey, null, null);
+        } catch (UnreadableWalletException e) {
+            // TODO: handle this terrible event. Should never happen though
+            throw new RuntimeException(e);
         }
     }
 
@@ -227,10 +313,6 @@ public class WalletService extends android.app.Service {
         // initialize the server transaction signer
         initTransactionSigner();
 
-        // check if we finished syncing the blockchain
-        if(isBlockChainSynced()) {
-            syncProgress.setFinished();
-        }
     }
 
     /**
@@ -240,7 +322,7 @@ public class WalletService extends android.app.Service {
      *
      * @return a {@link Service} object
      */
-    public Service init() {
+    private Service init() {
 
         if (isWalletReady()) {
             return clientWalletKit;
@@ -288,6 +370,10 @@ public class WalletService extends android.app.Service {
         return clientWalletKit.wallet().getWatchingKey().serializePubB58(clientWalletKit.params());
     }
 
+    /**
+     * Adds the {@link ServerTransactionSigner} to the wallet and / or sets the context. Context is
+     * needed to make the request to the server.
+     */
     private void initTransactionSigner() {
 
         for (TransactionSigner signer : clientWalletKit.wallet().getTransactionSigners()) {
@@ -356,6 +442,7 @@ public class WalletService extends android.app.Service {
     }
 
     public void createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
+        NetworkParameters params = getNetworkParams(bitcoinNet);
         Address btcAddress = new Address(params, address);
         Wallet.SendRequest req = Wallet.SendRequest.to(btcAddress, Coin.parseCoin(amount.toString()));
         req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
@@ -380,12 +467,12 @@ public class WalletService extends android.app.Service {
             transaction.setAmount(amount.abs());
             transaction.setTimestamp(tx.getUpdateTime());
 
-            if(amount.signum() < 0) {
+            if (amount.signum() < 0) {
                 // negative amount -> pay out
                 transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_OUT);
             } else {
                 // positive amount -> pay in
-                if(tx.getConfidence().getDepthInBlocks() >= Constants.MIN_CONFIRMATIONS) {
+                if (tx.getConfidence().getDepthInBlocks() >= Constants.MIN_CONFIRMATIONS) {
                     // confirmed tx
                     transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_IN);
                 } else {

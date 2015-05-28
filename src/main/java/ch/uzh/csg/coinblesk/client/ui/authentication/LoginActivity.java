@@ -1,18 +1,5 @@
 package ch.uzh.csg.coinblesk.client.ui.authentication;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Properties;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-
-import ch.uzh.csg.coinblesk.client.R;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +13,20 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Properties;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+
+import ch.uzh.csg.coinblesk.client.R;
 
 /**
  * The Login Activity is the first view of the application. The user has to sign
@@ -68,10 +69,10 @@ public class LoginActivity extends AbstractLoginActivity {
     	retrieveLastSignedUsername();
     	
     	initClickListener();
-    	
+
     	initUSBToken();
     }
-    
+
     private void initUSBToken() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(Intent.ACTION_MEDIA_MOUNTED);

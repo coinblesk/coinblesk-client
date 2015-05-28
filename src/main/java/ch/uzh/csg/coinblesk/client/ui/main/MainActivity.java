@@ -44,6 +44,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.MainActivityRequestTask;
@@ -122,7 +123,9 @@ public class MainActivity extends AbstractPaymentActivity {
     @Override
     public void onResume() {
         super.onResume();
-        checkOnlineModeAndProceed();
+        if(walletConnected()) {
+            checkOnlineModeAndProceed();
+        }
         invalidateOptionsMenu();
     }
 
@@ -295,10 +298,19 @@ public class MainActivity extends AbstractPaymentActivity {
         showFirstTimeInformation();
     }
 
-
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
+
+        // check if there is a wallet set up on the device. If not,
+        // we ask the user to enter his mnemonic seed to restore
+        // the wallet.
+        BitcoinNet bitcoinNet = ClientController.getStorageHandler().getBitcoinNet();
+        if(getWalletService().walletExistsOnDevice(bitcoinNet)) {
+            // TODO: show restore from seed dialog
+            LOGGER.debug("First login on restored/new device");
+        }
+
         displayUserBalance();
         initiateProgressBar();
         createHistoryViews();

@@ -8,6 +8,7 @@
     <!-- General settings -->
     <string name="pref_header_general">Allgemein</string>
     <string name="pref_title_about_settings">Über</string>
+    <string name="pref_title_wallet_backup">Wallet Backup</string>
     <string name="pref_title_bitcoin_unit">Bitcoin Einheit wählen</string>
 
     <string-array name="pref_bitcoin_unit_list">
@@ -28,4 +29,7 @@
     <string name="pref_title_include_fee">Transaktions-Gebühr</string>
     <string name="pref_title_fee_amount">Gebühr in Prozent (%)</string>
     <string name="pref_fee_amount">1</string>
+
+    <!--Wallet settings-->
+    <string name="pref_header_wallet">Wallet</string>
 </resources>

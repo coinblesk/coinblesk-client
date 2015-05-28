@@ -18,6 +18,7 @@
     <string name="title_activity_edit_email_account_profile">Update E-Mail</string>
     <string name="title_activity_edit_passwotrd_account_profile">Update Password</string>
     <string name="title_activity_about">About</string>
+    <string name="title_activity_wallet_backup">Wallet Backup</string>
     <string name="title_activity_setting_pay_out_rules">Pay out Rules</string>
     <string name="title_activity_choose_payment">Choose Payment Method</string>
     <string name="title_activity_address_book">Address Book</string>
@@ -313,6 +314,15 @@
     <string name="settings_autoAccept_checkbox_title">Auto accept payments</string>
     <string name="settings_autoAccept_editText_defaultValue">10</string>
     <string name="settings_autoAccept_editText_title">Auto accept limit in CHF</string>
+    <string name="settings_walletBackupSeedExplanation">To backup your wallet, please write down the following 12 words. If you lose your device, or you want to install CoinBlesk on a new device, you have to enter these 12 words in order to get access to your bitcoins. DO NOT SHARE THESE WORDS WITH ANYONE!</string>
+    <string name="settings_walletBackupSeedTitle">Wallet Backup Phrase</string>
+    <string name="settings_walletBackupSeedCopyButtonText">Copy to Clipboard</string>
+    <string name="settings_walletBackupRefundTransactionTitle">Refund Transaction</string>
+    <string name="settings_walletBackupRefundTransactionButtonText">Email Refund Transaction</string>
+    <string name="settings_walletBackupRefundTransactionExplanation">A refund transaction allows you to claim your bitcoins even if our server vanishes completely.
+        The refund transaction is time-locked though, which means that you can only claim you bitcoins after the time-lock has expired. Caution: As soon as the refund transaction is valid (after the time-lock expired),
+        instant transactions are no longer possible. Your bitcoins need to be "re-deposited" after the time-lock has expired to allow instant transactions. This will be done automatically by the App, but it is
+        possible that instant transactions are not possible if you haven\'t openend the app for a very long time (~3 months). </string>
 
     <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>

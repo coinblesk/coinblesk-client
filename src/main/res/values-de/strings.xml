@@ -18,6 +18,7 @@
     <string name="title_activity_edit_email_account_profile">Emailadresse ändern</string>
     <string name="title_activity_edit_passwotrd_account_profile">Passwort ändern</string>
     <string name="title_activity_about">Über </string>
+    <string name="title_activity_wallet_backup">Wallet Backup</string>
     <string name="title_activity_setting_pay_out_rules">Auszahlungs Regeln</string>
     <string name="title_activity_choose_payment">Zahlungsweise auswählen</string>
     <string name="title_activity_address_book">Adressbuch</string>
@@ -313,6 +314,16 @@
     <string name="settings_autoAccept_checkbox_title">Automatisch Zahlungen akzeptieren</string>
     <string name="settings_autoAccept_editText_defaultValue">10</string>
     <string name="settings_autoAccept_editText_title">Automatisch akzeptieren Limite in CHF</string>
+    <string name="settings_walletBackupSeedExplanation">Bitte schreiben Sie die folgenden 12 Wörter auf, und bewahren Sie sie auf. Mit diesen 12 Wörtern können Sie Ihre Wallet wieder herstellen, falls Sie ihr Gerät verlieren, oder falls Sie CoinBlesk auf einem neuen Gerät installieren wollen. ZEIGEN SIE DIESE 12 WÖRTER NIEMANDEM!</string>
+    <string name="settings_walletBackupSeedTitle">Wallet Backup Wörter</string>
+    <string name="settings_walletBackupSeedCopyButtonText">In Zwischenablage kopieren</string>
+    <string name="settings_walletBackupRefundTransactionTitle">Rückerstattungstransaktion</string>
+    <string name="settings_walletBackupRefundTransactionButtonText">Rückerstattungstransaktion per Email senden</string>
+    <string name="settings_walletBackupRefundTransactionExplanation"> Eine Rückerstattungstransaktion erlaubt es Ihnen, Ihre Bitcoins kontrolle über alle Ihre Bitcoins zu erlangen im Fall dass unser Server verschwinden würde.
+        Die Rückerstattungstransaktion hat allerdings ein Zeitschloss, was bedeutet, dass die Transaktion erst nach einer bestimmten Zeit gültig ist (nach 3 Monaten). Achtung:
+        Sobald die Rückerstattungstransaktion gültig wird, also nach ablauf des Zeitschlosses, sind keine Soforttransaktionen mehr möglich. Ihre Bitcoins müssen zuerst neu überwiesen werden auf die App.
+        Dies wird von CoinBlesk automatisch gemacht. Falls Sie die App jedoch für lange Zeit nicht öffnen (~3 Monate) kann es vorkommen, dass sie zuerst eine weile warten müssen, bis Soforttransaktionen wieder möglich sind.</string>
+
 
     <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Bitcoins Senden</string>

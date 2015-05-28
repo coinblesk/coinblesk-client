@@ -1,7 +1,5 @@
 package ch.uzh.csg.coinblesk.client.ui.settings;
 
-import java.util.List;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -20,8 +18,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+
+import java.util.List;
+
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.util.ClientController;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -204,13 +205,21 @@ public class SettingsActivity extends PreferenceActivity {
 			// Add 'general' preferences
 			addPreferencesFromResource(R.xml.pref_general);
 			// Add 'payment' preferences, and a corresponding header.
-			PreferenceCategory fakeHeader = new PreferenceCategory(getActivity());
-			fakeHeader.setTitle(R.string.pref_header_payments);
-			getPreferenceScreen().addPreference(fakeHeader);
+			PreferenceCategory paymentHeader = new PreferenceCategory(getActivity());
+			paymentHeader.setTitle(R.string.pref_header_payments);
+			getPreferenceScreen().addPreference(paymentHeader);
 			addPreferencesFromResource(R.xml.pref_payment);
 			bindPreferenceSummaryToValue(findPreference("bitcoin_list"));
 			bindPreferenceSummaryToValue(findPreference("fee_amount"));
 			bindPreferenceSummaryToValue(findPreference("auto_accept_amount"));
+
+			// add wallet preferences
+			PreferenceCategory walletHeader = new PreferenceCategory(getActivity());
+			walletHeader.setTitle(R.string.pref_header_wallet);
+			getPreferenceScreen().addPreference(walletHeader);
+			addPreferencesFromResource(R.xml.pref_wallet);
+
+
 		}
 	}
 

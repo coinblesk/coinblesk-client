@@ -1,0 +1,11 @@
+  <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <Preference android:title="@string/pref_title_wallet_backup" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="ch.uzh.csg.coinblesk.client.ui.settings.WalletBackupActivity"
+            android:targetPackage="ch.uzh.csg.coinblesk.client" />
+    </Preference>
+
+
+</PreferenceScreen>

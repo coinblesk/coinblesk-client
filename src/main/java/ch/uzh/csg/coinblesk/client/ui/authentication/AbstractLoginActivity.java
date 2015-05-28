@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.security.KeyPair;
 
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
-import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
 import ch.uzh.csg.coinblesk.client.request.CommitPublicKeyRequestTask;
@@ -25,8 +23,10 @@ import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.request.SignInRequestTask;
 import ch.uzh.csg.coinblesk.client.tools.KeyHandler;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
+import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.TimeHandler;
 import ch.uzh.csg.coinblesk.customserialization.PKIAlgorithm;
 import ch.uzh.csg.coinblesk.keys.CustomKeyPair;
