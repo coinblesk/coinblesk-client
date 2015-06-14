@@ -93,6 +93,13 @@ public class RestoreOrNewActivity extends WalletActivity {
             }
         });
 
+        mCreateNewWalletButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startMainActivity();
+            }
+        });
+
         mRestoreWalletButton.setEnabled(true);
         mCreateNewWalletButton.setEnabled(true);
     }
