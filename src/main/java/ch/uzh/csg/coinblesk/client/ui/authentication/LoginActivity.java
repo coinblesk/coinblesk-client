@@ -1,11 +1,13 @@
 package ch.uzh.csg.coinblesk.client.ui.authentication;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.Settings.Secure;
 import android.view.Menu;
 import android.view.View;
@@ -71,6 +73,12 @@ public class LoginActivity extends AbstractLoginActivity {
     	initClickListener();
 
     	initUSBToken();
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        super.onServiceConnected(name, service);
+        initSignInBtn();
     }
 
     private void initUSBToken() {
@@ -205,44 +213,48 @@ public class LoginActivity extends AbstractLoginActivity {
 		}
 	}
 
-	private void initClickListener() {
-    	signInBtn.setOnClickListener(new View.OnClickListener() {
+	private void initSignInBtn() {
+		signInBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				username = ((EditText) findViewById(R.id.loginUsernameEditText)).getText().toString();
 				password = ((EditText) findViewById(R.id.loginPasswordEditText)).getText().toString();
-				
-				if (lastToken != null && lastToken.exists() && lastToken.canRead() && lastToken.length() > 0 && 
+
+				if (lastToken != null && lastToken.exists() && lastToken.canRead() && lastToken.length() > 0 &&
 						(username.isEmpty() || password.isEmpty())) {
 					String androidId = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
 					Properties p = readToken(lastToken, androidId);
-        			if(p!=null) {
-        				if(username.isEmpty()) {
-        					username = p.getProperty(USERNAME);
-        				}
-        				if(password.isEmpty()) {
-        					password = p.getProperty(PASSWORD);
-        				}
-        			}
+					if (p != null) {
+						if (username.isEmpty()) {
+							username = p.getProperty(USERNAME);
+						}
+						if (password.isEmpty()) {
+							password = p.getProperty(PASSWORD);
+						}
+					}
 				}
-				
+
 				if (username.isEmpty() || password.isEmpty())
 					displayResponse(getResources().getString(R.string.enter_username_password));
-				else{
+				else {
 					// hide virtual keyboard
-					InputMethodManager inputManager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+					InputMethodManager inputManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 					inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 					launchSignInRequest(getApplicationContext());
 				}
 			}
 		});
-		
+
+		signInBtn.setEnabled(true);
+	}
+
+	private void initClickListener() {
+
 		signUpBtn.setOnClickListener(new View.OnClickListener() {			
 			public void onClick(View v) {
 				launchSignUpActivity();
 			}
 		});
-		
-		
+
 		resetPassword.setOnClickListener(new View.OnClickListener() {			
 			public void onClick(View v) {
 				launchActivity(LoginActivity.this, ResetPasswordActivity.class);

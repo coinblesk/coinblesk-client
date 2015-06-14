@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
-import ch.uzh.csg.coinblesk.client.wallet.WalletService.BitcoinWalletBinder;
+import ch.uzh.csg.coinblesk.client.wallet.WalletService.LocalBinder;
 
 /**
  * Base class for {@link Activity} that utilizes Wallet functionality.
@@ -28,7 +28,7 @@ public class WalletActivity extends AbstractAsyncActivity implements ServiceConn
     
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        BitcoinWalletBinder binder = (BitcoinWalletBinder) service;
+        LocalBinder binder = (LocalBinder) service;
         walletService = binder.getService();
         walletConnected = true;
     }

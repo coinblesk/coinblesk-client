@@ -40,7 +40,7 @@
         android:layout_marginRight="20dp"
         android:layout_marginTop="20dp"
         android:text=""
-        android:height="70dp"
+        android:height="50dp"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
@@ -60,7 +60,7 @@
         android:text="@string/settings_walletBackupRefundTransactionTitle"
         android:textColor="@android:color/primary_text_light"
         android:id="@+id/textView2"
-        android:layout_below="@+id/walletBackup_copyButton"
+        android:layout_below="@+id/settings_walletBackupSeed"
         android:layout_alignParentStart="true"
         android:layout_marginTop="10dp" />
 
@@ -71,17 +71,6 @@
         android:id="@+id/textView3"
         android:layout_below="@+id/textView2"
         android:layout_alignParentStart="true" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/settings_walletBackupSeedCopyButtonText"
-        android:id="@+id/walletBackup_copyButton"
-        android:layout_below="@+id/settings_walletBackupSeed"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true"
-        android:enabled="false" />
 
     <Button
         style="?android:attr/buttonStyleSmall"

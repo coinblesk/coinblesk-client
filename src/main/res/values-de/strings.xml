@@ -376,4 +376,9 @@
     <!--Bitcoin Wallet Strings-->
     <string name="bitcoin_synchronizing">Synchronisierung mit dem Bitcoin Netzwerk... (%1$s%%)</string>
 
+    <!--Restore or Create New Wallet-->
+    <string name="restoreOrCreate_passphrase_placeholder">Backup Wörter eingeben...</string>
+    <string name="restoreOrCreate_toast_restoreFailed">Wallet Wiederherstellung fehlgeschlagen. Sind Sie sicher, dass Sie die Wörter richtig eingegeben haben?</string>
+
+
 </resources>

@@ -24,6 +24,7 @@ import ch.uzh.csg.coinblesk.client.request.SignInRequestTask;
 import ch.uzh.csg.coinblesk.client.tools.KeyHandler;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
+import ch.uzh.csg.coinblesk.client.ui.main.RestoreOrNewActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
@@ -124,11 +125,11 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 		sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
 		sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
 		sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-			public boolean onMenuItemClick(MenuItem item) {
-				launchSignInRequest(context);
-				return false;
-			}
-		});
+            public boolean onMenuItemClick(MenuItem item) {
+                launchSignInRequest(context);
+                return false;
+            }
+        });
 	}
 
 	@Override
@@ -241,6 +242,7 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 				LOGGER.debug("Setting bitcoin net to " + response.getBitcoinNet());
 				ClientController.getStorageHandler().setBitcoinNet(response.getBitcoinNet());
 
+
 				CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
 				if (ckp == null) {
 					try {
@@ -259,7 +261,23 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 					return;
 				}
 				ClientController.setOnlineMode(true);
-				launchMainActivity(context);
+
+
+
+				// check if there is a wallet set up on the device. If not,
+				// we ask the user to enter his mnemonic seed to restore
+				// the wallet.
+
+				if (!getWalletService().walletExistsOnDevice(response.getBitcoinNet())) {
+					LOGGER.debug("First login on restored/new device");
+					Intent intent = new Intent(AbstractLoginActivity.this, RestoreOrNewActivity.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					startActivity(intent);
+				} else {
+					getWalletService().init(response.getBitcoinNet(), response.getServerWatchingKey());
+					launchMainActivity(context);
+				}
+
 			}
 		}, new TransferObject(), new ReadRequestObject(), context);
 		read.execute();
@@ -300,6 +318,7 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 		}, cpko, new CustomPublicKeyObject(), context);
 		task.execute();
 	}
+
 
 	private void launchMainActivity(Context context){
 		storeUsernameIntoSharedPref(context);

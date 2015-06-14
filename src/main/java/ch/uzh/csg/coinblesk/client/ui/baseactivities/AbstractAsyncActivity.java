@@ -17,8 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.ui.fragments.CustomDialogFragment;
+import ch.uzh.csg.coinblesk.client.util.ClientController;
 
 /**
  * The class AbstractAsyncActivity is the abstract base class for all
@@ -179,8 +179,11 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         menuWarning = menu.findItem(R.id.action_warning);
         offlineMode = menu.findItem(R.id.menu_offlineMode);
-        TextView offlineModeTV = (TextView) offlineMode.getActionView();
-        offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
+
+        if(offlineMode != null) {
+            TextView offlineModeTV = (TextView) offlineMode.getActionView();
+            offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
+        }
 
         invalidateOptionsMenu();
         return true;

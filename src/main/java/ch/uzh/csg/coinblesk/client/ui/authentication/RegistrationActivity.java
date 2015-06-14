@@ -118,7 +118,7 @@ public class RegistrationActivity extends WalletActivity {
 					// Blockchain synchronization will take some time when first installing the app.
 					// We're actively starting the synchronization here already, so that when
 					// the user first logs in, the app is already partially synchronized...
-                    getWalletService().init(response.getBitcoinNet(), response.getWatchingKey());
+                    getWalletService().init(response.getBitcoinNet(), response.getWatchingKey(), null, null);
 					
 				} else if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
 					displayResponse(getResources().getString(R.string.error_no_connection_before_login));

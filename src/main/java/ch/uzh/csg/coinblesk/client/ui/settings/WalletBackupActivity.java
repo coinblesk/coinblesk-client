@@ -1,9 +1,6 @@
 package ch.uzh.csg.coinblesk.client.ui.settings;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,7 +36,6 @@ public class WalletBackupActivity extends WalletActivity {
 
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar_mnemonic);
         mTextWalletSeed = (TextView) findViewById(R.id.settings_walletBackupSeed);
-        mCopyButton = (Button) findViewById(R.id.walletBackup_copyButton);
         mEmailRefundTxButton = (Button) findViewById(R.id.walletBackup_emailRefundTxButton);
         mHandler = new Handler();
 
@@ -47,17 +43,7 @@ public class WalletBackupActivity extends WalletActivity {
     }
 
     private void initClickListeners() {
-        mCopyButton.setEnabled(true);
         mEmailRefundTxButton.setEnabled(true);
-        mCopyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("Wallet Backup", mnemonic);
-                clipboard.setPrimaryClip(clip);
-                displayResponse(getResources().getString(R.string.copy_clipboard));
-            }
-        });
         mEmailRefundTxButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

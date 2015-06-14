@@ -374,6 +374,10 @@
 
     <!--Bitcoin Wallet Strings-->
     <string name="bitcoin_synchronizing">Synchronizing with Bitcoin network... (%1$s%%)</string>
+    <string name="title_activity_restore_or_new">Wallet Setup</string>
 
+    <!--Restore or Create New Wallet-->
+    <string name="restoreOrCreate_passphrase_placeholder">Enter Backup Phrase...</string>
+    <string name="restoreOrCreate_toast_restoreFailed">Failed to restore wallet. Are you sure you entered the backup phrase correctly?</string>
 
 </resources>

@@ -4,33 +4,38 @@
     android:versionCode="2"
     android:versionName="v1.0" >
 
+    <uses-sdk
+        android:minSdkVersion="22"
+        android:targetSdkVersion="22" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <uses-sdk
-        android:minSdkVersion="22"
-        android:targetSdkVersion="22" />
-    
-          <uses-feature
+    <uses-feature
         android:name="android.hardware.nfc"
         android:required="true" />
-   
+
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
-        android:name="ch.uzh.csg.coinblesk.client.CoinBleskApplication"
+        android:name=".CoinBleskApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/CoinBleskTheme" >
-        <meta-data android:name="com.google.android.backup.api_key" android:value="AEdPqrEAAAAIdRO4ergJcbcd10YlCXYWc9Mpzk1CpjsrjrakOw" />
+        <meta-data
+            android:name="com.google.android.backup.api_key"
+            android:value="AEdPqrEAAAAIdRO4ergJcbcd10YlCXYWc9Mpzk1CpjsrjrakOw" />
+
         <activity
             android:name=".ui.authentication.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_login" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -141,7 +146,7 @@
                 android:value=".ui.settings.SettingsActivity" />
         </activity>
 
-		<service
+        <service
             android:name="ch.uzh.csg.nfclib.HostApduServiceNfcLib"
             android:exported="true"
             android:permission="android.permission.BIND_NFC_SERVICE" >
@@ -153,9 +158,7 @@
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/apduservice" />
         </service>
-        
-        <service android:name="ch.uzh.csg.coinblesk.client.wallet.WalletService" />
-        
+        <service android:name=".wallet.WalletService" />
 
         <activity
             android:name=".ui.payment.ChoosePaymentActivity"
@@ -178,6 +181,13 @@
             android:name=".ui.adressbook.AddressBookActivity"
             android:label="@string/title_activity_address_book"
             android:parentActivityName=".ui.main.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.main.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ui.main.RestoreOrNewActivity"
+            android:label="@string/title_activity_restore_or_new" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.main.MainActivity" />

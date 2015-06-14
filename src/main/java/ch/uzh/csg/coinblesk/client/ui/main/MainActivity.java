@@ -44,7 +44,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.MainActivityRequestTask;
@@ -56,10 +55,10 @@ import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
-import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.TimeHandler;
+import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
@@ -123,7 +122,7 @@ public class MainActivity extends AbstractPaymentActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if(walletConnected()) {
+        if (walletConnected()) {
             checkOnlineModeAndProceed();
         }
         invalidateOptionsMenu();
@@ -243,7 +242,7 @@ public class MainActivity extends AbstractPaymentActivity {
                     mBlockchainSyncStatusText.setText(syncText);
 
 
-                    handler.postDelayed(this, updateInterval);
+                    handler.postDelayed(updateProgressTask, updateInterval);
                 }
             }
         };
@@ -302,15 +301,6 @@ public class MainActivity extends AbstractPaymentActivity {
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
 
-        // check if there is a wallet set up on the device. If not,
-        // we ask the user to enter his mnemonic seed to restore
-        // the wallet.
-        BitcoinNet bitcoinNet = ClientController.getStorageHandler().getBitcoinNet();
-        if(getWalletService().walletExistsOnDevice(bitcoinNet)) {
-            // TODO: show restore from seed dialog
-            LOGGER.debug("First login on restored/new device");
-        }
-
         displayUserBalance();
         initiateProgressBar();
         createHistoryViews();
@@ -325,7 +315,18 @@ public class MainActivity extends AbstractPaymentActivity {
 
     private void displayUserBalance() {
         // display the user balance
-        CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), getWalletService().getUnconfirmedBalance(), getApplicationContext());
+        AsyncTask<Void, Void, BigDecimal> displayBalanceTaks = new AsyncTask<Void, Void, BigDecimal>() {
+            @Override
+            protected BigDecimal doInBackground(Void... params) {
+                return getWalletService().getBalance();
+            }
+
+            @Override
+            protected void onPostExecute(BigDecimal balance) {
+                CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), balance, getApplicationContext());
+            }
+        };
+        displayBalanceTaks.execute();
     }
 
     private void launchRequest() {
@@ -404,7 +405,7 @@ public class MainActivity extends AbstractPaymentActivity {
     }
 
     private int getImage(Transaction history) {
-        switch(history.getType()) {
+        switch (history.getType()) {
             case PAY_IN:
                 return R.drawable.ic_pay_in;
             case PAY_IN_UNVERIFIED:
