@@ -39,6 +39,7 @@ import java.util.Set;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.testutils.TestUtils;
+import ch.uzh.csg.coinblesk.client.util.ClientController;
 
 /**
  * Created by rvoellmy on 6/7/15.
@@ -105,6 +106,9 @@ public class WalletServiceTest {
         // mock android context
         Context mockContext = PowerMockito.mock(Context.class);
         PowerMockito.doReturn(mockContext).when(walletService).getApplicationContext();
+
+        // mock client controller
+        ClientController.init(mockContext, "username", "password");
 
     }
 

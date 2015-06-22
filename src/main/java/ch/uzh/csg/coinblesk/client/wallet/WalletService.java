@@ -231,7 +231,6 @@ public class WalletService extends android.app.Service {
         // Else if two threads at the same time try to bind the service, IllegalStateException
         // will be thrown
         lock.lock();
-        System.out.println("locked");
 
         try {
             if (clientWalletKit != null && clientWalletKit.state() != Service.State.TERMINATED) {
@@ -275,7 +274,6 @@ public class WalletService extends android.app.Service {
             return clientWalletKit.startAsync();
         } finally {
             lock.unlock();
-            System.out.println("unlocked");
 
         }
     }
@@ -284,7 +282,11 @@ public class WalletService extends android.app.Service {
 
         // init the app kit if it's not running already
         if (clientWalletKit == null || clientWalletKit.state() != Service.State.STARTING || clientWalletKit.state() != Service.State.RUNNING) {
-            init();
+            if(bitcoinNet == null || serverWatchingKey == null) {
+                init();
+            } else {
+                init(bitcoinNet, serverWatchingKey);
+            }
         }
 
         // wait for the wallet kit to start

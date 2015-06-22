@@ -25,9 +25,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/CoinBleskTheme" >
-        <meta-data
-            android:name="com.google.android.backup.api_key"
-            android:value="AEdPqrEAAAAIdRO4ergJcbcd10YlCXYWc9Mpzk1CpjsrjrakOw" />
+
+        <meta-data android:name="com.google.android.backup.api_key" android:value="AEdPqrEAAAAIHYaIPvfcNV9O6jA91IszSWW63KdHhty9CN3QLQ" />
 
         <activity
             android:name=".ui.authentication.LoginActivity"
@@ -37,7 +36,7 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter>t pos
         </activity>
         <activity
             android:name=".ui.authentication.RegistrationActivity"
