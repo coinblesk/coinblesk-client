@@ -2,6 +2,7 @@ package basetests;
 
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase2;
+import android.widget.EditText;
 
 import com.robotium.solo.Solo;
 
@@ -14,12 +15,15 @@ import java.io.FilenameFilter;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
+import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.authentication.LoginActivity;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.AbstractAsyncActivity;
+import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.keys.CustomPublicKey;
 import ch.uzh.csg.coinblesk.responseobject.CustomPublicKeyObject;
 import ch.uzh.csg.coinblesk.responseobject.ReadRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
@@ -65,7 +69,9 @@ public class ActivityTestWithLogin extends ActivityInstrumentationTestCase2<Logi
         super.tearDown();
     }
 
-
+    /**
+     * Sets up a fake account, sets bitcoinnet and server watching key. All this is required to successfully log in.
+     */
     protected void prepareInternalStorage() {
 
         //init fake account
@@ -136,6 +142,41 @@ public class ActivityTestWithLogin extends ActivityInstrumentationTestCase2<Logi
             f.delete();
         }
 
+    }
+
+    protected void offlineLogin() {
+        loginResponse.setSuccessful(false);
+        login();
+    }
+
+    protected void onlineLogin() {
+        //login response
+        loginResponse.setSuccessful(true);
+
+        //read response
+        readResponse.setSuccessful(true);
+        readResponse.setVersion(Constants.CLIENT_VERSION);
+        CustomPublicKeyObject pubKeyObj = new CustomPublicKeyObject();
+        pubKeyObj.setCustomPublicKey(new CustomPublicKey((byte) 0, (byte) 0, "fakepubkey"));
+        readResponse.setCustomPublicKey(pubKeyObj);
+        readResponse.setServerWatchingKey(SERVER_WATCHING_KEY);
+        readResponse.setBitcoinNet(BitcoinNet.TESTNET);
+
+        commitPublicKeyResponse.setSuccessful(true);
+        commitPublicKeyResponse.setMessage("0");
+
+        login();
+    }
+
+    private void login(){
+
+        // enter username and password
+        solo.clearEditText((EditText) solo.getView(R.id.loginUsernameEditText));
+        solo.enterText((EditText) solo.getView(R.id.loginUsernameEditText), USERNAME);
+        solo.enterText((EditText) solo.getView(R.id.loginPasswordEditText), PASSWORD);
+
+        // click the sign in button
+        solo.clickOnView(solo.getView(R.id.loginSignInBtn));
     }
 
 

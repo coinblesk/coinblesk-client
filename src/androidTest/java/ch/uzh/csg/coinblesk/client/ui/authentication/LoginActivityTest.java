@@ -2,7 +2,6 @@ package ch.uzh.csg.coinblesk.client.ui.authentication;
 
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.widget.EditText;
 
 import org.junit.After;
 import org.junit.Before;
@@ -10,13 +9,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import basetests.ActivityTestWithLogin;
-import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.RestoreOrNewActivity;
-import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.keys.CustomPublicKey;
-import ch.uzh.csg.coinblesk.responseobject.CustomPublicKeyObject;
 
 /**
  * Created by rvoellmy on 6/20/15.
@@ -45,34 +39,11 @@ public class LoginActivityTest extends ActivityTestWithLogin {
 
         prepareInternalStorage();
 
-        //login response
-        loginResponse.setSuccessful(true);
-
-        //read response
-        readResponse.setSuccessful(true);
-        readResponse.setVersion(Constants.CLIENT_VERSION);
-        CustomPublicKeyObject pubKeyObj = new CustomPublicKeyObject();
-        pubKeyObj.setCustomPublicKey(new CustomPublicKey((byte) 0, (byte) 0, "fakepubkey"));
-        readResponse.setCustomPublicKey(pubKeyObj);
-        readResponse.setServerWatchingKey(SERVER_WATCHING_KEY);
-        readResponse.setBitcoinNet(BitcoinNet.TESTNET);
-
-        commitPublicKeyResponse.setSuccessful(true);
-        commitPublicKeyResponse.setMessage("0");
-
-        solo.clearEditText((EditText) solo.getView(R.id.loginUsernameEditText));
-        solo.enterText((EditText) solo.getView(R.id.loginUsernameEditText), USERNAME);
-        solo.enterText((EditText) solo.getView(R.id.loginPasswordEditText), PASSWORD);
-
-        solo.clickOnView(solo.getView(R.id.loginSignInBtn));
+        onlineLogin();
 
         // assert that the restore actitvity started
         solo.waitForActivity(RestoreOrNewActivity.class, 30 * 1000);
         solo.assertCurrentActivity("Should be RestoreOrNewActivity", RestoreOrNewActivity.class);
-
-        solo.clickOnView(solo.getView(R.id.restoreOrNew_button_createNewWallet));
-        solo.waitForActivity(MainActivity.class, 30 * 1000);
-        solo.assertCurrentActivity("Should be RestoreOrNewActivity", MainActivity.class);
 
     }
 
@@ -86,16 +57,11 @@ public class LoginActivityTest extends ActivityTestWithLogin {
 
         prepareInternalStorage();
 
-        loginResponse.setSuccessful(false);
-
-        solo.clearEditText((EditText) solo.getView(R.id.loginUsernameEditText));
-        solo.enterText((EditText) solo.getView(R.id.loginUsernameEditText), USERNAME);
-        solo.enterText((EditText) solo.getView(R.id.loginPasswordEditText), PASSWORD);
-
-        solo.clickOnView(solo.getView(R.id.loginSignInBtn));
+        offlineLogin();
 
         // assert that the main actitvity started
         solo.waitForActivity(RestoreOrNewActivity.class, 30 * 1000);
+        solo.waitForText(solo.getString(R.id.menu_offlineMode));
         solo.assertCurrentActivity("Should be main activity", RestoreOrNewActivity.class);
 
     }
@@ -107,13 +73,7 @@ public class LoginActivityTest extends ActivityTestWithLogin {
     @Test
     public void testOfflineWithoutAccount() throws Throwable {
 
-        loginResponse.setSuccessful(false);
-
-        solo.clearEditText((EditText) solo.getView(R.id.loginUsernameEditText));
-        solo.enterText((EditText) solo.getView(R.id.loginUsernameEditText), USERNAME);
-        solo.enterText((EditText) solo.getView(R.id.loginPasswordEditText), PASSWORD);
-
-        solo.clickOnView(solo.getView(R.id.loginSignInBtn));
+        offlineLogin();
 
         // assert that the main activity started
         assertTrue(solo.waitForText(solo.getString(R.string.establish_internet_connection), 0, 3000L));
