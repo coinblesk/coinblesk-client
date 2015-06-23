@@ -21,11 +21,9 @@ public class CoinBleskApplication extends Application {
 
     @Override
     public void onCreate() {
-
-        LOGGER.info("CoinBlesk ist starting....");
         super.onCreate();
         LoggingConfig.configure();
-
+        LOGGER.info("CoinBlesk is starting...");
     }
 
     public boolean initStorageHandler(Context context, String username, String password) throws WrongPasswordException {
@@ -44,4 +42,7 @@ public class CoinBleskApplication extends Application {
     public InternalStorageHandler getStorageHandler() {
         return mStorageHandler;
     }
+
+
+
 }

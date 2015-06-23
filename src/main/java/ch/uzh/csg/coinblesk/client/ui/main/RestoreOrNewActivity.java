@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.persistence.InternalStorageHandler;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 
 public class RestoreOrNewActivity extends WalletActivity {
@@ -31,6 +31,8 @@ public class RestoreOrNewActivity extends WalletActivity {
     private Button mCreateNewWalletButton;
     private EditText mBackupPhraseField;
 
+    private InternalStorageHandler storageHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +41,8 @@ public class RestoreOrNewActivity extends WalletActivity {
         mRestoreWalletButton = (Button) findViewById(R.id.restoreOrNew_button_restoreWallet);
         mCreateNewWalletButton = (Button) findViewById(R.id.restoreOrNew_button_createNewWallet);
         mBackupPhraseField = (EditText) findViewById(R.id.restoreOrNew_edit_passphrase);
+
+        storageHandler = getCoinBleskApplication().getStorageHandler();
     }
 
     @Override
@@ -49,9 +53,9 @@ public class RestoreOrNewActivity extends WalletActivity {
 
     private void initClickListener() {
 
-        final BitcoinNet bitcoinNet = ClientController.getStorageHandler().getBitcoinNet();
-        final String serverWatchingKey = ClientController.getStorageHandler().getWatchingKey();
-        final long creationTime = ClientController.getStorageHandler().getUserAccount().getCreationDate();
+        final BitcoinNet bitcoinNet = storageHandler.getBitcoinNet();
+        final String serverWatchingKey = storageHandler.getWatchingKey();
+        final long creationTime = storageHandler.getUserAccount().getCreationDate();
 
         mRestoreWalletButton.setOnClickListener(new View.OnClickListener() {
 
@@ -105,6 +109,7 @@ public class RestoreOrNewActivity extends WalletActivity {
     }
 
     private void startMainActivity() {
+        getWalletService().init(storageHandler.getBitcoinNet(), storageHandler.getWatchingKey());
         Intent intent = new Intent(RestoreOrNewActivity.this, MainActivity.class);
         startActivity(intent);
     }

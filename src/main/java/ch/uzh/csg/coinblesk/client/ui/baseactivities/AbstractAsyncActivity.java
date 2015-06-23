@@ -16,7 +16,9 @@ import android.widget.Toast;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.ui.fragments.CustomDialogFragment;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 
@@ -36,7 +38,7 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
     private ProgressDialog progressDialog;
     private boolean destroyed = false;
 
-
+    private RequestFactory requestFactory = new RequestFactory();
 
     @Override
     protected void onPause() {
@@ -200,6 +202,22 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
                 offlineMode.setVisible(true);
             }
         }
+    }
+
+    /**
+     * Set the request factory. This method is only used for testing to set a custom request factory that mocks server responses.
+     * @param requestFactory
+     */
+    public void setRequestFactory(RequestFactory requestFactory){
+        this.requestFactory = requestFactory;
+    }
+
+    public RequestFactory getRequestFactory() {
+        return requestFactory;
+    }
+
+    public CoinBleskApplication getCoinBleskApplication() {
+        return (CoinBleskApplication) getApplication();
     }
 
 }

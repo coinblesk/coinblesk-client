@@ -66,7 +66,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	}
 	
 	@Override
-	final protected O doInBackground(Void... params) {
+	protected O doInBackground(Void... params) {
 		if(TimeHandler.getInstance().determineIfLessThanFiveSecondsLeft()){
 			cancel(true);
 			return createFailed("timeout");

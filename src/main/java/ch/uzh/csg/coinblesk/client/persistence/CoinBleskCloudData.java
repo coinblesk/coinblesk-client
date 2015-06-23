@@ -237,5 +237,10 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
         prefs.edit().putString(BITCOIN_NET, bitcoinNet).commit();
     }
 
+    @Override
+    public void clear() {
+        prefs.edit().clear().commit();
+    }
+
 
 }

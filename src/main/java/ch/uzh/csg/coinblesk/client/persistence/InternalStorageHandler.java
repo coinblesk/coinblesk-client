@@ -472,4 +472,12 @@ public class InternalStorageHandler implements IPersistencyHandler {
 		data.setBitcoinNet(bitcoinNet.toString());
 	}
 
+	/**
+	 * deletes all internal data
+	 */
+	public void clear(){
+		data.clear();
+	}
+
+
 }

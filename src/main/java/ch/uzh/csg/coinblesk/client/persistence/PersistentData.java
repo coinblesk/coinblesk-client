@@ -73,4 +73,9 @@ public interface PersistentData {
     String getBitcoinNet();
 
     void setBitcoinNet(String bitcoinNet);
+
+    /**
+     * Deletes all data
+     */
+    void clear();
 }

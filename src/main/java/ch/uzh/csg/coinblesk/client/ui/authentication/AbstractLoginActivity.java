@@ -15,12 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import java.security.KeyPair;
 
+import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
-import ch.uzh.csg.coinblesk.client.request.CommitPublicKeyRequestTask;
-import ch.uzh.csg.coinblesk.client.request.ReadRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.request.SignInRequestTask;
 import ch.uzh.csg.coinblesk.client.tools.KeyHandler;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
@@ -69,7 +67,7 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 	protected void launchSignInRequest(final Context context) {
 		showLoadingProgressDialog();
 		TimeHandler.getInstance().setStartActivity(context);
-		RequestTask<TransferObject, TransferObject> signIn = new SignInRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+		RequestTask<TransferObject, TransferObject> signIn = getRequestFactory().loginRequest(new IAsyncTaskCompleteListener<TransferObject>() {
 			@Override
 			public void onTaskComplete(TransferObject response) {
 				init(context);
@@ -195,24 +193,24 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 	protected void launchOfflineMode(Context context) {
 		dismissProgressDialog();
 		if (ClientController.getStorageHandler().getUserAccount() != null) {
-			launchMainActivity(context);
+			launchRestoreOrMainActivity(context);
 		} else {
 			if (!wrongPassword)
 				displayResponse(context.getResources().getString(R.string.establish_internet_connection));
 		}
 	}
+	private void launchReadRequest(final Context context) {
 
-	private void launchReadRequest(final Context context) {		
-		RequestTask<TransferObject, ReadRequestObject> read = new ReadRequestTask(new IAsyncTaskCompleteListener<ReadRequestObject>() {
-			
+		RequestTask<TransferObject, ReadRequestObject> read = getRequestFactory().readRequest(new IAsyncTaskCompleteListener<ReadRequestObject>() {
+
 			public void onTaskComplete(ReadRequestObject response) {
 				dismissProgressDialog();
-				
-				 if (!response.isSuccessful()) {
-					 displayResponse(response.getMessage());
-					 return;
-				 }
-				
+
+				if (!response.isSuccessful()) {
+					displayResponse(response.getMessage());
+					return;
+				}
+
 				if (response.getVersion() != Constants.CLIENT_VERSION) {
 					showDialog(context.getResources().getString(R.string.invalid_client_version_title), R.drawable.ic_alerts_and_states_warning, context.getResources().getString(R.string.invalid_client_version));
 					return;
@@ -228,9 +226,9 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 				}
 
 				// compare the received watching key with the one stored on the client
-				String serverWatchingKey = ClientController.getStorageHandler().getWatchingKey();
+				String serverWatchingKey = getCoinBleskApplication().getStorageHandler().getWatchingKey();
 				if(serverWatchingKey == null) {
-					ClientController.getStorageHandler().setWatchingKey(response.getServerWatchingKey());
+					getCoinBleskApplication().getStorageHandler().setWatchingKey(response.getServerWatchingKey());
 				} else {
 					if(!serverWatchingKey.equals(response.getServerWatchingKey())) {
 						// TODO: Handle this terrible event more gracefully
@@ -240,7 +238,7 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 
 				// Set the bitcoin network to work with
 				LOGGER.debug("Setting bitcoin net to " + response.getBitcoinNet());
-				ClientController.getStorageHandler().setBitcoinNet(response.getBitcoinNet());
+				getCoinBleskApplication().getStorageHandler().setBitcoinNet(response.getBitcoinNet());
 
 
 				CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
@@ -262,24 +260,9 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 				}
 				ClientController.setOnlineMode(true);
 
-
-
-				// check if there is a wallet set up on the device. If not,
-				// we ask the user to enter his mnemonic seed to restore
-				// the wallet.
-
-				if (!getWalletService().walletExistsOnDevice(response.getBitcoinNet())) {
-					LOGGER.debug("First login on restored/new device");
-					Intent intent = new Intent(AbstractLoginActivity.this, RestoreOrNewActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					startActivity(intent);
-				} else {
-					getWalletService().init(response.getBitcoinNet(), response.getServerWatchingKey());
-					launchMainActivity(context);
-				}
-
 			}
 		}, new TransferObject(), new ReadRequestObject(), context);
+
 		read.execute();
 	}
 
@@ -290,23 +273,23 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 		CustomPublicKeyObject cpko = new CustomPublicKeyObject();
 		cpko.setCustomPublicKey(cpk);
 		
-		RequestTask<CustomPublicKeyObject, TransferObject> task = new CommitPublicKeyRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+		RequestTask<CustomPublicKeyObject, TransferObject> task = getRequestFactory().commitPublicKeyRequest(new IAsyncTaskCompleteListener<TransferObject>() {
 			@Override
 			public void onTaskComplete(TransferObject response) {
 				dismissProgressDialog();
 				if (response.isSuccessful()) {
 					String keyNr = response.getMessage();
 					byte keyNumber = Byte.parseByte(keyNr);
-					
+
 					CustomKeyPair ckp = new CustomKeyPair(customKeyPair.getPkiAlgorithm(), keyNumber, customKeyPair.getPublicKey(), customKeyPair.getPrivateKey());
 					boolean saved = ClientController.getStorageHandler().saveKeyPair(ckp);
 					if (!saved) {
 						displayResponse(context.getResources().getString(R.string.error_xmlSave_failed));
 					}
-					
+
 					dismissProgressDialog();
 					ClientController.setOnlineMode(true);
-					launchMainActivity(context);
+					launchRestoreOrMainActivity(context);
 				} else if (response.isUnauthorized()) {
 					//TODO: what else? fix
 					dismissProgressDialog();
@@ -320,13 +303,29 @@ public abstract class AbstractLoginActivity extends WalletActivity {
 	}
 
 
-	private void launchMainActivity(Context context){
-		storeUsernameIntoSharedPref(context);
-		Intent intent = new Intent(context.getApplicationContext(), MainActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		context.startActivity(intent);
-		finish();
+	private void launchRestoreOrMainActivity(Context context){
+
+		BitcoinNet bitcoinNet = getCoinBleskApplication().getStorageHandler().getBitcoinNet();
+		String serverWatchingKey = getCoinBleskApplication().getStorageHandler().getWatchingKey();
+
+		// check if there is a wallet set up on the device. If not,
+		// we ask the user to enter his mnemonic seed to restore
+		// the wallet.
+		if (!getWalletService().walletExistsOnDevice(bitcoinNet)) {
+			LOGGER.debug("First login on restored/new device");
+			Intent intent = new Intent(AbstractLoginActivity.this, RestoreOrNewActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
+		} else {
+			getWalletService().init(bitcoinNet, serverWatchingKey);
+			storeUsernameIntoSharedPref(context);
+			Intent intent = new Intent(context.getApplicationContext(), MainActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			context.startActivity(intent);
+			finish();
+		}
+
 	}
 
 	/**
