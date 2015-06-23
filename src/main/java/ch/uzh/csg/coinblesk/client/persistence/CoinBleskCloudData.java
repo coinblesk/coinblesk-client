@@ -229,12 +229,17 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
 
     @Override
     public String getBitcoinNet() {
+        String bitcoinNet = prefs.getString(BITCOIN_NET, null);
+
         return prefs.getString(BITCOIN_NET, null);
     }
 
     @Override
     public void setBitcoinNet(String bitcoinNet) {
         prefs.edit().putString(BITCOIN_NET, bitcoinNet).commit();
+        String bla = prefs.getString(BITCOIN_NET, null);
+        System.out.println(bla);
+
     }
 
     @Override
