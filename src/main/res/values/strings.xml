@@ -373,8 +373,9 @@
 	<string name="nfc_no_adapter">This device has no NFC Adapter. A usage of CoinBlesk is therefore not possible.</string>
 
     <!--Bitcoin Wallet Strings-->
-    <string name="bitcoin_synchronizing">Synchronizing with Bitcoin network... (%1$s%%)</string>
-    <string name="title_activity_restore_or_new">Wallet Setup</string>
+    <string name="main_loadingWallet">Loading wallet...</string>
+    <string name="main_bitcoinSynchronizing">Synchronizing with Bitcoin network... (%1$s%%)</string>
+    <string name="restoreOrNew_title">Wallet Setup</string>
 
     <!--Restore or Create New Wallet-->
     <string name="restoreOrCreate_passphrase_placeholder">Enter Backup Phrase...</string>

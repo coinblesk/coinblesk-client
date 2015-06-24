@@ -26,7 +26,6 @@ import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.params.UnitTestParams;
-import org.bitcoinj.signers.TransactionSigner;
 import org.bitcoinj.store.UnreadableWalletException;
 import org.bitcoinj.utils.Threading;
 import org.slf4j.Logger;
@@ -41,8 +40,8 @@ import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 
 public class WalletService extends android.app.Service {
@@ -56,8 +55,6 @@ public class WalletService extends android.app.Service {
             return WalletService.this;
         }
     }
-
-
 
     private final IBinder walletBinder = new LocalBinder();
     private CoinBleskWalletAppKit clientWalletKit;
@@ -177,44 +174,9 @@ public class WalletService extends android.app.Service {
         return init(bitcoinNet, serverWatchingKey);
     }
 
-//    /**
-//     * Replays / Resynchronizes the blockchain.
-//     *
-//     * @return
-//     */
-//    private Service replayBlockchain(final BitcoinNet bitcoinNet, String serverWatchingKey) {
-//        LOGGER.debug("Replaying blockchain");
-//
-//        clientWalletKit.peerGroup().stop();
-//        try {
-//            clientWalletKit.store().close();
-//        } catch (BlockStoreException e) {
-//            // TODO: handle
-//            LOGGER.error("Failed closing blockstore");
-//        }
-//        clientWalletKit.peerGroup().removeWallet(clientWalletKit.wallet());
-//
-//        File[] files = getFilesDir().listFiles(new FilenameFilter() {
-//            @Override
-//            public boolean accept(File dir, String filename) {
-//                return filename.startsWith(getWalletFilesPrefix(bitcoinNet)) && filename.endsWith("chain");
-//            }
-//        });
-//
-//        for (File f : files) {
-//            LOGGER.debug("Deleted file {}", f.getName());
-//            f.delete();
-//        }
-//
-//        clientWalletKit.wallet().reset();
-//
-//        return clientWalletKit;
-//
-//    }
-
     public Service init() {
-        BitcoinNet bitcoinNet = ClientController.getStorageHandler().getBitcoinNet();
-        String serverWatchingKey = ClientController.getStorageHandler().getWatchingKey();
+        BitcoinNet bitcoinNet = ((CoinBleskApplication)getApplication()).getStorageHandler().getBitcoinNet();
+        String serverWatchingKey = ((CoinBleskApplication)getApplication()).getStorageHandler().getWatchingKey();
         return init(bitcoinNet, serverWatchingKey);
     }
 
@@ -317,24 +279,6 @@ public class WalletService extends android.app.Service {
     }
 
     /**
-     * Adds the {@link ServerTransactionSigner} to the wallet and / or sets the context. Context is
-     * needed to make the request to the server.
-     */
-    private void initTransactionSigner() {
-
-        for (TransactionSigner signer : clientWalletKit.wallet().getTransactionSigners()) {
-            if (signer instanceof ServerTransactionSigner) {
-                ((ServerTransactionSigner) signer).setContext(getApplicationContext());
-                return;
-            }
-        }
-
-        ServerTransactionSigner serverTransactionSigner = new ServerTransactionSigner();
-        serverTransactionSigner.setContext(this);
-        clientWalletKit.wallet().addTransactionSigner(serverTransactionSigner);
-    }
-
-    /**
      * @param bitcoinNet
      * @return the {@link NetworkParameters} for a specific network
      */
@@ -412,26 +356,10 @@ public class WalletService extends android.app.Service {
         return new TransactionHistory(allTransactions);
     }
 
-    /**
-     * Blocking stop of the wallet
-     */
-    public void stop() {
-        clientWalletKit.stopAsync();
-        clientWalletKit.awaitTerminated();
-        clientWalletKit = null;
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
         return walletBinder;
     }
 
-    @Override
-    public void onDestroy() {
-//        if (clientWalletKit != null) {
-//            clientWalletKit.stopAsync();
-//            clientWalletKit = null;
-//        }
-    }
 
 }

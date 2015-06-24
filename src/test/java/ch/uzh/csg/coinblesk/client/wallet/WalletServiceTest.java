@@ -153,6 +153,7 @@ public class WalletServiceTest {
 
         walletService.init(bitcoinNet, serverWatchingKey);
         String mnemonic = walletService.getMnemonicSeed();
+        String address = walletService.getBitcoinAddress();
 
         // send a coin to the wallet
         FakeTxBuilder.BlockPair bp = injectTx(walletService.getBitcoinAddress(), BigDecimal.ONE);
@@ -167,6 +168,7 @@ public class WalletServiceTest {
         Service service = walletService.restoreWalletFromSeed(bitcoinNet, serverWatchingKey, mnemonic, 0L);
         service.awaitRunning();
         Assert.assertEquals(mnemonic, walletService.getMnemonicSeed());
+        Assert.assertEquals(address, walletService.getBitcoinAddress());
         Assert.assertTrue(extractAppKit(walletService).wallet().getActiveKeychain().isMarried());
 
         // simulate the receiving of a block

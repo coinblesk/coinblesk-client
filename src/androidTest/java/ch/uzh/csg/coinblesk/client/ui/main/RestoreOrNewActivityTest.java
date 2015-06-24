@@ -17,8 +17,11 @@ import ch.uzh.csg.coinblesk.client.R;
 @LargeTest
 public class RestoreOrNewActivityTest extends ActivityTestWithLogin {
 
+    private final static int TIMEOUT = 30*1000;
+
+    // these actually have some test coins on them, so don't change!
     private final static String RESTORE_SEED = "pause quarter bar elder always donkey elevator north scout symbol clever rather";
-    private final static String ADDRESS = "2MvoFRRTGFNgdqgHAurpDZyjNzpt1pK69ZH";
+    private final static String ADDRESS = "2N9f6XZqRiSHHdTBjS2tKTwXd2f6bt1RebV";
 
     @Before
     public void setUp() throws Exception {
@@ -30,12 +33,12 @@ public class RestoreOrNewActivityTest extends ActivityTestWithLogin {
         super.tearDown();
     }
 
-    public void testCreateNewWallet() {
+    public void testCreateNewWallet() throws Throwable {
         prepareInternalStorage();
-
         onlineLogin();
-
         checkifMainActivity();
+
+        Thread.sleep(30000);
     }
 
     public void testRestoreWallet() throws Throwable {
@@ -48,20 +51,27 @@ public class RestoreOrNewActivityTest extends ActivityTestWithLogin {
 
         checkifMainActivity();
 
+        // make sure the wallet seed is the same as the one we entered
         solo.setNavigationDrawer(Solo.OPENED);
         solo.clickOnActionBarHomeButton();
         solo.clickOnMenuItem("Settings");
         solo.clickOnText("Wallet Backup");
+        assertTrue(solo.waitForText(RESTORE_SEED, 0, TIMEOUT));
 
-        // make sure the wallet seed is the same as the one we entered
-        assertTrue(solo.waitForText(RESTORE_SEED, 0, 30*1000L));
+        // make sure the receive address is the same as before
+        solo.goBack();
+        solo.goBack();
+        solo.setNavigationDrawer(Solo.OPENED);
+        solo.waitForText("Top Up Account", 0, TIMEOUT);
+        solo.clickOnMenuItem("Top Up Account");
+        assertTrue(solo.waitForText(ADDRESS, 0, TIMEOUT));
 
-        //Thread.sleep(3600*1000L);
+
 
     }
 
     private void checkifMainActivity() {
-        solo.waitForActivity(RestoreOrNewActivity.class, 30 * 1000);
+        solo.waitForActivity(RestoreOrNewActivity.class, TIMEOUT);
         solo.clickOnView(solo.getView(R.id.restoreOrNew_button_createNewWallet));
         solo.assertCurrentActivity("Should be RestoreOrNewActivity", RestoreOrNewActivity.class);
     }

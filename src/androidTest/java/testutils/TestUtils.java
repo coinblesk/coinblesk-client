@@ -13,7 +13,7 @@ public class TestUtils {
 
     public static String getServerWatchingKey(NetworkParameters params) {
         // create server watching key
-        String mnemonic = "actor critic filter assist load now age strike right certain column paddle";
+        String mnemonic = "actor critic filter assist load now age strike right certain column paddle"; // don't change! Ever!
         DeterministicSeed seed = null;
         try {
             seed = new DeterministicSeed(mnemonic, null, "", 0);
@@ -21,8 +21,6 @@ public class TestUtils {
             e.printStackTrace();
         }
         KeyChainGroup kcg = new KeyChainGroup(params, seed);
-        kcg.createAndActivateNewHDChain();
-        System.out.println(kcg.getActiveKeyChain().getMnemonicCode());
         DeterministicKey watchingKey = kcg.getActiveKeyChain().getWatchingKey();
         return watchingKey.serializePubB58(params);
     }

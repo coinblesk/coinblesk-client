@@ -187,7 +187,7 @@
         </activity>
         <activity
             android:name=".ui.main.RestoreOrNewActivity"
-            android:label="@string/title_activity_restore_or_new" >
+            android:label="@string/restoreOrNew_title" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.main.MainActivity" />

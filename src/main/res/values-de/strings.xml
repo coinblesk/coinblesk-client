@@ -374,7 +374,9 @@
     <string name="nfc_no_adapter">Dieses Gerät verüfgt über kein NFC-Modul. Eine Verwendung von CoinBlesk ist aus diesem Grund nicht möglich.</string>
 
     <!--Bitcoin Wallet Strings-->
-    <string name="bitcoin_synchronizing">Synchronisierung mit dem Bitcoin Netzwerk... (%1$s%%)</string>
+    <string name="main_loadingWallet">Wallet wird geladen...</string>
+    <string name="main_bitcoinSynchronizing">Synchronisierung mit dem Bitcoin Netzwerk... (%1$s%%)</string>
+    <string name="restoreOrNew_title">Wallet Setup</string>
 
     <!--Restore or Create New Wallet-->
     <string name="restoreOrCreate_passphrase_placeholder">Backup Wörter eingeben...</string>

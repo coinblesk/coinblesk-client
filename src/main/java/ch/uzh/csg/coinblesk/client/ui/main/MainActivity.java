@@ -14,9 +14,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -201,8 +202,6 @@ public class MainActivity extends AbstractPaymentActivity {
     }
 
     private void initiateProgressBar() {
-        mProgressBar = (ProgressBar) findViewById(R.id.mainActivityBlockchainSyncProgressBar);
-        mBlockchainSyncStatusText = (TextView) findViewById(R.id.mainActivityBlockchainSyncText);
 
         final int updateInterval = 3000; // == 1s
         final WalletService walletService = getWalletService();
@@ -225,24 +224,21 @@ public class MainActivity extends AbstractPaymentActivity {
 
                     double progress = syncProgress.getProgress();
 
-                    // make progress bar visible if it's no already
-                    if ((mProgressBar.getVisibility() != View.VISIBLE ||
-                            mBlockchainSyncStatusText.getVisibility() != View.INVISIBLE) &&
-                            progress > 0) {
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        mBlockchainSyncStatusText.setVisibility(View.VISIBLE);
+                    if(progress >= 0) {
+
+                        // set progress
+                        mProgressBar.setIndeterminate(false);
+                        int progressPercentage = (int) (progress * mProgressBar.getMax()) + 1;
+                        progressPercentage = Math.max(0, progressPercentage);
+                        LOGGER.debug("Updating blockchain sync progress bar. current progress is {}%", progressPercentage);
+                        mProgressBar.setProgress(progressPercentage);
+
+                        // show sync status text
+                        String syncText = String.format(getResources().getString(R.string.main_bitcoinSynchronizing),
+                                String.format("%.1f", progress * 100));
+
+                        mBlockchainSyncStatusText.setText(syncText);
                     }
-
-                    int progressPercentage = (int) (progress * mProgressBar.getMax()) + 1;
-                    progressPercentage = Math.max(0, progressPercentage);
-                    LOGGER.debug("Updating blockchain sync progress bar. current progress is {}%", progressPercentage);
-                    mProgressBar.setProgress(progressPercentage);
-
-                    // show sync status text
-                    String syncText = String.format(getResources().getString(R.string.bitcoin_synchronizing),
-                            String.format("%.1f", progress * 100));
-                    mBlockchainSyncStatusText.setText(syncText);
-
 
                     handler.postDelayed(updateProgressTask, updateInterval);
                 }
@@ -251,6 +247,11 @@ public class MainActivity extends AbstractPaymentActivity {
 
         handler.postDelayed(updateProgressTask, updateInterval);
 
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
     }
 
     private void destroyProgressBar() {
@@ -270,6 +271,12 @@ public class MainActivity extends AbstractPaymentActivity {
         nfcActivity.setBackgroundResource(R.drawable.animation_nfc);
         nfcActivityAnimation = (AnimationDrawable) nfcActivity.getBackground();
         nfcActivityAnimation.start();
+
+        //show the loading spinner to indicate that the wallet is starting up
+        mBlockchainSyncStatusText = (TextView) findViewById(R.id.mainActivityBlockchainSyncText);
+        mBlockchainSyncStatusText.setText(getString(R.string.main_loadingWallet));
+        mProgressBar = (ProgressBar) findViewById(R.id.mainActivityBlockchainSyncProgressBar);
+        mProgressBar.setIndeterminate(true);
 
     }
 
@@ -302,7 +309,6 @@ public class MainActivity extends AbstractPaymentActivity {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
-
         displayUserBalance();
         initiateProgressBar();
         createHistoryViews();
@@ -377,33 +383,45 @@ public class MainActivity extends AbstractPaymentActivity {
     }
 
     private void createHistoryViews() {
-        List<Transaction> history = getWalletService().getTransactionHistory().getAllTransactions();
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mainActivity_history);
-        linearLayout.removeAllViews();
-        for (int i = 0; i < getNumberOfLastTransactions(); i++) {
-            if (i < history.size()) {
-                TextView tView = new TextView(getApplicationContext());
-                tView.setGravity(Gravity.LEFT);
-                tView.setTextColor(Color.DKGRAY);
-                int drawable = getImage(history.get(i));
-                tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
-                tView.setText(HistoryTransactionFormatter.formatHistoryTransaction(history.get(i), getApplicationContext()));
-                tView.setClickable(true);
-                if (i % 2 == 0) {
-                    tView.setBackgroundColor(Color.LTGRAY);
-                }
-                tView.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        handleAsyncTask();
-                        Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-                        Bundle b = new Bundle();
-                        intent.putExtras(b);
-                        startActivity(intent);
-                    }
-                });
-                linearLayout.addView(tView);
+
+        AsyncTask<Void, Void, List<Transaction>> getTransactionHistoryTask = new AsyncTask<Void, Void, List<Transaction>>() {
+            @Override
+            protected List<Transaction> doInBackground(Void... params) {
+                return getWalletService().getTransactionHistory().getAllTransactions();
             }
-        }
+
+            @Override
+            protected void onPostExecute(List<Transaction> history) {
+                LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mainActivity_history);
+                linearLayout.removeAllViews();
+                for (int i = 0; i < getNumberOfLastTransactions(); i++) {
+                    if (i < history.size()) {
+                        TextView tView = new TextView(getApplicationContext());
+                        tView.setGravity(Gravity.LEFT);
+                        tView.setTextColor(Color.DKGRAY);
+                        int drawable = getImage(history.get(i));
+                        tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
+                        tView.setText(HistoryTransactionFormatter.formatHistoryTransaction(history.get(i), getApplicationContext()));
+                        tView.setClickable(true);
+                        if (i % 2 == 0) {
+                            tView.setBackgroundColor(Color.LTGRAY);
+                        }
+                        tView.setOnClickListener(new View.OnClickListener() {
+                            public void onClick(View v) {
+                                handleAsyncTask();
+                                Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+                                Bundle b = new Bundle();
+                                intent.putExtras(b);
+                                startActivity(intent);
+                            }
+                        });
+                        linearLayout.addView(tView);
+                    }
+                }
+            }
+        };
+        getTransactionHistoryTask.execute();
+
     }
 
     private int getImage(Transaction history) {
