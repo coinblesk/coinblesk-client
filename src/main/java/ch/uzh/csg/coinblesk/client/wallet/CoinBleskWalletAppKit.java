@@ -7,6 +7,8 @@ import com.google.common.base.Preconditions;
 
 import org.bitcoinj.core.BlockChain;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.Wallet;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.RegTestParams;
@@ -65,11 +67,20 @@ public class CoinBleskWalletAppKit extends WalletAppKit {
 
     private void maybeInitServerTransactionSigner(Context context) {
 
+        // create listener for when transactions have been signed
+        TransactionSigningCompleteListener listener = new TransactionSigningCompleteListener() {
+            @Override
+            public void onSuccess(Transaction tx) {
+                vWallet.maybeCommitTx(tx);
+            }
+        };
+
         for (TransactionSigner signer : vWallet.getTransactionSigners()) {
             if (signer instanceof ServerTransactionSigner) {
                 Preconditions.checkNotNull(context);
                 LOGGER.debug("Server transaction signer already installed, set android context");
                 ((ServerTransactionSigner) signer).setContext(context);
+                ((ServerTransactionSigner) signer).addTransactionSigningCompleteListener(listener);
                 return;
             }
         }
@@ -79,8 +90,24 @@ public class CoinBleskWalletAppKit extends WalletAppKit {
         LOGGER.debug("No server transaction signer found, initialize it now.");
         ServerTransactionSigner serverTransactionSigner = new ServerTransactionSigner();
         serverTransactionSigner.setContext(context);
+        serverTransactionSigner.addTransactionSigningCompleteListener(listener);
         vWallet.addTransactionSigner(serverTransactionSigner);
 
+    }
+
+    /**
+     * Adds a TransactionSigningCompleteListener to the wallet.
+     * @param listener
+     */
+    public CoinBleskWalletAppKit setTransactionSigningCompleteListener(TransactionSigningCompleteListener listener) {
+        Wallet wallet;
+        for (TransactionSigner signer : wallet().getTransactionSigners()) {
+            if (signer instanceof ServerTransactionSigner) {
+                ((ServerTransactionSigner) signer).addTransactionSigningCompleteListener(listener);
+                return this;
+            }
+        }
+        return null;
     }
 
     public CoinBleskWalletAppKit setAndroidContext(Context context) {

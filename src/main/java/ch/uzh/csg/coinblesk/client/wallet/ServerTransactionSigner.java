@@ -1,9 +1,9 @@
 package ch.uzh.csg.coinblesk.client.wallet;
 
 import android.content.Context;
-import android.util.Base64;
 import android.widget.Toast;
 
+import org.apache.commons.codec.binary.Base64;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
@@ -16,11 +16,14 @@ import org.bitcoinj.wallet.RedeemData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedList;
 import java.util.List;
 
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.request.RequestFactory;
+import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
-import ch.uzh.csg.coinblesk.client.request.PayOutRequestTask;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
@@ -39,6 +42,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerTransactionSigner.class);
 
     private Context context;
+    private List<TransactionSigningCompleteListener> listeners = null;
 
     @Override
     public boolean isReady() {
@@ -89,22 +93,14 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
         }
 
-        String serializedTx = Base64.encodeToString(tx.bitcoinSerialize(), Base64.NO_WRAP);
+        String serializedTx = Base64.encodeBase64String(tx.bitcoinSerialize());
         txSigRequest.setPartialTx(serializedTx);
 
-        PayOutRequestTask payOutRequestTask = new PayOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
-            @Override
-            public void onTaskComplete(TransferObject response) {
-                if(response.isSuccessful()) {
-                    LOGGER.info("Transaction signing and broadcast was successful");
-                    Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
-                } else {
-                    LOGGER.error("Transaction failed with message: " + response.getMessage());
-                    Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
-                }
-            }
-        }, txSigRequest, new TransferObject(), context);
-        payOutRequestTask.execute();
+        if(!tx.isTimeLocked()) {
+            launchPayOutRequest(tx, txSigRequest);
+        } else {
+            launchRefundTxRequest(tx, txSigRequest);
+        }
 
         return true;
     }
@@ -117,6 +113,41 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
         return path;
     }
 
+    private void launchPayOutRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest) {
+        RequestFactory requestFactory = ((CoinBleskApplication) context.getApplicationContext()).getRequestFactory();
+        RequestTask payOutRequestTask = requestFactory.payOutRequest(new IAsyncTaskCompleteListener<TransferObject>() {
+            public void onTaskComplete(TransferObject response) {
+                if (response.isSuccessful()) {
+                    LOGGER.info("Transaction signing and broadcast was successful");
+                    notifySuccess(tx);
+                    Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
+                } else {
+                    LOGGER.error("Transaction failed: " + response.getMessage());
+                    Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
+                }
+            }
+        }, txSigRequest, new TransferObject(), context);
+        payOutRequestTask.execute();
+    }
+
+    private void launchRefundTxRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest){
+        RequestFactory requestFactory = ((CoinBleskApplication) context.getApplicationContext()).getRequestFactory();
+        RequestTask refundRequestTask = requestFactory.refundTxRequest(new IAsyncTaskCompleteListener<TransferObject>() {
+            @Override
+            public void onTaskComplete(TransferObject response) {
+                if (response.isSuccessful()) {
+                    LOGGER.info("Refund tx request was successful");
+                    notifySuccess(tx);
+                    Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
+                } else {
+                    LOGGER.error("Refund tx request failed: " + response.getMessage());
+                    Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
+                }
+            }
+        }, txSigRequest, new TransferObject(), context);
+        refundRequestTask.execute();
+    }
+
 
     /**
      * Sets the context of this transaction signer. IMPORTANT: This must be done *before* getting
@@ -126,5 +157,23 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
     public void setContext(Context context) {
         this.context = context;
     }
+
+    /**
+     * adds a listener to this transaction signer that will be called when the transaction is complete.
+     * @param listener
+     */
+    public void addTransactionSigningCompleteListener(TransactionSigningCompleteListener listener) {
+        if(listeners == null) {
+            listeners = new LinkedList<>();
+        }
+        listeners.add(listener);
+    }
+
+    private void notifySuccess(final Transaction tx) {
+        for(TransactionSigningCompleteListener listener : listeners) {
+            listener.onSuccess(tx);
+        }
+    }
+
 
 }

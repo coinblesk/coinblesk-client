@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.persistence.InternalStorageHandler;
 import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
+import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.util.LoggingConfig;
 
 /**
@@ -18,6 +19,7 @@ public class CoinBleskApplication extends Application {
     private final static Logger LOGGER = LoggerFactory.getLogger(CoinBleskApplication.class);
 
     private InternalStorageHandler mStorageHandler;
+    private RequestFactory requestFactory = new RequestFactory();
 
     @Override
     public void onCreate() {
@@ -41,6 +43,19 @@ public class CoinBleskApplication extends Application {
 
     public InternalStorageHandler getStorageHandler() {
         return mStorageHandler;
+    }
+
+    /**
+     * Set the request factory. This method is only used for testing to set a custom request factory that mocks server responses.
+     * @param requestFactory
+     */
+    public void setRequestFactory(RequestFactory requestFactory){
+        this.requestFactory = requestFactory;
+    }
+
+
+    public RequestFactory getRequestFactory() {
+        return this.requestFactory;
     }
 
 

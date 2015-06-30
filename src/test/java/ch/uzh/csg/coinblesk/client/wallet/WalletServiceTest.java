@@ -6,18 +6,23 @@ import com.google.common.util.concurrent.Service;
 
 import junit.framework.Assert;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Level;
 import org.bitcoinj.core.AbstractBlockChain;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.UnitTestParams;
 import org.bitcoinj.store.BlockStore;
 import org.bitcoinj.store.MemoryBlockStore;
 import org.bitcoinj.testing.FakeTxBuilder;
+import org.bitcoinj.wallet.DeterministicKeyChain;
 import org.bitcoinj.wallet.DeterministicSeed;
+import org.bitcoinj.wallet.KeyChain;
 import org.bitcoinj.wallet.KeyChainGroup;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -38,8 +43,15 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
+import ch.uzh.csg.coinblesk.client.persistence.InternalStorageHandler;
+import ch.uzh.csg.coinblesk.client.request.RequestFactory;
+import ch.uzh.csg.coinblesk.client.request.RequestTask;
+import ch.uzh.csg.coinblesk.client.testutils.MockRequestTask;
 import ch.uzh.csg.coinblesk.client.testutils.TestUtils;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
+import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
  * Created by rvoellmy on 6/7/15.
@@ -54,6 +66,7 @@ public class WalletServiceTest {
 
     private static final File testDirectory = new File("testdirectory");
 
+    private CoinBleskApplication mApplication;
     private WalletService walletService;
 
     private static BlockStore blockStore;
@@ -107,8 +120,17 @@ public class WalletServiceTest {
         Context mockContext = PowerMockito.mock(Context.class);
         PowerMockito.doReturn(mockContext).when(walletService).getApplicationContext();
 
-        // mock client controller
-        ClientController.init(mockContext, "username", "password");
+
+        // mock internal storage
+        mApplication = PowerMockito.spy(new CoinBleskApplication());
+        PowerMockito.doReturn(mApplication).when(walletService).getApplication();
+        PowerMockito.doReturn(mApplication).when(mockContext).getApplicationContext();
+
+        InternalStorageHandler mockStorage = PowerMockito.mock(InternalStorageHandler.class);
+        PowerMockito.doReturn(mockStorage).when(mApplication).getStorageHandler();
+
+        PowerMockito.doReturn(BitcoinNet.UNITTEST).when(mockStorage).getBitcoinNet();
+        PowerMockito.doReturn(serverWatchingKey).when(mockStorage).getWatchingKey();
 
     }
 
@@ -146,6 +168,90 @@ public class WalletServiceTest {
         walletService.init(bitcoinNet, serverWatchingKey, null, null);
         walletService.getService().awaitRunning();
         Assert.assertTrue(walletService.walletExistsOnDevice(bitcoinNet));
+    }
+
+    @Test
+    public void testCreatePayment() throws Exception {
+
+        walletService.init(bitcoinNet, serverWatchingKey);
+        String receiveAddress = walletService.getPrivateAddress();
+
+        final BigDecimal fundingAmount = new BigDecimal("1.01");
+        final BigDecimal sendAmount = BigDecimal.ONE;
+        final Address receiveAddr = new Address(params, receiveAddress);
+
+        RequestFactory requestFactory = new RequestFactory() {
+            @Override
+            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(IAsyncTaskCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
+                // check if the request is correct
+                Assert.assertNotNull(input);
+                Assert.assertNotNull(input.getPartialTx());
+                Assert.assertNotNull(input.getIndexAndDerivationPaths());
+                Assert.assertFalse(input.getIndexAndDerivationPaths().isEmpty());
+
+                // assert that the partial tx is correct
+                byte[] partialTxBytes = Base64.decodeBase64(input.getPartialTx());
+                Transaction tx = new Transaction(params, partialTxBytes);
+                Assert.assertFalse(tx.isTimeLocked());
+                Assert.assertFalse(tx.isAnyOutputSpent());
+
+                // check if the correct amount was sent
+                boolean outputFound = false;
+                for(TransactionOutput txOut : tx.getOutputs()) {
+                    Address outputAddr = txOut.getAddressFromP2PKHScript(params);
+
+                    if(outputAddr == null) {
+                        // output to P2SH
+                        continue;
+                    }
+
+                    if(txOut.getAddressFromP2PKHScript(params).equals(receiveAddr)) {
+                        outputFound = true;
+                        Assert.assertEquals(0, txOut.getValue().compareTo(Coin.parseCoin(sendAmount.toString())));
+                    }
+                }
+                Assert.assertTrue("Output was not found in the generated transaction", outputFound);
+
+                TransferObject response = new TransferObject();
+                response.setSuccessful(true);
+
+                return new MockRequestTask(completeListener, response);
+            }
+        };
+
+        PowerMockito.doReturn(requestFactory).when(mApplication).getRequestFactory();
+
+        // send a coin to the wallet
+        FakeTxBuilder.BlockPair bp = injectTx(walletService.getBitcoinAddress(), fundingAmount);
+        Assert.assertEquals(0, fundingAmount.compareTo(walletService.getBalance()));
+
+        // create a transaction
+        walletService.createPayment(receiveAddr.toString(), sendAmount);
+
+    }
+
+    @Test
+    public void testGetRefundTx() throws Exception {
+
+    }
+
+    @Test
+    public void testGetPrivateAddress() throws Exception {
+        String mnemonic = walletService.getMnemonicSeed();
+        WalletAppKit walletAppKit = extractAppKit(walletService);
+        Address addr = walletAppKit.wallet().getActiveKeychain().getKey(KeyChain.KeyPurpose.RECEIVE_FUNDS).toAddress(params);
+        Assert.assertFalse(addr.isP2SHAddress());
+
+        DeterministicSeed seed = new DeterministicSeed(mnemonic, null, "", 0);
+        KeyChainGroup kcg = new KeyChainGroup(params, seed);
+        kcg.createAndActivateNewHDChain();
+
+        DeterministicKeyChain privateChain = DeterministicKeyChain.builder().seed(seed).build();
+        walletAppKit.wallet().addAndActivateHDChain(privateChain);
+
+        Address addr2 = walletAppKit.wallet().currentAddress(KeyChain.KeyPurpose.RECEIVE_FUNDS);
+
+        Assert.assertEquals(addr, addr2);
     }
 
     @Test

@@ -28,6 +28,9 @@ import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.params.UnitTestParams;
 import org.bitcoinj.store.UnreadableWalletException;
 import org.bitcoinj.utils.Threading;
+import org.bitcoinj.wallet.DeterministicSeed;
+import org.bitcoinj.wallet.KeyChain;
+import org.bitcoinj.wallet.KeyChainGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,8 +178,8 @@ public class WalletService extends android.app.Service {
     }
 
     public Service init() {
-        BitcoinNet bitcoinNet = ((CoinBleskApplication)getApplication()).getStorageHandler().getBitcoinNet();
-        String serverWatchingKey = ((CoinBleskApplication)getApplication()).getStorageHandler().getWatchingKey();
+        BitcoinNet bitcoinNet = ((CoinBleskApplication) getApplication()).getStorageHandler().getBitcoinNet();
+        String serverWatchingKey = ((CoinBleskApplication) getApplication()).getStorageHandler().getWatchingKey();
         return init(bitcoinNet, serverWatchingKey);
     }
 
@@ -224,15 +227,14 @@ public class WalletService extends android.app.Service {
                     });
 
             // load checkpoints
-            if(bitcoinNet == BitcoinNet.TESTNET || bitcoinNet == BitcoinNet.MAINNET) {
+            if (bitcoinNet == BitcoinNet.TESTNET || bitcoinNet == BitcoinNet.MAINNET) {
                 clientWalletKit.setCheckpoints(getCheckpoints(bitcoinNet));
             }
 
             // custom dummy dns discovery for unittests
-            if(bitcoinNet == BitcoinNet.UNITTEST) {
+            if (bitcoinNet == BitcoinNet.UNITTEST) {
                 clientWalletKit.setDiscovery(new DnsDiscovery(new String[]{"localhost"}, params));
             }
-
             return clientWalletKit.startAsync();
         } finally {
             lock.unlock();
@@ -244,7 +246,7 @@ public class WalletService extends android.app.Service {
 
         // init the app kit if it's not running already
         if (clientWalletKit == null || clientWalletKit.state() != Service.State.STARTING || clientWalletKit.state() != Service.State.RUNNING) {
-            if(bitcoinNet == null || serverWatchingKey == null) {
+            if (bitcoinNet == null || serverWatchingKey == null) {
                 init();
             } else {
                 init(bitcoinNet, serverWatchingKey);
@@ -252,7 +254,7 @@ public class WalletService extends android.app.Service {
         }
 
         // wait for the wallet kit to start
-        if(clientWalletKit.state() == Service.State.STARTING) {
+        if (clientWalletKit.state() == Service.State.STARTING) {
             clientWalletKit.awaitRunning();
         }
 
@@ -317,6 +319,46 @@ public class WalletService extends android.app.Service {
         getAppKit().wallet().completeTx(req);
     }
 
+
+    public String createRefundTransaction() {
+
+        Transaction tx = null;
+        try {
+            Address privateAddr = new Address(getNetworkParams(bitcoinNet), getPrivateAddress());
+            Wallet.SendRequest req = Wallet.SendRequest.emptyWallet(privateAddr);
+            req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
+            req.tx.setLockTime(getLockTime());
+            getAppKit().wallet().completeTx(req);
+            tx = req.tx;
+
+        } catch (AddressFormatException e) {
+            LOGGER.error("Failed to create private receiving address", e);
+        } catch (InsufficientMoneyException e) {
+            LOGGER.error("Failed to create refund transaction", e);
+        }
+
+        return toHexString(tx.unsafeBitcoinSerialize());
+    }
+
+    private String toHexString(byte[] bytes) {
+        final char[] hexChars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
+                'B', 'C', 'D', 'E', 'F'};
+        char[] res = new char[bytes.length * 2];
+        int v;
+        for (int j = 0; j < bytes.length; j++) {
+            v = bytes[j] & 0xFF;
+            res[j * 2] = hexChars[v >>> 4];
+            res[j * 2 + 1] = hexChars[v & 0x0F];
+        }
+        return new String(res);
+    }
+
+    private long getLockTime() {
+        long currentBlockHeight = getAppKit().peerGroup().getMostCommonChainHeight();
+        long lockTime = 6 * 24 * 30 * 3; // ~3 month assuming 1 block every 10 minutes
+        return currentBlockHeight + lockTime;
+    }
+
     public TransactionHistory getTransactionHistory() {
         int maxNumberOfTransactions = 500;
 
@@ -356,9 +398,29 @@ public class WalletService extends android.app.Service {
         return new TransactionHistory(allTransactions);
     }
 
+    /**
+     * @return A private, non-multi sig address. Private address are used to create
+     * refund-transactions.
+     */
+    public String getPrivateAddress() {
+        DeterministicSeed seed = getAppKit().wallet().getActiveKeychain().getSeed();
+        KeyChainGroup kcg = new KeyChainGroup(getNetworkParams(bitcoinNet), seed);
+        return kcg.getActiveKeyChain().getKey(KeyChain.KeyPurpose.RECEIVE_FUNDS).toAddress(getNetworkParams(bitcoinNet)).toString();
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return walletBinder;
+    }
+
+    /**
+     * Blocking stop of the wallet
+     */
+    public void stop() {
+        if (clientWalletKit != null) {
+            clientWalletKit.stopAsync().awaitTerminated();
+            clientWalletKit = null;
+        }
     }
 
 

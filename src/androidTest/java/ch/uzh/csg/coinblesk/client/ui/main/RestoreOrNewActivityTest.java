@@ -38,7 +38,7 @@ public class RestoreOrNewActivityTest extends ActivityTestWithLogin {
         onlineLogin();
         checkifMainActivity();
 
-        Thread.sleep(30000);
+        Thread.sleep(15000);
     }
 
     public void testRestoreWallet() throws Throwable {
@@ -54,6 +54,7 @@ public class RestoreOrNewActivityTest extends ActivityTestWithLogin {
         // make sure the wallet seed is the same as the one we entered
         solo.setNavigationDrawer(Solo.OPENED);
         solo.clickOnActionBarHomeButton();
+        solo.waitForText("Settings", 0, TIMEOUT);
         solo.clickOnMenuItem("Settings");
         solo.clickOnText("Wallet Backup");
         assertTrue(solo.waitForText(RESTORE_SEED, 0, TIMEOUT));
@@ -65,8 +66,6 @@ public class RestoreOrNewActivityTest extends ActivityTestWithLogin {
         solo.waitForText("Top Up Account", 0, TIMEOUT);
         solo.clickOnMenuItem("Top Up Account");
         assertTrue(solo.waitForText(ADDRESS, 0, TIMEOUT));
-
-
 
     }
 

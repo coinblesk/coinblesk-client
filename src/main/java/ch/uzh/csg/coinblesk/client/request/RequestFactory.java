@@ -5,6 +5,7 @@ import android.content.Context;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.CustomPublicKeyObject;
 import ch.uzh.csg.coinblesk.responseobject.ReadRequestObject;
+import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
@@ -20,7 +21,16 @@ public class RequestFactory {
         return new ReadRequestTask(completeListener, input, output, context);
     }
 
-    public RequestTask<CustomPublicKeyObject, TransferObject> commitPublicKeyRequest(IAsyncTaskCompleteListener<TransferObject> completeListener, CustomPublicKeyObject input, CustomPublicKeyObject output, Context context){
+    public RequestTask<CustomPublicKeyObject, TransferObject> commitPublicKeyRequest(IAsyncTaskCompleteListener<TransferObject> completeListener, CustomPublicKeyObject input, CustomPublicKeyObject output, Context context) {
         return new CommitPublicKeyRequestTask(completeListener, input, output, context);
     }
+
+    public RequestTask<ServerSignatureRequestTransferObject, TransferObject> refundTxRequest(IAsyncTaskCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
+        return new RefundTxRequestTask(cro, input, output, context);
+    }
+
+    public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(IAsyncTaskCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
+        return new PayOutRequestTask(cro, input, output, context);
+    }
+
 }

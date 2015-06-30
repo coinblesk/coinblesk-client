@@ -20,7 +20,6 @@ import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.authentication.LoginActivity;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.AbstractAsyncActivity;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.keys.CustomPublicKey;
@@ -116,7 +115,7 @@ public class ActivityTestWithLogin extends ActivityInstrumentationTestCase2<Logi
             }
         };
 
-        ((AbstractAsyncActivity) solo.getCurrentActivity()).setRequestFactory(requestFactory);
+        mApplication.setRequestFactory(requestFactory);
 
     }
 

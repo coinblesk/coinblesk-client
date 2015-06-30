@@ -38,8 +38,6 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
     private ProgressDialog progressDialog;
     private boolean destroyed = false;
 
-    private RequestFactory requestFactory = new RequestFactory();
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -204,20 +202,12 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
         }
     }
 
-    /**
-     * Set the request factory. This method is only used for testing to set a custom request factory that mocks server responses.
-     * @param requestFactory
-     */
-    public void setRequestFactory(RequestFactory requestFactory){
-        this.requestFactory = requestFactory;
+    public CoinBleskApplication getCoinBleskApplication() {
+        return (CoinBleskApplication) getApplication();
     }
 
     public RequestFactory getRequestFactory() {
-        return requestFactory;
-    }
-
-    public CoinBleskApplication getCoinBleskApplication() {
-        return (CoinBleskApplication) getApplication();
+        return getCoinBleskApplication().getRequestFactory();
     }
 
 }
