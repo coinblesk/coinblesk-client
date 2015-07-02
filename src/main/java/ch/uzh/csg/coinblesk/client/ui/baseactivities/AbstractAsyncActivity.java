@@ -3,6 +3,7 @@ package ch.uzh.csg.coinblesk.client.ui.baseactivities;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.support.v4.app.FragmentActivity;
@@ -208,6 +209,20 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
 
     public RequestFactory getRequestFactory() {
         return getCoinBleskApplication().getRequestFactory();
+    }
+
+    /**
+     * Initializes option menu items for indicating offline mode, refresh
+     * session and session countdown.
+     *
+     * @param menu
+     */
+    protected void initializeMenuItems(Menu menu, final Context context){
+        menuWarning = menu.findItem(R.id.action_warning);
+        offlineMode = menu.findItem(R.id.menu_offlineMode);
+        TextView offlineModeTV = (TextView) offlineMode.getActionView();
+        offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
+
     }
 
 }

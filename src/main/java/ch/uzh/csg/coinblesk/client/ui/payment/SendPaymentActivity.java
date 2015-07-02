@@ -39,24 +39,18 @@ import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.request.TransactionRequestTask;
-import ch.uzh.csg.coinblesk.client.tools.KeyHandler;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
-import ch.uzh.csg.coinblesk.client.util.TimeHandler;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
-import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
-import ch.uzh.csg.coinblesk.customserialization.PKIAlgorithm;
-import ch.uzh.csg.coinblesk.customserialization.PaymentRequest;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerResponseStatus;
 import ch.uzh.csg.coinblesk.customserialization.exceptions.NotSignedException;
-import ch.uzh.csg.coinblesk.keys.CustomKeyPair;
 import ch.uzh.csg.coinblesk.responseobject.TransactionObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
@@ -180,30 +174,6 @@ public class SendPaymentActivity extends WalletActivity {
 	}
 
 	/**
-	 * Start Timer for Session Countdown in Options Menu.
-	 * 
-	 * @param duration Time left in milliseconds.
-	 * @param interval Interval in which timer is updated in milliseconds.
-	 */
-	private void startTimer(long duration, long interval) {
-		if (timer != null) {
-			timer.cancel();
-		}
-		timer = new CountDownTimer(duration, interval) {
-			@Override
-			public void onFinish() {
-				//Session Timeout is already handled by TimeHandler
-			}
-			@Override
-			public void onTick(long millisecondsLeft) {
-				int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
-				sessionCountdown.setText(getResources().getString(R.string.menu_sessionCountdown) + " " + TimeHandler.getInstance().formatCountdown(secondsLeft));
-			}
-		};
-		timer.start();
-	}
-
-	/**
 	 * Launches request for updating Exchange Rate
 	 */
 	public void launchExchangeRateRequest() {
@@ -233,10 +203,6 @@ public class SendPaymentActivity extends WalletActivity {
 	private void onTaskCompleteExchangeRate(String exchangeRateNew) {
 		dismissProgressDialog();
 		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.sendPayment_exchangeRate));	
-		//renew Session Timeout Countdown
-		if(ClientController.isConnectedToServer()){
-			startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
-		}
 		exchangeRate = new BigDecimal(exchangeRateNew);
 		CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.sendPayment_exchangeRate));
 		BigDecimal balance = getWalletService().getBalance();
@@ -279,9 +245,6 @@ public class SendPaymentActivity extends WalletActivity {
 	
 	private void onTaskCompletTransaction(byte[] serverPaymentResponseBytes) {
 		dismissProgressDialog();
-		if(ClientController.isConnectedToServer()){
-			startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
-		}
 		ServerPaymentResponse serverPaymentResponse = null;
 		try {
 			serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
@@ -466,33 +429,33 @@ public class SendPaymentActivity extends WalletActivity {
 	}
 
 	private void createTransaction(){
-		CustomKeyPair ckp = ClientController.getStorageHandler().getKeyPair();
-		if (!receiverUsernameEditText.getText().toString().isEmpty() && !(amountBTC == null || amountBTC.compareTo(BigDecimal.ZERO) == 0)) {
-			if(receiverUsernameEditText.getText().toString().equals(ClientController.getStorageHandler().getUserAccount().getUsername())){
-				displayResponse(getResources().getString(R.string.sendPayment_error_user));
-				return;
-			}
-			try {
-				PaymentRequest paymentRequestPayer = new PaymentRequest(
-						PKIAlgorithm.DEFAULT, 
-						ckp.getKeyNumber(), 
-						ClientController.getStorageHandler().getUserAccount().getUsername(), 
-						receiverUsernameEditText.getText().toString(), 
-						Currency.BTC, 
-						Converter.getLongFromBigDecimal(amountBTC),
-						Currency.CHF, 
-						Converter.getLongFromBigDecimal(amountCHF), 
-						System.currentTimeMillis());
-
-				paymentRequestPayer.sign(KeyHandler.decodePrivateKey(ckp.getPrivateKey()));
-				ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
-				launchTransactionRequest(serverPaymentRequest);
-			} catch (Exception e) {
-				displayResponse(getResources().getString(R.string.sendPayment_error));
-			}
-		} else {
-			displayResponse(getResources().getString(R.string.fill_necessary_fields));
-		}
+		//TODO
+//		if (!receiverUsernameEditText.getText().toString().isEmpty() && !(amountBTC == null || amountBTC.compareTo(BigDecimal.ZERO) == 0)) {
+//			if(receiverUsernameEditText.getText().toString().equals(ClientController.getStorageHandler().getUserAccount().getUsername())){
+//				displayResponse(getResources().getString(R.string.sendPayment_error_user));
+//				return;
+//			}
+//			try {
+//				PaymentRequest paymentRequestPayer = new PaymentRequest(
+//						PKIAlgorithm.DEFAULT,
+//						ckp.getKeyNumber(),
+//						ClientController.getStorageHandler().getUserAccount().getUsername(),
+//						receiverUsernameEditText.getText().toString(),
+//						Currency.BTC,
+//						Converter.getLongFromBigDecimal(amountBTC),
+//						Currency.CHF,
+//						Converter.getLongFromBigDecimal(amountCHF),
+//						System.currentTimeMillis());
+//
+//				paymentRequestPayer.sign(KeyHandler.decodePrivateKey(ckp.getPrivateKey()));
+//				ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
+//				launchTransactionRequest(serverPaymentRequest);
+//			} catch (Exception e) {
+//				displayResponse(getResources().getString(R.string.sendPayment_error));
+//			}
+//		} else {
+//			displayResponse(getResources().getString(R.string.fill_necessary_fields));
+//		}
 	}
 
 	/**

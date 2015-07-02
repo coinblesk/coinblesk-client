@@ -17,6 +17,7 @@ import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
+import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.authentication.LoginActivity;
@@ -98,7 +99,7 @@ public class ActivityTestWithLogin extends ActivityInstrumentationTestCase2<Logi
 
 
     protected void prepareRequestFactory(){
-        RequestFactory requestFactory = new RequestFactory() {
+        RequestFactory requestFactory = new DefaultRequestFactory() {
             @Override
             public RequestTask<TransferObject, TransferObject> loginRequest(IAsyncTaskCompleteListener<TransferObject> completeListener, String username, String password, Context context) {
                 return new MockRequestTask(completeListener, loginResponse);

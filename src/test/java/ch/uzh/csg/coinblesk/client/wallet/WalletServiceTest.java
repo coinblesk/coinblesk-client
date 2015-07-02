@@ -47,6 +47,7 @@ import java.util.Set;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
+import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.testutils.MockRequestTask;
@@ -167,7 +168,7 @@ public class WalletServiceTest {
         final BigDecimal sendAmount = BigDecimal.ONE;
         final Address receiveAddr = new Address(params, receiveAddress);
 
-        RequestFactory requestFactory = new RequestFactory() {
+        RequestFactory requestFactory = new DefaultRequestFactory() {
             @Override
             public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(IAsyncTaskCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
                 // check if the request is correct
@@ -234,7 +235,7 @@ public class WalletServiceTest {
         walletService.init(bitcoinNet, serverWatchingKey);
 
         // mock server response
-        RequestFactory requestFactory = new RequestFactory() {
+        RequestFactory requestFactory = new DefaultRequestFactory() {
             @Override
             public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(IAsyncTaskCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
                 TransferObject response = new TransferObject();
@@ -272,14 +273,11 @@ public class WalletServiceTest {
 
         Assert.assertEquals(addr, addr2);
 
-        // send a coin to the wallet
+        // Check if we can send coins without server
         FakeTxBuilder.BlockPair bp = injectTx(addr.toString(), BigDecimal.TEN);
         Assert.assertEquals(0, BigDecimal.TEN.compareTo(walletService.getBalance()));
-
-        Address someAddress = new Address(params, "n4eY3qiP9pi32MWC6FcJFHciSsfNiYFYgR");
         walletService.createPayment("n4eY3qiP9pi32MWC6FcJFHciSsfNiYFYgR", BigDecimal.ONE);
         Assert.assertEquals(0, BigDecimal.ZERO.compareTo(walletService.getBalance()));
-
 
     }
 

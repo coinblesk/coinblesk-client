@@ -8,30 +8,21 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.AbstractAsyncActivity;
-import ch.uzh.csg.coinblesk.client.ui.authentication.AbstractLoginActivity;
 import ch.uzh.csg.coinblesk.client.ui.adressbook.AddressBookActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
-import ch.uzh.csg.coinblesk.client.ui.authentication.LoginActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.PayInActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.PayOutActivity;
-import ch.uzh.csg.coinblesk.client.ui.profile.AccountProfileActivity;
-import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.request.SignOutRequestTask;
-import ch.uzh.csg.coinblesk.client.tools.CookieHandler;
 import ch.uzh.csg.coinblesk.client.ui.settings.SettingsActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
-import ch.uzh.csg.coinblesk.client.util.TimeHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
  * This class represents the navigation drawer. The methods from
  * {@link AbstractAsyncActivity} are not inherited but overridden.
  */
-public class DrawerItemClickListener extends AbstractLoginActivity implements OnItemClickListener {
+public class DrawerItemClickListener extends WalletActivity implements OnItemClickListener {
 	private View view;
 	private ProgressDialog dialog;
 
@@ -40,119 +31,43 @@ public class DrawerItemClickListener extends AbstractLoginActivity implements On
 	}
 
 	/**
-	 * Swaps fragments to guide through views from main view {@link MainActvity}
+	 * Swaps fragments to guide through views from main view {@link MainActivity}
 	 */
 	private void selectItem(View view, int position) {
 		this.view = view;
 		switch (position) {
 		case 0:
-			// Profile
-			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), AccountProfileActivity.class));
-			break;
-		case 1:
 			// Create New Transaction
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), ChoosePaymentActivity.class));
 			break;
-		case 2:
+		case 1:
 			// History
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), HistoryActivity.class));
 			break;
-		case 3:
+		case 2:
 			// Settings
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), SettingsActivity.class));
 			break;
-		case 4:
+		case 3:
 			// Pay In
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), PayInActivity.class));
 			break;
-		case 5:
+		case 4:
 			// Pay Out
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), PayOutActivity.class));
 			break;
-		case 6:
+		case 5:
 			// Address Book
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), AddressBookActivity.class));
 			break;
-		case 7:
-			// Reconnect to Server
-			launchSignInRequest();
-			break;
-		case 8:
+		case 6:
 			// Help
 			MainActivity.isFirstTime = true;
 			this.view.getContext().startActivity(new Intent(this.view.getContext().getApplicationContext(), MainActivity.class));
 			break;
-		case 9:
-			// Sign Out
-			launchSignOut();
-			break;
 		default:
 			break;
 		}
-	}
-
-	protected void launchSignInRequest() {
-		if (!ClientController.isConnectedToServer()) {
-			super.launchSignInRequest(getContext());
-		} else {
-			displayResponse(getContext().getResources().getString(R.string.already_connected_to_server));
-		}
-	}
-
-	private void launchSignOut() {
-		if (ClientController.isConnectedToServer()) {
-			if(!TimeHandler.getInstance().determineIfLessThanFiveSecondsLeft()){
-				launchSignOutRequest();
-			}else{
-				// Dismiss session
-				TimeHandler.getInstance().terminateSession();
-				updateClientControllerAndFinish();
-				displayResponse(getContext().getResources().getString(R.string.session_expired));
-			}
-		} else {
-			updateClientControllerAndFinish();
-		}
-	}
-
-	private void launchSignOutRequest() {
-		showLoadingProgressDialog();
-		RequestTask<TransferObject, TransferObject> signOut = new SignOutRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
-			@Override
-			public void onTaskComplete(TransferObject response) {
-				if(response.isSuccessful()) {
-					TimeHandler.getInstance().terminateSession();
-					updateClientControllerAndFinish();
-					CookieHandler.deleteCookie();
-				} else {
-					dismissProgressDialog();
-					displayResponse(response.getMessage());
-				}
-            }
-		}, new TransferObject(), new TransferObject(), getContext());
-		signOut.execute();
-	}
-
-	private void updateClientControllerAndFinish() {
-		dismissProgressDialog();
-		ClientController.clear();
-		launchActivity(LoginActivity.class);
-	}
-
-	/**
-	 * Starts a new activity. The method is called only for guiding to another
-	 * activity.
-	 * 
-	 * @param <T>
-	 *            generic placeholder for the passed parameter
-	 * @param classActvity
-	 *            The class of the activity which will be started.
-	 */
-	public <T> void launchActivity(Class<T> classActivity){
-		Intent intent = new Intent(this.view.getContext().getApplicationContext(), classActivity);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		this.view.getContext().startActivity(intent);
-		finish();
 	}
 
 	/**

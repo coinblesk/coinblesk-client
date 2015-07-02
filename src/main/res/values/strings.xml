@@ -77,16 +77,13 @@
 
     <!-- Drawer Navigation -->
     <string-array name="drawerItems_array">
-        <item>User Profile</item>
         <item>Create new Transaction</item>
         <item>Transaction History</item>
         <item>Settings</item>
         <item>Top Up Account</item>
         <item>Pay out to BTC address</item>
         <item>Address Book</item>
-        <item>Reconnect to Server</item>
         <item>Help</item>
-        <item>Sign out</item>
     </string-array>
 
     <!-- History Strings -->

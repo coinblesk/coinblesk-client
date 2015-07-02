@@ -1,10 +1,7 @@
 package ch.uzh.csg.coinblesk.client.request;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.KeyStore;
-import java.util.List;
+import android.content.Context;
+import android.os.AsyncTask;
 
 import net.minidev.json.JSONObject;
 
@@ -33,13 +30,16 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.KeyStore;
+import java.util.List;
+
+import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.tools.CookieHandler;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
-import ch.uzh.csg.coinblesk.client.util.TimeHandler;
-import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
@@ -67,10 +67,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	
 	@Override
 	protected O doInBackground(Void... params) {
-		if(TimeHandler.getInstance().determineIfLessThanFiveSecondsLeft()){
-			cancel(true);
-			return createFailed("timeout");
-		}
 		try {
 			return responseService(requestObject);
 		} catch (Exception e) {
@@ -134,14 +130,14 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 		return responseObject;
 	}
 	
-	private HttpResponse executePost(List<NameValuePair> postParameters) throws ClientProtocolException, IOException {
+	private HttpResponse executePost(List<NameValuePair> postParameters) throws IOException {
 		HttpClient httpclient = createDefaultHttpsClient();
 		HttpPost post = createPost(url, null, postParameters);
 		HttpResponse response = httpclient.execute(post);
 		return response;
     }
 	
-	public HttpResponse executePost(JSONObject jsonObject) throws ClientProtocolException, IOException {
+	public HttpResponse executePost(JSONObject jsonObject) throws IOException {
 		HttpClient httpclient = createDefaultHttpsClient();
 		HttpPost post = createPost(url, jsonObject, null);
 		HttpResponse response = httpclient.execute(post);
@@ -176,7 +172,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
         	//reply
             StatusLine statusLine = response.getStatusLine();
             if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-            	TimeHandler.getInstance().setStartTime();
             	HttpEntity entity1 = response.getEntity();
             	String responseString = EntityUtils.toString(entity1);
             	if(responseString != null && responseString.trim().length() > 0) {
@@ -185,8 +180,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             	return responseObject;
             } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
             	ClientController.setOnlineMode(false);
-	        	TimeHandler.getInstance().setStartTime();
-	        	
+
 	        	responseObject.setUnauthorized();
         		responseObject.setMessage(statusLine.getReasonPhrase());
         		responseObject.setVersion(-1);
@@ -198,7 +192,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             }
         } catch (Exception e) {
         	ClientController.setOnlineMode(false);
-        	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
         	return createFailed(e.getMessage());
         }
@@ -211,7 +204,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 			//reply
             StatusLine statusLine = response.getStatusLine();
             if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-            	TimeHandler.getInstance().setStartTime();
             	HttpEntity entity1 = response.getEntity();
             	String responseString = EntityUtils.toString(entity1);
             	
@@ -225,8 +217,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             	return responseObject;
             } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
             	ClientController.setOnlineMode(false);
-	        	TimeHandler.getInstance().setStartTime();
-	        	
+
 	        	responseObject.setUnauthorized();
         		responseObject.setMessage(statusLine.getReasonPhrase());
         		responseObject.setVersion(-1);
@@ -238,7 +229,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             }
         } catch (Exception e) {
         	ClientController.setOnlineMode(false);
-        	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
         	return createFailed(e.getMessage());
         }
@@ -269,7 +259,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
         	//reply
             StatusLine statusLine = response.getStatusLine();
             if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-            	TimeHandler.getInstance().setStartTime();
             	HttpEntity entity1 = response.getEntity();
             	String responseString = EntityUtils.toString(entity1);
             	if(responseString != null && responseString.trim().length() > 0) {
@@ -278,8 +267,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             	return responseObject;
             } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
             	ClientController.setOnlineMode(false);
-	        	TimeHandler.getInstance().setStartTime();
-	        	
+
 	        	responseObject.setUnauthorized();
         		responseObject.setMessage(statusLine.getReasonPhrase());
         		responseObject.setVersion(-1);
@@ -287,13 +275,11 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             } else {
                 //Closes the connection.
             	ClientController.setOnlineMode(false);
-            	TimeHandler.getInstance().setStartTime();
                 response.getEntity().getContent().close();
                 return createFailed(statusLine.getReasonPhrase());
             }
         } catch (Exception e) {
         	ClientController.setOnlineMode(false);
-        	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
         	return createFailed(e.getMessage());
         }
@@ -306,7 +292,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
         	//reply
             StatusLine statusLine = response.getStatusLine();
             if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-            	TimeHandler.getInstance().setStartTime();
             	responseObject.setSuccessful(true);
             	return responseObject;
             } else {
@@ -316,7 +301,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             }
         } catch (Exception e) {
         	ClientController.setOnlineMode(false);
-        	TimeHandler.getInstance().setStartTime();
         	e.printStackTrace();
         	return createFailed(e.getMessage());
         }
@@ -336,7 +320,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	    	//reply
 	        StatusLine statusLine = response.getStatusLine();
 	        if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-	        	TimeHandler.getInstance().setStartTime();
 	        	HttpEntity entity1 = response.getEntity();
 	        	String responseString = EntityUtils.toString(entity1);
 	        	if(responseString != null && responseString.trim().length() > 0) {
@@ -345,8 +328,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	        	return responseObject;
 	        } else if (statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
 	        	ClientController.setOnlineMode(false);
-	        	TimeHandler.getInstance().setStartTime();
-	        	
+
 	        	responseObject.setUnauthorized();
         		responseObject.setMessage(statusLine.getReasonPhrase());
         		responseObject.setVersion(-1);
@@ -358,7 +340,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 	        }
 	    } catch (Exception e) {
 	    	ClientController.setOnlineMode(false);
-        	TimeHandler.getInstance().setStartTime();
 	    	e.printStackTrace();
 	    	return createFailed(e.getMessage());
 	    }

@@ -39,17 +39,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.MainActivityRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.tools.KeyHandler;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
 import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
 import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
@@ -57,13 +53,11 @@ import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
-import ch.uzh.csg.coinblesk.client.util.TimeHandler;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
-import ch.uzh.csg.coinblesk.customserialization.PKIAlgorithm;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.model.Transaction;
 import ch.uzh.csg.coinblesk.responseobject.MainRequestObject;
@@ -74,11 +68,7 @@ import ch.uzh.csg.paymentlib.IServerResponseListener;
 import ch.uzh.csg.paymentlib.IUserPromptAnswer;
 import ch.uzh.csg.paymentlib.IUserPromptPaymentRequest;
 import ch.uzh.csg.paymentlib.PaymentEvent;
-import ch.uzh.csg.paymentlib.PaymentRequestHandler;
-import ch.uzh.csg.paymentlib.container.ServerInfos;
-import ch.uzh.csg.paymentlib.container.UserInfos;
 import ch.uzh.csg.paymentlib.messages.PaymentError;
-import ch.uzh.csg.paymentlib.persistency.PersistedPaymentRequest;
 
 /**
  * This class shows the main view of the user with the balance of the user's
@@ -110,6 +100,7 @@ public class MainActivity extends AbstractPaymentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         setScreenOrientation();
         isPortrait = getResources().getBoolean(R.bool.portrait_only);
@@ -117,7 +108,6 @@ public class MainActivity extends AbstractPaymentActivity {
         initializeGui();
         initClickListener();
         initializeDrawer();
-
     }
 
     @Override
@@ -354,13 +344,7 @@ public class MainActivity extends AbstractPaymentActivity {
                     CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, getWalletService().getUnconfirmedBalance());
                     TextView balanceTv = (TextView) findViewById(R.id.mainActivity_balanceCHF);
                     balanceTv.append(" (1 BTC = " + CurrencyFormatter.formatChf(exchangeRate) + " CHF)");
-                    //renew Session Timeout Countdown
-                    if (ClientController.isConnectedToServer()) {
-                        startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
-                    }
-                    Set<PersistedPaymentRequest> requests = ClientController.getStorageHandler().getPersistedPaymentRequests();
                 } else if (response.getMessage() != null && response.getMessage().contains(Constants.CONNECTION_ERROR)) {
-                    launchOfflineMode(getApplicationContext());
                     invalidateOptionsMenu();
                     displayResponse(getResources().getString(R.string.no_connection_server));
                     lastTransactionsTitle.setVisibility(View.INVISIBLE);
@@ -481,23 +465,25 @@ public class MainActivity extends AbstractPaymentActivity {
      * Initializes NFC adapter and user payment information.
      */
     private void initializeNFC() {
-        nfcAdapter = createAdapter(MainActivity.this);
-        if (nfcAdapter == null) {
-            return;
-        }
 
-        //disable android beam (touch to beam screen)
-        nfcAdapter.setNdefPushMessage(null, this, this);
-
-        try {
-            PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey().getPublicKey());
-            final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
-            PrivateKey privateKey = KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
-            final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
-            new PaymentRequestHandler(this, eventHandler, userInfos, serverInfos, userPrompt, persistencyHandler);
-        } catch (Exception e) {
-            displayResponse(getResources().getString(R.string.error_nfc_initializing));
-        }
+        // TODO
+//        nfcAdapter = createAdapter(MainActivity.this);
+//        if (nfcAdapter == null) {
+//            return;
+//        }
+//
+//        //disable android beam (touch to beam screen)
+//        nfcAdapter.setNdefPushMessage(null, this, this);
+//
+//        try {
+//            PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey().getPublicKey());
+//            final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
+//            PrivateKey privateKey = KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
+//            final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
+//            new PaymentRequestHandler(this, eventHandler, userInfos, serverInfos, userPrompt, persistencyHandler);
+//        } catch (Exception e) {
+//            displayResponse(getResources().getString(R.string.error_nfc_initializing));
+//        }
     }
 
     /**

@@ -31,8 +31,6 @@ import android.widget.TextView;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.ArrayList;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
@@ -40,16 +38,13 @@ import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.request.TransactionRequestTask;
-import ch.uzh.csg.coinblesk.client.tools.KeyHandler;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
-import ch.uzh.csg.coinblesk.client.util.TimeHandler;
+import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
-import ch.uzh.csg.coinblesk.customserialization.PKIAlgorithm;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentResponse;
@@ -61,10 +56,7 @@ import ch.uzh.csg.paymentlib.IPaymentEventHandler;
 import ch.uzh.csg.paymentlib.IServerResponseListener;
 import ch.uzh.csg.paymentlib.PaymentEvent;
 import ch.uzh.csg.paymentlib.PaymentRequestInitializer;
-import ch.uzh.csg.paymentlib.PaymentRequestInitializer.PaymentType;
 import ch.uzh.csg.paymentlib.container.PaymentInfos;
-import ch.uzh.csg.paymentlib.container.ServerInfos;
-import ch.uzh.csg.paymentlib.container.UserInfos;
 import ch.uzh.csg.paymentlib.messages.PaymentError;
 
 /**
@@ -168,17 +160,9 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 
 	@Override
 	public void onResume() {
-		checkOnlineModeAndProceed();
+		launchExchangeRateRequest();
 		invalidateOptionsMenu();
 		super.onResume();
-	}
-
-	private void checkOnlineModeAndProceed() {
-		if (ClientController.isConnectedToServer() && walletConnected()) {
-			launchExchangeRateRequest();
-		} else {
-			launchOfflineMode(getApplicationContext());
-		}
 	}
 
 	@Override
@@ -251,7 +235,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 			@Override
 			public void onTick(long millisecondsLeft) {
 				int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
-				sessionCountdown.setText(getResources().getString(R.string.menu_sessionCountdown) + " " + TimeHandler.getInstance().formatCountdown(secondsLeft));
 			}
 		};
 
@@ -271,10 +254,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 					dismissNfcInProgressDialog();
 					if (response.isSuccessful()) {
 						CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
-						//renew Session Timeout Countdown
-						if(ClientController.isConnectedToServer()){
-							startTimer(TimeHandler.getInstance().getRemainingTime(), 1000);
-						}
 						exchangeRate = new BigDecimal(response.getMessage());
 						CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
 						BigDecimal balance = getWalletService().getBalance();
@@ -496,45 +475,43 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	 * @throws Exception
 	 */
 	private void initializeNFC(PaymentInfos paymentInfos) throws Exception {
-		PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey().getPublicKey());
-		final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
-		PrivateKey privateKey = KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
-		final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
 
-		nfcAdapter = createAdapter(ReceivePaymentActivity.this);
-		if (nfcAdapter == null) {
-			return;
-		}
+		//TODO
 
-		//disable android beam (touch to beam screen)
-		nfcAdapter.setNdefPushMessage(null, this, this);
-
-		if(isSendingMode){
-			try {
-				if (paymentRequestInitializer != null) {
-					paymentRequestInitializer.disable(); 
-					paymentRequestInitializer = null;
-				}
-				paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
-				paymentRequestInitializer.enableNfc();
-			} catch (Exception e) {
-				displayResponse(getResources().getString(R.string.unexcepted_error));
-				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
-			}
-		}
-		else {
-			try {
-				if (paymentRequestInitializer != null) {
-					paymentRequestInitializer.disable(); 
-					paymentRequestInitializer = null;
-				}
-				paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
-				paymentRequestInitializer.enableNfc();
-			} catch (Exception e) {
-				displayResponse(getResources().getString(R.string.unexcepted_error));
-				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
-			}
-		}
+//		nfcAdapter = createAdapter(ReceivePaymentActivity.this);
+//		if (nfcAdapter == null) {
+//			return;
+//		}
+//
+//		//disable android beam (touch to beam screen)
+//		nfcAdapter.setNdefPushMessage(null, this, this);
+//
+//		if(isSendingMode){
+//			try {
+//				if (paymentRequestInitializer != null) {
+//					paymentRequestInitializer.disable();
+//					paymentRequestInitializer = null;
+//				}
+//				paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
+//				paymentRequestInitializer.enableNfc();
+//			} catch (Exception e) {
+//				displayResponse(getResources().getString(R.string.unexcepted_error));
+//				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
+//			}
+//		}
+//		else {
+//			try {
+//				if (paymentRequestInitializer != null) {
+//					paymentRequestInitializer.disable();
+//					paymentRequestInitializer = null;
+//				}
+//				paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
+//				paymentRequestInitializer.enableNfc();
+//			} catch (Exception e) {
+//				displayResponse(getResources().getString(R.string.unexcepted_error));
+//				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
+//			}
+//		}
 	}
 
 	/**

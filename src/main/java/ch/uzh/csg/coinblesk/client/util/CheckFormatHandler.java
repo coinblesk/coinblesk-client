@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.uzh.csg.coinblesk.client.ui.profile.EditPasswordAccountProfileActivity;
 import ch.uzh.csg.coinblesk.client.R;
 import android.content.Context;
 import android.util.Pair;

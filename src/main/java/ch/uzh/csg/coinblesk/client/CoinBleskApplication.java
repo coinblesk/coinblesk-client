@@ -1,13 +1,12 @@
 package ch.uzh.csg.coinblesk.client;
 
 import android.app.Application;
-import android.content.Context;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.uzh.csg.coinblesk.client.persistence.InternalStorageHandler;
-import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
+import ch.uzh.csg.coinblesk.client.persistence.InternalStorage;
+import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.util.LoggingConfig;
 
@@ -18,30 +17,21 @@ public class CoinBleskApplication extends Application {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CoinBleskApplication.class);
 
-    private InternalStorageHandler mStorageHandler;
-    private RequestFactory requestFactory = new RequestFactory();
+    private InternalStorage mStorageHandler;
+    private RequestFactory requestFactory;
 
     @Override
     public void onCreate() {
         super.onCreate();
         LoggingConfig.configure();
+
+        mStorageHandler = new InternalStorage(this);
+        requestFactory = new DefaultRequestFactory();
+
         LOGGER.info("CoinBlesk is starting...");
     }
 
-    public boolean initStorageHandler(Context context, String username, String password) throws WrongPasswordException {
-        try {
-            mStorageHandler = new InternalStorageHandler(context, username, password);
-            return true;
-        } catch (Exception e) {
-            if (e instanceof WrongPasswordException) {
-                throw new WrongPasswordException(e.getMessage());
-            } else {
-                throw new RuntimeException("Failed to create internal storage handler", e);
-            }
-        }
-    }
-
-    public InternalStorageHandler getStorageHandler() {
+    public InternalStorage getStorageHandler() {
         return mStorageHandler;
     }
 

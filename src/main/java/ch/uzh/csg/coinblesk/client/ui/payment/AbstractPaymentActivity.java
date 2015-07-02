@@ -1,7 +1,5 @@
 package ch.uzh.csg.coinblesk.client.ui.payment;
 
-import java.math.BigDecimal;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -13,24 +11,23 @@ import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.provider.Settings;
-import ch.uzh.csg.coinblesk.client.ui.authentication.AbstractLoginActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+
+import java.math.BigDecimal;
+
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.paymentlib.persistency.IPersistencyHandler;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 
 /**
  * This is the abstract base class of the payment activities (receive and pay).
  * Common behavior is implemented here.
  */
-public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
+public abstract class AbstractPaymentActivity extends WalletActivity {
 	protected boolean isSeller;
 	protected BigDecimal exchangeRate;
 	private ProgressDialog progressDialog;
 	private boolean destroyed = false;
 	protected boolean paymentAccepted = false;
 	
-	protected IPersistencyHandler persistencyHandler = ClientController.getStorageHandler();
-
 	/**
 	 * Reset the UI after a successful or failed transaction.
 	 */
@@ -40,7 +37,7 @@ public abstract class AbstractPaymentActivity extends AbstractLoginActivity {
 	 * Starts the NFC progress dialog. As long as the dialog is running other
 	 * touch actions are ignored.
 	 * 
-	 * @param boolean isInProgress determines if NFC is already inProgress or
+	 * @param isInProgress determines if NFC is already inProgress or
 	 *        needs to be established first
 	 */
 	protected void showNfcProgressDialog(final boolean isInProgress){
