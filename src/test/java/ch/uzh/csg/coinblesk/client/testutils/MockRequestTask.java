@@ -1,5 +1,12 @@
 package ch.uzh.csg.coinblesk.client.testutils;
 
+import net.minidev.json.JSONObject;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+
+import java.io.IOException;
+
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
@@ -19,12 +26,17 @@ public class MockRequestTask extends RequestTask {
     }
 
     @Override
-    protected Object doInBackground(Object[] params) {
+    protected TransferObject doInBackground(Void... params) {
         return mockResponse;
     }
 
     @Override
     protected TransferObject responseService(TransferObject restTemplate) throws Exception {
+        return null;
+    }
+
+    @Override
+    public HttpResponse executePost(JSONObject jsonObject) throws ClientProtocolException, IOException {
         return null;
     }
 

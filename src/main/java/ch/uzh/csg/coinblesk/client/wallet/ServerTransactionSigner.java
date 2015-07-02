@@ -3,7 +3,6 @@ package ch.uzh.csg.coinblesk.client.wallet;
 import android.content.Context;
 import android.widget.Toast;
 
-import org.apache.commons.codec.binary.Base64;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
@@ -93,7 +92,8 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
         }
 
-        String serializedTx = Base64.encodeBase64String(tx.bitcoinSerialize());
+//        String serializedTx = Base64.encodeBase64String(tx.bitcoinSerialize());
+        String serializedTx = android.util.Base64.encodeToString(tx.bitcoinSerialize(), android.util.Base64.NO_WRAP);
         txSigRequest.setPartialTx(serializedTx);
 
         if(!tx.isTimeLocked()) {
@@ -115,7 +115,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
     private void launchPayOutRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest) {
         RequestFactory requestFactory = ((CoinBleskApplication) context.getApplicationContext()).getRequestFactory();
-        RequestTask payOutRequestTask = requestFactory.payOutRequest(new IAsyncTaskCompleteListener<TransferObject>() {
+        RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequestTask = requestFactory.payOutRequest(new IAsyncTaskCompleteListener<TransferObject>() {
             public void onTaskComplete(TransferObject response) {
                 if (response.isSuccessful()) {
                     LOGGER.info("Transaction signing and broadcast was successful");
@@ -135,6 +135,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
         RequestTask refundRequestTask = requestFactory.refundTxRequest(new IAsyncTaskCompleteListener<TransferObject>() {
             @Override
             public void onTaskComplete(TransferObject response) {
+                // TODO: change success/fail strings below
                 if (response.isSuccessful()) {
                     LOGGER.info("Refund tx request was successful");
                     notifySuccess(tx);
@@ -174,6 +175,5 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
             listener.onSuccess(tx);
         }
     }
-
 
 }

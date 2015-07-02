@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -19,6 +20,7 @@ import org.bitcoinj.core.InsufficientMoneyException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Peer;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.core.Wallet.BalanceType;
 import org.bitcoinj.net.discovery.DnsDiscovery;
@@ -317,9 +319,25 @@ public class WalletService extends android.app.Service {
         Wallet.SendRequest req = Wallet.SendRequest.to(btcAddress, Coin.parseCoin(amount.toString()));
         req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
         getAppKit().wallet().completeTx(req);
+
+
+        for(TransactionInput txIn : req.tx.getInputs()) {
+            if(txIn.getConnectedOutput().getScriptPubKey().isPayToScriptHash()) {
+                // at least one input needs to be signed by the server,
+                // which means that we are not responsible for broadcasting the transaction
+                return;
+            }
+        }
+
+        getAppKit().peerGroup().broadcastTransaction(req.tx);
+        getAppKit().wallet().maybeCommitTx(req.tx);
     }
 
 
+    /**
+     * Creates a time-locked transaction that sends all available coins to a personal address.
+     * @return a Base64 encoded, fully signed bitcoin transaction
+     */
     public String createRefundTransaction() {
 
         Transaction tx = null;
@@ -337,20 +355,7 @@ public class WalletService extends android.app.Service {
             LOGGER.error("Failed to create refund transaction", e);
         }
 
-        return toHexString(tx.unsafeBitcoinSerialize());
-    }
-
-    private String toHexString(byte[] bytes) {
-        final char[] hexChars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
-                'B', 'C', 'D', 'E', 'F'};
-        char[] res = new char[bytes.length * 2];
-        int v;
-        for (int j = 0; j < bytes.length; j++) {
-            v = bytes[j] & 0xFF;
-            res[j * 2] = hexChars[v >>> 4];
-            res[j * 2 + 1] = hexChars[v & 0x0F];
-        }
-        return new String(res);
+        return Base64.encodeToString(tx.unsafeBitcoinSerialize(), Base64.NO_WRAP);
     }
 
     private long getLockTime() {
