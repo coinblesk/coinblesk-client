@@ -19,7 +19,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.util.TimePickerRule;
 import ch.uzh.csg.coinblesk.client.R;
@@ -29,7 +29,7 @@ import ch.uzh.csg.coinblesk.client.R;
  * {@link SettingPayOutRulesActivity}. The payout rules consist of
  * a balance limit or a day and time selection. 
  */
-public class CustomOnItemSelectedListener implements OnItemSelectedListener, IAsyncTaskCompleteListener<Integer> {
+public class CustomOnItemSelectedListener implements OnItemSelectedListener, RequestCompleteListener<Integer> {
 	
 	private Activity parentActivity;
 	private static List<TextView> timeSelections;

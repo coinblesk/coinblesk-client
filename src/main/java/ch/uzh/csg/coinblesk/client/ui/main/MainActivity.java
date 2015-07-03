@@ -52,7 +52,7 @@ import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
@@ -328,7 +328,7 @@ public class MainActivity extends AbstractPaymentActivity {
     }
 
     private void launchRequest() {
-        getMainActivityValues = new MainActivityRequestTask(new IAsyncTaskCompleteListener<MainRequestObject>() {
+        getMainActivityValues = new MainActivityRequestTask(new RequestCompleteListener<MainRequestObject>() {
             @Override
             public void onTaskComplete(MainRequestObject response) {
                 TextView lastTransactionsTitle = (TextView) findViewById(R.id.mainActivity_lastTransactionsTitle);

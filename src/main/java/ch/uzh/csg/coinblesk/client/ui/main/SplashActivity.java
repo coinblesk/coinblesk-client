@@ -11,7 +11,6 @@ import ch.uzh.csg.coinblesk.client.ui.baseactivities.AbstractAsyncActivity;
  *     <li>The {@link MainActivity} if an account is already stored on the device, or</li>
  *     <li>The {@link RestoreOrNewActivity} the app is launched for the first time</li>
  * </ul>
- *
  */
 public class SplashActivity extends AbstractAsyncActivity {
 

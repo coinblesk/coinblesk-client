@@ -1,7 +1,7 @@
 package ch.uzh.csg.coinblesk.client.request;
 
 import android.content.Context;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.responseobject.MainRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
@@ -11,7 +11,7 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
  */
 public class MainActivityRequestTask extends RequestTask<TransferObject, MainRequestObject> {
 	
-	public MainActivityRequestTask(IAsyncTaskCompleteListener<MainRequestObject> cro, TransferObject input, MainRequestObject output, Context context) {
+	public MainActivityRequestTask(RequestCompleteListener<MainRequestObject> cro, TransferObject input, MainRequestObject output, Context context) {
 		super(input, output, Constants.BASE_URI_SSL + "/user/mainActivityRequests", cro, context);
 	}
 

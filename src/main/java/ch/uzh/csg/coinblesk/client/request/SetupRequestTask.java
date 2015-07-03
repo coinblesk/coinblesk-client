@@ -3,7 +3,7 @@ package ch.uzh.csg.coinblesk.client.request;
 import android.content.Context;
 
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
@@ -13,7 +13,7 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
  */
 public class SetupRequestTask extends RequestTask<TransferObject, SetupRequestObject> {
 
-	public SetupRequestTask(IAsyncTaskCompleteListener<SetupRequestObject> cro, Context context) {
+	public SetupRequestTask(RequestCompleteListener<SetupRequestObject> cro, Context context) {
 		super(new TransferObject(), new SetupRequestObject(), Constants.BASE_URI_SSL + "/info/setupInfo", cro, context);
 	}
 

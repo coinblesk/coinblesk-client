@@ -3,7 +3,7 @@ package ch.uzh.csg.coinblesk.client.request;
 import android.content.Context;
 
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
@@ -13,7 +13,7 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
  */
 public class RefundTxRequestTask extends RequestTask<ServerSignatureRequestTransferObject, TransferObject> {
 
-	public RefundTxRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
+	public RefundTxRequestTask(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
 		super(input, output, Constants.BASE_URI_SSL + "/transaction/signRefundTx", cro, context);
 	}
 

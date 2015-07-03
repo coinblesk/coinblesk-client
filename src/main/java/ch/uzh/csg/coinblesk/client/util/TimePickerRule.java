@@ -14,9 +14,9 @@ import java.util.Calendar;
 @SuppressLint("ValidFragment")
 public class TimePickerRule extends DialogFragment implements CustomTimePickerDialog.OnTimeSetListener{
 
-	protected IAsyncTaskCompleteListener<Integer> callback;
+	protected RequestCompleteListener<Integer> callback;
 	
-	public TimePickerRule(IAsyncTaskCompleteListener<Integer> time) {
+	public TimePickerRule(RequestCompleteListener<Integer> time) {
 		callback = time;
 	}
 

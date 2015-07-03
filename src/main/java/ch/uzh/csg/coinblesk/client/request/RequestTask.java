@@ -17,7 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
@@ -34,7 +34,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
     final private O responseObject;
     final private String url;
 
-    final private IAsyncTaskCompleteListener<O> callback;
+    final private RequestCompleteListener<O> callback;
     final private Context context;
 
     /**
@@ -46,7 +46,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
      * @param callback
      * @param context
      */
-    public RequestTask(I requestObject, O responseObject, String url, IAsyncTaskCompleteListener<O> callback, Context context) {
+    public RequestTask(I requestObject, O responseObject, String url, RequestCompleteListener<O> callback, Context context) {
         this.requestObject = requestObject;
         this.responseObject = responseObject;
         this.url = url;
@@ -62,7 +62,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
      * @param callback
      * @param context
      */
-    public RequestTask(O responseObject, String url, IAsyncTaskCompleteListener<O> callback, Context context) {
+    public RequestTask(O responseObject, String url, RequestCompleteListener<O> callback, Context context) {
         this(null, responseObject, url, callback, context);
     }
 

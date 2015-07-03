@@ -21,7 +21,7 @@ import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.persistence.InternalStorage;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
@@ -54,8 +54,8 @@ public class RestoreOrNewActivity extends WalletActivity {
         initClickListener();
     }
 
-    private void getSetupInfo(final IAsyncTaskCompleteListener<SetupRequestObject> cro) {
-        RequestTask<TransferObject, SetupRequestObject> task = getCoinBleskApplication().getRequestFactory().setupRequest(new IAsyncTaskCompleteListener<SetupRequestObject>() {
+    private void getSetupInfo(final RequestCompleteListener<SetupRequestObject> cro) {
+        RequestTask<TransferObject, SetupRequestObject> task = getCoinBleskApplication().getRequestFactory().setupRequest(new RequestCompleteListener<SetupRequestObject>() {
             @Override
             public void onTaskComplete(SetupRequestObject response) {
                 if(response.isSuccessful()) {
@@ -77,7 +77,7 @@ public class RestoreOrNewActivity extends WalletActivity {
             @Override
             public void onClick(View v) {
 
-                getSetupInfo(new IAsyncTaskCompleteListener<SetupRequestObject>() {
+                getSetupInfo(new RequestCompleteListener<SetupRequestObject>() {
                     @Override
                     public void onTaskComplete(final SetupRequestObject response) {
 
@@ -125,7 +125,7 @@ public class RestoreOrNewActivity extends WalletActivity {
             @Override
             public void onClick(View v) {
                 LOGGER.debug("Setting up a new wallet...");
-                getSetupInfo(new IAsyncTaskCompleteListener<SetupRequestObject>() {
+                getSetupInfo(new RequestCompleteListener<SetupRequestObject>() {
                     @Override
                     public void onTaskComplete(SetupRequestObject response) {
                         startMainActivity();

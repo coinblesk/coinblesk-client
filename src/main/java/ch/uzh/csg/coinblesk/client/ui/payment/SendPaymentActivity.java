@@ -43,7 +43,7 @@ import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
@@ -179,7 +179,7 @@ public class SendPaymentActivity extends WalletActivity {
 	public void launchExchangeRateRequest() {
 		if (ClientController.isConnectedToServer()) {
 			showLoadingProgressDialog();
-			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new IAsyncTaskCompleteListener<TransferObject>() {
+			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new RequestCompleteListener<TransferObject>() {
 				public void onTaskComplete(TransferObject response) {
 					dismissProgressDialog();
 					if (response.isSuccessful()) {
@@ -223,7 +223,7 @@ public class SendPaymentActivity extends WalletActivity {
 				return;
             }
 			
-			RequestTask<TransactionObject, TransactionObject> transactionRequest = new TransactionRequestTask(new IAsyncTaskCompleteListener<TransactionObject>() {
+			RequestTask<TransactionObject, TransactionObject> transactionRequest = new TransactionRequestTask(new RequestCompleteListener<TransactionObject>() {
 				public void onTaskComplete(TransactionObject response) {
 					dismissProgressDialog();
 					if (!response.isSuccessful()) {

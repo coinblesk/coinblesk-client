@@ -22,7 +22,7 @@ import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
@@ -115,7 +115,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
     private void launchPayOutRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest) {
         RequestFactory requestFactory = ((CoinBleskApplication) context.getApplicationContext()).getRequestFactory();
-        RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequestTask = requestFactory.payOutRequest(new IAsyncTaskCompleteListener<TransferObject>() {
+        RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequestTask = requestFactory.payOutRequest(new RequestCompleteListener<TransferObject>() {
             public void onTaskComplete(TransferObject response) {
                 if (response.isSuccessful()) {
                     LOGGER.info("Transaction signing and broadcast was successful");
@@ -132,7 +132,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
     private void launchRefundTxRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest){
         RequestFactory requestFactory = ((CoinBleskApplication) context.getApplicationContext()).getRequestFactory();
-        RequestTask refundRequestTask = requestFactory.refundTxRequest(new IAsyncTaskCompleteListener<TransferObject>() {
+        RequestTask refundRequestTask = requestFactory.refundTxRequest(new RequestCompleteListener<TransferObject>() {
             @Override
             public void onTaskComplete(TransferObject response) {
                 // TODO: change success/fail strings below

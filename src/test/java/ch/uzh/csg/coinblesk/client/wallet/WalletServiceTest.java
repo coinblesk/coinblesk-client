@@ -52,7 +52,7 @@ import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.testutils.MockRequestTask;
 import ch.uzh.csg.coinblesk.client.testutils.TestUtils;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
@@ -170,7 +170,7 @@ public class WalletServiceTest {
 
         RequestFactory requestFactory = new DefaultRequestFactory() {
             @Override
-            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(IAsyncTaskCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
+            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
                 // check if the request is correct
                 Assert.assertNotNull(input);
                 Assert.assertNotNull(input.getPartialTx());
@@ -237,7 +237,7 @@ public class WalletServiceTest {
         // mock server response
         RequestFactory requestFactory = new DefaultRequestFactory() {
             @Override
-            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(IAsyncTaskCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
+            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
                 TransferObject response = new TransferObject();
                 response.setSuccessful(true);
                 return new MockRequestTask(completeListener, response);

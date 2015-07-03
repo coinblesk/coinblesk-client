@@ -6,7 +6,7 @@ package ch.uzh.csg.coinblesk.client.util;
  * 
  * @param <T> generic placeholder for the returned type
  */
-public interface IAsyncTaskCompleteListener<T> {
+public interface RequestCompleteListener<T> {
 	/**
 	 * Handles response form server after http server call.
 	 */

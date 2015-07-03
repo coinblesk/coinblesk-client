@@ -21,7 +21,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.request.SendPayInAddressByEmail;
@@ -191,7 +191,7 @@ public class PayInActivity extends WalletActivity {
 
     private void launchRequest() {
         showLoadingProgressDialog();
-        RequestTask<TransferObject, TransferObject> sendToEmail = new SendPayInAddressByEmail(new IAsyncTaskCompleteListener<TransferObject>() {
+        RequestTask<TransferObject, TransferObject> sendToEmail = new SendPayInAddressByEmail(new RequestCompleteListener<TransferObject>() {
             @Override
             public void onTaskComplete(TransferObject response) {
                 dismissProgressDialog();

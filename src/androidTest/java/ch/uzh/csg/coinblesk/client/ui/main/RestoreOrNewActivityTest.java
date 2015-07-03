@@ -8,14 +8,15 @@ import com.robotium.solo.Solo;
 import org.junit.After;
 import org.junit.Before;
 
-import basetests.ActivityTestWithLogin;
+import basetests.BaseInstrumentationTest;
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
 
 /**
  * Created by rvoellmy on 6/23/15.
  */
 @LargeTest
-public class RestoreOrNewActivityTest extends ActivityTestWithLogin {
+public class RestoreOrNewActivityTest extends BaseInstrumentationTest<RestoreOrNewActivity> {
 
     private final static int TIMEOUT = 30*1000;
 
@@ -23,9 +24,22 @@ public class RestoreOrNewActivityTest extends ActivityTestWithLogin {
     private final static String RESTORE_SEED = "pause quarter bar elder always donkey elevator north scout symbol clever rather";
     private final static String ADDRESS = "2N9f6XZqRiSHHdTBjS2tKTwXd2f6bt1RebV";
 
+    public RestoreOrNewActivityTest() {
+        super(RestoreOrNewActivity.class);
+
+
+    }
+
     @Before
     public void setUp() throws Exception {
         super.setUp();
+
+        solo = new Solo(getInstrumentation(), getActivity());
+        mApplication = (CoinBleskApplication) getActivity().getApplication();
+
+        clearInternalData();
+        prepareResponses();
+        prepareRequestFactory();
     }
 
     @After
@@ -34,16 +48,14 @@ public class RestoreOrNewActivityTest extends ActivityTestWithLogin {
     }
 
     public void testCreateNewWallet() throws Throwable {
-        prepareInternalStorage();
-        onlineLogin();
+
+        solo.clickOnView(solo.getView(R.id.restoreOrNew_button_createNewWallet));
         checkifMainActivity();
 
         Thread.sleep(15000);
     }
 
     public void testRestoreWallet() throws Throwable {
-        prepareInternalStorage();
-        onlineLogin();
 
         solo.clearEditText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase));
         solo.enterText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase), RESTORE_SEED);

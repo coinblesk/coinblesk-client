@@ -3,7 +3,7 @@ package ch.uzh.csg.coinblesk.client.request;
 import android.content.Context;
 
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
@@ -13,7 +13,7 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
  */
 public class PayOutRequestTask extends RequestTask<ServerSignatureRequestTransferObject, TransferObject> {
 		
-	public PayOutRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
+	public PayOutRequestTask(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
 		super(input, output, Constants.BASE_URI_SSL + "/transaction/signAndBroadcastTx", cro, context);
 	}
 
