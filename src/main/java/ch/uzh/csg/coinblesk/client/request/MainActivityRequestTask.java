@@ -15,9 +15,4 @@ public class MainActivityRequestTask extends RequestTask<TransferObject, MainReq
 		super(input, output, Constants.BASE_URI_SSL + "/user/mainActivityRequests", cro, context);
 	}
 
-	@Override
-	protected MainRequestObject responseService(TransferObject tro) {
-		return execGet();
-	}
-	
 }

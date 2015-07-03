@@ -17,9 +17,4 @@ public class SetupRequestTask extends RequestTask<TransferObject, SetupRequestOb
 		super(new TransferObject(), new SetupRequestObject(), Constants.BASE_URI_SSL + "/info/setupInfo", cro, context);
 	}
 
-	@Override
-	protected SetupRequestObject responseService(TransferObject tro) {
-		return execGet();
-	}
-
 }

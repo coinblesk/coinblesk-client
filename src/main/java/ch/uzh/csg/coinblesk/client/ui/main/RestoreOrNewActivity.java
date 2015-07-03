@@ -19,10 +19,12 @@ import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.persistence.InternalStorage;
+import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.IAsyncTaskCompleteListener;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
+import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 public class RestoreOrNewActivity extends WalletActivity {
 
@@ -53,14 +55,20 @@ public class RestoreOrNewActivity extends WalletActivity {
     }
 
     private void getSetupInfo(final IAsyncTaskCompleteListener<SetupRequestObject> cro) {
-        getCoinBleskApplication().getRequestFactory().setupRequest(new IAsyncTaskCompleteListener<SetupRequestObject>() {
+        RequestTask<TransferObject, SetupRequestObject> task = getCoinBleskApplication().getRequestFactory().setupRequest(new IAsyncTaskCompleteListener<SetupRequestObject>() {
             @Override
             public void onTaskComplete(SetupRequestObject response) {
-                storageHandler.setWatchingKey(response.getServerWatchingKey());
-                storageHandler.setBitcoinNet(response.getBitcoinNet());
-                cro.onTaskComplete(response);
+                if(response.isSuccessful()) {
+                    storageHandler.setWatchingKey(response.getServerWatchingKey());
+                    storageHandler.setBitcoinNet(response.getBitcoinNet());
+                    cro.onTaskComplete(response);
+                } else {
+                    displayResponse(getString(R.string.establish_internet_connection));
+                }
             }
         }, this);
+
+        task.execute();
     }
 
     private void initRestoreWalletClickListener() {

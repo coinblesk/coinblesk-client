@@ -14,9 +14,4 @@ public class SendPayInAddressByEmail extends RequestTask<TransferObject, Transfe
 		super(input, output, Constants.BASE_URI_SSL + "/transaction/payIn/getByEmail", cro, context);
 	}
 
-	@Override
-	protected TransferObject responseService(TransferObject to) {
-		return execGet();
-	}
-
 }

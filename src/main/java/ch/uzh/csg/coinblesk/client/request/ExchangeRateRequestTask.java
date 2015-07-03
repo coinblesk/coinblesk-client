@@ -13,9 +13,4 @@ public class ExchangeRateRequestTask extends RequestTask<TransferObject, Transfe
 	public ExchangeRateRequestTask(IAsyncTaskCompleteListener<TransferObject> cro, TransferObject input, TransferObject output, Context context) {
 		super(input, output, Constants.BASE_URI_SSL + "/transaction/exchange-rate/", cro, context);
 	}
-
-	@Override
-	protected TransferObject responseService(TransferObject to) {
-		return execGet();
-	}
 }
