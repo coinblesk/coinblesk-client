@@ -25,6 +25,11 @@ public class BitcoinUtils {
         return Coin.parseCoin(amount.toString());
     }
 
+    /**
+     * Checvks if the passed mnemonic is a valid BIP32 mnemonic seed
+     * @param mnemonic
+     * @return
+     */
     public static boolean validMnemonic(String mnemonic) {
         List<String> words = Arrays.asList(mnemonic.split(" "));
         try {
@@ -34,5 +39,14 @@ public class BitcoinUtils {
             LOGGER.info("Mnemonic verification failed: {}", e);
             return false;
         }
+    }
+
+    /**
+     * Converts month to number of blocks. E.g. 1 month == 6 * 24 * 30 blocks
+     * @param month
+     * @return
+     */
+    public static long monthsToBlocks(int month) {
+        return 6 * 24 * 30 * month;
     }
 }

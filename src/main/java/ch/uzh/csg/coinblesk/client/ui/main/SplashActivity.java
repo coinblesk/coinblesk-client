@@ -18,11 +18,14 @@ public class SplashActivity extends AbstractAsyncActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // new setup, start restore or new activity
         if(!getCoinBleskApplication().getStorageHandler().hasUserData()) {
+            // new setup, start restore or new activity
             Intent intent = new Intent(this, RestoreOrNewActivity.class);
             startActivity(intent);
-            return;
+        } else {
+            // existing account, start main activity
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
         }
 
     }

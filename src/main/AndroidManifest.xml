@@ -30,10 +30,10 @@
             android:name="com.google.android.backup.api_key"
             android:value="AEdPqrEAAAAIHYaIPvfcNV9O6jA91IszSWW63KdHhty9CN3QLQ" />
 
-        <activity
-            android:name=".ui.main.SplashActivity" >
+        <activity android:name=".ui.main.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -146,6 +146,11 @@
                 android:value=".ui.main.MainActivity" />
         </activity>
 
+        <receiver
+            android:name=".wallet.BlockChainSyncAlarmReceiver"
+            android:enabled="true"
+            android:exported="true" >
+        </receiver>
     </application>
 
 </manifest>

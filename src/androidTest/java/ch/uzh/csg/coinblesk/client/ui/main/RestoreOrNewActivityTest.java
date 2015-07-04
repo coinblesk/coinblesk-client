@@ -18,8 +18,6 @@ import ch.uzh.csg.coinblesk.client.R;
 @LargeTest
 public class RestoreOrNewActivityTest extends BaseInstrumentationTest<RestoreOrNewActivity> {
 
-    private final static int TIMEOUT = 30*1000;
-
     // these actually have some test coins on them, so don't change!
     private final static String RESTORE_SEED = "pause quarter bar elder always donkey elevator north scout symbol clever rather";
     private final static String ADDRESS = "2N9f6XZqRiSHHdTBjS2tKTwXd2f6bt1RebV";
@@ -47,15 +45,13 @@ public class RestoreOrNewActivityTest extends BaseInstrumentationTest<RestoreOrN
         super.tearDown();
     }
 
-    public void testCreateNewWallet() throws Throwable {
-
+    public void testCreateNewWallet() throws Exception {
         solo.clickOnView(solo.getView(R.id.restoreOrNew_button_createNewWallet));
         checkifMainActivity();
 
-        Thread.sleep(15000);
     }
 
-    public void testRestoreWallet() throws Throwable {
+    public void testRestoreWallet() throws Exception {
 
         solo.clearEditText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase));
         solo.enterText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase), RESTORE_SEED);
@@ -78,6 +74,15 @@ public class RestoreOrNewActivityTest extends BaseInstrumentationTest<RestoreOrN
         solo.waitForText("Top Up Account", 0, TIMEOUT);
         solo.clickOnMenuItem("Top Up Account");
         assertTrue(solo.waitForText(ADDRESS, 0, TIMEOUT));
+
+    }
+
+    public void testRestoreWallet_wrongPassphrase() throws Exception {
+        String invalidPassphrase = "some invalid passphrase";
+        solo.clearEditText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase));
+        solo.enterText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase), invalidPassphrase);
+        solo.clickOnView(solo.getView(R.id.restoreOrNew_button_restoreWallet));
+        solo.waitForText(solo.getString(R.string.restoreOrCreate_toast_restoreFailed), 0, TIMEOUT);
 
     }
 

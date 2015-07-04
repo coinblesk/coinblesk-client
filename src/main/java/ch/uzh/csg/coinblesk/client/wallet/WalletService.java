@@ -7,7 +7,9 @@ import android.support.annotation.Nullable;
 import android.util.Base64;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Service;
 
 import org.bitcoinj.core.Address;
@@ -45,8 +47,8 @@ import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
-import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 
 public class WalletService extends android.app.Service {
@@ -54,6 +56,16 @@ public class WalletService extends android.app.Service {
     private final static Logger LOGGER = LoggerFactory.getLogger(WalletService.class);
 
     private final static String WALLET_FILES_PREFIX = "_bitcoinj";
+
+
+    private final static int REFUND_LOCKTIME_MONTH = 5;
+
+    /**
+     * If a earlier created refund transaction becomes valid in less month than this,
+     * the clients' funds are redeposited, meaning the once created refund transaction
+     * will be invalidated
+     */
+    private final static int REFUND_LOCKTIME_THRESHOLD = 2;
 
     public class LocalBinder extends Binder {
         public WalletService getService() {
@@ -67,6 +79,7 @@ public class WalletService extends android.app.Service {
 
     private BitcoinNet bitcoinNet;
     private String serverWatchingKey;
+    private PersistentStorageHandler storage;
 
     private SyncProgress syncProgress;
 
@@ -111,21 +124,18 @@ public class WalletService extends android.app.Service {
         return bitcoinNet.toString().toLowerCase(Locale.ENGLISH) + WALLET_FILES_PREFIX;
     }
 
-    private boolean isWalletReady() {
-        return clientWalletKit != null && clientWalletKit.isRunning();
-    }
-
     /**
      * Restores a wallet from an Mnemonic seed.
      *
-     * @param bitcoinNet
-     * @param watchingKey
+     * @param storage
      * @param mnemonic
      * @param creationTime
      * @return
      * @throws UnreadableWalletException
      */
-    public Service restoreWalletFromSeed(final BitcoinNet bitcoinNet, final String watchingKey, String mnemonic, Long creationTime) throws UnreadableWalletException {
+    public Service restoreWalletFromSeed(PersistentStorageHandler storage, String mnemonic, Long creationTime) throws UnreadableWalletException {
+        Preconditions.checkNotNull(storage, "Storage handler cannot be null.");
+
         LOGGER.debug("Restoring wallet from mnemonic seed");
 
         File[] files = getFilesDir().listFiles(new FilenameFilter() {
@@ -141,11 +151,11 @@ public class WalletService extends android.app.Service {
         }
 
         LOGGER.debug("Starting wallet service normally");
-        Service service = init(bitcoinNet, watchingKey, mnemonic, creationTime);
+        Service service = init(storage, mnemonic, creationTime);
         service.awaitRunning();
         LOGGER.debug("Wallet service started");
 
-        return replayBlockchain(bitcoinNet, serverWatchingKey);
+        return replayBlockchain();
     }
 
     /**
@@ -153,7 +163,7 @@ public class WalletService extends android.app.Service {
      *
      * @return
      */
-    private Service replayBlockchain(final BitcoinNet bitcoinNet, String serverWatchingKey) {
+    private Service replayBlockchain() {
         LOGGER.debug("Replaying blockchain");
 
         clientWalletKit.awaitRunning();
@@ -176,23 +186,31 @@ public class WalletService extends android.app.Service {
         }
 
         LOGGER.debug("Restarting wallet service");
-        return init(bitcoinNet, serverWatchingKey);
+        return init(storage);
     }
 
-    public Service init() {
-        BitcoinNet bitcoinNet = ((CoinBleskApplication) getApplication()).getStorageHandler().getBitcoinNet();
-        String serverWatchingKey = ((CoinBleskApplication) getApplication()).getStorageHandler().getWatchingKey();
-        return init(bitcoinNet, serverWatchingKey);
+    public Service init(PersistentStorageHandler storageHandler) {
+        return init(storageHandler, null, null);
     }
 
-    public Service init(final BitcoinNet bitcoinNet, final String watchingKey) {
-        return init(bitcoinNet, watchingKey, null, null);
+    /**
+     * This method will be called after the bitcoin wallet is started
+     */
+    private void postInit() {
+        checkRefundTxState();
     }
 
-    public Service init(final BitcoinNet bitcoinNet, final String watchingKey, @Nullable String mnemonic, @Nullable Long creationTime) {
+    private Service init(PersistentStorageHandler storage, @Nullable String mnemonic, @Nullable Long creationTime) {
 
-        this.bitcoinNet = bitcoinNet;
-        this.serverWatchingKey = watchingKey;
+        Preconditions.checkNotNull(storage, "Storage handler cannot be null.");
+
+        this.storage = storage;
+
+        bitcoinNet = storage.getBitcoinNet();
+        serverWatchingKey = storage.getWatchingKey();
+
+        // check state
+        Preconditions.checkState(bitcoinNet != null && serverWatchingKey != null, "bitcoinnet and server watching key have to be set in the storage for the wallet service to strart.");
 
         // we need a lock here to make sure below is not executed multiple times.
         // Else if two threads at the same time try to bind the service, IllegalStateException
@@ -237,6 +255,17 @@ public class WalletService extends android.app.Service {
             if (bitcoinNet == BitcoinNet.UNITTEST) {
                 clientWalletKit.setDiscovery(new DnsDiscovery(new String[]{"localhost"}, params));
             }
+
+            // run postInit method when the wallet is running
+            clientWalletKit.addListener(new Service.Listener() {
+                @Override
+                public void running() {
+                    super.running();
+                    LOGGER.debug("Wallet service is running....");
+                    postInit();
+                }
+            }, MoreExecutors.sameThreadExecutor());
+
             return clientWalletKit.startAsync();
         } finally {
             lock.unlock();
@@ -244,16 +273,71 @@ public class WalletService extends android.app.Service {
         }
     }
 
-    private CoinBleskWalletAppKit getAppKit() {
+    /**
+     * Redepositing means sending all available bitcoins to the own P2SH address. This is necessary to invalidate a earlier created
+     * refund transaction. If we don't do this before a refund transaction becomes valid, the server can no longer guarantee that we don't double-spend
+     * our bitcoins, and therefore instant transaction are no longer allowed.
+     */
+    private void redeposit() {
+        NetworkParameters params = getNetworkParams(bitcoinNet);
 
-        // init the app kit if it's not running already
-        if (clientWalletKit == null || clientWalletKit.state() != Service.State.STARTING || clientWalletKit.state() != Service.State.RUNNING) {
-            if (bitcoinNet == null || serverWatchingKey == null) {
-                init();
-            } else {
-                init(bitcoinNet, serverWatchingKey);
-            }
+        try {
+            Address btcAddress = new Address(params, getBitcoinAddress());
+            Wallet.SendRequest req = Wallet.SendRequest.emptyWallet(btcAddress);
+            req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
+            getAppKit().wallet().completeTx(req);
+        } catch (AddressFormatException | InsufficientMoneyException e) {
+            LOGGER.error("Failed to create bitcoin address", e);
         }
+    }
+
+    /**
+     * This method is responsible for
+     * <ul>
+     *     <li>Creating a refund transaction if we don't have one yet</li>
+     *     <li>Redepositing the bitcoins if an earlier generated refund transaction becomes valid soon</li>
+     *     <li>Broadcasting the refund transaction if it is valid</li>
+     * </ul>
+     */
+    private void checkRefundTxState() {
+
+        long currentChainHeight = getAppKit().peerGroup().getMostCommonChainHeight();
+
+        if(storage.getRefundTxValidBlock() < 0) {
+            // no refund transaction yet, create one
+            createRefundTransaction();
+        } else if(currentChainHeight > storage.getRefundTxValidBlock()) {
+            // an earlier created refund transaction has become valid. This should only happen if we
+            // were not able to redeposit the bitcoins, and could be an indication that the server
+            // disappeared. If this is the case, we issue the refund transaction, which sends us back all
+            // bitcoins.
+            broadcastRefundTx();
+        } else if (storage.getRefundTxValidBlock() - BitcoinUtils.monthsToBlocks(REFUND_LOCKTIME_THRESHOLD) < currentChainHeight) {
+            // we are in the threshold until a earlier created refund transaction becomes valid. This
+            // means that we have to redeposit the bitcoins, or else the earlier issued refund transaction
+            // becomes valid, and the server will no longer sign our transactions.
+            redeposit();
+        }
+    }
+
+    /**
+     * Broadcasts the stored refund transaction.
+     */
+    private void broadcastRefundTx() {
+        byte[] serializedRefundTx = Base64.decode(storage.getRefundTx(), Base64.NO_WRAP);
+        Transaction refundTx = new Transaction(getNetworkParams(bitcoinNet), serializedRefundTx);
+        Wallet.SendRequest req = Wallet.SendRequest.forTx(refundTx);
+
+        try {
+            getAppKit().wallet().completeTx(req);
+        } catch (InsufficientMoneyException e) {
+            LOGGER.error("Refund transaction is no longer valid, funds have already been spent. Uh-oh.");
+            return;
+        }
+
+    }
+
+    private CoinBleskWalletAppKit getAppKit() {
 
         // wait for the wallet kit to start
         if (clientWalletKit.state() == Service.State.STARTING) {
@@ -321,8 +405,8 @@ public class WalletService extends android.app.Service {
         getAppKit().wallet().completeTx(req);
 
 
-        for(TransactionInput txIn : req.tx.getInputs()) {
-            if(txIn.getConnectedOutput().getScriptPubKey().isPayToScriptHash()) {
+        for (TransactionInput txIn : req.tx.getInputs()) {
+            if (txIn.getConnectedOutput().getScriptPubKey().isPayToScriptHash()) {
                 // at least one input needs to be signed by the server,
                 // which means that we are not responsible for broadcasting the transaction
                 return;
@@ -335,32 +419,37 @@ public class WalletService extends android.app.Service {
 
 
     /**
-     * Creates a time-locked transaction that sends all available coins to a personal address.
-     * @return a Base64 encoded, fully signed bitcoin transaction
+     * Creates a time-locked transaction signed by the coinblesk server that sends all available coins to a personal address, and
+     * stores it on the device.
+     *
+     * @return true if the refund transaction was successfully signed by the server and stored on the device.
      */
-    public String createRefundTransaction() {
+    public boolean createRefundTransaction() {
 
-        Transaction tx = null;
+        Transaction tx;
+
         try {
             Address privateAddr = new Address(getNetworkParams(bitcoinNet), getPrivateAddress());
             Wallet.SendRequest req = Wallet.SendRequest.emptyWallet(privateAddr);
             req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
-            req.tx.setLockTime(getLockTime());
-            getAppKit().wallet().completeTx(req);
-            tx = req.tx;
 
-        } catch (AddressFormatException e) {
-            LOGGER.error("Failed to create private receiving address", e);
-        } catch (InsufficientMoneyException e) {
+            // calculate the blocktime.
+            long lockTime = getLockTime(REFUND_LOCKTIME_MONTH);
+            req.tx.setLockTime(lockTime);
+
+            getAppKit().wallet().completeTx(req);
+
+        } catch (Exception e) {
             LOGGER.error("Failed to create refund transaction", e);
+            return false;
         }
 
-        return Base64.encodeToString(tx.unsafeBitcoinSerialize(), Base64.NO_WRAP);
+        return true;
     }
 
-    private long getLockTime() {
+    private long getLockTime(int month) {
         long currentBlockHeight = getAppKit().peerGroup().getMostCommonChainHeight();
-        long lockTime = 6 * 24 * 30 * 3; // ~3 month assuming 1 block every 10 minutes
+        long lockTime = 6 * 24 * 30 * month; // ~3 month assuming 1 block every 10 minutes
         return currentBlockHeight + lockTime;
     }
 

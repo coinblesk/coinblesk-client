@@ -4,7 +4,7 @@ import android.content.Context;
 
 public class PersistenceFactory {
     
-    public static PersistentData getCloudStorage(Context context) {
+    public static PersistentStorage getCloudStorage(Context context) {
         return new CoinBleskCloudData(context);
     }
 }

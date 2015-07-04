@@ -15,22 +15,23 @@ import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
  * Handles storing and retrieving user information which needs to be persisted
  * locally.
  */
-public class InternalStorage {
+public class PersistentStorageHandler {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(InternalStorage.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(PersistentStorageHandler.class);
 
-    private PersistentData data;
+    private PersistentStorage data;
 
     private Set<String> addressbook;
     private Set<String> trustedAddressbook;
 
+
     /**
-     * Instantiates a new {@link InternalStorage}.
+     * Instantiates a new {@link PersistentStorageHandler}.
      *
      * @param context the application's context used to be able to write on the
      *                private storage
      */
-    public InternalStorage(Context context) {
+    public PersistentStorageHandler(Context context) {
         this.data = PersistenceFactory.getCloudStorage(context);
     }
 
@@ -207,6 +208,48 @@ public class InternalStorage {
     public void setBitcoinNet(BitcoinNet bitcoinNet) {
         LOGGER.debug("Saving bitcoin net {}", bitcoinNet);
         data.setBitcoinNet(bitcoinNet.toString());
+    }
+
+    /**
+     * @return the last, base64 encoded refund transaction
+     */
+    public String getRefundTx() {
+        return data.getRefundTx();
+    }
+
+    /**
+     * Set the newest refund transaction. Old refund transactions are deleted.
+     *
+     * @param base64encodedRefundTx the base64 encoded refund transaction
+     */
+    public void setRefundTx(String base64encodedRefundTx) {
+        data.setRefundTx(base64encodedRefundTx);
+    }
+
+
+    /**
+     * This method returns the block number from which the a earlier generated refund transaction
+     * becomes valid and ready to spend. This means that the server can no longer guarantee that
+     * the client doesn't double-spend.
+     * Usually if the last seen block's number is larger than this, we need to re-deposit the bitcoins.
+     *
+     * @return block number when at least one earlier generated refund-transaction becomes valid
+     * <strong>or</strong> -1 if no block number has been set.
+     */
+    public long getRefundTxValidBlock() {
+        return data.getRefundTxValidBlock();
+    }
+
+    /**
+     * This method returns sets block number from which the a earlier generated refund transaction
+     * becomes valid and ready to spend. This means that the server can no longer guarantee that
+     * the client doesn't double-spend.
+     * <p>
+     * Usually this is set after a redeposit or new wallet setup, after the refund transaction
+     * has been signed by the server.
+     */
+    public void setRefundTxValidBlock(long refundTxValidBlock) {
+        data.setRefundTxValidBlock(refundTxValidBlock);
     }
 
     /**

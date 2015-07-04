@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Set;
 
-public class CoinBleskCloudData  extends BackupAgentHelper implements PersistentData {
+public class CoinBleskCloudData  extends BackupAgentHelper implements PersistentStorage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CoinBleskCloudData.class);
     
@@ -31,6 +31,8 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     private static final String SERVER_WATCHING_KEY = "server-watching-key";
     private static final String CONTACTS = "contacts";
     private static final String TRUSTED_CONTACTS = "trusted-contacts";
+    private static final String REFUND_TX = "refund-tx";
+    private static final String REFUND_TX_VALID_BLOCK = "refund-tx-valid-block";
 
     private final SharedPreferences prefs;
     private Gson gson;
@@ -84,7 +86,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     private void saveAddressBook(Collection<String> contacts, boolean trustet) {
         String[] contactArray = contacts.toArray(new String[contacts.size()]);
         String json = gson.toJson(contactArray);
-        prefs.edit().putString(trustet ? TRUSTED_CONTACTS : CONTACTS, json).apply();
+        prefs.edit().putString(trustet ? TRUSTED_CONTACTS : CONTACTS, json).commit();
     }
 
     private Set<String> getAddresses(boolean trustet) {
@@ -105,7 +107,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
 
     @Override
     public void setServerWatchingKey(String serverWatchingKey) {
-        prefs.edit().putString(SERVER_WATCHING_KEY, serverWatchingKey).apply();
+        prefs.edit().putString(SERVER_WATCHING_KEY, serverWatchingKey).commit();
     }
 
     @Override
@@ -116,9 +118,26 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     @Override
     public void setBitcoinNet(String bitcoinNet) {
         prefs.edit().putString(BITCOIN_NET, bitcoinNet).commit();
-        String bla = prefs.getString(BITCOIN_NET, null);
-        System.out.println(bla);
+    }
 
+    @Override
+    public void setRefundTx(String base64EncodedTx) {
+        prefs.edit().putString(REFUND_TX, base64EncodedTx).commit();
+    }
+
+    @Override
+    public String getRefundTx() {
+        return prefs.getString(REFUND_TX, null);
+    }
+
+    @Override
+    public void setRefundTxValidBlock(long validBlockNr) {
+        prefs.edit().putLong(REFUND_TX_VALID_BLOCK, validBlockNr).commit();
+    }
+
+    @Override
+    public long getRefundTxValidBlock() {
+        return prefs.getLong(REFUND_TX_VALID_BLOCK, -1);
     }
 
     @Override

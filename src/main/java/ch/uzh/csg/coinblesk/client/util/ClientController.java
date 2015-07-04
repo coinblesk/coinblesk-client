@@ -7,25 +7,25 @@ import android.net.NetworkInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.uzh.csg.coinblesk.client.persistence.InternalStorage;
+import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
 import ch.uzh.csg.coinblesk.client.persistence.WrongPasswordException;
 
 /**
  * This class stores the user information as long as the user is logged in. It
  * also provides the information if the user is in only mode or not.
- * Furthermore, it holds the reference to the {@link InternalStorage}.
+ * Furthermore, it holds the reference to the {@link PersistentStorageHandler}.
  */
 public class ClientController {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ClientController.class);
 
     private static boolean isConnectedToServer = false;
-    private static InternalStorage internalStorageHandler;
+    private static PersistentStorageHandler internalStorageHandler;
 
     /**
-     * Returns the {@link InternalStorage}.
+     * Returns the {@link PersistentStorageHandler}.
      */
-    public static InternalStorage getStorageHandler() {
+    public static PersistentStorageHandler getStorageHandler() {
         return internalStorageHandler;
     }
 
@@ -59,7 +59,7 @@ public class ClientController {
      *                                given username
      */
     public static boolean init(Context context) {
-        internalStorageHandler = new InternalStorage(context);
+        internalStorageHandler = new PersistentStorageHandler(context);
         return true;
     }
 

@@ -29,6 +29,8 @@ import testutils.TestUtils;
  */
 public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrumentationTestCase2<T> {
 
+
+    protected final static int TIMEOUT = 30*1000;
     protected final static String SERVER_WATCHING_KEY = TestUtils.getServerWatchingKey(TestNet3Params.get());
 
     protected Solo solo;

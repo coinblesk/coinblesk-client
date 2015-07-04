@@ -5,17 +5,12 @@ import android.support.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 
-import org.bitcoinj.core.BlockChain;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.signers.TransactionSigner;
-import org.bitcoinj.store.BlockStore;
-import org.bitcoinj.store.BlockStoreException;
-import org.bitcoinj.store.MemoryBlockStore;
 import org.bitcoinj.store.UnreadableWalletException;
 import org.bitcoinj.wallet.DeterministicSeed;
 import org.bitcoinj.wallet.MarriedKeyChain;
@@ -24,6 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.security.SecureRandom;
+
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
+import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
 
 /**
  * Created by rvoellmy on 5/24/15.
@@ -50,8 +48,6 @@ public class CoinBleskWalletAppKit extends WalletAppKit {
     private String serverSeed;
     private RestoreData restoreData;
 
-    private BlockStore blockStore;
-
     public CoinBleskWalletAppKit(NetworkParameters params, File directory, String filePrefix) {
         super(params, directory, filePrefix);
     }
@@ -61,22 +57,19 @@ public class CoinBleskWalletAppKit extends WalletAppKit {
         maybeAllowSpendingUnconfirmed();
         maybeMarryWallet();
         maybeInitServerTransactionSigner(context);
-        maybeSetBlockStore();
     }
 
-    private void maybeInitServerTransactionSigner(Context context) {
+    private void maybeInitServerTransactionSigner(final Context context) {
+
+        Preconditions.checkNotNull(context);
 
         // create listener for when transactions have been signed
-        TransactionSigningCompleteListener listener = new TransactionSigningCompleteListener() {
-            @Override
-            public void onSuccess(Transaction tx) {
-                vWallet.maybeCommitTx(tx);
-            }
-        };
+        PersistentStorageHandler storage = ((CoinBleskApplication) context.getApplicationContext()).getStorageHandler();
+        TransactionSigningCompleteListener listener = new DefaultTransactionSigningCompleteListener(vWallet, storage);
 
+        // add the server transaction signer to the wallet
         for (TransactionSigner signer : vWallet.getTransactionSigners()) {
             if (signer instanceof ServerTransactionSigner) {
-                Preconditions.checkNotNull(context);
                 LOGGER.debug("Server transaction signer already installed, set android context");
                 ((ServerTransactionSigner) signer).setContext(context);
                 ((ServerTransactionSigner) signer).addTransactionSigningCompleteListener(listener);
@@ -96,11 +89,6 @@ public class CoinBleskWalletAppKit extends WalletAppKit {
 
     public CoinBleskWalletAppKit setAndroidContext(Context context) {
         this.context = context;
-        return this;
-    }
-
-    public CoinBleskWalletAppKit setBlockStore(BlockStore blockStore) {
-        this.blockStore = blockStore;
         return this;
     }
 
@@ -160,22 +148,6 @@ public class CoinBleskWalletAppKit extends WalletAppKit {
         vWallet.addAndActivateHDChain(marriedKeyChain);
 
     }
-
-    private void maybeSetBlockStore() {
-
-        if(blockStore == null) {
-            return;
-        }
-
-        try {
-            vChain = new BlockChain(params, new MemoryBlockStore(params));
-        } catch (BlockStoreException e) {
-            LOGGER.error("Failed setting block store", e);
-        }
-        vChain.addWallet(vWallet);
-        vPeerGroup.addWallet(vWallet);
-    }
-
 
     /**
      * @return e new wallet seed

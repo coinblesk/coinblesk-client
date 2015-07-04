@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.persistence.InternalStorage;
+import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
@@ -34,7 +34,7 @@ public class RestoreOrNewActivity extends WalletActivity {
     private Button mCreateNewWalletButton;
     private EditText mBackupPhraseField;
 
-    private InternalStorage storageHandler;
+    private PersistentStorageHandler storageHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +81,7 @@ public class RestoreOrNewActivity extends WalletActivity {
                     @Override
                     public void onTaskComplete(final SetupRequestObject response) {
 
-                        final String backupPhrase = mBackupPhraseField.getText().toString();
+                        final String backupPhrase = mBackupPhraseField.getText().toString().toLowerCase();
                         if (BitcoinUtils.validMnemonic(backupPhrase)) {
                             showLoadingProgressDialog();
 
@@ -90,7 +90,7 @@ public class RestoreOrNewActivity extends WalletActivity {
                                 protected Void doInBackground(Void... params) {
                                     try {
                                         showLoadingProgressDialog();
-                                        Service service = getWalletService().restoreWalletFromSeed(response.getBitcoinNet(), response.getServerWatchingKey(), backupPhrase, 0L);
+                                        Service service = getWalletService().restoreWalletFromSeed(getCoinBleskApplication().getStorageHandler(), backupPhrase, 0L);
                                         service.awaitRunning();
                                     } catch (UnreadableWalletException e) {
                                         LOGGER.error("Wallet setup failed: {}", e);
@@ -144,7 +144,7 @@ public class RestoreOrNewActivity extends WalletActivity {
     }
 
     private void startMainActivity() {
-        getWalletService().init(storageHandler.getBitcoinNet(), storageHandler.getWatchingKey());
+        getWalletService().init(getCoinBleskApplication().getStorageHandler());
         Intent intent = new Intent(RestoreOrNewActivity.this, MainActivity.class);
         startActivity(intent);
     }

@@ -5,6 +5,7 @@ import org.bitcoinj.core.Transaction;
 /**
  * Created by rvoellmy on 6/30/15.
  */
-public interface TransactionSigningCompleteListener {
-    void onSuccess(Transaction tx);
+public abstract class TransactionSigningCompleteListener {
+    abstract void onSuccess(Transaction tx);
+    void onFailed(Transaction tx) {}
 }
