@@ -5,7 +5,7 @@ import android.util.Base64;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.Wallet;
 
-import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
+import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 
 /**
  * Created by rvoellmy on 7/4/15.
@@ -13,9 +13,9 @@ import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
 public class DefaultTransactionSigningCompleteListener extends TransactionSigningCompleteListener {
 
     private Wallet wallet;
-    private PersistentStorageHandler storage;
+    private StorageHandler storage;
 
-    public DefaultTransactionSigningCompleteListener(Wallet wallet, PersistentStorageHandler storage) {
+    public DefaultTransactionSigningCompleteListener(Wallet wallet, StorageHandler storage) {
         this.wallet = wallet;
         this.storage = storage;
     }
@@ -26,6 +26,11 @@ public class DefaultTransactionSigningCompleteListener extends TransactionSignin
             // the signerd transaction was a normal transaction. Commit it to the wallet,
             // if it was not already seen on the network.
             wallet.maybeCommitTx(tx);
+
+            if(tx.getMemo() == DefaultTransactionMemos.REDEPOSIT_TX_MEMO) {
+                // this was a redeposit: Reset refund transaction valid block in storage
+                storage.setRefundTxValidBlock(wallet.getLastBlockSeenHeight());
+            }
         } else {
             // the signed transaction was a refund transaction
             storage.setRefundTx(Base64.encodeToString(tx.unsafeBitcoinSerialize(), Base64.NO_WRAP));

@@ -15,7 +15,7 @@ import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
  * Handles storing and retrieving user information which needs to be persisted
  * locally.
  */
-public class PersistentStorageHandler {
+public class PersistentStorageHandler implements StorageHandler {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PersistentStorageHandler.class);
 
@@ -35,13 +35,7 @@ public class PersistentStorageHandler {
         this.data = PersistenceFactory.getCloudStorage(context);
     }
 
-    /**
-     * Returns an alphabetically ordered Set<String> with all usernames stored
-     * in address book.
-     *
-     * @return Set<String> with all usernames stored in address book or null, if
-     * there is no such element in the underlying xml
-     */
+    @Override
     public Set<String> getAddressBook() {
         if (addressbook == null) {
             addressbook = data.getAddressBookContacts();
@@ -49,13 +43,7 @@ public class PersistentStorageHandler {
         return addressbook;
     }
 
-    /**
-     * Adds an entry (username) to the address book of known users.
-     *
-     * @param username the username to be saved
-     * @return true if the file was saved, false if it is just set temporarily
-     * but could not be persisted
-     */
+    @Override
     public boolean addAddressBookEntry(String username) {
         if (getAddressBook().contains(username)) {
             return true;
@@ -70,13 +58,7 @@ public class PersistentStorageHandler {
         }
     }
 
-    /**
-     * Removes an entry (username) from the address book of known users.
-     *
-     * @param username the username to be removed
-     * @return true if the file was saved, false if it is just set temporarily
-     * but could not be persisted
-     */
+    @Override
     public boolean removeAddressBookEntry(String username) {
         boolean isTrusted = trustedAddressbook.contains(username);
 
@@ -101,12 +83,7 @@ public class PersistentStorageHandler {
         }
     }
 
-    /**
-     * Removes all entries from address book which are not trusted.
-     *
-     * @return true if the file was saved, false if it is just set temporarily
-     * but could not be persisted
-     */
+    @Override
     public boolean removeAllUntrustedAddressBookEntries() {
         Set<String> trustedAddressBook = new TreeSet<>(getTrustedAddressbook());
         Set<String> addressesToRemove = new TreeSet<>(getAddressBook());
@@ -132,13 +109,7 @@ public class PersistentStorageHandler {
         }
     }
 
-    /**
-     * Returns an alphabetically ordered Set<String> with all usernames of
-     * trusted users stored in the trusted address book.
-     *
-     * @return Set<String> with all trusted usernames (alphabetically ordered)
-     * or null, if there is no such element in the underlying xml
-     */
+    @Override
     public Set<String> getTrustedAddressbook() {
         if (trustedAddressbook == null) {
             trustedAddressbook = data.getTrusteAddressBookdContacts();
@@ -146,17 +117,12 @@ public class PersistentStorageHandler {
         return trustedAddressbook;
     }
 
+    @Override
     public boolean isTrustedContact(String contact) {
         return getTrustedAddressbook().contains(contact);
     }
 
-    /**
-     * Adds an entry (username) to the address book of trusted users.
-     *
-     * @param username the username to be saved
-     * @return true if the file was saved, false if it is just set temporarily
-     * but could not be persisted
-     */
+    @Override
     public boolean addTrustedAddressBookEntry(String username) {
         if (getTrustedAddressbook().contains(username)) {
             return true;
@@ -171,13 +137,7 @@ public class PersistentStorageHandler {
         }
     }
 
-    /**
-     * Removes an entry (username) from the address book of trusted users.
-     *
-     * @param username the username to be removed
-     * @return true if the file was saved, false if it is just set temporarily
-     * but could not be persisted
-     */
+    @Override
     public boolean removeTrustedAddressBookEntry(String username) {
         if (!getTrustedAddressbook().contains(username)) {
             return true;
@@ -192,79 +152,56 @@ public class PersistentStorageHandler {
         }
     }
 
+    @Override
     public String getWatchingKey() {
         return data.getServerWatchingKey();
     }
 
+    @Override
     public void setWatchingKey(String watchingKey) {
         data.setServerWatchingKey(watchingKey);
     }
 
+    @Override
     public BitcoinNet getBitcoinNet() {
         String bitcoinNet = data.getBitcoinNet();
         return bitcoinNet == null ? null : BitcoinNet.of(bitcoinNet);
     }
 
+    @Override
     public void setBitcoinNet(BitcoinNet bitcoinNet) {
         LOGGER.debug("Saving bitcoin net {}", bitcoinNet);
         data.setBitcoinNet(bitcoinNet.toString());
     }
 
-    /**
-     * @return the last, base64 encoded refund transaction
-     */
+    @Override
     public String getRefundTx() {
         return data.getRefundTx();
     }
 
-    /**
-     * Set the newest refund transaction. Old refund transactions are deleted.
-     *
-     * @param base64encodedRefundTx the base64 encoded refund transaction
-     */
+    @Override
     public void setRefundTx(String base64encodedRefundTx) {
         data.setRefundTx(base64encodedRefundTx);
     }
 
 
-    /**
-     * This method returns the block number from which the a earlier generated refund transaction
-     * becomes valid and ready to spend. This means that the server can no longer guarantee that
-     * the client doesn't double-spend.
-     * Usually if the last seen block's number is larger than this, we need to re-deposit the bitcoins.
-     *
-     * @return block number when at least one earlier generated refund-transaction becomes valid
-     * <strong>or</strong> -1 if no block number has been set.
-     */
+    @Override
     public long getRefundTxValidBlock() {
         return data.getRefundTxValidBlock();
     }
 
-    /**
-     * This method returns sets block number from which the a earlier generated refund transaction
-     * becomes valid and ready to spend. This means that the server can no longer guarantee that
-     * the client doesn't double-spend.
-     * <p>
-     * Usually this is set after a redeposit or new wallet setup, after the refund transaction
-     * has been signed by the server.
-     */
+    @Override
     public void setRefundTxValidBlock(long refundTxValidBlock) {
         data.setRefundTxValidBlock(refundTxValidBlock);
     }
 
-    /**
-     * Checks if all data that is required to launch the wallet is stored on the device.
-     *
-     * @return true if all required data is stored on the device.
-     */
+    @Override
     public boolean hasUserData() {
         return getBitcoinNet() != null &&
                 getWatchingKey() != null;
     }
 
-    /**
-     * deletes all internal data
-     */
+    @Override
     public void clear() {
         data.clear();
     }

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
+import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.util.LoggingConfig;
@@ -17,7 +18,7 @@ public class CoinBleskApplication extends Application {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CoinBleskApplication.class);
 
-    private PersistentStorageHandler mStorageHandler;
+    private StorageHandler mStorageHandler;
     private RequestFactory requestFactory;
 
     @Override
@@ -31,11 +32,11 @@ public class CoinBleskApplication extends Application {
         LOGGER.info("CoinBlesk is starting...");
     }
 
-    public PersistentStorageHandler getStorageHandler() {
+    public StorageHandler getStorageHandler() {
         return mStorageHandler;
     }
 
-    public void setStorageHandler(PersistentStorageHandler storageHandler) {
+    public void setStorageHandler(StorageHandler storageHandler) {
         this.mStorageHandler = storageHandler;
     }
 

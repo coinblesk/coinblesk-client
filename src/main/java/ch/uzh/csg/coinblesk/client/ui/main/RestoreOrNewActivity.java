@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
+import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
@@ -34,7 +34,7 @@ public class RestoreOrNewActivity extends WalletActivity {
     private Button mCreateNewWalletButton;
     private EditText mBackupPhraseField;
 
-    private PersistentStorageHandler storageHandler;
+    private StorageHandler storageHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

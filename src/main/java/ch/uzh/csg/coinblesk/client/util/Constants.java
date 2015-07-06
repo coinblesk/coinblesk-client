@@ -53,15 +53,11 @@ public class Constants {
 	
 	public static final String USERNAME_PATTERN = "^[A-Za-z0-9_-]{3,25}$";
 	public static final String TIME_SESSION_EXPIRED = "Time is expired";
-	public static final String NO_COOKIE_STORED = "No Cookie stored!";
-	
-	//minimum value for payouts
-	public static final String MIN_VALUE_PAYOUT = "0.0001";
 
 	
 	public static final int SCALE_CHF = 2;
 	public static final int SCALE_BTC = 8;
-	
+
 	public static BigDecimal inputValueCalculator = BigDecimal.ZERO;
 	public static String inputUnit = "CHF";
 	

@@ -1,6 +1,7 @@
 package ch.uzh.csg.coinblesk.client.wallet;
 
 import android.content.Context;
+import android.util.Base64;
 import android.widget.Toast;
 
 import org.bitcoinj.core.ScriptException;
@@ -23,6 +24,7 @@ import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
@@ -95,14 +97,18 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
         String serializedTx = android.util.Base64.encodeToString(tx.bitcoinSerialize(), android.util.Base64.NO_WRAP);
         txSigRequest.setPartialTx(serializedTx);
 
-        launchServerRequest(tx, txSigRequest);
+        if (!tx.isTimeLocked()) {
+            launchServerRequest(tx, txSigRequest);
+        } else {
+            launchRefundTxRequest(tx, txSigRequest);
+        }
 
         return true;
     }
 
     private int[] childNumbersToIntArray(List<ChildNumber> childNumbers) {
         int[] path = new int[childNumbers.size()];
-        for(int i = 0; i < childNumbers.size(); i++) {
+        for (int i = 0; i < childNumbers.size(); i++) {
             path[i] = childNumbers.get(i).getI();
         }
         return path;
@@ -113,18 +119,17 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
         RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequestTask = requestFactory.payOutRequest(new RequestCompleteListener<TransferObject>() {
             public void onTaskComplete(TransferObject response) {
 
-                // notify the listeners
+                // we notify the listeners with the partial transaction here. We don't need the
+                // fully signed transaction, the server will broadcast it, and we can commit it to the
+                // wallet even if it's not fully signed.
                 notifyListeners(tx, response.isSuccessful());
 
-                // notify the user of success/error
-                if(!tx.isTimeLocked()) {
-                    if (response.isSuccessful()) {
-                        LOGGER.info("Transaction signing was successful");
-                        Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
-                    } else {
-                        LOGGER.error("Transaction signing failed: " + response.getMessage());
-                        Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
-                    }
+                if (response.isSuccessful()) {
+                    LOGGER.info("Transaction signing and broadcast was successful");
+                    Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
+                } else {
+                    LOGGER.error("Transaction failed: " + response.getMessage());
+                    Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -132,10 +137,36 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
         payOutRequestTask.execute();
     }
 
+    private void launchRefundTxRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest) {
+        RequestFactory requestFactory = ((CoinBleskApplication) context.getApplicationContext()).getRequestFactory();
+        RequestTask<ServerSignatureRequestTransferObject, RefundTxTransferObject> refundRequestTask = requestFactory.refundTxRequest(new RequestCompleteListener<RefundTxTransferObject>() {
+            @Override
+            public void onTaskComplete(RefundTxTransferObject response) {
+
+                Transaction refundTx = null;
+                // TODO: change success/fail strings below
+
+                if (response.isSuccessful()) {
+                    refundTx = new Transaction(tx.getParams(), Base64.decode(response.getRefundTx(), Base64.NO_WRAP));
+                    LOGGER.info("Refund tx request was successful");
+                    Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
+                } else {
+                    LOGGER.error("Refund tx request failed: " + response.getMessage());
+                    Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
+                }
+
+                notifyListeners(refundTx, response.isSuccessful());
+            }
+        }, txSigRequest, new RefundTxTransferObject(), context);
+
+        refundRequestTask.execute();
+    }
+
 
     /**
      * Sets the context of this transaction signer. IMPORTANT: This must be done *before* getting
      * signatures from the server. Otherwise the request will fail.
+     *
      * @param context
      */
     public void setContext(Context context) {
@@ -144,10 +175,11 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
     /**
      * adds a listener to this transaction signer that will be called when the transaction is complete.
+     *
      * @param listener
      */
     public void addTransactionSigningCompleteListener(TransactionSigningCompleteListener listener) {
-        if(listeners == null) {
+        if (listeners == null) {
             listeners = new LinkedList<>();
         }
         listeners.add(listener);
@@ -155,12 +187,12 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
     private void notifyListeners(final Transaction tx, boolean successful) {
 
-        if(listeners == null) {
+        if (listeners == null) {
             return;
         }
 
-        for(TransactionSigningCompleteListener listener : listeners) {
-            if(successful) {
+        for (TransactionSigningCompleteListener listener : listeners) {
+            if (successful) {
                 listener.onSuccess(tx);
             } else {
                 listener.onFailed(tx);

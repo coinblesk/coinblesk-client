@@ -21,7 +21,7 @@ import java.io.File;
 import java.security.SecureRandom;
 
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
-import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
+import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 
 /**
  * Created by rvoellmy on 5/24/15.
@@ -64,7 +64,7 @@ public class CoinBleskWalletAppKit extends WalletAppKit {
         Preconditions.checkNotNull(context);
 
         // create listener for when transactions have been signed
-        PersistentStorageHandler storage = ((CoinBleskApplication) context.getApplicationContext()).getStorageHandler();
+        StorageHandler storage = ((CoinBleskApplication) context.getApplicationContext()).getStorageHandler();
         TransactionSigningCompleteListener listener = new DefaultTransactionSigningCompleteListener(vWallet, storage);
 
         // add the server transaction signer to the wallet

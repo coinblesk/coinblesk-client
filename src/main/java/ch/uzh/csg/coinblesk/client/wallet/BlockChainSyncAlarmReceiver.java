@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
-import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
+import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 
 public class BlockChainSyncAlarmReceiver extends BroadcastReceiver implements ServiceConnection {
 
@@ -35,7 +35,7 @@ public class BlockChainSyncAlarmReceiver extends BroadcastReceiver implements Se
 
         WalletService.LocalBinder binder = (WalletService.LocalBinder) service;
         walletService = binder.getService();
-        PersistentStorageHandler storage = ((CoinBleskApplication) context.getApplicationContext()).getStorageHandler();
+        StorageHandler storage = ((CoinBleskApplication) context.getApplicationContext()).getStorageHandler();
         walletService.init(storage);
 
         walletService.getSyncProgress().addSyncCompleteListener(new SyncProgress.SyncProgressFinishedListener() {

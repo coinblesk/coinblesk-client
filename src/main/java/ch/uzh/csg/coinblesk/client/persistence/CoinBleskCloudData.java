@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Set;
 
+import ch.uzh.csg.coinblesk.client.wallet.RefundTx;
+
 public class CoinBleskCloudData  extends BackupAgentHelper implements PersistentStorage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CoinBleskCloudData.class);
@@ -137,7 +139,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
 
     @Override
     public long getRefundTxValidBlock() {
-        return prefs.getLong(REFUND_TX_VALID_BLOCK, -1);
+        return prefs.getLong(REFUND_TX_VALID_BLOCK, RefundTx.NO_REFUND_TX_VALID_BLOCK);
     }
 
     @Override

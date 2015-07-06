@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -36,6 +37,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplication;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -44,13 +46,15 @@ import java.util.Set;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
-import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
+import ch.uzh.csg.coinblesk.client.persistence.MemoryStorageHandler;
+import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.testutils.MockRequestTask;
 import ch.uzh.csg.coinblesk.client.testutils.TestUtils;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
@@ -59,8 +63,8 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
  */
 @PrepareForTest({WalletService.class})
 @RunWith(RobolectricTestRunner.class)
-@PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*", "javax.crypto.*" })
-@Config(manifest="src/main/AndroidManifest.xml")
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*", "javax.crypto.*"})
+@Config(manifest = "src/main/AndroidManifest.xml")
 public class WalletServiceTest {
 
     private static final BitcoinNet bitcoinNet = BitcoinNet.UNITTEST;
@@ -70,24 +74,21 @@ public class WalletServiceTest {
 
     private WalletService walletService;
     private static BlockStore blockStore;
-    private PersistentStorageHandler storage;
+    private StorageHandler storage;
 
     @BeforeClass
     public static void setupClass() throws Exception {
-        TestUtils.configureLogger(Level.INFO);
+        TestUtils.configureLogger(Level.DEBUG);
 
-        if(!testDirectory.exists()) {
+        if (!testDirectory.exists()) {
             testDirectory.mkdirs();
         }
 
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception {
-        for (File f : testDirectory.listFiles()) {
-            f.delete();
-        }
-        testDirectory.delete();
+    public static void tearDownClass() {
+        cleanTestDirectory();
     }
 
     @Before
@@ -100,14 +101,14 @@ public class WalletServiceTest {
         cleanTestDirectory();
 
         // build the service
-        walletService = Robolectric.buildService(WalletService.class).create().get();
+        walletService = Robolectric.buildService(WalletService.class).bind().get();
         walletService = PowerMockito.spy(walletService);
 
         // mocks
         PowerMockito.doReturn(testDirectory).when(walletService).getFilesDir();
 
         // mock internal storage
-        storage = PowerMockito.mock(PersistentStorageHandler.class);
+        storage = PowerMockito.spy(new MemoryStorageHandler());
         PowerMockito.doReturn(TestUtils.getServerWatchingKey(params)).when(storage).getWatchingKey();
         PowerMockito.doReturn(bitcoinNet).when(storage).getBitcoinNet();
 
@@ -176,15 +177,15 @@ public class WalletServiceTest {
 
                 // check if the correct amount was sent
                 boolean outputFound = false;
-                for(TransactionOutput txOut : tx.getOutputs()) {
+                for (TransactionOutput txOut : tx.getOutputs()) {
                     Address outputAddr = txOut.getAddressFromP2PKHScript(params);
 
-                    if(outputAddr == null) {
+                    if (outputAddr == null) {
                         // output to P2SH
                         continue;
                     }
 
-                    if(txOut.getAddressFromP2PKHScript(params).equals(receiveAddr)) {
+                    if (txOut.getAddressFromP2PKHScript(params).equals(receiveAddr)) {
                         outputFound = true;
                         Assert.assertEquals(0, txOut.getValue().compareTo(Coin.parseCoin(sendAmount.toString())));
                     }
@@ -198,7 +199,7 @@ public class WalletServiceTest {
             }
         };
 
-        ((CoinBleskApplication)RuntimeEnvironment.application).setRequestFactory(requestFactory);
+        ((CoinBleskApplication) RuntimeEnvironment.application).setRequestFactory(requestFactory);
 
         // send a coin to the wallet
         FakeTxBuilder.BlockPair bp = injectTx(walletService.getBitcoinAddress(), fundingAmount);
@@ -222,28 +223,51 @@ public class WalletServiceTest {
     }
 
     @Test
-    public void testGetRefundTx() throws Exception {
+    public void testCreateRefundTx() throws Exception {
+
+        BigDecimal totalAmount = BigDecimal.TEN;
+        Mockito.doNothing().when(walletService).checkRefundTxState();
+
+        ((CoinBleskApplication) RuntimeEnvironment.application).setStorageHandler(storage);
         walletService.init(storage);
 
         // mock server response
         RequestFactory requestFactory = new DefaultRequestFactory() {
             @Override
-            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
-                TransferObject response = new TransferObject();
+            public RequestTask<ServerSignatureRequestTransferObject, RefundTxTransferObject> refundTxRequest(RequestCompleteListener<RefundTxTransferObject> completeListener, ServerSignatureRequestTransferObject input, RefundTxTransferObject output, Context context) {
+
+                Transaction tx = new Transaction(params, Base64.decode(input.getPartialTx(), Base64.NO_WRAP));
+                Assert.assertTrue(tx.isTimeLocked());
+
+                RefundTxTransferObject response = new RefundTxTransferObject();
                 response.setSuccessful(true);
-                return new MockRequestTask(completeListener, response);
+                response.setRefundTx(input.getPartialTx()); // only partially signed but doesn't matter for the test
+
+                return new MockRequestTask<>(completeListener, response);
             }
         };
         ((CoinBleskApplication) RuntimeEnvironment.application).setRequestFactory(requestFactory);
 
+        // check preconditions
+        Assert.assertEquals(storage.getRefundTxValidBlock(), RefundTx.NO_REFUND_TX_VALID_BLOCK);
+        Assert.assertNull(storage.getRefundTx());
 
+        // send some coins to the wallet
         String addr = walletService.getBitcoinAddress();
-        injectTx(addr, BigDecimal.TEN);
-        walletService.createRefundTransaction();
+        injectTx(addr, totalAmount);
 
-        // TODO: fix this test
-//        Transaction tx = new Transaction(params, Base64.decode(base64RefundTx, Base64.NO_WRAP));
-//        Assert.assertTrue(tx.getLockTime() > 100);
+        Thread.sleep(1000);
+        ShadowApplication.runBackgroundTasks();
+        Thread.sleep(1000);
+
+        System.out.println(storage.getRefundTxValidBlock());
+        Assert.assertNotSame(storage.getRefundTxValidBlock(), RefundTx.NO_REFUND_TX_VALID_BLOCK);
+
+        Assert.assertNotNull(storage.getRefundTx());
+        Transaction refundTx = new Transaction(params, Base64.decode(storage.getRefundTx(), Base64.NO_WRAP));
+        Assert.assertTrue(refundTx.isTimeLocked());
+
+
 
     }
 
@@ -324,6 +348,100 @@ public class WalletServiceTest {
         Assert.assertTrue(addr.isP2SHAddress());
     }
 
+    @Test
+    public void testCheckRefundTxState_noBalance() throws Exception {
+
+        RequestFactory requestFactory = new DefaultRequestFactory() {
+            @Override
+            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
+                Assert.fail("Pay out request was launched with a balance of 0");
+                return null;
+            }
+        };
+
+        ((CoinBleskApplication) RuntimeEnvironment.application).setRequestFactory(requestFactory);
+
+        walletService.init(storage);
+        walletService.getService().awaitRunning();
+
+        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("createRefundTransaction");
+        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("broadcastRefundTx");
+        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("redeposit");
+    }
+
+    @Test
+    public void testCheckRefundTxState_noRefundTx() throws Exception {
+
+        // mock the balance and internal storage
+        PowerMockito.doReturn(null).when(storage).getRefundTx();
+        PowerMockito.doReturn(-1L).when(storage).getRefundTxValidBlock();
+        PowerMockito.doReturn(BigDecimal.ONE).when(walletService).getUnconfirmedBalance();
+
+        walletService.init(storage);
+        walletService.getService().awaitRunning();
+
+        PowerMockito.verifyPrivate(walletService, Mockito.times(1)).invoke("createRefundTransaction");
+        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("broadcastRefundTx");
+        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("redeposit");
+
+    }
+
+
+    @Test
+    public void testCheckRefundTxState_validRefundTransaction() throws Exception {
+
+        // pretend we are in the middle of the "threshold phase"
+        long mockCurrentBlockHeight = 100;
+        long mockRefundTxValidBlock = 50;
+
+        // mock the balance, block height and internal storage
+        Mockito.doReturn(mockRefundTxValidBlock).when(storage).getRefundTxValidBlock();
+        Mockito.doReturn(mockCurrentBlockHeight).when(walletService).getCurrentBlockHeight();
+        Mockito.doReturn(BigDecimal.ONE).when(walletService).getUnconfirmedBalance();
+
+        Mockito.doNothing().when(walletService).broadcastRefundTx();
+        Mockito.doNothing().when(walletService).createRefundTransaction();
+        Mockito.doNothing().when(walletService).redeposit();
+
+        walletService.init(storage);
+        walletService.getService().awaitRunning();
+
+        Thread.sleep(3000);
+
+        Mockito.verify(walletService, Mockito.times(1)).broadcastRefundTx();
+        Mockito.verify(walletService, Mockito.times(0)).createRefundTransaction();
+        Mockito.verify(walletService, Mockito.times(0)).redeposit();
+
+    }
+
+
+    @Test
+    public void testCheckRefundTxState_refundTxInThreshold() throws Exception {
+
+        // pretend we are in the middle of the "threshold phase"
+        long mockRefundTxValidBlock = BitcoinUtils.monthsToBlocks(WalletService.REFUND_LOCKTIME_MONTH);
+        long mockCurrentBlockHeight = mockRefundTxValidBlock - BitcoinUtils.monthsToBlocks(WalletService.REFUND_LOCKTIME_THRESHOLD) / 2;
+
+        // mock the balance, block height and internal storage
+        Mockito.doReturn(mockRefundTxValidBlock).when(storage).getRefundTxValidBlock();
+        Mockito.doReturn(mockCurrentBlockHeight).when(walletService).getCurrentBlockHeight();
+        Mockito.doReturn(BigDecimal.ONE).when(walletService).getUnconfirmedBalance();
+
+        Mockito.doNothing().when(walletService).broadcastRefundTx();
+        Mockito.doNothing().when(walletService).createRefundTransaction();
+        Mockito.doNothing().when(walletService).redeposit();
+
+        walletService.init(storage);
+        walletService.getService().awaitRunning();
+
+        Thread.sleep(3000);
+
+        Mockito.verify(walletService, Mockito.times(0)).broadcastRefundTx();
+        Mockito.verify(walletService, Mockito.times(0)).createRefundTransaction();
+        Mockito.verify(walletService, Mockito.times(1)).redeposit();
+
+    }
+
     private FakeTxBuilder.BlockPair injectTx(String address, BigDecimal amount) throws Exception {
 
         Coin coin = Coin.parseCoin(amount.toString());
@@ -359,11 +477,11 @@ public class WalletServiceTest {
 
     }
 
-    private void cleanTestDirectory() {
+    private static void cleanTestDirectory() {
         deleteFiles(testDirectory.listFiles());
     }
 
-    private void deleteFiles(File[] files) {
+    private static void deleteFiles(File[] files) {
         for (File f : files) {
             System.out.println("Deleted file " + f.getName());
             f.delete();
