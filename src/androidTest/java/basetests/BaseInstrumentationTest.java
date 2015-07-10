@@ -6,6 +6,8 @@ import android.test.ActivityInstrumentationTestCase2;
 
 import com.robotium.solo.Solo;
 
+import junit.framework.Assert;
+
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.After;
 import org.junit.Before;
@@ -18,9 +20,11 @@ import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
+import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 import testutils.MockRequestTask;
 import testutils.TestUtils;
 
@@ -39,6 +43,7 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
     protected SetupRequestObject setupResponse;
     protected TransferObject payOutResponse;
     protected TransferObject refundTxResponse;
+    protected TransferObject saveWatchingKeyResponse;
 
     public BaseInstrumentationTest(Class<T> activityClass) {
         super(activityClass);
@@ -48,7 +53,6 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
     }
 
     protected void prepareResponses() {
@@ -63,6 +67,10 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
 
         refundTxResponse = new TransferObject();
         refundTxResponse.setSuccessful(true);
+
+        saveWatchingKeyResponse = new TransferObject();
+        saveWatchingKeyResponse.setSuccessful(true);
+
     }
 
 
@@ -80,15 +88,26 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
 
     protected void prepareRequestFactory(){
 
+        // set up the mock responses here. This also does some basic checks on the requests.
         RequestFactory requestFactory = new RequestFactory() {
             @Override
-            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> refundTxRequest(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
-                return new MockRequestTask(cro, setupResponse);
+            public RequestTask<ServerSignatureRequestTransferObject, RefundTxTransferObject> refundTxRequest(RequestCompleteListener<RefundTxTransferObject> cro, ServerSignatureRequestTransferObject input, RefundTxTransferObject output, Context context) {
+                return new MockRequestTask(cro, refundTxResponse);
             }
 
             @Override
-            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
-                return new MockRequestTask(cro, setupResponse);
+            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, Context context) {
+                Assert.assertNotNull(input.getPartialTx());
+                Assert.assertNotNull(input.getIndexAndDerivationPaths());
+                Assert.assertFalse(input.getIndexAndDerivationPaths().isEmpty());
+                return new MockRequestTask(cro, payOutResponse);
+            }
+
+            @Override
+            public RequestTask<WatchingKeyTransferObject, TransferObject> saveWatchingKeyRequest(RequestCompleteListener<TransferObject> cro, WatchingKeyTransferObject input, Context context) {
+                Assert.assertNotNull(input.getWatchingKey());
+                Assert.assertNotNull(input.getBitcoinNet());
+                return new MockRequestTask(cro, saveWatchingKeyResponse);
             }
 
             @Override

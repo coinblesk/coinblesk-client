@@ -25,6 +25,7 @@ import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
+import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 
 public class RestoreOrNewActivity extends WalletActivity {
 
@@ -55,10 +56,12 @@ public class RestoreOrNewActivity extends WalletActivity {
     }
 
     private void getSetupInfo(final RequestCompleteListener<SetupRequestObject> cro) {
+        showLoadingProgressDialog();
+
         RequestTask<TransferObject, SetupRequestObject> task = getCoinBleskApplication().getRequestFactory().setupRequest(new RequestCompleteListener<SetupRequestObject>() {
             @Override
             public void onTaskComplete(SetupRequestObject response) {
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     storageHandler.setWatchingKey(response.getServerWatchingKey());
                     storageHandler.setBitcoinNet(response.getBitcoinNet());
                     cro.onTaskComplete(response);
@@ -67,6 +70,68 @@ public class RestoreOrNewActivity extends WalletActivity {
                 }
             }
         }, this);
+
+        task.execute();
+    }
+
+    private void restoreWallet(final String mnemonic) {
+        AsyncTask<Void, Void, Void> startWalletTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    Service service = getWalletService().restoreWalletFromSeed(getCoinBleskApplication().getStorageHandler(), mnemonic, 0L);
+                    service.awaitRunning();
+                } catch (UnreadableWalletException e) {
+                    LOGGER.error("Wallet setup failed: {}", e);
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                startMainActivity();
+            }
+        };
+
+        startWalletTask.execute();
+    }
+
+    private void setupWalletAndSaveWatchingKey() {
+
+        AsyncTask<Void, Void, Void> startWalletTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                Service service = getWalletService().init(storageHandler);
+                service.awaitRunning();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                saveWatchingKey();
+            }
+        };
+
+        startWalletTask.execute();
+    }
+
+    private void saveWatchingKey() {
+
+        WatchingKeyTransferObject input = new WatchingKeyTransferObject();
+        input.setWatchingKey(getWalletService().getWatchingKey());
+        input.setBitcoinNet(getWalletService().getBitcoinNet());
+
+        RequestTask<WatchingKeyTransferObject, TransferObject> task = getCoinBleskApplication().getRequestFactory().saveWatchingKeyRequest(new RequestCompleteListener<TransferObject>() {
+            @Override
+            public void onTaskComplete(TransferObject response) {
+                if (response.isSuccessful()) {
+                    startMainActivity();
+                } else {
+                    displayResponse(getString(R.string.establish_internet_connection));
+
+                }
+            }
+        }, input, this);
 
         task.execute();
     }
@@ -81,35 +146,13 @@ public class RestoreOrNewActivity extends WalletActivity {
                     @Override
                     public void onTaskComplete(final SetupRequestObject response) {
 
-                        final String backupPhrase = mBackupPhraseField.getText().toString().toLowerCase();
-                        if (BitcoinUtils.validMnemonic(backupPhrase)) {
-                            showLoadingProgressDialog();
-
-                            AsyncTask<Void, Void, Void> startWalletTask = new AsyncTask<Void, Void, Void>() {
-                                @Override
-                                protected Void doInBackground(Void... params) {
-                                    try {
-                                        showLoadingProgressDialog();
-                                        Service service = getWalletService().restoreWalletFromSeed(getCoinBleskApplication().getStorageHandler(), backupPhrase, 0L);
-                                        service.awaitRunning();
-                                    } catch (UnreadableWalletException e) {
-                                        LOGGER.error("Wallet setup failed: {}", e);
-                                    }
-                                    return null;
-                                }
-
-                                @Override
-                                protected void onPostExecute(Void aVoid) {
-                                    startMainActivity();
-                                }
-                            };
-
-                            startWalletTask.execute();
-
+                        final String mnemonic = mBackupPhraseField.getText().toString().toLowerCase();
+                        if (BitcoinUtils.validMnemonic(mnemonic)) {
+                            restoreWallet(mnemonic);
                         } else {
                             Animation shake = AnimationUtils.loadAnimation(RestoreOrNewActivity.this, R.anim.shake);
                             mBackupPhraseField.startAnimation(shake);
-                            LOGGER.error("Failed to restore wallet with seed {}", backupPhrase);
+                            LOGGER.error("Invalid mnemonic seed: {}", mnemonic);
                             displayResponse(getResources().getString(R.string.restoreOrCreate_toast_restoreFailed));
                         }
                     }
@@ -128,7 +171,7 @@ public class RestoreOrNewActivity extends WalletActivity {
                 getSetupInfo(new RequestCompleteListener<SetupRequestObject>() {
                     @Override
                     public void onTaskComplete(SetupRequestObject response) {
-                        startMainActivity();
+                        setupWalletAndSaveWatchingKey();
                     }
                 });
             }
@@ -146,6 +189,7 @@ public class RestoreOrNewActivity extends WalletActivity {
     private void startMainActivity() {
         getWalletService().init(getCoinBleskApplication().getStorageHandler());
         Intent intent = new Intent(RestoreOrNewActivity.this, MainActivity.class);
+        dismissProgressDialog();
         startActivity(intent);
     }
 

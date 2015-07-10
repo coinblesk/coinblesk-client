@@ -44,24 +44,18 @@ import java.util.List;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.request.MainActivityRequestTask;
-import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
 import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
 import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
-import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.model.Transaction;
-import ch.uzh.csg.coinblesk.responseobject.MainRequestObject;
-import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
 import ch.uzh.csg.paymentlib.IPaymentEventHandler;
 import ch.uzh.csg.paymentlib.IServerResponseListener;
@@ -87,7 +81,6 @@ public class MainActivity extends AbstractPaymentActivity {
     private CharSequence mTitle;
 
     private Button createNewTransactionBtn;
-    private RequestTask<TransferObject, MainRequestObject> getMainActivityValues;
     private PopupWindow popupWindow;
     public static Boolean isFirstTime;
     AnimationDrawable nfcActivityAnimation;
@@ -280,16 +273,12 @@ public class MainActivity extends AbstractPaymentActivity {
     }
 
     private void handleAsyncTask() {
-        if (ClientController.isConnectedToServer() && !getMainActivityValues.equals(AsyncTask.Status.FINISHED)) {
-            getMainActivityValues.cancel(true);
-        }
+        throw new RuntimeException("Not yet implemented");
     }
 
     private void checkOnlineModeAndProceed() {
         CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.mainActivity_balanceCHF));
-        if (ClientController.isConnectedToServer()) {
-            launchRequest();
-        } else {
+        if (!ClientController.isConnectedToServer()) {
             createNewTransactionBtn.setEnabled(false);
             createNewTransactionBtn.setTextColor(Color.LTGRAY);
         }
@@ -325,33 +314,6 @@ public class MainActivity extends AbstractPaymentActivity {
             }
         };
         displayBalanceTaks.execute();
-    }
-
-    private void launchRequest() {
-        getMainActivityValues = new MainActivityRequestTask(new RequestCompleteListener<MainRequestObject>() {
-            @Override
-            public void onTaskComplete(MainRequestObject response) {
-                TextView lastTransactionsTitle = (TextView) findViewById(R.id.mainActivity_lastTransactionsTitle);
-                String s = String.format(getResources().getString(R.string.lastFewTransactionsTitle), getNumberOfLastTransactions());
-                lastTransactionsTitle.setText(s);
-
-                dismissProgressDialog();
-
-                if (response.isSuccessful()) {
-                    exchangeRate = response.getExchangeRate();
-
-                    //update gui
-                    CurrencyViewHandler.setToCHF((TextView) findViewById(R.id.mainActivity_balanceCHF), exchangeRate, getWalletService().getUnconfirmedBalance());
-                    TextView balanceTv = (TextView) findViewById(R.id.mainActivity_balanceCHF);
-                    balanceTv.append(" (1 BTC = " + CurrencyFormatter.formatChf(exchangeRate) + " CHF)");
-                } else if (response.getMessage() != null && response.getMessage().contains(Constants.CONNECTION_ERROR)) {
-                    invalidateOptionsMenu();
-                    displayResponse(getResources().getString(R.string.no_connection_server));
-                    lastTransactionsTitle.setVisibility(View.INVISIBLE);
-                }
-            }
-        }, new TransferObject(), new MainRequestObject(), getApplicationContext());
-        getMainActivityValues.execute();
     }
 
     private class CustomComparator implements Comparator<Transaction> {

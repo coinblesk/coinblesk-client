@@ -38,7 +38,6 @@ import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.request.TransactionRequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
@@ -50,8 +49,6 @@ import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerResponseStatus;
-import ch.uzh.csg.coinblesk.customserialization.exceptions.NotSignedException;
-import ch.uzh.csg.coinblesk.responseobject.TransactionObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
 
@@ -212,35 +209,7 @@ public class SendPaymentActivity extends WalletActivity {
 	}
 
 	private void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
-		if (ClientController.isConnectedToServer()) {
-			showLoadingProgressDialog();
-			TransactionObject tro = new TransactionObject();
-			try {
-	            tro.setServerPaymentResponse(serverPaymentRequest.encode());
-            } catch (NotSignedException e) {
-	            e.printStackTrace();
-	            displayResponse(e.getMessage());
-				return;
-            }
-			
-			RequestTask<TransactionObject, TransactionObject> transactionRequest = new TransactionRequestTask(new RequestCompleteListener<TransactionObject>() {
-				public void onTaskComplete(TransactionObject response) {
-					dismissProgressDialog();
-					if (!response.isSuccessful()) {
-						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
-							displayResponse(getResources().getString(R.string.no_connection_server));
-							finish();
-							launchActivity(SendPaymentActivity.this, MainActivity.class);
-						} else {
-							displayResponse(response.getMessage());
-						}
-						return;
-					}
-					onTaskCompletTransaction(response.getServerPaymentResponse());
-                }
-			}, tro, new TransactionObject(), getApplicationContext());
-			transactionRequest.execute();
-		}
+		throw new RuntimeException("Not yet implemented");
 	}
 	
 	private void onTaskCompletTransaction(byte[] serverPaymentResponseBytes) {

@@ -37,7 +37,6 @@ import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.request.TransactionRequestTask;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
@@ -47,9 +46,6 @@ import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
-import ch.uzh.csg.coinblesk.customserialization.ServerPaymentResponse;
-import ch.uzh.csg.coinblesk.customserialization.exceptions.NotSignedException;
-import ch.uzh.csg.coinblesk.responseobject.TransactionObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
 import ch.uzh.csg.paymentlib.IPaymentEventHandler;
@@ -151,6 +147,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 			initializeCalculator();
 		}
 	}
+
+
 
 	@Override
 	public void onPause() {
@@ -602,58 +600,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	 * @param serverPaymentRequest object with transaction details
 	 */
 	private void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
-		if (ClientController.isConnectedToServer()) {
-			showLoadingProgressDialog();
-			TransactionObject tro = new TransactionObject();
-			try {
-	            tro.setServerPaymentResponse(serverPaymentRequest.encode());
-            } catch (NotSignedException e) {
-	            e.printStackTrace();
-	            displayResponse(e.getMessage());
-				return;
-            }
-			
-			RequestTask<TransactionObject, TransactionObject> transactionRequest = new TransactionRequestTask(new RequestCompleteListener<TransactionObject>() {
-				public void onTaskComplete(TransactionObject response) {
-					if (!response.isSuccessful()) {
-						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
-							displayResponse(getResources().getString(R.string.no_connection_server));
-							finish();
-							launchActivity(ReceivePaymentActivity.this, MainActivity.class);
-						} else {
-							displayResponse(response.getMessage());
-						}
-						return;
-					}
-					onTaskCompletTransaction(response.getServerPaymentResponse(), response.getBalanceBTC());
-                }
-			}, tro, new TransactionObject(), getApplicationContext());
-			transactionRequest.execute();
-		}
+		throw new RuntimeException("Not yet implemented");
 	}
-	
-	/**
-	 * Executed in case of a successfull Transaction Request.
-	 * 
-	 * @param serverPaymentResponseBytes received from the Server
-	 * @param balance received from the server (up to date)
-	 */
-	private void onTaskCompletTransaction(byte[] serverPaymentResponseBytes, BigDecimal balance) {
-		dismissProgressDialog();
-		dismissNfcInProgressDialog();
-		CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));	
-		
-		ServerPaymentResponse serverPaymentResponse = null;
-		try {
-			serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
-		} catch (Exception e) {
-			displayResponse(getResources().getString(R.string.error_transaction_failed));
-			return;
-		}
-		responseListener.onServerResponse(serverPaymentResponse);
-	}
-	
-	
 
 	/**
 	 * Shows a dialog indicating if transaction was successful or not.

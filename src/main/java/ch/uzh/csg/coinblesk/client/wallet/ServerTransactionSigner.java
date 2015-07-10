@@ -133,7 +133,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                 }
 
             }
-        }, txSigRequest, new TransferObject(), context);
+        }, txSigRequest, context);
         payOutRequestTask.execute();
     }
 

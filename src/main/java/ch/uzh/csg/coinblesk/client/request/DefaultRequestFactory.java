@@ -7,6 +7,7 @@ import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
+import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 
 /**
  * Created by rvoellmy on 6/22/15.
@@ -19,8 +20,13 @@ public class DefaultRequestFactory implements RequestFactory {
     }
 
     @Override
-    public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
-        return new PayOutRequestTask(cro, input, output, context);
+    public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, Context context) {
+        return new PayOutRequestTask(cro, input, context);
+    }
+
+    @Override
+    public RequestTask<WatchingKeyTransferObject, TransferObject> saveWatchingKeyRequest(RequestCompleteListener<TransferObject> cro, WatchingKeyTransferObject input, Context context) {
+        return new SaveWatchingKeyRequestTask(cro, input, context);
     }
 
     @Override

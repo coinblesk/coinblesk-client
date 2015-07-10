@@ -260,7 +260,6 @@ public class WalletServiceTest {
         ShadowApplication.runBackgroundTasks();
         Thread.sleep(1000);
 
-        System.out.println(storage.getRefundTxValidBlock());
         Assert.assertNotSame(storage.getRefundTxValidBlock(), RefundTx.NO_REFUND_TX_VALID_BLOCK);
 
         Assert.assertNotNull(storage.getRefundTx());
@@ -351,22 +350,17 @@ public class WalletServiceTest {
     @Test
     public void testCheckRefundTxState_noBalance() throws Exception {
 
-        RequestFactory requestFactory = new DefaultRequestFactory() {
-            @Override
-            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
-                Assert.fail("Pay out request was launched with a balance of 0");
-                return null;
-            }
-        };
-
-        ((CoinBleskApplication) RuntimeEnvironment.application).setRequestFactory(requestFactory);
+        Mockito.doNothing().when(walletService).broadcastRefundTx();
+        Mockito.doNothing().when(walletService).createRefundTransaction();
+        Mockito.doNothing().when(walletService).redeposit();
+        ((CoinBleskApplication) RuntimeEnvironment.application).setStorageHandler(storage);
 
         walletService.init(storage);
         walletService.getService().awaitRunning();
 
-        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("createRefundTransaction");
-        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("broadcastRefundTx");
-        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("redeposit");
+        Mockito.verify(walletService, Mockito.times(0)).broadcastRefundTx();
+        Mockito.verify(walletService, Mockito.times(0)).createRefundTransaction();
+        Mockito.verify(walletService, Mockito.times(0)).redeposit();
     }
 
     @Test
@@ -376,16 +370,23 @@ public class WalletServiceTest {
         PowerMockito.doReturn(null).when(storage).getRefundTx();
         PowerMockito.doReturn(-1L).when(storage).getRefundTxValidBlock();
         PowerMockito.doReturn(BigDecimal.ONE).when(walletService).getUnconfirmedBalance();
+        ((CoinBleskApplication) RuntimeEnvironment.application).setStorageHandler(storage);
+
+
+        Mockito.doNothing().when(walletService).broadcastRefundTx();
+        Mockito.doNothing().when(walletService).createRefundTransaction();
+        Mockito.doNothing().when(walletService).redeposit();
 
         walletService.init(storage);
         walletService.getService().awaitRunning();
 
-        PowerMockito.verifyPrivate(walletService, Mockito.times(1)).invoke("createRefundTransaction");
-        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("broadcastRefundTx");
-        PowerMockito.verifyPrivate(walletService, Mockito.times(0)).invoke("redeposit");
+        Thread.sleep(3000);
+
+        Mockito.verify(walletService, Mockito.times(0)).broadcastRefundTx();
+        Mockito.verify(walletService, Mockito.times(1)).createRefundTransaction();
+        Mockito.verify(walletService, Mockito.times(0)).redeposit();
 
     }
-
 
     @Test
     public void testCheckRefundTxState_validRefundTransaction() throws Exception {

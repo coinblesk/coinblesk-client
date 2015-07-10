@@ -6,15 +6,16 @@ import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
+import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 
 /**
  * This class sends a request to payout a defined amount of bitcoins to the
  * inserted bitcoin-address.
  */
-public class SetupRequestTask extends RequestTask<TransferObject, SetupRequestObject> {
+public class SaveWatchingKeyRequestTask extends RequestTask<WatchingKeyTransferObject, TransferObject> {
 
-	public SetupRequestTask(RequestCompleteListener<SetupRequestObject> cro, Context context) {
-		super(new SetupRequestObject(), Constants.BASE_URI_SSL + "/wallet/setupInfo", cro, context);
+	public SaveWatchingKeyRequestTask(RequestCompleteListener<TransferObject> cro, WatchingKeyTransferObject input, Context context) {
+		super(input, new SetupRequestObject(), Constants.BASE_URI_SSL + "/wallet/saveWatchingKey", cro, context);
 	}
 
 }

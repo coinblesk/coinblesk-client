@@ -144,6 +144,7 @@ public class WalletService extends android.app.Service {
         Preconditions.checkNotNull(storage, "Storage handler cannot be null.");
 
         LOGGER.debug("Restoring wallet from mnemonic seed");
+        bitcoinNet = storage.getBitcoinNet();
 
         File[] files = getFilesDir().listFiles(new FilenameFilter() {
             @Override
@@ -309,6 +310,20 @@ public class WalletService extends android.app.Service {
     }
 
     /**
+     * @return a base58 encoded watching key of this wallet
+     */
+    public String getWatchingKey() {
+        return getAppKit().wallet().getWatchingKey().serializePubB58(getNetworkParams(bitcoinNet));
+    }
+
+    /**
+     * @return the {@link BitcoinNet} the wallet is running on.
+     */
+    public BitcoinNet getBitcoinNet() {
+        return bitcoinNet;
+    }
+
+    /**
      * This method is responsible for
      * <ul>
      * <li>Creating a refund transaction if we don't have one yet</li>
@@ -369,7 +384,9 @@ public class WalletService extends android.app.Service {
 
     private CoinBleskWalletAppKit getAppKit() {
 
-        Preconditions.checkNotNull(storage, "Storage cannot be null. Was the wallet service initialized?");
+        if(storage == null) {
+            storage = getCoinbleskApplication().getStorageHandler();
+        }
 
         if (clientWalletKit == null) {
             // start the wallet service if it isn't running

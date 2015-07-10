@@ -13,8 +13,8 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
  */
 public class PayOutRequestTask extends RequestTask<ServerSignatureRequestTransferObject, TransferObject> {
 		
-	public PayOutRequestTask(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
-		super(input, output, Constants.BASE_URI_SSL + "/transaction/signAndBroadcastTx", cro, context);
+	public PayOutRequestTask(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, Context context) {
+		super(input, new TransferObject(), Constants.BASE_URI_SSL + "/wallet/signAndBroadcastTx", cro, context);
 	}
 
 }

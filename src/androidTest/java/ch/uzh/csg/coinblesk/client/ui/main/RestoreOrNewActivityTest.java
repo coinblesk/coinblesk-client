@@ -48,7 +48,6 @@ public class RestoreOrNewActivityTest extends BaseInstrumentationTest<RestoreOrN
     public void testCreateNewWallet() throws Exception {
         solo.clickOnView(solo.getView(R.id.restoreOrNew_button_createNewWallet));
         checkifMainActivity();
-
     }
 
     public void testRestoreWallet() throws Exception {
