@@ -75,16 +75,16 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             } else {
                 res = executePost(url, requestObject);
             }
-            if(res != null) {
+            if (res != null) {
                 responseObject.decode(res);
                 return responseObject;
             }
-
         } catch (Exception e) {
             LOGGER.error("Request failed: {}", e);
-            responseObject.setSuccessful(false);
             responseObject.setMessage(e.getMessage());
         }
+
+        responseObject.setSuccessful(false);
         return responseObject;
     }
 
@@ -166,8 +166,6 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
 
             connection.setUseCaches(false);
             connection.setDoInput(true);
-            connection.setDoOutput(true);
-
 
             //Get Response
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
