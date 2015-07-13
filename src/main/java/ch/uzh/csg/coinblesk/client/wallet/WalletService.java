@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Service;
 
+import org.bitcoinj.core.AbstractWalletEventListener;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Block;
@@ -44,8 +45,10 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -83,19 +86,49 @@ public class WalletService extends android.app.Service {
     private final IBinder walletBinder = new LocalBinder();
     private CoinBleskWalletAppKit clientWalletKit;
     private final ReentrantLock lock = Threading.lock("WalletService");
-
     private BitcoinNet bitcoinNet;
     private String serverWatchingKey;
     private StorageHandler storage;
-
     private SyncProgress syncProgress;
+    private Map<String, WalletListener> listeners;
+
 
     public WalletService() {
         this.syncProgress = new SyncProgress();
+        this.listeners = new HashMap<>();
     }
 
     public SyncProgress getSyncProgress() {
         return syncProgress;
+    }
+
+
+    public void addBitcoinListener(String id, WalletListener listener) {
+        listeners.put(id, listener);
+    }
+    public void addBitcoinListener(Class clazz, WalletListener listener) {
+        addBitcoinListener(clazz.getName(), listener);
+    }
+    public void removeBitcoinListener(String listenerId) {
+        listeners.remove(listenerId);
+    }
+    public void removeBitcoinListener(Class clazz) {
+        removeBitcoinListener(clazz.getName());
+    }
+
+    private void notifyOnNewTransaction() {
+        for(WalletListener listener : listeners.values()) {
+            listener.onWalletChange();
+        }
+    }
+
+    private void initTxListener() {
+        getAppKit().wallet().addEventListener(new AbstractWalletEventListener() {
+            @Override
+            public void onWalletChanged(Wallet wallet) {
+                notifyOnNewTransaction();
+            }
+        });
     }
 
     /**
@@ -210,6 +243,9 @@ public class WalletService extends android.app.Service {
 
         // add wallet listeners
         getAppKit().wallet().addEventListener(new CreateNewRefundTxListener(this));
+
+        // notify listeners about wallet changes
+        initTxListener();
     }
 
     private Service init(StorageHandler storage, @Nullable String mnemonic, @Nullable Long creationTime) {

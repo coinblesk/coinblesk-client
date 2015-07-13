@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase2;
 
+import com.robotium.solo.Condition;
 import com.robotium.solo.Solo;
 
 import junit.framework.Assert;
@@ -19,6 +20,7 @@ import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
@@ -165,6 +167,22 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
             e.printStackTrace();
         }
         return app;
+    }
+
+    /**
+     * Waits until the {@link ch.uzh.csg.coinblesk.client.wallet.WalletService} is running. Only works for activities that
+     * extend the {@link ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity}.
+     */
+    protected void waitForWalletService() {
+        final WalletActivity activity = (WalletActivity) solo.getCurrentActivity();
+        boolean started = solo.waitForCondition(new Condition() {
+            @Override
+            public boolean isSatisfied() {
+                return activity.getWalletService() != null;
+            }
+        }, TIMEOUT);
+
+        assertTrue("Failed to start wallet service before timeout", started);
     }
 
 }

@@ -50,6 +50,7 @@ import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
+import ch.uzh.csg.coinblesk.client.wallet.WalletListener;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.TransactionObject;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
@@ -86,7 +87,7 @@ public class MainActivity extends AbstractPaymentActivity {
     private boolean isPortrait = true;
 
     private NfcAdapter nfcAdapter;
-    private Thread updateProgressTask;
+    private Thread updateTxHistoryTask;
     private TextView mBlockchainSyncStatusText;
 
     @Override
@@ -189,7 +190,7 @@ public class MainActivity extends AbstractPaymentActivity {
         final WalletService walletService = getWalletService();
         final Handler handler = new Handler();
 
-        updateProgressTask = new Thread() {
+        updateTxHistoryTask = new Thread() {
             @Override
             public void run() {
                 if (this.isInterrupted()) {
@@ -222,22 +223,18 @@ public class MainActivity extends AbstractPaymentActivity {
                         mBlockchainSyncStatusText.setText(syncText);
                     }
 
-                    handler.postDelayed(updateProgressTask, updateInterval);
+                    handler.postDelayed(updateTxHistoryTask, updateInterval);
                 }
             }
         };
 
-        handler.postDelayed(updateProgressTask, updateInterval);
+        handler.postDelayed(updateTxHistoryTask, updateInterval);
 
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
-    }
-
-    private void destroyProgressBar() {
-        updateProgressTask.interrupt();
     }
 
     private void initializeGui() {
@@ -291,12 +288,22 @@ public class MainActivity extends AbstractPaymentActivity {
         initiateProgressBar();
         createHistoryViews();
         initializeNFC();
+        initTxListener();
     }
 
-
     @Override
-    public void onServiceDisconnected(ComponentName name) {
-        destroyProgressBar();
+    protected void onDestroy() {
+        getWalletService().removeBitcoinListener(this.getClass());
+    }
+
+    private void initTxListener() {
+        getWalletService().addBitcoinListener(this.getClass(), new WalletListener() {
+            @Override
+            public void onWalletChange() {
+                createHistoryViews();
+                displayUserBalance();
+            }
+        });
     }
 
     private void displayUserBalance() {

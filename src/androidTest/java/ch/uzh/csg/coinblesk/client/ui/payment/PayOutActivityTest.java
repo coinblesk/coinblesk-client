@@ -91,18 +91,12 @@ public class PayOutActivityTest extends BaseInstrumentationTest {
 
     public void testSendBitcoins() throws Exception {
 
-        // wait for the service connect (-> when button is active)
-        final Button sendButton = (Button) solo.getView(R.id.payOut_payOutButton);
-        boolean active = solo.waitForCondition(new Condition() {
-            @Override
-            public boolean isSatisfied() {
-                return sendButton.isEnabled();
-            }
-        }, (int) TIMEOUT);
-        assertTrue(active);
+        final PayOutActivity activity = (PayOutActivity) solo.getCurrentActivity();
+
+        // wait for the service to connect
+        waitForWalletService();
 
         // add fake bitcoins to the wallet
-        PayOutActivity activity = (PayOutActivity) solo.getCurrentActivity();
         WalletService walletService = activity.getWalletService();
         assertNotNull(walletService);
 
@@ -113,6 +107,7 @@ public class PayOutActivityTest extends BaseInstrumentationTest {
         assertTrue(walletService.getBalance().compareTo(receiveAmount) == 0);
 
         // send the bitcoins...
+        Button sendButton = (Button) solo.getView(R.id.payOut_payOutButton);
         BigDecimal sendAmount = new BigDecimal("0.50");
         solo.clearEditText((EditText) solo.getView(R.id.payOut_Amount));
         solo.enterText((EditText) solo.getView(R.id.payOut_Amount), sendAmount.toString());
