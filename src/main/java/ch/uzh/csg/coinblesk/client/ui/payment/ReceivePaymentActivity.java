@@ -37,7 +37,7 @@ import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
@@ -205,7 +205,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	@Override
 	public void invalidateOptionsMenu() {
 		if(menuWarning != null){
-			if(ClientController.isConnectedToServer()) {
+			if(ConnectionCheck.isNetworkAvailable(this)) {
 				menuWarning.setVisible(false);
 				offlineMode.setVisible(false);
 				sessionCountdownMenuItem.setVisible(true);
@@ -244,7 +244,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	 * Launches request for updating Exchange Rate
 	 */
 	public void launchExchangeRateRequest() {
-		if (ClientController.isConnectedToServer()) {
+		if (ConnectionCheck.isNetworkAvailable(this)) {
 			showLoadingProgressDialog();
 			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
 				public void onTaskComplete(ExchangeRateTransferObject response) {
@@ -620,13 +620,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 			BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
 
 			if(isSending){
-				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
+				getCoinBleskApplication().getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
 						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")",
 						pr.getUsernamePayee());
 			}
 			else {
-				ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
+				getCoinBleskApplication().getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
 				answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
 						CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" +CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")",
 						pr.getUsernamePayer());

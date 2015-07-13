@@ -21,7 +21,7 @@ import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.ui.fragments.CustomDialogFragment;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 
 /**
  * The class AbstractAsyncActivity is the abstract base class for all
@@ -193,7 +193,7 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
     @Override
     public void invalidateOptionsMenu() {
         if (menuWarning != null) {
-            if (ClientController.isConnectedToServer()) {
+            if (ConnectionCheck.isNetworkAvailable(this)) {
                 menuWarning.setVisible(false);
                 offlineMode.setVisible(false);
             } else {
@@ -222,7 +222,6 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
         offlineMode = menu.findItem(R.id.menu_offlineMode);
         TextView offlineModeTV = (TextView) offlineMode.getActionView();
         offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
-
     }
 
 }

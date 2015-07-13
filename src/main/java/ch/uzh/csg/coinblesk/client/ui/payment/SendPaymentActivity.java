@@ -39,7 +39,7 @@ import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
@@ -157,7 +157,7 @@ public class SendPaymentActivity extends WalletActivity {
 	@Override
 	public void invalidateOptionsMenu() {
 		if(menuWarning != null){
-			if(ClientController.isConnectedToServer()) {
+			if(ConnectionCheck.isNetworkAvailable(this)) {
 				menuWarning.setVisible(false);
 				offlineMode.setVisible(false);
 				sessionCountdownMenuItem.setVisible(true);
@@ -175,7 +175,7 @@ public class SendPaymentActivity extends WalletActivity {
 	 * Launches request for updating Exchange Rate
 	 */
 	public void launchExchangeRateRequest() {
-		if (ClientController.isConnectedToServer()) {
+		if (ConnectionCheck.isNetworkAvailable(this)) {
 			showLoadingProgressDialog();
 			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
 				@Override
@@ -242,7 +242,7 @@ public class SendPaymentActivity extends WalletActivity {
 					paymentResponsePayer.getUsernamePayee());
 			showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
 
-			boolean saved = ClientController.getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
+			boolean saved = getCoinBleskApplication().getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
 			if (!saved) {
 				displayResponse(getResources().getString(R.string.error_xmlSave_failed));
 			}
@@ -434,11 +434,11 @@ public class SendPaymentActivity extends WalletActivity {
 	 * will be written to SendPaymentActivity.receiverUsernameEditText.
 	 * 
 	 */
-	public static class AddressBookDialog extends DialogFragment {
+	public class AddressBookDialog extends DialogFragment {
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			Set<String> receiverEntries = null;
-			receiverEntries = ClientController.getStorageHandler().getAddressBook();
+			receiverEntries = getCoinBleskApplication().getStorageHandler().getAddressBook();
 
 			final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
 
@@ -457,7 +457,7 @@ public class SendPaymentActivity extends WalletActivity {
 				entry.setPadding(0, 0, 0, 10);
 				entry.setTextColor(Color.BLACK);
 				entry.setText(username);
-				if (ClientController.getStorageHandler().isTrustedContact(username)) {
+				if (getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
 					entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null,null,null);
 				} else{
 					entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null,null,null);

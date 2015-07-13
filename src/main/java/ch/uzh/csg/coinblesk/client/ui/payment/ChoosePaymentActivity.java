@@ -8,7 +8,7 @@ import android.widget.Button;
 
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 
 /**
  * Activity for selecting which kind of payment shall be initialized.
@@ -33,7 +33,7 @@ public class ChoosePaymentActivity extends WalletActivity {
     }
 
     private void checkOnlineModeAndProceed() {
-        if (!ClientController.isConnectedToServer()) {
+        if (!ConnectionCheck.isNetworkAvailable(this)) {
             requestPaymentBtn.setEnabled(false);
             sendPaymentBtn.setEnabled(false);
             requestPaymentNoNfcBtn.setEnabled(false);

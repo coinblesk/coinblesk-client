@@ -22,7 +22,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -98,7 +98,7 @@ public class SettingsActivity extends PreferenceActivity {
 	@Override
 	public void invalidateOptionsMenu() {
 		if (menuWarning != null) {
-			if (ClientController.isConnectedToServer()) {
+			if (ConnectionCheck.isNetworkAvailable(this)) {
 				menuWarning.setVisible(false);
 			} else {
 				menuWarning.setVisible(true);

@@ -1,7 +1,5 @@
 package ch.uzh.csg.coinblesk.client.ui.adressbook;
 
-import java.util.Iterator;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -20,9 +18,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.AbstractAsyncActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+import java.util.Iterator;
+
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.AbstractAsyncActivity;
 
 /**
  * Activity for showing and modifying address book contacts. 
@@ -59,7 +58,7 @@ public class AddressBookActivity extends AbstractAsyncActivity {
 						new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String username = input.getText().toString();
-						boolean saved = ClientController.getStorageHandler().addAddressBookEntry(username);
+						boolean saved = getCoinBleskApplication().getStorageHandler().addAddressBookEntry(username);
 						if (!saved) {
 							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show(); 
 						}
@@ -87,7 +86,7 @@ public class AddressBookActivity extends AbstractAsyncActivity {
 				alert.setPositiveButton(getString(R.string.dialog_yes),
 						new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						boolean saved = ClientController.getStorageHandler().removeAllUntrustedAddressBookEntries();
+						boolean saved = getCoinBleskApplication().getStorageHandler().removeAllUntrustedAddressBookEntries();
 						if (!saved) {
 							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
 						}
@@ -113,7 +112,7 @@ public class AddressBookActivity extends AbstractAsyncActivity {
 		parent.removeAllViews();
 
 		int i = 0;
-		for (Iterator<String> it = ClientController.getStorageHandler().getAddressBook().iterator(); it.hasNext();) {
+		for (Iterator<String> it = getCoinBleskApplication().getStorageHandler().getAddressBook().iterator(); it.hasNext();) {
 			final String username = it.next();
 			View custom = inflater.inflate(R.layout.addressbook_entry_layout, null);
 			TextView tv = (TextView) custom.findViewById(R.id.textView1);
@@ -128,7 +127,7 @@ public class AddressBookActivity extends AbstractAsyncActivity {
 					.setMessage(username)
 					.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
-							boolean saved = ClientController.getStorageHandler().removeAddressBookEntry(username);
+							boolean saved = getCoinBleskApplication().getStorageHandler().removeAddressBookEntry(username);
 							if (!saved) {
 								Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
 							}
@@ -145,8 +144,8 @@ public class AddressBookActivity extends AbstractAsyncActivity {
 			setTrustedImage(trusted, username);
 			trusted.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					if (ClientController.getStorageHandler().isTrustedContact(username)){
-						boolean saved = ClientController.getStorageHandler().removeTrustedAddressBookEntry(username);
+					if (getCoinBleskApplication().getStorageHandler().isTrustedContact(username)){
+						boolean saved = getCoinBleskApplication().getStorageHandler().removeTrustedAddressBookEntry(username);
 						if (!saved) {
 							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
 						}
@@ -154,7 +153,7 @@ public class AddressBookActivity extends AbstractAsyncActivity {
 						showToast(getString(R.string.addressBook_removeContact));
 					}
 					else{
-						boolean saved = ClientController.getStorageHandler().addTrustedAddressBookEntry(username);
+						boolean saved = getCoinBleskApplication().getStorageHandler().addTrustedAddressBookEntry(username);
 						if (!saved) {
 							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
 						}
@@ -179,7 +178,7 @@ public class AddressBookActivity extends AbstractAsyncActivity {
 	}
 
 	private void setTrustedImage(ImageView img, String username) {
-		if (ClientController.getStorageHandler().isTrustedContact(username)) {
+		if (getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
 			img.setImageResource(R.drawable.ic_starred);
 		} else {
 			img.setImageResource(R.drawable.ic_not_starred);

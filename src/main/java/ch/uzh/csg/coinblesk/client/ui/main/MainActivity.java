@@ -47,7 +47,7 @@ import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
 import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
 import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
@@ -277,7 +277,7 @@ public class MainActivity extends AbstractPaymentActivity {
 
     private void checkOnlineModeAndProceed() {
         CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.mainActivity_balanceCHF));
-        if (!ClientController.isConnectedToServer()) {
+        if (!ConnectionCheck.isNetworkAvailable(this)) {
             createNewTransactionBtn.setEnabled(false);
             createNewTransactionBtn.setTextColor(Color.LTGRAY);
         }
@@ -543,7 +543,7 @@ public class MainActivity extends AbstractPaymentActivity {
             BigDecimal amountChf = CurrencyViewHandler.getAmountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount));
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             boolean isAutoAcceptEnabled = sharedPref.getBoolean("auto_accept", false);
-            if (isAutoAcceptEnabled && ClientController.getStorageHandler().isTrustedContact(username)) {
+            if (isAutoAcceptEnabled && getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
                 String value = sharedPref.getString("auto_accept_amount", "0");
                 int limit = Integer.parseInt(value);
                 if (amountChf.compareTo(new BigDecimal(limit)) <= 0)
@@ -638,12 +638,12 @@ public class MainActivity extends AbstractPaymentActivity {
             }
 
             if (isSending) {
-                ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
+                getCoinBleskApplication().getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
                 answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
                         CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue,
                         pr.getUsernamePayee());
             } else {
-                ClientController.getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
+                getCoinBleskApplication().getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
                 answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
                         CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue,
                         pr.getUsernamePayer());

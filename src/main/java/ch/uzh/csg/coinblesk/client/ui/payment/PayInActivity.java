@@ -21,19 +21,19 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
-import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.request.SendPayInAddressByEmail;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
-import ch.uzh.csg.coinblesk.responseobject.TransferObject;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Writer;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+
+import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.request.RequestTask;
+import ch.uzh.csg.coinblesk.client.request.SendPayInAddressByEmail;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
  * This class is the view for pay ins. It displays the bitcoin address where a
@@ -83,7 +83,7 @@ public class PayInActivity extends WalletActivity {
 
         initClickListener();
 
-        if (!ClientController.isConnectedToServer())
+        if (!ConnectionCheck.isNetworkAvailable(this))
             sendAsMailBtn.setEnabled(false);
     }
 
@@ -97,7 +97,7 @@ public class PayInActivity extends WalletActivity {
         super.onResume();
         invalidateOptionsMenu();
 
-        if (!ClientController.isConnectedToServer())
+        if (!ConnectionCheck.isNetworkAvailable(this))
             sendAsMailBtn.setEnabled(false);
     }
 
