@@ -8,7 +8,7 @@ import java.math.BigDecimal;
  */
 public class Constants {
 //	public static final String BASE_URI = "http://bitcoin.csg.uzh.ch/server";
-	public static final String BASE_URI_SSL = "http://192.168.42.88:8080/coinblesk";
+	public static final String BASE_URI_SSL = "http://192.168.42.232:8080/coinblesk";
 //	public static final String BASE_URI = "http://bitcoin-clone2.csg.uzh.ch/server";
 //	public static final String BASE_URI_SSL = "http://bitcoin-clone2.csg.uzh.ch/server";
 	
@@ -67,5 +67,14 @@ public class Constants {
 
 	// Date format
 	public static String DATE_FORMAT = "dd-MM-yyyy' 'HH:mm:ss";
+
+	/**
+	 * Determines the earlies creation date of a coin blesk backup phrase (mnemonic).
+	 * This will speed up blockchain synchronization significantly, as we don't have
+	 * to download block earlier than this date.
+	 */
+	public static long EARLIEST_COINBLESK_KEY = 1427846400;
+
+	public static final BigDecimal DEFAULT_FEE = new BigDecimal("0.0001");
 
 }

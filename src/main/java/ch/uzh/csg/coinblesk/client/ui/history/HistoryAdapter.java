@@ -16,7 +16,7 @@ import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.util.formatter.DateFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.TransactionHistory;
-import ch.uzh.csg.coinblesk.model.Transaction;
+import ch.uzh.csg.coinblesk.client.wallet.TransactionObject;
 
 /**
  * Created by rvoellmy on 5/25/15.
@@ -47,7 +47,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Transact
     public void onBindViewHolder(TransactionHolder holder, int position) {
         Preconditions.checkElementIndex(position, txHistory.getAllTransactions().size());
 
-        Transaction tx = txHistory.getAllTransactions().get(position);
+        TransactionObject tx = txHistory.getAllTransactions().get(position);
 
         CurrencyViewHandler.setBTC(holder.vAmount, tx.getAmount(), context);
         String date = DateFormatter.formatDate(tx.getTimestamp());

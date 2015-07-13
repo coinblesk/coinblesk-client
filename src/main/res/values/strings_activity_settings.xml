@@ -7,7 +7,7 @@
 
     <!-- General settings -->
     <string name="pref_header_general">General</string>
-    <string name="pref_title_about_settings">About</string>
+    <string name="pref_title_about_settings">About</string>w
     <string name="pref_title_wallet_backup">Wallet Backup</string>
     <string name="pref_title_bitcoin_unit">Choose bitcoin unit</string>
 

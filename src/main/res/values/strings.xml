@@ -181,7 +181,9 @@
 	<string name="payOut_successful">Your PayOut transaction of %1$s was successfully sent to the Bitcoin network.</string>
     <string name="payOut_error_balance">Couldn\'t pay out the desired amount. Your balance is lower than your specified PayOut amount.</string>
     <string name="payOut_error_address">Couldn\'t pay out the desired amount. The BTC Address is invalid.</string>
-    
+    <string name="payOut_error_enterBitcoinAddress">Please enter a Bitcoin address</string>
+    <string name="payOut_error_enterAmount">Please enter an amount</string>
+
     <!-- Payou out Rules -->
     <string name="insert_payout_address">Please insert a pay out address!</string>
     <string name="insert_min_amount">Please insert a balance amount with a minimum of 0.0001 BTC!</string>

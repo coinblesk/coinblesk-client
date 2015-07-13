@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,12 +24,13 @@ import java.math.BigDecimal;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
-import ch.uzh.csg.coinblesk.client.util.ClientController;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.customserialization.Currency;
+import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
@@ -38,7 +40,7 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 public class PayOutActivity extends WalletActivity {
     public static BigDecimal exchangeRate;
     private BigDecimal payOutAmount;
-    private Button acceptBtn;
+    private Button payOutBtn;
     private Button allBtn;
     private Button scanQRButton;
     private EditText payoutAmountEditText;
@@ -53,19 +55,10 @@ public class PayOutActivity extends WalletActivity {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
-        walletConnected = true;
 
-        CurrencyViewHandler.setBTC(btcBalance, getWalletService().getBalance(), getApplicationContext());
-        CurrencyViewHandler.clearTextView(chfBalance);
-
+        updateBalance();
         checkOnlineModeAndProceed();
 
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-        super.onServiceDisconnected(name);
-        walletConnected = false;
     }
 
     @Override
@@ -80,27 +73,25 @@ public class PayOutActivity extends WalletActivity {
         btcBalance = (TextView) findViewById(R.id.payOut_Balance);
         chfAmount = (TextView) findViewById(R.id.payOut_AmountCHF);
 
-        acceptBtn = (Button) findViewById(R.id.payOut_payOutButton);
+        payOutBtn = (Button) findViewById(R.id.payOut_payOutButton);
         allBtn = (Button) findViewById(R.id.payout_ButtonAll);
         payoutAmountEditText = (EditText) findViewById(R.id.payOut_Amount);
         payoutAddress = (EditText) findViewById(R.id.payOut_Address);
         scanQRButton = (Button) findViewById(R.id.payout_ButtonScanQR);
 
-        initClickListener();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        checkOnlineModeAndProceed();
         invalidateOptionsMenu();
     }
 
     private void initClickListener() {
 
-        acceptBtn.setOnClickListener(new View.OnClickListener() {
+        payOutBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (ClientController.isConnectedToServer()) {
+                if (ConnectionCheck.isNetworkAvailable(PayOutActivity.this)) {
                     // hide virtual keyboard
                     InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
@@ -108,6 +99,7 @@ public class PayOutActivity extends WalletActivity {
                 }
             }
         });
+        payOutBtn.setEnabled(true);
 
         scanQRButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -118,7 +110,7 @@ public class PayOutActivity extends WalletActivity {
 
         allBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(walletConnected) {
+                if (walletConnected) {
                     BigDecimal balance = getWalletService().getBalance();
                     BigDecimal amount = CurrencyViewHandler.getBTCAmountInDefinedUnit(balance, getApplicationContext());
 
@@ -127,6 +119,7 @@ public class PayOutActivity extends WalletActivity {
                 }
             }
         });
+        allBtn.setEnabled(true);
 
         payoutAmountEditText.addTextChangedListener(new TextWatcher() {
             /*
@@ -149,6 +142,7 @@ public class PayOutActivity extends WalletActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
         });
+        payoutAmountEditText.setEnabled(true);
     }
 
 
@@ -158,34 +152,45 @@ public class PayOutActivity extends WalletActivity {
     }
 
     private void launchPayOutRequest() {
-        if (!payoutAmountEditText.getText().toString().isEmpty() && !payoutAddress.getText().toString().isEmpty()) {
-            showLoadingProgressDialog();
-            BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(payoutAmountEditText.getText().toString());
-            payOutAmount = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
-
-            try {
-                getWalletService().createPayment(payoutAddress.getText().toString(), payOutAmount);
-                chfAmount.setText("");
-                payoutAmountEditText.setText("");
-                payoutAddress.setText("");
-            } catch (AddressFormatException e) {
-                displayResponse(getResources().getString(R.string.payOut_error_address));
-            } catch (InsufficientMoneyException e) {
-                displayResponse(getResources().getString(R.string.payOut_error_balance));
-            }
-
-            dismissProgressDialog();
-
-        } else {
-            displayResponse(getResources().getString(R.string.fill_necessary_fields));
+        if (payoutAmountEditText.getText().toString().isEmpty()) {
+            displayResponse(getResources().getString(R.string.payOut_error_enterAmount));
+            return;
         }
+        if (payoutAddress.getText().toString().isEmpty()) {
+            displayResponse(getResources().getString(R.string.payOut_error_enterBitcoinAddress));
+            return;
+        }
+
+        showLoadingProgressDialog();
+        BigDecimal tempBTC = CurrencyFormatter.getBigDecimalBtc(payoutAmountEditText.getText().toString());
+        payOutAmount = CurrencyViewHandler.getBitcoinsRespectingUnit(tempBTC, getApplicationContext());
+
+        try {
+            getWalletService().createPayment(payoutAddress.getText().toString(), payOutAmount);
+            chfAmount.setText("");
+            payoutAmountEditText.setText("");
+            payoutAddress.setText("");
+        } catch (AddressFormatException e) {
+            displayResponse(getResources().getString(R.string.payOut_error_address));
+        } catch (InsufficientMoneyException e) {
+            displayResponse(getResources().getString(R.string.payOut_error_balance));
+        }
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateBalance();
+            }
+        }, 1000);
+
+        dismissProgressDialog();
     }
 
     private void checkOnlineModeAndProceed() {
-        if (ClientController.isConnectedToServer()) {
+        if (ConnectionCheck.isNetworkAvailable(this)) {
             launchExchangeRateRequest();
         } else {
-            acceptBtn.setEnabled(false);
+            payOutBtn.setEnabled(false);
             allBtn.setEnabled(false);
             scanQRButton.setEnabled(false);
         }
@@ -195,24 +200,34 @@ public class PayOutActivity extends WalletActivity {
      * Launches request for updating Exchange Rate
      */
     public void launchExchangeRateRequest() {
-        if (ClientController.isConnectedToServer()) {
-            showLoadingProgressDialog();
-            RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new RequestCompleteListener<TransferObject>() {
-                public void onTaskComplete(TransferObject response) {
-                    dismissProgressDialog();
-                    if (response.isSuccessful()) {
-                        exchangeRate = new BigDecimal(response.getMessage());
-                        BigDecimal balance = getWalletService().getBalance();
-                        CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payout_exchangeRate));
-                        CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
-                    } else {
-                        exchangeRate = BigDecimal.ZERO;
-                        displayResponse(response.getMessage());
-                        chfBalance.setText("");
-                    }
+        showLoadingProgressDialog();
+        RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
+            public void onTaskComplete(ExchangeRateTransferObject response) {
+                dismissProgressDialog();
+                if (response.isSuccessful()) {
+                    exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
+                    BigDecimal balance = getWalletService().getBalance();
+                    CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payout_exchangeRate));
+                    CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
+                } else {
+                    exchangeRate = BigDecimal.ZERO;
+                    displayResponse(response.getMessage());
+                    chfBalance.setText("");
                 }
-            }, new TransferObject(), new TransferObject(), getApplicationContext());
-            request.execute();
+                initClickListener();
+            }
+        }, this);
+        request.execute();
+    }
+
+    private void updateBalance() {
+        // TODO: distinguish between unconfirmed and confirmed balance
+        BigDecimal balance = getWalletService().getUnconfirmedBalance();
+
+        CurrencyViewHandler.setBTC(btcBalance, balance, this);
+        CurrencyViewHandler.clearTextView(chfBalance);
+        if(exchangeRate != null) {
+            CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
         }
     }
 

@@ -3,6 +3,7 @@ package ch.uzh.csg.coinblesk.client.request;
 import android.content.Context;
 
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
@@ -32,6 +33,11 @@ public class DefaultRequestFactory implements RequestFactory {
     @Override
     public RequestTask<TransferObject, SetupRequestObject> setupRequest(RequestCompleteListener<SetupRequestObject> cro, Context context) {
         return new SetupRequestTask(cro, context);
+    }
+
+    @Override
+    public RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest(RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) {
+        return new ExchangeRateRequestTask(cro, context);
     }
 
 }

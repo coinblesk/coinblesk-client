@@ -21,6 +21,7 @@ import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
@@ -67,6 +68,7 @@ public class RestoreOrNewActivity extends WalletActivity {
                     cro.onTaskComplete(response);
                 } else {
                     displayResponse(getString(R.string.establish_internet_connection));
+                    dismissProgressDialog();
                 }
             }
         }, this);
@@ -79,7 +81,7 @@ public class RestoreOrNewActivity extends WalletActivity {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    Service service = getWalletService().restoreWalletFromSeed(getCoinBleskApplication().getStorageHandler(), mnemonic, 0L);
+                    Service service = getWalletService().restoreWalletFromSeed(getCoinBleskApplication().getStorageHandler(), mnemonic, Constants.EARLIEST_COINBLESK_KEY);
                     service.awaitRunning();
                 } catch (UnreadableWalletException e) {
                     LOGGER.error("Wallet setup failed: {}", e);
@@ -128,7 +130,7 @@ public class RestoreOrNewActivity extends WalletActivity {
                     startMainActivity();
                 } else {
                     displayResponse(getString(R.string.establish_internet_connection));
-
+                    dismissProgressDialog();
                 }
             }
         }, input, this);
@@ -154,6 +156,7 @@ public class RestoreOrNewActivity extends WalletActivity {
                             mBackupPhraseField.startAnimation(shake);
                             LOGGER.error("Invalid mnemonic seed: {}", mnemonic);
                             displayResponse(getResources().getString(R.string.restoreOrCreate_toast_restoreFailed));
+                            dismissProgressDialog();
                         }
                     }
                 });

@@ -3,6 +3,7 @@ package ch.uzh.csg.coinblesk.client.request;
 import android.content.Context;
 
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
@@ -21,4 +22,7 @@ public interface RequestFactory {
     RequestTask<WatchingKeyTransferObject, TransferObject> saveWatchingKeyRequest(RequestCompleteListener<TransferObject> cro, WatchingKeyTransferObject input, Context context);
 
     RequestTask<TransferObject, SetupRequestObject> setupRequest(RequestCompleteListener<SetupRequestObject> cro, Context context);
+
+    RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest(RequestCompleteListener<ExchangeRateTransferObject> cro, Context context);
+
 }

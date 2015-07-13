@@ -134,9 +134,9 @@ public class WalletService extends android.app.Service {
     /**
      * Restores a wallet from an Mnemonic seed.
      *
-     * @param storage
-     * @param mnemonic
-     * @param creationTime
+     * @param storage      the StorageHandler of the application
+     * @param mnemonic     the mnemonic seed to restore the private keys from
+     * @param creationTime the creation date of the key, UNIX epoch
      * @return
      * @throws UnreadableWalletException
      */
@@ -222,7 +222,8 @@ public class WalletService extends android.app.Service {
         serverWatchingKey = storage.getWatchingKey();
 
         // check state
-        Preconditions.checkState(bitcoinNet != null && serverWatchingKey != null, "bitcoinnet and server watching key have to be set in the storage for the wallet service to start.");
+        Preconditions.checkNotNull(bitcoinNet, "bitcoinnet has to be set in the storage for the wallet service to start.");
+        Preconditions.checkNotNull(serverWatchingKey, "server watching key has to be set in the storage for the wallet service to start.");
 
         // we need a lock here to make sure below is not executed multiple times.
         // Else if two threads at the same time try to bind the service, IllegalStateException
@@ -360,7 +361,7 @@ public class WalletService extends android.app.Service {
                 LOGGER.info("Refund transaction becomes valid soon, redepositing bitcoins now to invalidate the old refund transaction");
                 redeposit();
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.debug("Unexpected error checking the refund transaction state", e);
         }
     }
@@ -369,6 +370,7 @@ public class WalletService extends android.app.Service {
      * Broadcasts the stored refund transaction.
      */
     public void broadcastRefundTx() {
+
         byte[] serializedRefundTx = Base64.decode(storage.getRefundTx(), Base64.NO_WRAP);
         Transaction refundTx = new Transaction(getNetworkParams(bitcoinNet), serializedRefundTx);
         Wallet.SendRequest req = Wallet.SendRequest.forTx(refundTx);
@@ -384,7 +386,7 @@ public class WalletService extends android.app.Service {
 
     private CoinBleskWalletAppKit getAppKit() {
 
-        if(storage == null) {
+        if (storage == null) {
             storage = getCoinbleskApplication().getStorageHandler();
         }
 
@@ -439,6 +441,15 @@ public class WalletService extends android.app.Service {
         }
     }
 
+    /**
+     * Checks if the stored refund transaction is already valid.
+     *
+     * @return true if a valid refund transaction is stored on the device
+     */
+    public boolean isRefundTxValid() {
+        return getCurrentBlockHeight() >= storage.getRefundTxValidBlock();
+    }
+
     public String getBitcoinAddress() {
         return getAppKit().wallet().currentReceiveAddress().toString();
     }
@@ -454,10 +465,14 @@ public class WalletService extends android.app.Service {
     public void createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
         NetworkParameters params = getNetworkParams(bitcoinNet);
         Address btcAddress = new Address(params, address);
-        Wallet.SendRequest req = Wallet.SendRequest.to(btcAddress, Coin.parseCoin(amount.toString()));
-        req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
-        getAppKit().wallet().completeTx(req);
+        Coin sendAmount = BitcoinUtils.bigDecimalToCoin(amount);
 
+        // create the send request
+        Wallet.SendRequest req = Wallet.SendRequest.to(btcAddress, sendAmount);
+        req.fee = BitcoinUtils.bigDecimalToCoin(Constants.DEFAULT_FEE);
+        req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
+
+        getAppKit().wallet().completeTx(req);
 
         for (TransactionInput txIn : req.tx.getInputs()) {
             if (txIn.getConnectedOutput().getScriptPubKey().isPayToScriptHash()) {
@@ -490,7 +505,7 @@ public class WalletService extends android.app.Service {
             // at least one input needs a so-called sequence number set to 0.
             // For details, see: https://bitcoin.org/en/developer-guide#locktime-and-sequence-number
             List<Transaction> unspents = new ArrayList<>(getAppKit().wallet().getTransactionPool(WalletTransaction.Pool.UNSPENT).values());
-            if(unspents.isEmpty()) {
+            if (unspents.isEmpty()) {
                 // no unspent transaction found -> use pending instead
                 unspents.addAll(new ArrayList<>(getAppKit().wallet().getTransactionPool(WalletTransaction.Pool.PENDING).values()));
             }
@@ -498,8 +513,8 @@ public class WalletService extends android.app.Service {
             Preconditions.checkState(!unspents.isEmpty(), "Cannot create refund transaction without any unspent transactions.");
 
             TransactionOutput outputToAdd = null;
-            for(TransactionOutput output : unspents.get(0).getOutputs()) {
-                if(output.isMine(getAppKit().wallet())) {
+            for (TransactionOutput output : unspents.get(0).getOutputs()) {
+                if (output.isMine(getAppKit().wallet())) {
                     outputToAdd = output;
                 }
             }
@@ -527,7 +542,7 @@ public class WalletService extends android.app.Service {
 
         List<Transaction> txs = getAppKit().wallet().getRecentTransactions(maxNumberOfTransactions, false);
 
-        List<ch.uzh.csg.coinblesk.model.Transaction> allTransactions = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
+        List<TransactionObject> allTransactions = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
 
 
         for (Transaction tx : txs) {
@@ -536,22 +551,22 @@ public class WalletService extends android.app.Service {
             BigDecimal amount = BitcoinUtils.coinToBigDecimal(tx.getValue(getAppKit().wallet()));
 
             // now let's translate the bitcoinJ Transaction to our simplified Transaction object
-            ch.uzh.csg.coinblesk.model.Transaction transaction = new ch.uzh.csg.coinblesk.model.Transaction();
+            TransactionObject transaction = new TransactionObject();
             transaction.setAmount(amount.abs());
             transaction.setTimestamp(tx.getUpdateTime());
 
             if (amount.signum() < 0) {
                 // negative amount -> pay out
-                transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_OUT);
+                transaction.setType(TransactionObject.TransactionType.PAY_OUT);
             } else {
                 // positive amount -> pay in
                 if (tx.getConfidence().getDepthInBlocks() >= Constants.MIN_CONFIRMATIONS) {
                     // confirmed tx
-                    transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_IN);
+                    transaction.setType(TransactionObject.TransactionType.PAY_IN);
                 } else {
                     // TODO: work with confidence instead of confirmations
                     // unconfirmed tx
-                    transaction.setType(ch.uzh.csg.coinblesk.model.Transaction.TransactionType.PAY_IN_UNVERIFIED);
+                    transaction.setType(TransactionObject.TransactionType.PAY_IN_UNVERIFIED);
                 }
             }
 
@@ -573,6 +588,7 @@ public class WalletService extends android.app.Service {
 
     /**
      * Returns the current chain height, as reported by a majority of our peers.
+     *
      * @return the most common chain height
      */
     public long getCurrentBlockHeight() {
@@ -596,6 +612,31 @@ public class WalletService extends android.app.Service {
 
     private CoinBleskApplication getCoinbleskApplication() {
         return ((CoinBleskApplication) getApplication());
+    }
+
+    /**
+     * Checks whether the passed bitcoin address is a valid address.
+     *
+     * @param addr the bitcoin address
+     * @return true if the address is valid
+     */
+    public boolean isValidAddress(String addr) {
+        try {
+            new Address(getNetworkParams(bitcoinNet), addr);
+            return true;
+        } catch (AddressFormatException e) {
+            return false;
+        }
+    }
+
+
+    /**
+     * This method should not be called and is only used for testing.
+     *
+     * @return the {@link CoinBleskWalletAppKit}
+     */
+    public CoinBleskWalletAppKit getCoinBleskWalletAppKit() {
+        return getAppKit();
     }
 
 

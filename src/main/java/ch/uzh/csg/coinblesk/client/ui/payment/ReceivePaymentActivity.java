@@ -35,7 +35,6 @@ import java.util.ArrayList;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ClientController;
@@ -46,6 +45,7 @@ import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
+import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
 import ch.uzh.csg.paymentlib.IPaymentEventHandler;
@@ -246,13 +246,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	public void launchExchangeRateRequest() {
 		if (ClientController.isConnectedToServer()) {
 			showLoadingProgressDialog();
-			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new RequestCompleteListener<TransferObject>() {
-				public void onTaskComplete(TransferObject response) {
+			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
+				public void onTaskComplete(ExchangeRateTransferObject response) {
 					dismissProgressDialog();
 					dismissNfcInProgressDialog();
 					if (response.isSuccessful()) {
 						CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
-						exchangeRate = new BigDecimal(response.getMessage());
+						exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
 						CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
 						BigDecimal balance = getWalletService().getBalance();
 						CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
@@ -268,7 +268,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 						}
 					}
 				}
-			}, new TransferObject(), new TransferObject(), getApplicationContext());
+			}, this);
 			request.execute();
 		}
 	}

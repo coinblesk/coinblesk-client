@@ -31,6 +31,7 @@
         android:layout_toLeftOf="@+id/payout_ButtonAll"
         android:layout_toRightOf="@+id/payOut_BalanceText"
         android:ems="10"
+        android:enabled="false"
         android:inputType="numberDecimal" >
         <requestFocus />
     </EditText>
@@ -70,6 +71,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/payOut_Address"
         android:layout_marginTop="5dp"
+        android:enabled="false"
         android:text="@string/payOut_payOut" />
 
     <TextView
@@ -126,6 +128,7 @@
         android:layout_alignParentRight="true" />
 
     <Button
+        android:enabled="false"
         android:id="@+id/payout_ButtonAll"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"

@@ -4,7 +4,7 @@ import android.content.Context;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.model.Transaction;
+import ch.uzh.csg.coinblesk.client.wallet.TransactionObject;
 
 public class HistoryTransactionFormatter {
 
@@ -16,7 +16,7 @@ public class HistoryTransactionFormatter {
 	 * @param context ApplicationContext to access String ressources
 	 * @return String representation of HistoryTransaction
 	 */
-	public static String formatHistoryTransaction(Transaction tx, Context context){
+	public static String formatHistoryTransaction(TransactionObject tx, Context context){
 		StringBuilder sb = new StringBuilder();
 		sb.append(DateFormatter.formatDate(tx.getTimestamp()));
 		sb.append("\n");

@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
 import java.util.List;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
@@ -52,10 +51,10 @@ import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
+import ch.uzh.csg.coinblesk.client.wallet.TransactionObject;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
-import ch.uzh.csg.coinblesk.model.Transaction;
 import ch.uzh.csg.coinblesk.util.Converter;
 import ch.uzh.csg.paymentlib.IPaymentEventHandler;
 import ch.uzh.csg.paymentlib.IServerResponseListener;
@@ -316,11 +315,6 @@ public class MainActivity extends AbstractPaymentActivity {
         displayBalanceTaks.execute();
     }
 
-    private class CustomComparator implements Comparator<Transaction> {
-        public int compare(Transaction o1, Transaction o2) {
-            return o1.getTimestamp().compareTo(o2.getTimestamp());
-        }
-    }
 
     private int getNumberOfLastTransactions() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -330,14 +324,14 @@ public class MainActivity extends AbstractPaymentActivity {
 
     private void createHistoryViews() {
 
-        AsyncTask<Void, Void, List<Transaction>> getTransactionHistoryTask = new AsyncTask<Void, Void, List<Transaction>>() {
+        AsyncTask<Void, Void, List<TransactionObject>> getTransactionHistoryTask = new AsyncTask<Void, Void, List<TransactionObject>>() {
             @Override
-            protected List<Transaction> doInBackground(Void... params) {
+            protected List<TransactionObject> doInBackground(Void... params) {
                 return getWalletService().getTransactionHistory().getAllTransactions();
             }
 
             @Override
-            protected void onPostExecute(List<Transaction> history) {
+            protected void onPostExecute(List<TransactionObject> history) {
                 LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mainActivity_history);
                 linearLayout.removeAllViews();
                 for (int i = 0; i < getNumberOfLastTransactions(); i++) {
@@ -370,8 +364,8 @@ public class MainActivity extends AbstractPaymentActivity {
 
     }
 
-    private int getImage(Transaction history) {
-        switch (history.getType()) {
+    private int getImage(TransactionObject tx) {
+        switch (tx.getType()) {
             case PAY_IN:
                 return R.drawable.ic_pay_in;
             case PAY_IN_UNVERIFIED:
@@ -379,7 +373,7 @@ public class MainActivity extends AbstractPaymentActivity {
             case PAY_OUT:
                 return R.drawable.ic_pay_out;
             default:
-                throw new IllegalArgumentException("Unknown transaction type " + history.getType());
+                throw new IllegalArgumentException("Unknown transaction type " + tx.getType());
         }
     }
 

@@ -7,4 +7,5 @@ public class RefundTx {
 
     public static long NO_REFUND_TX_VALID_BLOCK = -1;
 
+
 }

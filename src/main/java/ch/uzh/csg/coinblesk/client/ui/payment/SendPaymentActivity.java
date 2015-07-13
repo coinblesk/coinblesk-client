@@ -36,7 +36,6 @@ import java.util.Set;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.request.ExchangeRateRequestTask;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
@@ -44,11 +43,13 @@ import ch.uzh.csg.coinblesk.client.util.ClientController;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerResponseStatus;
+import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
 
@@ -176,11 +177,12 @@ public class SendPaymentActivity extends WalletActivity {
 	public void launchExchangeRateRequest() {
 		if (ClientController.isConnectedToServer()) {
 			showLoadingProgressDialog();
-			RequestTask<TransferObject, TransferObject> request = new ExchangeRateRequestTask(new RequestCompleteListener<TransferObject>() {
-				public void onTaskComplete(TransferObject response) {
+			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
+				@Override
+				public void onTaskComplete(ExchangeRateTransferObject response) {
 					dismissProgressDialog();
 					if (response.isSuccessful()) {
-						onTaskCompleteExchangeRate(response.getMessage());
+						onTaskCompleteExchangeRate(response.getExchangeRate(Currency.CHF));
 					} else {
 						if (response.getMessage().contains(Constants.CONNECTION_ERROR)) {
 							displayResponse(getResources().getString(R.string.no_connection_server));
@@ -192,7 +194,7 @@ public class SendPaymentActivity extends WalletActivity {
 						return;
 					}
 				}
-			}, new TransferObject(), new TransferObject(), getApplicationContext());
+			}, this);
 			request.execute();
 		}
 	}

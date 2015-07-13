@@ -139,6 +139,7 @@
     <string name="sendPayment_dialog_confirm">Senden</string>
     <string name="sendPayment_balance_error">Ihr Konto verfügt nicht über eine genügende Deckung zur Zahlung dieses Betrags.</string>
 
+
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">Sie haben %1$s an %2$s gesendet.</string>
     <string name="payment_notification_success_payee">Sie haben %1$s von %2$s erhalten.</string>
@@ -185,6 +186,9 @@
     <string name="payOut_successful">Ihre Auszahlung von %1$s wurde erfolgreich ans Bitcoin Netzwerk gesendet.</string>
     <string name="payOut_error_balance">Auszahlung nicht erfolgreich. Ihr Kontostand ist tiefer als ihr gewünschter Auszahlungsbetrag.</string>
     <string name="payOut_error_address">Auszahlung nicht erfolgreich. Die Bitcoin Adresse ist ungültig.</string>
+    <string name="payOut_error_enterBitcoinAddress">Bitte geben Sie eine Bitcoin Adresse ein.</string>
+    <string name="payOut_error_enterAmount">Bitte geben Sie einen Betrag ein.</string>
+
 
     <!-- Payou out Rules -->
     <string name="insert_payout_address">Bitte Auszahlungs-Adresse eingeben!</string>

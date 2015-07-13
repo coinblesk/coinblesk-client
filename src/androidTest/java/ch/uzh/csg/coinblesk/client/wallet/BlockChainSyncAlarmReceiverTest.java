@@ -14,7 +14,7 @@ import org.junit.Before;
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
-import testutils.TestUtils;
+import testutils.BitcoinTestUtils;
 
 /**
  * Created by rvoellmy on 7/4/15.
@@ -27,7 +27,7 @@ public class BlockChainSyncAlarmReceiverTest extends AndroidTestCase {
         // preapre internal storage
         PersistentStorageHandler storage = new PersistentStorageHandler(getContext());
         storage.setBitcoinNet(BitcoinNet.TESTNET);
-        storage.setWatchingKey(TestUtils.getServerWatchingKey(TestNet3Params.get()));
+        storage.setWatchingKey(BitcoinTestUtils.getServerWatchingKey(TestNet3Params.get()));
         ((CoinBleskApplication) getContext().getApplicationContext()).setStorageHandler(storage);
     }
 

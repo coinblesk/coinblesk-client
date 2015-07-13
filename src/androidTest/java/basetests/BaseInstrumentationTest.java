@@ -20,13 +20,15 @@ import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.customserialization.Currency;
+import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 import testutils.MockRequestTask;
-import testutils.TestUtils;
+import testutils.BitcoinTestUtils;
 
 /**
  * Created by rvoellmy on 6/23/15.
@@ -35,14 +37,15 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
 
 
     protected final static int TIMEOUT = 30*1000;
-    protected final static String SERVER_WATCHING_KEY = TestUtils.getServerWatchingKey(TestNet3Params.get());
+    protected final static String SERVER_WATCHING_KEY = BitcoinTestUtils.getServerWatchingKey(TestNet3Params.get());
 
     protected Solo solo;
     protected CoinBleskApplication mApplication;
 
     protected SetupRequestObject setupResponse;
+    protected ExchangeRateTransferObject exchangeRateResponse;
     protected TransferObject payOutResponse;
-    protected TransferObject refundTxResponse;
+    protected RefundTxTransferObject refundTxResponse;
     protected TransferObject saveWatchingKeyResponse;
 
     public BaseInstrumentationTest(Class<T> activityClass) {
@@ -62,10 +65,14 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
         setupResponse.setBitcoinNet(BitcoinNet.TESTNET);
         setupResponse.setServerWatchingKey(SERVER_WATCHING_KEY);
 
+        exchangeRateResponse = new ExchangeRateTransferObject();
+        exchangeRateResponse.setSuccessful(true);
+        exchangeRateResponse.setExchangeRate(Currency.CHF, "300.00");
+
         payOutResponse = new TransferObject();
         payOutResponse.setSuccessful(true);
 
-        refundTxResponse = new TransferObject();
+        refundTxResponse = new RefundTxTransferObject();
         refundTxResponse.setSuccessful(true);
 
         saveWatchingKeyResponse = new TransferObject();
@@ -85,14 +92,15 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
         mApplication.getStorageHandler().setWatchingKey(SERVER_WATCHING_KEY);
     }
 
-
     protected void prepareRequestFactory(){
 
         // set up the mock responses here. This also does some basic checks on the requests.
         RequestFactory requestFactory = new RequestFactory() {
             @Override
             public RequestTask<ServerSignatureRequestTransferObject, RefundTxTransferObject> refundTxRequest(RequestCompleteListener<RefundTxTransferObject> cro, ServerSignatureRequestTransferObject input, RefundTxTransferObject output, Context context) {
-                return new MockRequestTask(cro, refundTxResponse);
+                // send the same tx back. It won't be signed but it doesn't matter
+                refundTxResponse.setRefundTx(input.getPartialTx());
+                return new MockRequestTask<>(cro, refundTxResponse);
             }
 
             @Override
@@ -100,20 +108,27 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
                 Assert.assertNotNull(input.getPartialTx());
                 Assert.assertNotNull(input.getIndexAndDerivationPaths());
                 Assert.assertFalse(input.getIndexAndDerivationPaths().isEmpty());
-                return new MockRequestTask(cro, payOutResponse);
+                return new MockRequestTask<>(cro, payOutResponse);
             }
 
             @Override
             public RequestTask<WatchingKeyTransferObject, TransferObject> saveWatchingKeyRequest(RequestCompleteListener<TransferObject> cro, WatchingKeyTransferObject input, Context context) {
                 Assert.assertNotNull(input.getWatchingKey());
                 Assert.assertNotNull(input.getBitcoinNet());
-                return new MockRequestTask(cro, saveWatchingKeyResponse);
+                return new MockRequestTask<>(cro, saveWatchingKeyResponse);
             }
 
             @Override
             public RequestTask<TransferObject, SetupRequestObject> setupRequest(RequestCompleteListener<SetupRequestObject> cro, Context context) {
-                return new MockRequestTask(cro, setupResponse);
+                return new MockRequestTask<>(cro, setupResponse);
             }
+
+            @Override
+            public RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest(RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) {
+                return new MockRequestTask<>(cro, exchangeRateResponse);
+            }
+
+
         };
 
         mApplication.setRequestFactory(requestFactory);
@@ -137,6 +152,19 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
             f.delete();
         }
 
+    }
+
+    protected CoinBleskApplication getCoinBleskApplication() {
+        CoinBleskApplication app = (CoinBleskApplication) getInstrumentation().getTargetContext().getApplicationContext();
+
+        try {
+            // we need to wait for the application to initialize, else a null pointer
+            // exception will be thrown.
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return app;
     }
 
 }

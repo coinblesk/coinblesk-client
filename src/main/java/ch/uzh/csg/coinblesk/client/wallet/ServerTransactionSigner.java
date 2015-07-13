@@ -124,7 +124,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                 // wallet even if it's not fully signed.
                 notifyListeners(tx, response.isSuccessful());
 
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && tx.getMemo() != DefaultTransactionMemos.REDEPOSIT_TX_MEMO) {
                     LOGGER.info("Transaction signing and broadcast was successful");
                     Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
                 } else {
@@ -144,15 +144,11 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
             public void onTaskComplete(RefundTxTransferObject response) {
 
                 Transaction refundTx = null;
-                // TODO: change success/fail strings below
-
                 if (response.isSuccessful()) {
                     refundTx = new Transaction(tx.getParams(), Base64.decode(response.getRefundTx(), Base64.NO_WRAP));
                     LOGGER.info("Refund tx request was successful");
-                    Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
                 } else {
                     LOGGER.error("Refund tx request failed: " + response.getMessage());
-                    Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
                 }
 
                 notifyListeners(refundTx, response.isSuccessful());

@@ -3,8 +3,6 @@ package ch.uzh.csg.coinblesk.client.request;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import net.minidev.json.JSONObject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import ch.uzh.csg.coinblesk.JsonConverter;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
@@ -76,8 +75,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
                 res = executePost(url, requestObject);
             }
             if (res != null) {
-                responseObject.decode(res);
-                return responseObject;
+                return JsonConverter.fromJson(res, (Class<O>) responseObject.getClass());
             }
         } catch (Exception e) {
             LOGGER.error("Request failed: {}", e);
@@ -115,11 +113,10 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             connection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT);
 
             //Send request
-            JSONObject jsonParam = new JSONObject();
-            params.encode(jsonParam);
+            String json = params.toJson();
 
             DataOutputStream printout = new DataOutputStream(connection.getOutputStream());
-            printout.writeUTF(URLEncoder.encode(jsonParam.toJSONString(), "UTF-8"));
+            printout.writeUTF(URLEncoder.encode(json, "UTF-8"));
             printout.flush();
             printout.close();
 

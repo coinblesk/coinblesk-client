@@ -51,7 +51,7 @@ public class WalletActivity extends AbstractAsyncActivity implements ServiceConn
     }
     
     
-    protected WalletService getWalletService() {
+    public WalletService getWalletService() {
         return walletService;
     }
     
@@ -67,5 +67,6 @@ public class WalletActivity extends AbstractAsyncActivity implements ServiceConn
     protected boolean walletConnected() {
         return walletConnected;
     }
+
 
 }

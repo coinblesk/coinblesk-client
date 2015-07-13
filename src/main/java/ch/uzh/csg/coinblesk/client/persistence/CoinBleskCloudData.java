@@ -23,18 +23,18 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     
     // The names of the SharedPreferences groups that the application maintains.  These
     // are the same strings that are passed to getSharedPreferences(String, int).
-    static final String COINBLSEK_DATA = "CoinBleskSharedData";
+    public final String COINBLSEK_DATA = "CoinBleskSharedData";
 
     // An arbitrary string used within the BackupAgentHelper implementation to
     // identify the SharedPreferenceBackupHelper's data.
-    static final String COINBLESK_PREFS_BACKUP_KEY = "CoinBleskPrefs";
+    public static final String COINBLESK_PREFS_BACKUP_KEY = "CoinBleskPrefs";
 
-    private static final String BITCOIN_NET = "bitcoin-net";
-    private static final String SERVER_WATCHING_KEY = "server-watching-key";
-    private static final String CONTACTS = "contacts";
-    private static final String TRUSTED_CONTACTS = "trusted-contacts";
-    private static final String REFUND_TX = "refund-tx";
-    private static final String REFUND_TX_VALID_BLOCK = "refund-tx-valid-block";
+    public static final String BITCOIN_NET = "bitcoin-net";
+    public static final String SERVER_WATCHING_KEY = "server-watching-key";
+    public static final String CONTACTS = "contacts";
+    public static final String TRUSTED_CONTACTS = "trusted-contacts";
+    public static final String REFUND_TX = "refund-tx";
+    public static final String REFUND_TX_VALID_BLOCK = "refund-tx-valid-block";
 
     private final SharedPreferences prefs;
     private Gson gson;
@@ -109,6 +109,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
 
     @Override
     public void setServerWatchingKey(String serverWatchingKey) {
+        LOGGER.debug("Saved server watching key: {}", serverWatchingKey);
         prefs.edit().putString(SERVER_WATCHING_KEY, serverWatchingKey).commit();
     }
 
@@ -119,6 +120,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
 
     @Override
     public void setBitcoinNet(String bitcoinNet) {
+        LOGGER.debug("Saved server bitcoin network: {}", bitcoinNet);
         prefs.edit().putString(BITCOIN_NET, bitcoinNet).commit();
     }
 
