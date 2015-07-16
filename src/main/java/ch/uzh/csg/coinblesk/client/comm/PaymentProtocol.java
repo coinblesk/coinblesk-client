@@ -369,6 +369,11 @@ final public class PaymentProtocol {
         return paymentMessage;
     }
 
+    public static PaymentProtocol contactAndPaymentResponseNok() {
+        final PaymentProtocol paymentMessage = new PaymentProtocol(Type.CONTACT_AND_PAYMENT_RESPONSE_NOK);
+        return paymentMessage;
+    }
+
     public static PaymentProtocol fromServerRequestOk(final byte[] fullySignedTransaction) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.FROM_SERVER_REQUEST_OK);
         paymentMessage.fullySignedTransaction = fullySignedTransaction;
@@ -377,11 +382,6 @@ final public class PaymentProtocol {
 
     public static PaymentProtocol fromServerRequestNok() {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.FROM_SERVER_REQUEST_NOK);
-        return paymentMessage;
-    }
-
-    public static PaymentProtocol contactAndPaymentResponseNok() {
-        final PaymentProtocol paymentMessage = new PaymentProtocol(Type.CONTACT_AND_PAYMENT_RESPONSE_NOK);
         return paymentMessage;
     }
 
