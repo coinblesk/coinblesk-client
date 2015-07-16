@@ -34,6 +34,7 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,11 @@ import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.util.Converter;
+import ch.uzh.csg.nfclib.NfcInitiatorHandler;
+import ch.uzh.csg.nfclib.NfcLibException;
+import ch.uzh.csg.nfclib.NfcResponseHandler;
+import ch.uzh.csg.nfclib.NfcSetup;
+import ch.uzh.csg.nfclib.ResponseLater;
 import ch.uzh.csg.paymentlib.IPaymentEventHandler;
 import ch.uzh.csg.paymentlib.IServerResponseListener;
 import ch.uzh.csg.paymentlib.IUserPromptAnswer;
@@ -101,6 +107,12 @@ public class MainActivity extends AbstractPaymentActivity {
         initializeGui();
         initClickListener();
         initializeDrawer();
+        try {
+            initializeNFC();
+        } catch (NfcLibException e) {
+            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG);
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -287,7 +299,6 @@ public class MainActivity extends AbstractPaymentActivity {
         displayUserBalance();
         initiateProgressBar();
         createHistoryViews();
-        initializeNFC();
         initTxListener();
     }
 
@@ -427,26 +438,72 @@ public class MainActivity extends AbstractPaymentActivity {
     /**
      * Initializes NFC adapter and user payment information.
      */
-    private void initializeNFC() {
+    private void initializeNFC() throws NfcLibException {
+        NfcSetup initiator = new NfcSetup(new NfcInitiatorHandler() {
 
-        // TODO
-//        nfcAdapter = createAdapter(MainActivity.this);
-//        if (nfcAdapter == null) {
-//            return;
-//        }
-//
-//        //disable android beam (touch to beam screen)
-//        nfcAdapter.setNdefPushMessage(null, this, this);
-//
-//        try {
-//            PublicKey publicKeyServer = KeyHandler.decodePublicKey(ClientController.getStorageHandler().getServerPublicKey().getPublicKey());
-//            final ServerInfos serverInfos = new ServerInfos(publicKeyServer);
-//            PrivateKey privateKey = KeyHandler.decodePrivateKey(ClientController.getStorageHandler().getKeyPair().getPrivateKey());
-//            final UserInfos userInfos = new UserInfos(ClientController.getStorageHandler().getUserAccount().getUsername(), privateKey, PKIAlgorithm.DEFAULT, ClientController.getStorageHandler().getKeyPair().getKeyNumber());
-//            new PaymentRequestHandler(this, eventHandler, userInfos, serverInfos, userPrompt, persistencyHandler);
-//        } catch (Exception e) {
-//            displayResponse(getResources().getString(R.string.error_nfc_initializing));
-//        }
+            @Override
+            public void handleMessageReceived(byte[] bytes) {
+                //get 2nd message (maybe check amount here) -> send to server for check if valid, not spend, etc.
+                //continue with 3rd message
+
+                //get 5th message: ok
+            }
+
+            @Override
+            public void handleFailed(String s) {
+
+            }
+
+            @Override
+            public void handleStatus(String s) {
+
+            }
+
+            @Override
+            public boolean hasMoreMessages() {
+                return false;
+            }
+
+            @Override
+            public byte[] nextMessage() {
+                //1st message: amount BTC, which user, to which address, public key -> request signed
+                //1st message: which user, to which address, public key -> send signed
+
+                //3rd message: server says ok, amount ok from server, signed
+                // -> send ok with transaction (optional only signature), signed
+
+                return new byte[0];
+            }
+
+            @Override
+            public boolean isFirst() {
+                return false;
+            }
+        }, new NfcResponseHandler() {
+            @Override
+            public byte[] handleMessageReceived(byte[] bytes, ResponseLater responseLater) {
+                //get 1st message request / get 1st message send
+                //2nd return partially signed transaction
+                // request: BTC from message, public key, signed, username
+                // send: BTC entered by user, public key, signed, username
+                //4th (optional check if signed by server), get ok, reply
+                //5th reply ok, public key, signed
+                return new byte[0];
+            }
+
+            @Override
+            public void handleFailed(String s) {
+
+            }
+
+            @Override
+            public void handleStatus(String s) {
+
+            }
+        }, this);
+
+        //
+        initiator.startInitiating(this);
     }
 
     /**
