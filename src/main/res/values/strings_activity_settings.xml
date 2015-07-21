@@ -33,5 +33,32 @@
     <!--Wallet settings-->
     <string name="pref_header_wallet">Wallet</string>
 
+    <!-- Merchant settings -->
+    <string name="pref_header_merchant">Merchant Settings</string>
+    <string name="pref_title_merchant_mode">Activate Merchant Mode</string>
+    <string name="pref_description_merchant_mode">In the merchant mode all bitcoins are immediately sold for traditional currencies. Sending Bitcoins is no longer possible if merchant mode is activated. A BitStamp or Kraken account is required for the merchant mode.</string>
+
+    <string-array name="pref_primary_exchange_list">
+        <item>Kraken</item>
+        <item>BitStamp</item>
+    </string-array>
+    <string-array name="pref_primary_exchange_values">
+        <item>kraken</item>
+        <item>bitstamp</item>
+    </string-array>
+    <string name="pref_title_primary_exchange">Select Primary Exchange</string>
+
+    <string-array name="pref_secondary_exchange_list">
+        <item>Kraken</item>
+        <item>BitStamp</item>
+    </string-array>
+    <string-array name="pref_secondary_exchange_values">
+        <item>kraken</item>
+        <item>bitstamp</item>
+    </string-array>
+    <string name="pref_title_secondary_exchange">Select Secondary Exchange</string>
+
+
+
 
 </resources>

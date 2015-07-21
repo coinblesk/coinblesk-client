@@ -238,7 +238,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	public void launchExchangeRateRequest() {
 		if (ConnectionCheck.isNetworkAvailable(this)) {
 			showLoadingProgressDialog();
-			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
+			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest("", new RequestCompleteListener<ExchangeRateTransferObject>() {
 				public void onTaskComplete(ExchangeRateTransferObject response) {
 					dismissProgressDialog();
 					dismissNfcInProgressDialog();

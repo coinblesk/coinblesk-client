@@ -19,6 +19,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
@@ -35,6 +38,8 @@ import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends BaseActivity {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SettingsActivity.class);
 
 	private static final boolean ALWAYS_SIMPLE_PREFS = false;
 	private MenuItem menuWarning;
@@ -171,6 +176,7 @@ public class SettingsActivity extends BaseActivity {
 	};
 
 	private static void bindPreferenceSummaryToValue(Preference preference) {
+
 		// Set the listener to watch for value changes.
 		preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
@@ -185,7 +191,7 @@ public class SettingsActivity extends BaseActivity {
 	 * immediately updated upon calling this method. The exact display format is
 	 * dependent on the type of preference. This class represents the view for
 	 * small devices.
-	 * 
+	 *
 	 * @see #sBindPreferenceSummaryToValueListener
 	 */
 	public static class SettingsPreferenceFragement extends PreferenceFragment {
@@ -198,9 +204,7 @@ public class SettingsActivity extends BaseActivity {
 			PreferenceCategory paymentHeader = new PreferenceCategory(getActivity());
 			paymentHeader.setTitle(R.string.pref_header_payments);
 			getPreferenceScreen().addPreference(paymentHeader);
-			bindPreferenceSummaryToValue(findPreference("bitcoin_list"));
-			bindPreferenceSummaryToValue(findPreference("fee_amount"));
-			bindPreferenceSummaryToValue(findPreference("auto_accept_amount"));
+			addPreferencesFromResource(R.xml.pref_payment);
 
 			// add wallet preferences
 			PreferenceCategory walletHeader = new PreferenceCategory(getActivity());
@@ -208,13 +212,18 @@ public class SettingsActivity extends BaseActivity {
 			getPreferenceScreen().addPreference(walletHeader);
 			addPreferencesFromResource(R.xml.pref_wallet);
 
+            // add merchant preferences
+            PreferenceCategory merchantHeader = new PreferenceCategory(getActivity());
+            merchantHeader.setTitle(R.string.pref_header_merchant);
+            getPreferenceScreen().addPreference(merchantHeader);
+            addPreferencesFromResource(R.xml.pref_merchant);
 
 		}
 	}
 
 	/**
 	 * This class represents the view for tablets and larger devices.
-	 * Here the value's are bind which are declared in the general part.
+	 * Here the value's are bind which are declared in the general part.r
 	 */
 	public static class GeneralPreferenceFragment extends PreferenceFragment {
 		@Override

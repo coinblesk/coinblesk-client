@@ -36,8 +36,8 @@ public class DefaultRequestFactory implements RequestFactory {
     }
 
     @Override
-    public RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest(RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) {
-        return new ExchangeRateRequestTask(cro, context);
+    public RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest(String symbol, RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) {
+        return new ExchangeRateRequestTask(symbol, cro, context);
     }
 
 }

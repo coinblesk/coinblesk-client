@@ -23,6 +23,13 @@ public interface RequestFactory {
 
     RequestTask<TransferObject, SetupRequestObject> setupRequest(RequestCompleteListener<SetupRequestObject> cro, Context context);
 
-    RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest(RequestCompleteListener<ExchangeRateTransferObject> cro, Context context);
+    /**
+     *
+     * @param symbol the symbol of the currency to get the exchange rate (e.g. "USD" or "EUR")
+     * @param cro
+     * @param context
+     * @return
+     */
+    RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest(String symbol, RequestCompleteListener<ExchangeRateTransferObject> cro, Context context);
 
 }

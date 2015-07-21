@@ -202,7 +202,7 @@ public class PayOutActivity extends WalletActivity {
      */
     public void launchExchangeRateRequest() {
         showLoadingProgressDialog();
-        RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
+        RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest("", new RequestCompleteListener<ExchangeRateTransferObject>() {
             public void onTaskComplete(ExchangeRateTransferObject response) {
                 dismissProgressDialog();
                 if (response.isSuccessful()) {

@@ -178,7 +178,7 @@ public class SendPaymentActivity extends WalletActivity {
 	public void launchExchangeRateRequest() {
 		if (ConnectionCheck.isNetworkAvailable(this)) {
 			showLoadingProgressDialog();
-			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
+			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest("TODO", new RequestCompleteListener<ExchangeRateTransferObject>() {
 				@Override
 				public void onTaskComplete(ExchangeRateTransferObject response) {
 					dismissProgressDialog();

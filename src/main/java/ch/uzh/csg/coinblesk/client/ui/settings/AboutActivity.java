@@ -15,8 +15,9 @@ public class AboutActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_about);
 		setScreenOrientation();
-		
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+
+		setupActionBar();
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
     @Override
