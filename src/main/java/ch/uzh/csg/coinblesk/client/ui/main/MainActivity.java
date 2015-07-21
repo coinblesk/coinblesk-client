@@ -1,6 +1,5 @@
 package ch.uzh.csg.coinblesk.client.ui.main;
 
-import android.app.ActionBar;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,7 +15,9 @@ import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,22 +41,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PublicKey;
 import java.util.List;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.comm.PaymentProtocol;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
 import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
 import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
-import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
-import ch.uzh.csg.coinblesk.client.wallet.WalletListener;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.TransactionObject;
+import ch.uzh.csg.coinblesk.client.wallet.WalletListener;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
-import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.util.Converter;
 import ch.uzh.csg.nfclib.NfcInitiatorHandler;
@@ -63,12 +68,6 @@ import ch.uzh.csg.nfclib.NfcLibException;
 import ch.uzh.csg.nfclib.NfcResponseHandler;
 import ch.uzh.csg.nfclib.NfcSetup;
 import ch.uzh.csg.nfclib.ResponseLater;
-import ch.uzh.csg.paymentlib.IPaymentEventHandler;
-import ch.uzh.csg.paymentlib.IServerResponseListener;
-import ch.uzh.csg.paymentlib.IUserPromptAnswer;
-import ch.uzh.csg.paymentlib.IUserPromptPaymentRequest;
-import ch.uzh.csg.paymentlib.PaymentEvent;
-import ch.uzh.csg.paymentlib.messages.PaymentError;
 
 /**
  * This class shows the main view of the user with the balance of the user's
@@ -79,8 +78,9 @@ public class MainActivity extends AbstractPaymentActivity {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainActivity.class);
 
     private String[] mDrawerItems;
-    private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
+    private DrawerLayout mDrawerLayout;
+    private Toolbar mToolbar;
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
     private ProgressBar mProgressBar;
@@ -93,7 +93,7 @@ public class MainActivity extends AbstractPaymentActivity {
     private boolean isPortrait = true;
 
     private NfcAdapter nfcAdapter;
-    private Thread updateTxHistoryTask;
+    private Thread updateProgressTask;
     private TextView mBlockchainSyncStatusText;
 
     @Override
@@ -101,15 +101,17 @@ public class MainActivity extends AbstractPaymentActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
         setScreenOrientation();
         isPortrait = getResources().getBoolean(R.bool.portrait_only);
 
+        initializeDrawer();
         initializeGui();
         initClickListener();
-        initializeDrawer();
+
         try {
             initializeNFC();
-        } catch (NfcLibException e) {
+        } catch (Exception e) {
             Toast.makeText(this, e.toString(), Toast.LENGTH_LONG);
             e.printStackTrace();
         }
@@ -127,20 +129,17 @@ public class MainActivity extends AbstractPaymentActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        mDrawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item))
             return true;
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -162,47 +161,41 @@ public class MainActivity extends AbstractPaymentActivity {
      * @see 'http://developer.android.com/training/implementing-navigation/nav-drawer.html'
      */
     private void initializeDrawer() {
+
         mDrawerItems = getResources().getStringArray(R.array.drawerItems_array);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout_activity_main);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mDrawerItems));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         mTitle = mDrawerTitle = getTitle();
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout_activity_main);
 
-
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
         mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                null,
-                R.string.drawer_open,  /* "open drawer" description */
-                R.string.drawer_close  /* "close drawer" description */
-        ) {
-
-            public void onDrawerClosed(View view) {
-                getActionBar().setTitle(mTitle);
-            }
-
-            public void onDrawerOpened(View drawerView) {
-                getActionBar().setTitle(mDrawerTitle);
-            }
-        };
-
+                this,  mDrawerLayout, mToolbar,
+                R.string.drawer_open, R.string.drawer_close
+        );
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        mDrawerToggle.syncState();
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
     }
 
     private void initiateProgressBar() {
 
-        final int updateInterval = 3000; // == 1s
         final WalletService walletService = getWalletService();
+
+        if(walletService.getSyncProgress().isFinished()) {
+            return;
+        }
+
+        final int updateInterval = 3000; // == 1s
         final Handler handler = new Handler();
 
-        updateTxHistoryTask = new Thread() {
+        updateProgressTask = new Thread() {
             @Override
             public void run() {
                 if (this.isInterrupted()) {
@@ -235,12 +228,12 @@ public class MainActivity extends AbstractPaymentActivity {
                         mBlockchainSyncStatusText.setText(syncText);
                     }
 
-                    handler.postDelayed(updateTxHistoryTask, updateInterval);
+                    handler.postDelayed(updateProgressTask, updateInterval);
                 }
             }
         };
 
-        handler.postDelayed(updateTxHistoryTask, updateInterval);
+        handler.postDelayed(updateProgressTask, updateInterval);
 
     }
 
@@ -250,11 +243,11 @@ public class MainActivity extends AbstractPaymentActivity {
     }
 
     private void initializeGui() {
-        // display red action bar when running on testserver
-        if (Constants.BASE_URI_SSL.contains("clone")) {
-            ActionBar bar = getActionBar();
-            bar.setBackgroundDrawable(new ColorDrawable(Color.RED));
-        }
+
+        // Set a toolbar to replace the action bar.
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         createNewTransactionBtn = (Button) findViewById(R.id.createNewTransactionButton);
 
         //create animated nfc activity image
@@ -274,14 +267,9 @@ public class MainActivity extends AbstractPaymentActivity {
     private void initClickListener() {
         createNewTransactionBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                handleAsyncTask();
                 launchActivity(MainActivity.this, ChoosePaymentActivity.class);
             }
         });
-    }
-
-    private void handleAsyncTask() {
-        throw new RuntimeException("Not yet implemented");
     }
 
     private void checkOnlineModeAndProceed() {
@@ -304,6 +292,7 @@ public class MainActivity extends AbstractPaymentActivity {
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         getWalletService().removeBitcoinListener(this.getClass());
     }
 
@@ -366,7 +355,6 @@ public class MainActivity extends AbstractPaymentActivity {
                         }
                         tView.setOnClickListener(new View.OnClickListener() {
                             public void onClick(View v) {
-                                handleAsyncTask();
                                 Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
                                 Bundle b = new Bundle();
                                 intent.putExtras(b);
@@ -435,16 +423,30 @@ public class MainActivity extends AbstractPaymentActivity {
         }
     }
 
+    enum State {
+        INIT, FIRST, SECOND
+    }
+
     /**
      * Initializes NFC adapter and user payment information.
      */
-    private void initializeNFC() throws NfcLibException {
+    private void initializeNFC() throws NfcLibException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+
         NfcSetup initiator = new NfcSetup(new NfcInitiatorHandler() {
 
+            State current = State.INIT;
+            KeyPair keyPair = PaymentProtocol.generateKeys();
+            PublicKey remotePubKey;
+
             @Override
-            public void handleMessageReceived(byte[] bytes) {
+            public void handleMessageReceived(byte[] bytes) throws Exception {
                 //get 2nd message (maybe check amount here) -> send to server for check if valid, not spend, etc.
                 //continue with 3rd message
+
+                PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
+                remotePubKey = protocol.publicKey();
+
+                LOGGER.debug("message received... State is {}.", current);
 
                 //get 5th message: ok
             }
@@ -461,18 +463,28 @@ public class MainActivity extends AbstractPaymentActivity {
 
             @Override
             public boolean hasMoreMessages() {
-                return false;
+                return current != State.SECOND;
             }
 
             @Override
-            public byte[] nextMessage() {
+            public byte[] nextMessage() throws Exception {
                 //1st message: amount BTC, which user, to which address, public key -> request signed
                 //1st message: which user, to which address, public key -> send signed
 
                 //3rd message: server says ok, amount ok from server, signed
                 // -> send ok with transaction (optional only signature), signed
+                switch(current) {
+                    case INIT:
+                        current = State.FIRST;
+                        return PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), "Hans", new byte[6], 100000, new byte[20]).toBytes(keyPair.getPrivate());
+                    case FIRST:
+                        current = State.SECOND;
+                        return PaymentProtocol.fromServerRequestOk(new byte[2000]).toBytes(keyPair.getPrivate());
+                    default:
+                        throw new RuntimeException("Should never be reached");
+                }
 
-                return new byte[0];
+
             }
 
             @Override
@@ -480,14 +492,29 @@ public class MainActivity extends AbstractPaymentActivity {
                 return false;
             }
         }, new NfcResponseHandler() {
+
+            PublicKey remotePubKey;
+            KeyPair keyPair = PaymentProtocol.generateKeys();
+
             @Override
-            public byte[] handleMessageReceived(byte[] bytes, ResponseLater responseLater) {
+            public byte[] handleMessageReceived(byte[] bytes, ResponseLater responseLater) throws Exception {
                 //get 1st message request / get 1st message send
                 //2nd return partially signed transaction
                 // request: BTC from message, public key, signed, username
                 // send: BTC entered by user, public key, signed, username
                 //4th (optional check if signed by server), get ok, reply
                 //5th reply ok, public key, signed
+
+                PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
+                remotePubKey = protocol.publicKey();
+
+                switch(protocol.type()) {
+                    case CONTACT_AND_PAYMENT_REQUEST:
+                        return PaymentProtocol.contactAndPaymentResponseOk(keyPair.getPublic(), "Heiri", new byte[6], new byte[3000]).toBytes(keyPair.getPrivate());
+                    case FROM_SERVER_REQUEST_OK:
+                        return null;
+                }
+
                 return new byte[0];
             }
 
@@ -506,94 +533,6 @@ public class MainActivity extends AbstractPaymentActivity {
         initiator.startInitiating(this);
     }
 
-    /**
-     * Handler responsible for managing events received by NFC Payment Library.
-     */
-    private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
-        public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
-
-            switch (event) {
-                case ERROR:
-                    PaymentError err = (PaymentError) object;
-                    if (err != null) {
-                        switch (err) {
-                            case DUPLICATE_REQUEST:
-                                dismissNfcInProgressDialog();
-                                showDialog(getResources().getString(R.string.transaction_duplicate_error), false);
-                                break;
-                            case NO_SERVER_RESPONSE:
-                                dismissNfcInProgressDialog();
-                                showDialog(getResources().getString(R.string.error_transaction_failed), false);
-                                break;
-                            case PAYER_REFUSED:
-                                dismissNfcInProgressDialog();
-                                showDialog(getResources().getString(R.string.transaction_rejected_payer), false);
-                                break;
-                            case REQUESTS_NOT_IDENTIC:
-                                dismissNfcInProgressDialog();
-                                showDialog(getResources().getString(R.string.transaction_server_rejected), false);
-                                break;
-                            case SERVER_REFUSED:
-                                dismissNfcInProgressDialog();
-                                String errorMessage = err.getErrorCause();
-                                if (errorMessage != null && errorMessage.equals("BALANCE")) {
-                                    showDialog(getResources().getString(R.string.transaction_server_rejected_balance), false);
-                                } else {
-                                    showDialog(getResources().getString(R.string.transaction_server_rejected), false);
-                                }
-                                break;
-                            case UNEXPECTED_ERROR:
-                                //check if Mensa Tablet (with external reader) is connected, if yes ignore unexpected errors
-                                if (Constants.IS_MENSA_MODE && !isPortrait) {
-                                    break;
-                                } else {
-                                    dismissNfcInProgressDialog();
-                                    showDialog(getResources().getString(R.string.error_transaction_failed), false);
-                                }
-                                break;
-                            case INIT_FAILED:
-                                //ignore
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    resetStates();
-                    break;
-                case FORWARD_TO_SERVER:
-                    break;
-                case SUCCESS:
-                    showSuccessDialog(object, paymentAccepted);
-                    resetStates();
-                    break;
-                case INITIALIZED:
-                    showNfcProgressDialog(true);
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
-
-    /**
-     * Prompts user if an incoming payment request shall be accepted or not.
-     */
-    private IUserPromptPaymentRequest userPrompt = new IUserPromptPaymentRequest() {
-
-        public boolean isPaymentAccepted() {
-            return paymentAccepted;
-        }
-
-        public void promptUserPaymentRequest(String username, Currency currency, long amount, IUserPromptAnswer answer) {
-            if (checkAutoAccept(username, amount)) {
-                paymentAccepted = true;
-                answer.acceptPayment();
-                showNfcProgressDialog(false);
-            } else {
-                showCustomDialog(username, amount, answer);
-            }
-        }
-    };
 
     /**
      * Checks if auto accepting of payments are enabled for given username and amount.
@@ -626,7 +565,7 @@ public class MainActivity extends AbstractPaymentActivity {
      * @param amount
      * @param answer2
      */
-    private void showCustomDialog(String username, long amount, final IUserPromptAnswer answer2) {
+    private void showCustomDialog(String username, long amount) {
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewGroup group = (ViewGroup) findViewById(R.id.pay_payment_popup);
         final View layout = inflater.inflate(R.layout.pay_payment_popup, group);
@@ -660,7 +599,7 @@ public class MainActivity extends AbstractPaymentActivity {
             public void onClick(View v) {
                 paymentAccepted = false;
                 showNfcProgressDialog(false);
-                answer2.rejectPayment();
+                //answer2.rejectPayment();
                 popupWindow.dismiss();
             }
         });
@@ -669,7 +608,7 @@ public class MainActivity extends AbstractPaymentActivity {
         acceptButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 paymentAccepted = true;
-                answer2.acceptPayment();
+                //answer2.acceptPayment();
                 popupWindow.dismiss();
                 showNfcProgressDialog(false);
             }

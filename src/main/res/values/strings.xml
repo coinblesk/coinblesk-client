@@ -380,4 +380,7 @@
     <string name="restoreOrCreate_passphrase_placeholder">Enter Backup Phrase...</string>
     <string name="restoreOrCreate_toast_restoreFailed">Failed to restore wallet. Are you sure you entered the backup phrase correctly?</string>
 
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

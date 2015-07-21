@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.AbstractAsyncActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.ui.adressbook.AddressBookActivity;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
@@ -20,7 +20,7 @@ import ch.uzh.csg.coinblesk.client.R;
 
 /**
  * This class represents the navigation drawer. The methods from
- * {@link AbstractAsyncActivity} are not inherited but overridden.
+ * {@link BaseActivity} are not inherited but overridden.
  */
 public class DrawerItemClickListener extends WalletActivity implements OnItemClickListener {
 	private View view;
@@ -72,7 +72,7 @@ public class DrawerItemClickListener extends WalletActivity implements OnItemCli
 
 	/**
 	 * This method is a placeholder for the toast but much simpler to use. See
-	 * {@link AbstractAsyncActivity}
+	 * {@link BaseActivity}
 	 * 
 	 * @param response
 	 *            The message which is shown in a toast call.

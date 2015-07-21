@@ -15,8 +15,7 @@ public class SyncProgress {
         void onFinished();
     }
 
-    private int totalBlockToDownload;
-    private int blocksRemaining;
+    private double percentage;
 
     private boolean started;
     private boolean finished;
@@ -24,18 +23,13 @@ public class SyncProgress {
     private List<SyncProgressFinishedListener> listeners = new LinkedList<>();
 
     public SyncProgress() {
-        this.totalBlockToDownload = -1;
-        this.blocksRemaining = Integer.MAX_VALUE;
+        this.percentage = -1;
         this.finished = false;
     }
 
-    public void setBlocksRemaining(int blocksRemaining) {
-        this.blocksRemaining = blocksRemaining;
+    public void setProgress(double percentage) {
         this.started = true;
-    }
-
-    public boolean hasStarted() {
-        return started;
+        this.percentage = percentage;
     }
 
     public void setFinished() {
@@ -45,11 +39,7 @@ public class SyncProgress {
     }
 
     public boolean isFinished() {
-        return blocksRemaining == 0 || finished;
-    }
-
-    public void setTotalBlocks(int totalBlocks) {
-        this.totalBlockToDownload = totalBlocks;
+        return finished;
     }
 
     public void addSyncCompleteListener(SyncProgressFinishedListener listener) {
@@ -80,8 +70,7 @@ public class SyncProgress {
             return -1d;
         }
 
-        // minimum progress == 0
-        return Math.max(1d - ((double) blocksRemaining) / totalBlockToDownload, 0);
+        return percentage;
     }
     
     @Override

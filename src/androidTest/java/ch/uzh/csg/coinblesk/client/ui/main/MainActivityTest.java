@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 
 import basetests.BaseInstrumentationTest;
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
+import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import testutils.BitcoinTestUtils;
@@ -49,22 +50,29 @@ public class MainActivityTest extends BaseInstrumentationTest {
 
     }
 
-    public void testIncomingTransactions() throws Exception {
+    public void testTransactionHistoryAndBalanceUpdate() throws Exception {
         waitForWalletService();
 
         MainActivity activity = (MainActivity) solo.getCurrentActivity();
         WalletService walletService = activity.getWalletService();
 
-        BigDecimal amount = new BigDecimal("0.1234");
+        // send some bitcoins to the wallet
+        BigDecimal receiveAmount = new BigDecimal("0.1234");
         int numTransactions = 7;
-
         for(int i = 0; i < numTransactions; i++) {
-            BitcoinTestUtils.sendFakeCoins(PARAMS, amount, walletService.getBitcoinAddress(), walletService.getCoinBleskWalletAppKit());
-            Thread.sleep(200);
-        }
+            BitcoinTestUtils.sendFakeCoins(PARAMS, receiveAmount, walletService.getBitcoinAddress(), walletService.getCoinBleskWalletAppKit());
 
+        }
+        solo.waitForText(solo.getString(R.string.history_payInUn), 0, TIMEOUT);
         // check if balance is displayed correctly
-        solo.waitForText(CurrencyFormatter.formatBTC(amount.multiply(BigDecimal.valueOf(numTransactions))), 0, TIMEOUT);
+        BigDecimal balance = receiveAmount.multiply(BigDecimal.valueOf(numTransactions));
+        solo.waitForText(CurrencyFormatter.formatBTC(balance), 0, TIMEOUT);
+
+        // now send some coins away
+        BigDecimal sendAmount = new BigDecimal("0.0321");
+        walletService.createPayment(BitcoinTestUtils.getBitcoinAddress(PARAMS), sendAmount);
+
+        solo.waitForText(solo.getString(R.string.history_payOut), 0, TIMEOUT);
 
     }
 

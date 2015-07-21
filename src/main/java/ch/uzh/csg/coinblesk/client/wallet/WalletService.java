@@ -45,6 +45,7 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -276,16 +277,19 @@ public class WalletService extends android.app.Service {
             clientWalletKit = new CoinBleskWalletAppKit(params, getFilesDir(), getWalletFilesPrefix(bitcoinNet));
             clientWalletKit
                     .marryWallet(serverWatchingKey, mnemonic, creationTime)
-                    .setAndroidContext(getApplicationContext())
+                    .setAndroidContext(getCoinbleskApplication())
                     .setBlockingStartup(false)
                     .setDownloadListener(new DownloadProgressTracker() {
+
                         @Override
-                        public void onBlocksDownloaded(Peer peer, Block block, FilteredBlock filteredBlock, int blocksLeft) {
-                            LOGGER.debug("{} blocks left to download...", blocksLeft);
-                            if (!syncProgress.hasStarted()) {
-                                syncProgress.setTotalBlocks(blocksLeft);
-                            }
-                            syncProgress.setBlocksRemaining(blocksLeft);
+                        public void onChainDownloadStarted(Peer peer, int blocksLeft) {
+                            super.onChainDownloadStarted(peer, blocksLeft);
+                            syncProgress.setProgress(0);
+                        }
+
+                        @Override
+                        protected void progress(double pct, int blocksSoFar, Date date) {
+                            syncProgress.setProgress(pct / 100);
                         }
 
                         @Override

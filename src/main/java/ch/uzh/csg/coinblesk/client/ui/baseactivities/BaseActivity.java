@@ -6,10 +6,11 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.support.v4.app.FragmentActivity;
+import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,15 +25,15 @@ import ch.uzh.csg.coinblesk.client.ui.fragments.CustomDialogFragment;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 
 /**
- * The class AbstractAsyncActivity is the abstract base class for all
+ * The class BaseActivity is the abstract base class for all
  * activity-contexts. This class inherits from fragmentActivity and extends the
  * activity with some common functions, which are used by almost all activities.
  * This class determines if the application is used by a smart-phone or by a
  * tablet and sets the orientation appropriately.
  */
-public abstract class AbstractAsyncActivity extends FragmentActivity {
+public abstract class BaseActivity extends AppCompatActivity {
     
-    private final static Logger LOGGER = LoggerFactory.getLogger(AbstractAsyncActivity.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(BaseActivity.class);
     
     private MenuItem menuWarning;
     private MenuItem offlineMode;
@@ -50,7 +51,7 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
         super.onDestroy();
         destroyed = true;
     }
-    
+
 
     /**
      * Starts the progress dialog. As long as the dialog is running other touch
@@ -131,15 +132,9 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
         }
     }
 
-    /**
-     * Reloads the current activity.
-     * 
-     * @param intent
-     *            the intent
-     */
-    public void reload(Intent intent) {
-        finish();
-        startActivity(intent);
+    protected void setupActionBar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 
     /**
@@ -170,21 +165,21 @@ public abstract class AbstractAsyncActivity extends FragmentActivity {
     }
 
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(ch.uzh.csg.coinblesk.client.R.menu.offline_mode, menu);
-        return super.onCreateOptionsMenu(menu);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         menuWarning = menu.findItem(R.id.action_warning);
         offlineMode = menu.findItem(R.id.menu_offlineMode);
-
-        if(offlineMode != null) {
-            TextView offlineModeTV = (TextView) offlineMode.getActionView();
-            offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
-        }
 
         invalidateOptionsMenu();
         return true;

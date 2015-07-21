@@ -75,7 +75,8 @@ public class PayInActivity extends WalletActivity {
         setContentView(R.layout.activity_pay_in);
         setScreenOrientation();
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        setupActionBar();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         copyClipboardBtn = (Button) findViewById(R.id.payIn_copyButton);
         sendAsMailBtn = (Button) findViewById(R.id.payIn_sendMail);

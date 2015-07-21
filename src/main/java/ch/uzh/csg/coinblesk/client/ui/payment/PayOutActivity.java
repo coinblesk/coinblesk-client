@@ -67,7 +67,8 @@ public class PayOutActivity extends WalletActivity {
         setContentView(R.layout.activity_pay_out);
         setScreenOrientation();
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        setupActionBar();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         chfBalance = (TextView) findViewById(R.id.payOut_BalanceCHF);
         btcBalance = (TextView) findViewById(R.id.payOut_Balance);

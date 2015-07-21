@@ -46,7 +46,9 @@ public class HistoryActivity extends WalletActivity {
         setContentView(R.layout.activity_history);
 
         setScreenOrientation();
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        setupActionBar();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recent_transactions_recycler_view);
 

@@ -160,6 +160,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             URL url = new URL(endpoint);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT);
 
             connection.setUseCaches(false);
             connection.setDoInput(true);

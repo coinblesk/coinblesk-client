@@ -19,9 +19,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import java.util.List;
-
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 
 /**
@@ -35,11 +34,20 @@ import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends BaseActivity {
 
 	private static final boolean ALWAYS_SIMPLE_PREFS = false;
 	private MenuItem menuWarning;
 	protected static Context context;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_with_toolbar);
+
+		setupActionBar();
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+	}
 
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
@@ -50,7 +58,6 @@ public class SettingsActivity extends PreferenceActivity {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		}
 
-		getActionBar().setDisplayHomeAsUpEnabled(true);
 		context = getApplicationContext();
 		setupSimplePreferencesScreen();
 
@@ -117,12 +124,7 @@ public class SettingsActivity extends PreferenceActivity {
 		}
 
 		// Add all preferences for settings in one view
-		getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsPreferenceFragement()).commit();
-	}
-
-	@Override
-	public boolean onIsMultiPane() {
-		return isXLargeTablet(this) && !isSimplePreferences(this);
+		getFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsPreferenceFragement()).commit();
 	}
 
 	/**
@@ -142,13 +144,6 @@ public class SettingsActivity extends PreferenceActivity {
 	 */
 	private static boolean isSimplePreferences(Context context) {
 		return ALWAYS_SIMPLE_PREFS || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB || !isXLargeTablet(context);
-	}
-
-	@Override
-	public void onBuildHeaders(List<Header> target) {
-		if (!isSimplePreferences(this)) {
-			loadHeadersFromResource(R.xml.pref_headers, target);
-		}
 	}
 
 	/**
@@ -183,11 +178,6 @@ public class SettingsActivity extends PreferenceActivity {
 		sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(),""));
 	}
 
-	@Override
-	protected boolean isValidFragment(String fragmentName){
-		return true;
-	}
-
 	/**
 	 * Binds a preference's summary to its value. More specifically, when the
 	 * preference's value is changed, its summary (line of text below the
@@ -198,7 +188,7 @@ public class SettingsActivity extends PreferenceActivity {
 	 * 
 	 * @see #sBindPreferenceSummaryToValueListener
 	 */
-	public static class SettingsPreferenceFragement extends PreferenceFragment{
+	public static class SettingsPreferenceFragement extends PreferenceFragment {
 		@Override
 		public void onCreate(final Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
@@ -208,7 +198,6 @@ public class SettingsActivity extends PreferenceActivity {
 			PreferenceCategory paymentHeader = new PreferenceCategory(getActivity());
 			paymentHeader.setTitle(R.string.pref_header_payments);
 			getPreferenceScreen().addPreference(paymentHeader);
-			addPreferencesFromResource(R.xml.pref_payment);
 			bindPreferenceSummaryToValue(findPreference("bitcoin_list"));
 			bindPreferenceSummaryToValue(findPreference("fee_amount"));
 			bindPreferenceSummaryToValue(findPreference("auto_accept_amount"));
@@ -246,7 +235,6 @@ public class SettingsActivity extends PreferenceActivity {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
-			addPreferencesFromResource(R.xml.pref_payment);
 			PreferenceCategory fakeHeader = new PreferenceCategory(getActivity());
 			getPreferenceScreen().addPreference(fakeHeader);
 			bindPreferenceSummaryToValue(findPreference("fee_amount"));

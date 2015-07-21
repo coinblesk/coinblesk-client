@@ -85,7 +85,8 @@ public class SendPaymentActivity extends WalletActivity {
 		setScreenOrientation();
 
 		Constants.inputUnit = INPUT_UNIT_CHF;
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		setupActionBar();
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		exchangeRate = BigDecimal.ZERO;
 
 		setUpGui();

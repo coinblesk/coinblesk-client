@@ -423,4 +423,8 @@ final public class PaymentProtocol {
         g.initialize(ecSpec, new SecureRandom());
         return g.generateKeyPair();
     }
+
+    public Type type() {
+        return type;
+    }
 }

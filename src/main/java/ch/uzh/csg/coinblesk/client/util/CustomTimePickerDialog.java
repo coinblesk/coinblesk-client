@@ -15,8 +15,6 @@
  */
 package ch.uzh.csg.coinblesk.client.util;
 
-import java.util.Calendar;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -25,8 +23,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TimePicker;
-import ch.uzh.csg.coinblesk.client.util.CustomTimePicker.CustomOnTimeChangedListener;
+
+import java.util.Calendar;
+
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.util.CustomTimePicker.CustomOnTimeChangedListener;
 
 /**
  * A dialog that prompts the user for the time of day using a {@link TimePicker}.
@@ -65,7 +66,7 @@ public class CustomTimePickerDialog extends AlertDialog implements OnClickListen
     public CustomTimePickerDialog(Context context,
             OnTimeSetListener callBack,
             int hourOfDay, boolean is24HourView) {
-        this(context, R.style.Theme_Dialog_Alert,
+        this(context, R.style.Theme_AppCompat_Dialog_Alert,
                 callBack, hourOfDay, is24HourView);
     }
 
