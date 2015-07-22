@@ -45,10 +45,11 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     }
 
 
+    @Override
     public void onCreate() {
+        super.onCreate();
         // allocate a helper and install it
-        SharedPreferencesBackupHelper helper =
-                new SharedPreferencesBackupHelper(this, COINBLSEK_DATA);
+        SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, COINBLSEK_DATA);
         addHelper(COINBLESK_PREFS_BACKUP_KEY, helper);
     }
     

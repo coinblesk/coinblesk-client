@@ -95,6 +95,12 @@ public class Exchange {
         Preconditions.checkNotNull(this.pair, "Only exchanges that trade BTC against USD or EUR are currently supported");
     }
 
+    /**
+     * Sell bitcoins on the exchange
+     * @param amount the amount of bitcoins to sell, in BTC
+     * @param listener
+     * @throws IOException
+     */
     public void sell(BigDecimal amount, final TradePlacedListener listener) throws IOException {
 
         if (!hasCredentials()) {
@@ -223,5 +229,26 @@ public class Exchange {
      */
     public boolean hasCredentials() {
         return exchange.getExchangeSpecification() != null;
+    }
+
+    /**
+     *
+     * @return a unique id of the exchange
+     */
+    public String getExchangeId() {
+        return exchange.getExchangeSpecification().getExchangeClassName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof  Exchange) {
+            return ((Exchange) o).getExchangeId().equals(getExchangeId());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return getExchangeId().hashCode();
     }
 }

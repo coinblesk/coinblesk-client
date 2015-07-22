@@ -22,6 +22,7 @@ import android.widget.Toast;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
@@ -63,7 +64,7 @@ public class SettingsActivity extends BaseActivity {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		}
 
-		context = getApplicationContext();
+		CoinBleskApplication application = (CoinBleskApplication) getApplicationContext();
 		setupSimplePreferencesScreen();
 
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -73,7 +74,7 @@ public class SettingsActivity extends BaseActivity {
 				if(key.equals("numberOfLastTransactions")) {
 					int value = Integer.parseInt(sharedPreferences.getString("numberOfLastTransactions", "3"));
 					if(value <= 0 || value > 5){
-						Toast.makeText(context, "please enter number between 1 and 5", Toast.LENGTH_LONG).show();
+						Toast.makeText(SettingsActivity.this, "please enter number between 1 and 5", Toast.LENGTH_LONG).show();
 						SharedPreferences.Editor prefEditor = prefs.edit();
 				        prefEditor.putString("numberOfLastTransactions", "3");
 				        prefEditor.commit();
@@ -81,6 +82,8 @@ public class SettingsActivity extends BaseActivity {
 				}
 			}
 		});
+
+        prefs.registerOnSharedPreferenceChangeListener(application.getMerchantModeManager());
 	}
 
 	@Override

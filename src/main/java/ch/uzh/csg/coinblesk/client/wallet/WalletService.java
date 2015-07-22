@@ -14,10 +14,8 @@ import com.google.common.util.concurrent.Service;
 import org.bitcoinj.core.AbstractWalletEventListener;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.DownloadProgressTracker;
-import org.bitcoinj.core.FilteredBlock;
 import org.bitcoinj.core.InsufficientMoneyException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Peer;
@@ -243,7 +241,8 @@ public class WalletService extends android.app.Service {
         checkRefundTxState();
 
         // add wallet listeners
-        getAppKit().wallet().addEventListener(new CreateNewRefundTxListener(this));
+        getAppKit().wallet().addEventListener(new CreateNewRefundTxListener(this)); // responsible for creating refund txs
+        getAppKit().wallet().addEventListener(new MerchantModeSellListener(this)); // responsible for selling BTC if merchant mode is active
 
         // notify listeners about wallet changes
         initTxListener();

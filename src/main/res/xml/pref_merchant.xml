@@ -7,11 +7,10 @@
         android:title="@string/pref_title_merchant_mode"/>
 
     <ListPreference
-        android:defaultValue="bitstamp"
         android:dependency="merchant_mode"
         android:entries="@array/pref_primary_exchange_list"
         android:entryValues="@array/pref_primary_exchange_values"
-        android:key="secondary_exchange"
+        android:key="primary_exchange"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
         android:title="@string/settings_exchange_primary" />

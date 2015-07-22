@@ -385,9 +385,9 @@
     <string name="restoreOrCreate_passphrase_placeholder">Enter Backup Phrase...</string>
     <string name="restoreOrCreate_toast_restoreFailed">Failed to restore wallet. Are you sure you entered the backup phrase correctly?</string>
 
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_exchange_list">Exchanges</string>
-    <string name="title_exchange_detail">Exchange Detail</string>
+    <!--Merchant Mode-->
+    <string name="merchantMode_toast_merchantModeActiveButNoExchanges">Merchant mode only works if at least one exchange is configured correctly.</string>
+    <string name="merchantMode_toast_sellingFailed">Failed to exchange BTC</string>
+
 
 </resources>

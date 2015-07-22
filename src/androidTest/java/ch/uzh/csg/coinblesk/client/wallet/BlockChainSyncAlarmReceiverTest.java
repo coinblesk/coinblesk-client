@@ -25,7 +25,7 @@ public class BlockChainSyncAlarmReceiverTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
         // preapre internal storage
-        PersistentStorageHandler storage = new PersistentStorageHandler(getContext());
+        PersistentStorageHandler storage = new PersistentStorageHandler();
         storage.setBitcoinNet(BitcoinNet.TESTNET);
         storage.setWatchingKey(BitcoinTestUtils.getServerWatchingKey(TestNet3Params.get()));
         ((CoinBleskApplication) getContext().getApplicationContext()).setStorageHandler(storage);

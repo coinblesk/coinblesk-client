@@ -22,6 +22,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
+        android:backupAgent="ch.uzh.csg.coinblesk.client.persistence.CoinBleskCloudData"
         android:name=".CoinBleskApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -34,7 +35,6 @@
         <activity android:name=".ui.main.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -7,12 +7,7 @@ import android.content.SharedPreferences;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * This class acts as shared preferences
- * When the editor is requested we send back our CloudEditor so that we have control of what is going on!
- * @author paul.blundell
- *
- */
+
 public class CloudBackedSharedPreferences implements SharedPreferences {
 
 	private final SharedPreferences sharedPreferences;

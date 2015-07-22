@@ -32,7 +32,6 @@ public class BlockChainSyncAlarmReceiver extends BroadcastReceiver implements Se
     public void onServiceConnected(ComponentName name, IBinder service) {
         final BlockChainSyncAlarmReceiver self = this;
 
-
         WalletService.LocalBinder binder = (WalletService.LocalBinder) service;
         walletService = binder.getService();
         StorageHandler storage = ((CoinBleskApplication) context.getApplicationContext()).getStorageHandler();
@@ -50,14 +49,6 @@ public class BlockChainSyncAlarmReceiver extends BroadcastReceiver implements Se
     @Override
     public void onServiceDisconnected(ComponentName name) {
         LOGGER.debug("{} disconnected from the wallet service.", name.toShortString());
-    }
-
-    public boolean isSyncing() {
-        if(walletService == null) {
-            return false;
-        } else {
-            return !walletService.getSyncProgress().isFinished();
-        }
     }
 
     public WalletService getWalletService() {
