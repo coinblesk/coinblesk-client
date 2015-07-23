@@ -5,7 +5,7 @@
     android:versionName="v1.0" >
 
     <uses-sdk
-        android:minSdkVersion="21"
+        android:minSdkVersion="19"
         android:targetSdkVersion="21" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,12 +13,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <uses-feature
-        android:name="android.hardware.nfc"
-        android:required="true" />
-
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+    <uses-feature android:name="android.hardware.nfc" android:required="true" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
+
+
 
     <application
         android:name=".CoinBleskApplication"
@@ -99,18 +101,6 @@
                 android:value=".ui.settings.SettingsActivity" />
         </activity>
 
-        <service
-            android:name="ch.uzh.csg.nfclib.HostApduServiceNfcLib"
-            android:exported="true"
-            android:permission="android.permission.BIND_NFC_SERVICE" >
-            <intent-filter>
-                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.nfc.cardemulation.host_apdu_service"
-                android:resource="@xml/apduservice" />
-        </service>
         <service android:name=".wallet.WalletService" />
 
         <activity
@@ -151,6 +141,16 @@
             android:enabled="true"
             android:exported="true" >
         </receiver>
+
+        <service android:name="ch.uzh.csg.nfclib.HostApduServiceNfcLib" android:exported="true"
+            android:permission="android.permission.BIND_NFC_SERVICE">
+            <intent-filter>
+                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE"/>
+            </intent-filter>
+            <meta-data android:name="android.nfc.cardemulation.host_apdu_service" android:resource="@xml/apduservice"/>
+            <meta-data android:name="android.nfc.disable_beam_default" android:value="true" />
+        </service>
+
     </application>
 
 </manifest>
