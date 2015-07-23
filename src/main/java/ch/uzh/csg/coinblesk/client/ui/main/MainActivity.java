@@ -15,7 +15,6 @@ import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
@@ -33,7 +32,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,12 +54,14 @@ import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
 import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.TransactionObject;
 import ch.uzh.csg.coinblesk.client.wallet.WalletListener;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
+import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
 import ch.uzh.csg.comm.NfcInitiatorHandler;
 import ch.uzh.csg.comm.NfcResponseHandler;
@@ -213,9 +213,11 @@ public class MainActivity extends AbstractPaymentActivity {
                     double progress = syncProgress.getProgress();
 
                     if(progress >= 0) {
+                        // make progress bar visible
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        mBlockchainSyncStatusText.setVisibility(View.VISIBLE);
 
                         // set progress
-                        mProgressBar.setIndeterminate(false);
                         int progressPercentage = (int) (progress * mProgressBar.getMax()) + 1;
                         progressPercentage = Math.max(0, progressPercentage);
                         LOGGER.debug("Updating blockchain sync progress bar. current progress is {}%", progressPercentage);
@@ -315,13 +317,30 @@ public class MainActivity extends AbstractPaymentActivity {
             }
 
             @Override
-            protected void onPostExecute(BigDecimal balance) {
+            protected void onPostExecute(final BigDecimal balance) {
                 CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), balance, getApplicationContext());
+
+                // TODO: fix this
+                //setFiatBalance(balance);
             }
         };
         displayBalanceTaks.execute();
     }
 
+    private void setFiatBalance(final BigDecimal btcBalance) {
+        // display balance in fiat
+        getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
+            @Override
+            public void onTaskComplete(ExchangeRateTransferObject response) {
+                if(response.isSuccessful()) {
+                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                    TextView chfBalance = (TextView) findViewById(R.id.mainActivity_balanceCHF);
+                    CurrencyViewHandler.clearTextView(chfBalance);
+                    CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, btcBalance);
+                }
+            }
+        });
+    }
 
     private int getNumberOfLastTransactions() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -531,6 +550,7 @@ public class MainActivity extends AbstractPaymentActivity {
 
         //
         initiator.startInitiating(this);
+
     }
 
 

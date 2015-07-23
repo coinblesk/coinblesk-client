@@ -44,6 +44,10 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
         this.gson = new GsonBuilder().create();
     }
 
+    public CoinBleskCloudData() {
+        this.prefs = new CloudBackedSharedPreferences(COINBLESK_PREFS_BACKUP_KEY, getApplicationContext());
+        this.gson = new GsonBuilder().create();
+    }
 
     @Override
     public void onCreate() {

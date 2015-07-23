@@ -17,6 +17,8 @@ import java.util.Set;
 
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 
 /**
  * Created by rvoellmy on 7/21/15.
@@ -41,6 +43,9 @@ public class MerchantModeManager implements SharedPreferences.OnSharedPreference
         primaryExchangeKeys.add("primary_exchange_username");
         primaryExchangeKeys.add("primary_exchange_api_key");
         primaryExchangeKeys.add("primary_exchange_api_secret");
+
+        // add default exchange without credentials for exchange rate
+        addExchange(new Exchange(Exchange.BITSTAMP));
     }
 
     /**
@@ -60,7 +65,7 @@ public class MerchantModeManager implements SharedPreferences.OnSharedPreference
 
     private void sell(final Iterator<Exchange> exchangeIterator, final BigDecimal amount) throws IOException {
 
-        if(!exchangeIterator.hasNext()) {
+        if (!exchangeIterator.hasNext()) {
             LOGGER.warn("All exchanges failed!");
             Toast.makeText(context, context.getString(R.string.merchantMode_toast_sellingFailed), Toast.LENGTH_LONG);
             return;
@@ -87,7 +92,7 @@ public class MerchantModeManager implements SharedPreferences.OnSharedPreference
 
     public void sell(BigDecimal amount) {
 
-        if(merchantModeActivated && exchanges.isEmpty()) {
+        if (merchantModeActivated && exchanges.isEmpty()) {
             Toast.makeText(context, context.getString(R.string.merchantMode_toast_merchantModeActiveButNoExchanges), Toast.LENGTH_LONG);
         }
 
@@ -105,7 +110,7 @@ public class MerchantModeManager implements SharedPreferences.OnSharedPreference
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-        if(key.equals("merchant_mode")) {
+        if (key.equals("merchant_mode")) {
             merchantModeActivated = sharedPreferences.getBoolean("merchant_mode", false);
         }
 
@@ -117,8 +122,8 @@ public class MerchantModeManager implements SharedPreferences.OnSharedPreference
 
     private void addExchange(SharedPreferences sharedPreferences) {
         // primary exchange settings changes, check if settings complete
-        for(String pref : primaryExchangeKeys) {
-            if(!sharedPreferences.contains(pref)) return;
+        for (String pref : primaryExchangeKeys) {
+            if (!sharedPreferences.contains(pref)) return;
         }
 
         // all necessary values are there -> set up exchange
@@ -127,9 +132,14 @@ public class MerchantModeManager implements SharedPreferences.OnSharedPreference
         // determine exchange id
         String exchange;
         switch (sharedPreferences.getString("primary_exchange", "").toLowerCase()) {
-            case "kraken": exchange = Exchange.KRAKEN; break;
-            case "bitstamp": exchange = Exchange.BITSTAMP; break;
-            default: return;
+            case "kraken":
+                exchange = Exchange.KRAKEN;
+                break;
+            case "bitstamp":
+                exchange = Exchange.BITSTAMP;
+                break;
+            default:
+                return;
         }
 
         // set the credentials
@@ -140,5 +150,33 @@ public class MerchantModeManager implements SharedPreferences.OnSharedPreference
 
         // create exchange
         application.getMerchantModeManager().addExchange(new Exchange(exSpec));
+    }
+
+    private void getExchangeRate(final Iterator<Exchange> exchangeIterator, final RequestCompleteListener<ExchangeRateTransferObject> rcl) {
+
+        if (!exchangeIterator.hasNext()) {
+            // all exchanges failed
+            ExchangeRateTransferObject transferObject = new ExchangeRateTransferObject();
+            transferObject.setSuccessful(false);
+            transferObject.setMessage("Failed to obtain exchange rate");
+            rcl.onTaskComplete(transferObject);
+            return;
+        }
+
+        exchangeIterator.next().getBTCExchangeRateInDefaultCurrency(new RequestCompleteListener<ExchangeRateTransferObject>() {
+            @Override
+            public void onTaskComplete(ExchangeRateTransferObject response) {
+                if (response.isSuccessful()) {
+                    rcl.onTaskComplete(response);
+                } else {
+                    getExchangeRate(exchangeIterator, rcl);
+                }
+            }
+        }, context);
+
+    }
+
+    public void getExchangeRate(final RequestCompleteListener<ExchangeRateTransferObject> rcl) {
+        getExchangeRate(exchanges.iterator(), rcl);
     }
 }

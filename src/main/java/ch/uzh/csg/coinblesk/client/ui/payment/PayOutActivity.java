@@ -24,14 +24,12 @@ import java.math.BigDecimal;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
-import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
  * This class is a view to send bitcoins from the system to the inserted
@@ -202,7 +200,8 @@ public class PayOutActivity extends WalletActivity {
      */
     public void launchExchangeRateRequest() {
         showLoadingProgressDialog();
-        RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest("", new RequestCompleteListener<ExchangeRateTransferObject>() {
+
+        getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
             public void onTaskComplete(ExchangeRateTransferObject response) {
                 dismissProgressDialog();
                 if (response.isSuccessful()) {
@@ -217,8 +216,7 @@ public class PayOutActivity extends WalletActivity {
                 }
                 initClickListener();
             }
-        }, this);
-        request.execute();
+        });
     }
 
     private void updateBalance() {

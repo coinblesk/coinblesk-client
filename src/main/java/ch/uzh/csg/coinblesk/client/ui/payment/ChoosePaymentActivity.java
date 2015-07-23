@@ -28,6 +28,9 @@ public class ChoosePaymentActivity extends WalletActivity {
         sendPaymentBtn = (Button) findViewById(R.id.choosePayment_sendPaymentBtn);
         requestPaymentNoNfcBtn = (Button) findViewById(R.id.choosePayment_requestPaymentNoNfcBtn);
 
+        setupActionBar();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         initClickListener();
         checkOnlineModeAndProceed();
     }
@@ -49,7 +52,6 @@ public class ChoosePaymentActivity extends WalletActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        initializeMenuItems(menu, getApplicationContext());
         invalidateOptionsMenu();
         return true;
     }
