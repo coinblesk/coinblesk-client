@@ -41,7 +41,14 @@ public class Exchange {
 
     public interface TradePlacedListener {
         void onSuccess();
+
         void onFail(String msg);
+    }
+
+    public interface ExchangeRateListener {
+        void onSuccess(BigDecimal exchangeRate);
+
+        void onError(String msg);
     }
 
     private class SymbolAndExchangeRate {
@@ -49,6 +56,7 @@ public class Exchange {
             this.currency = currency;
             this.exchangeRate = exchangeRate;
         }
+
         public Currency currency;
         public BigDecimal exchangeRate;
     }
@@ -97,109 +105,129 @@ public class Exchange {
 
     /**
      * Sell bitcoins on the exchange
-     * @param amount the amount of bitcoins to sell, in BTC
+     *
+     * @param amount   the amount of bitcoins to sell, in BTC
      * @param listener
      * @throws IOException
      */
-    public void sell(BigDecimal amount, final TradePlacedListener listener) throws IOException {
+    public void sell(final BigDecimal amount, final TradePlacedListener listener) throws IOException {
 
         if (!hasCredentials()) {
             listener.onFail("Selling bitcoins is not possible without authentication.");
             return;
         }
 
-        AsyncTask<BigDecimal, Void, Void> placeOrderTask = new AsyncTask<BigDecimal, Void, Void>() {
+        getExchangeRate(new ExchangeRateListener() {
             @Override
-            protected Void doInBackground(BigDecimal... amount) {
+            public void onSuccess(final BigDecimal exchangeRate) {
 
-                Preconditions.checkState(amount.length == 1, "Amount not speciefied for sell order.");
+                AsyncTask<BigDecimal, Void, Void> placeOrderTask = new AsyncTask<BigDecimal, Void, Void>() {
 
-                try {
-                    PollingTradeService tradeService = exchange.getPollingTradeService();
+                    @Override
+                    protected Void doInBackground(final BigDecimal... amount) {
 
-                    // we are placing a sell order at the price (currrentAsk - 5%). This will make sure that the trade is executed,
-                    // while making sure we will never lose sell for less than 95% of our expected value. This means that in
-                    // theory it is possible that a trade never gets executed, if the market suddenly crashes.
-                    BigDecimal limitPrice = getExchangeRate().multiply(new BigDecimal("0.95"));
+                        Preconditions.checkState(amount.length == 1, "Amount not speciefied for sell order.");
 
-                    LimitOrder order = new LimitOrder.Builder(Order.OrderType.ASK, CurrencyPair.BTC_USD).tradableAmount(amount[0]).limitPrice(limitPrice).build();
-                    tradeService.placeLimitOrder(order);
-                    listener.onSuccess();
-                } catch (Exception e) {
-                    listener.onFail(e.getMessage());
-                    return null;
-                }
-                return null;
+                        // we are placing a sell order at the price (currrentAsk - 5%). This will make sure that the trade is executed,
+                        // while making sure we will never lose sell for less than 95% of our expected value. This means that in
+                        // theory it is possible that a trade never gets executed, if the market suddenly crashes.
+                        BigDecimal limitPrice = exchangeRate.multiply(new BigDecimal("0.95"));
+
+                        try {
+                            LimitOrder order = new LimitOrder.Builder(Order.OrderType.ASK, CurrencyPair.BTC_USD).tradableAmount(amount[0]).limitPrice(limitPrice).build();
+                            PollingTradeService tradeService = exchange.getPollingTradeService();
+                            tradeService.placeLimitOrder(order);
+                            listener.onSuccess();
+                        } catch (Exception e) {
+                            listener.onFail(e.getMessage());
+                        }
+
+                        return null;
+                    }
+                };
+                placeOrderTask.execute(amount);
+
             }
-        };
-        placeOrderTask.execute(amount);
 
-    }
-
-    /**
-     * Gets the current balance of the specified exchange, in the default currency specified by the server (e.g. CHF).
-     * @param cro
-     * @param context
-     */
-    public void getBalanceInDefaultCurrency(final RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) throws IOException {
-        BigDecimal balance = getBalance();
-        getExchangeRateInDefaultCurrency(balance, cro, context);
-    }
-
-    /**
-     *
-     * @param amount the amount to convert to the default currency (e.g. CHF)
-     * @param cro
-     * @param context
-     * @throws IOException
-     */
-    private void getExchangeRateInDefaultCurrency(final BigDecimal amount, final RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) throws IOException {
-
-        // forex exchange rate
-        SymbolAndExchangeRate exchangeRateAndCurrency = forexCache.getIfPresent(pair.counterSymbol);
-        if(exchangeRateAndCurrency != null) {
-            // found in cache: execute listener
-            ExchangeRateTransferObject exchangeRateObj = new ExchangeRateTransferObject();
-            exchangeRateObj.setExchangeRate(exchangeRateAndCurrency.currency, exchangeRateAndCurrency.exchangeRate.multiply(amount).toString());
-            exchangeRateObj.setSuccessful(true);
-            cro.onTaskComplete(exchangeRateObj);
-            return;
-        }
-
-        // exchange rate not saved in cache: get it from server
-        final CoinBleskApplication application = (CoinBleskApplication) context.getApplicationContext();
-        RequestFactory requestFactory = application.getRequestFactory();
-        RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest = requestFactory.exchangeRateRequest(pair.counterSymbol, new RequestCompleteListener<ExchangeRateTransferObject>() {
             @Override
-            public void onTaskComplete(ExchangeRateTransferObject response) {
-                Currency symbol = response.getExchangeRates().keySet().iterator().next();
-                BigDecimal forexExchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
-                BigDecimal btcExchangeRateInBaseCurrency = forexExchangeRate.multiply(amount);
+            public void onError(String msg) {
+                // failed to get exchange rate from exchange
+                listener.onFail(msg);
+            }
+        });
 
-                ExchangeRateTransferObject exchangeRateObj = new ExchangeRateTransferObject();
-                exchangeRateObj.setExchangeRate(symbol, btcExchangeRateInBaseCurrency.toString());
 
-                // save forex exchange rate in cache
-                forexCache.put(pair.counterSymbol, new SymbolAndExchangeRate(symbol, forexExchangeRate));
+    }
 
-                // execute listener
-                exchangeRateObj.setSuccessful(true);
+    /**
+     * Get the exchange rate of this exchange in the default currency. The default currency (e.g. CHF) is specified by the server.
+     *
+     * @param cro     the request task listener. Will hold the exchange rate if successful
+     * @param context
+     */
+    public void getBTCExchangeRateInDefaultCurrency(final RequestCompleteListener<ExchangeRateTransferObject> cro, final Context context) {
+
+        final ExchangeRateTransferObject exchangeRateObj = new ExchangeRateTransferObject();
+
+        getExchangeRate(new ExchangeRateListener() {
+            @Override
+            public void onSuccess(final BigDecimal exchangeRate) {
+
+
+                AsyncTask<Void, Void, Void> exchangeRateTask = new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+
+                        final ExchangeRateTransferObject exchangeRateObj = new ExchangeRateTransferObject();
+
+                        // forex exchange rate
+                        SymbolAndExchangeRate exchangeRateAndCurrency = forexCache.getIfPresent(pair.counterSymbol);
+                        if (exchangeRateAndCurrency != null) {
+                            // found in cache: execute listener
+                            exchangeRateObj.setExchangeRate(exchangeRateAndCurrency.currency, exchangeRateAndCurrency.exchangeRate.multiply(exchangeRate).toString());
+                            exchangeRateObj.setSuccessful(true);
+                            cro.onTaskComplete(exchangeRateObj);
+                            return null;
+                        }
+
+                        // exchange rate not saved in cache: get it from server
+                        final CoinBleskApplication application = (CoinBleskApplication) context.getApplicationContext();
+                        RequestFactory requestFactory = application.getRequestFactory();
+
+                        RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest = requestFactory.exchangeRateRequest(pair.counterSymbol, new RequestCompleteListener<ExchangeRateTransferObject>() {
+                            @Override
+                            public void onTaskComplete(ExchangeRateTransferObject response) {
+                                Currency symbol = response.getExchangeRates().keySet().iterator().next();
+                                BigDecimal forexExchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                                BigDecimal btcExchangeRateInBaseCurrency = null;
+                                btcExchangeRateInBaseCurrency = forexExchangeRate.multiply(exchangeRate);
+
+                                exchangeRateObj.setExchangeRate(symbol, btcExchangeRateInBaseCurrency.toString());
+
+                                // save forex exchange rate in cache
+                                forexCache.put(pair.counterSymbol, new SymbolAndExchangeRate(symbol, forexExchangeRate));
+
+                                // execute listener
+                                exchangeRateObj.setSuccessful(true);
+                                cro.onTaskComplete(exchangeRateObj);
+                            }
+                        }, context);
+                        exchangeRateRequest.execute();
+
+                        return null;
+                    }
+
+                };
+                exchangeRateTask.execute();
+            }
+
+            @Override
+            public void onError(String msg) {
+                exchangeRateObj.setSuccessful(false);
+                exchangeRateObj.setMessage(msg);
                 cro.onTaskComplete(exchangeRateObj);
             }
-        }, context);
-        exchangeRateRequest.execute();
-    }
-
-    /**
-     * @return the current exchange rate of 1 BTC on the specified exchange, in the default currency specified by the server (e.g. CHF).
-     * @throws IOException if the connection failed
-     */
-    public void getBTCExchangeRateInDefaultCurrency(final RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) throws IOException {
-
-        // bitcoin exchange rate
-        final BigDecimal currentBtcBid = getExchangeRate();
-
-        getExchangeRateInDefaultCurrency(currentBtcBid, cro, context);
+        });
 
     }
 
@@ -207,21 +235,21 @@ public class Exchange {
      * @return the current bid price of this market
      * @throws IOException if the connection to the exchange failed
      */
-    private BigDecimal getExchangeRate() throws IOException {
-        PollingMarketDataService marketDataService = exchange.getPollingMarketDataService();
-        return marketDataService.getTicker(pair).getBid();
-    }
-
-    /**
-     * @return the current balance on this exchange
-     * @throws IOException
-     */
-    private BigDecimal getBalance() throws IOException {
-        if(!hasCredentials()) {
-            LOGGER.error("Tried to get balance of exchange without credentials");
-            return BigDecimal.ZERO;
-        }
-        return exchange.getPollingAccountService().getAccountInfo().getBalance(pair.counterSymbol);
+    private void getExchangeRate(final ExchangeRateListener listener) {
+        AsyncTask<Void, Void, Void> exchangeRateTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                PollingMarketDataService marketDataService = exchange.getPollingMarketDataService();
+                try {
+                    listener.onSuccess(marketDataService.getTicker(pair).getBid());
+                } catch (IOException e) {
+                    LOGGER.error("failed to get exchange rate from {}: {}", getExchangeId(), e);
+                    listener.onError(e.getMessage());
+                }
+                return null;
+            }
+        };
+        exchangeRateTask.execute();
     }
 
     /**
@@ -232,7 +260,6 @@ public class Exchange {
     }
 
     /**
-     *
      * @return a unique id of the exchange
      */
     public String getExchangeId() {
@@ -241,7 +268,7 @@ public class Exchange {
 
     @Override
     public boolean equals(Object o) {
-        if(o instanceof  Exchange) {
+        if (o instanceof Exchange) {
             return ((Exchange) o).getExchangeId().equals(getExchangeId());
         }
         return false;

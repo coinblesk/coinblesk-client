@@ -17,6 +17,8 @@ import org.bitcoinj.store.UnreadableWalletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
@@ -114,7 +116,7 @@ public class RestoreOrNewActivity extends WalletActivity {
             }
         };
 
-        startWalletTask.execute();
+        startWalletTask.executeOnExecutor(Executors.newCachedThreadPool());
     }
 
     private void saveWatchingKey() {
@@ -129,6 +131,11 @@ public class RestoreOrNewActivity extends WalletActivity {
                 if (response.isSuccessful()) {
                     startMainActivity();
                 } else {
+                    // reset the setup info in the local storage, or else, the next time the user starts the app,
+                    // the app will go to the main activity, but will not be able to spend bitcoins, because
+                    // the server doesn't have the clients watching key.
+                    storageHandler.clear();
+
                     displayResponse(getString(R.string.establish_internet_connection));
                     dismissProgressDialog();
                 }

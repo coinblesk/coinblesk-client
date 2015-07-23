@@ -8,34 +8,29 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".RestoreOrNewActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:minHeight="?attr/actionBarSize"
-        android:background="#2196F3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </android.support.v7.widget.Toolbar>
-
 
     <Button
         android:id="@+id/restoreOrNew_button_createNewWallet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView5"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="62dp"
         android:enabled="false"
-        android:text="Create New Wallet" />
+        android:text="Create New Wallet"
+        android:clickable="false"
+        android:textSize="20sp"
+        android:padding="24dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/restoreOrNew_button_createNewWallet"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="65dp"
         android:text="Restore Wallet"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@+id/restoreOrNew_button_createNewWallet"
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:id="@+id/restoreOrNew_edit_passphrase"
@@ -46,15 +41,6 @@
         android:layout_below="@+id/textView6"
         android:layout_marginTop="22dp"
         android:hint="@string/restoreOrCreate_passphrase_placeholder" />
-
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:text="Create New Wallet"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
         android:id="@+id/restoreOrNew_button_restoreWallet"
