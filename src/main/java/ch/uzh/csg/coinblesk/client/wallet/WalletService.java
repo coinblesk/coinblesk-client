@@ -14,10 +14,8 @@ import com.google.common.util.concurrent.Service;
 import org.bitcoinj.core.AbstractWalletEventListener;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.DownloadProgressTracker;
-import org.bitcoinj.core.FilteredBlock;
 import org.bitcoinj.core.InsufficientMoneyException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Peer;
@@ -45,6 +43,7 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -242,7 +241,8 @@ public class WalletService extends android.app.Service {
         checkRefundTxState();
 
         // add wallet listeners
-        getAppKit().wallet().addEventListener(new CreateNewRefundTxListener(this));
+        getAppKit().wallet().addEventListener(new CreateNewRefundTxListener(this)); // responsible for creating refund txs
+        getAppKit().wallet().addEventListener(new MerchantModeSellListener(this)); // responsible for selling BTC if merchant mode is active
 
         // notify listeners about wallet changes
         initTxListener();
@@ -276,16 +276,19 @@ public class WalletService extends android.app.Service {
             clientWalletKit = new CoinBleskWalletAppKit(params, getFilesDir(), getWalletFilesPrefix(bitcoinNet));
             clientWalletKit
                     .marryWallet(serverWatchingKey, mnemonic, creationTime)
-                    .setAndroidContext(getApplicationContext())
+                    .setAndroidContext(getCoinbleskApplication())
                     .setBlockingStartup(false)
                     .setDownloadListener(new DownloadProgressTracker() {
+
                         @Override
-                        public void onBlocksDownloaded(Peer peer, Block block, FilteredBlock filteredBlock, int blocksLeft) {
-                            LOGGER.debug("{} blocks left to download...", blocksLeft);
-                            if (!syncProgress.hasStarted()) {
-                                syncProgress.setTotalBlocks(blocksLeft);
-                            }
-                            syncProgress.setBlocksRemaining(blocksLeft);
+                        public void onChainDownloadStarted(Peer peer, int blocksLeft) {
+                            super.onChainDownloadStarted(peer, blocksLeft);
+                            syncProgress.setProgress(0);
+                        }
+
+                        @Override
+                        protected void progress(double pct, int blocksSoFar, Date date) {
+                            syncProgress.setProgress(pct / 100);
                         }
 
                         @Override

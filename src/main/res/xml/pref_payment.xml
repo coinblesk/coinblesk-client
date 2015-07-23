@@ -1,19 +1,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <Preference android:title="@string/pref_title_payout_rule" >
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:targetClass="ch.uzh.csg.coinblesk.client.settings.SettingPayOutRulesActivity"
-            android:targetPackage="ch.uzh.csg.coinblesk.client" />
-    </Preference>
-    
-    <CheckBoxPreference 
+    <CheckBoxPreference
         android:defaultValue="false"
         android:key="include_fee"
         android:summary="@string/pref_description_include_fee"
         android:title="@string/pref_title_include_fee"/>
-    
-     <EditTextPreference
+
+    <EditTextPreference
         android:defaultValue="@string/pref_fee_amount"
         android:dependency="include_fee"
         android:inputType="number"
@@ -23,14 +16,14 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="@string/pref_title_fee_amount" />
-     
-     <CheckBoxPreference 
+
+    <CheckBoxPreference
         android:defaultValue="false"
         android:key="auto_accept"
         android:summary="@string/settings_autoAccept_checkbox_summary"
         android:title="@string/settings_autoAccept_checkbox_title"/>
-    
-     <EditTextPreference
+
+    <EditTextPreference
         android:defaultValue="@string/settings_autoAccept_editText_defaultValue"
         android:dependency="auto_accept"
         android:numeric="integer"
@@ -41,8 +34,8 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="@string/settings_autoAccept_editText_title" />
-     
-     <EditTextPreference
+
+    <EditTextPreference
         android:defaultValue="3"
         android:inputType="numberDecimal"
         android:numeric="integer"
@@ -51,7 +44,7 @@
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="false"
-        android:title="@string/sharedPreferences_numberOfLastTransactionsTitle" 
+        android:title="@string/sharedPreferences_numberOfLastTransactionsTitle"
         android:summary="@string/sharedPreferences_numberOfLastTransactionsDescription"/>
-     
+
 </PreferenceScreen>

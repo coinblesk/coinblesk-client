@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import ch.uzh.csg.coinblesk.JsonConverter;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
@@ -105,32 +104,37 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             URL url = new URL(endpoint);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
 
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
             connection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT);
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 ( compatible ) ");
+            connection.setRequestProperty("Accept", "*/*");
+            connection.connect();
 
             //Send request
             String json = params.toJson();
-
             DataOutputStream printout = new DataOutputStream(connection.getOutputStream());
-            printout.writeUTF(URLEncoder.encode(json, "UTF-8"));
+
+            printout.writeBytes(json);
             printout.flush();
             printout.close();
 
 
             //Get Response
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                InputStream is = connection.getInputStream();
+            boolean isError = connection.getResponseCode() >= 400;
+            InputStream is = isError ? connection.getErrorStream() : connection.getInputStream();
+            if(!isError) {
                 return readString(is);
             } else {
+                LOGGER.error("Request failed. Server response: {}", readString(is));
                 return null;
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Request failed:", e);
             return null;
 
         } finally {
@@ -160,6 +164,7 @@ public abstract class RequestTask<I extends TransferObject, O extends TransferOb
             URL url = new URL(endpoint);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT);
 
             connection.setUseCaches(false);
             connection.setDoInput(true);

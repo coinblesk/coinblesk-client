@@ -7,11 +7,12 @@ import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
- * This class sends a request to get the exchange rate BTC to CHF.
+ * This class sends a request to get the exchange from a currency to the reference currency.
+ * The reference currency is determined by the server's settings.
  */
 public class ExchangeRateRequestTask extends RequestTask<TransferObject, ExchangeRateTransferObject> {
 	
-	public ExchangeRateRequestTask(RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) {
-		super(new ExchangeRateTransferObject(), Constants.BASE_URI_SSL + "/wallet/exchangeRate/", cro, context);
+	public ExchangeRateRequestTask(String symbol, RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) {
+		super(new ExchangeRateTransferObject(), Constants.BASE_URI_SSL + "/wallet/exchangeRate/" + symbol, cro, context);
 	}
 }

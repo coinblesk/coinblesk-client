@@ -1,0 +1,43 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="merchant_mode"
+        android:summary="@string/pref_description_merchant_mode"
+        android:title="@string/pref_title_merchant_mode"/>
+
+    <ListPreference
+        android:dependency="merchant_mode"
+        android:entries="@array/pref_primary_exchange_list"
+        android:entryValues="@array/pref_primary_exchange_values"
+        android:key="primary_exchange"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/settings_exchange_primary" />
+
+    <EditTextPreference
+        android:dependency="merchant_mode"
+        android:inputType="text"
+        android:key="primary_exchange_username"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/settings_exchange_username" />
+    <EditTextPreference
+        android:dependency="merchant_mode"
+        android:inputType="text"
+        android:key="primary_exchange_api_key"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/settings_exchange_api_key" />
+    <EditTextPreference
+        android:dependency="merchant_mode"
+        android:inputType="text"
+        android:key="primary_exchange_api_secret"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/settings_exchange_api_secret" />
+
+</PreferenceScreen>

@@ -1,16 +1,71 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<resources>-->
+    <!--<style name="MyTheme" parent="MyTheme.Base"></style>-->
+    <!--&lt;!&ndash; Base theme applied no matter what API &ndash;&gt;-->
+    <!--<style name="MyTheme.Base" parent="Theme.AppCompat.NoActionBar">-->
+        <!--&lt;!&ndash;If you are using revision 22.1 please use just windowNoTitle. Without android:&ndash;&gt;-->
+        <!--<item name="android:windowNoTitle">true</item>-->
+        <!--&lt;!&ndash;We will be using the toolbar so no need to show ActionBar&ndash;&gt;-->
+        <!--<item name="windowActionBar">false</item>-->
+        <!--&lt;!&ndash; Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette&ndash;&gt;-->
+        <!--&lt;!&ndash; colorPrimary is used for the default action bar background &ndash;&gt;-->
+        <!--<item name="colorPrimary">#2196F3</item>-->
+        <!--&lt;!&ndash; colorPrimaryDark is used for the status bar &ndash;&gt;-->
+        <!--<item name="colorPrimaryDark">#1976D2</item>-->
+        <!--&lt;!&ndash; colorAccent is used as the default value for colorControlActivated-->
+             <!--which is used to tint widgets &ndash;&gt;-->
+        <!--<item name="colorAccent">#FF4081</item>-->
+        <!--&lt;!&ndash; You can also set colorControlNormal, colorControlActivated-->
+            <!--colorControlHighlight and colorSwitchThumbNormal. &ndash;&gt;-->
+    <!--</style>-->
+
+    <!--<style name="Theme_Dialog_Alert">-->
+        <!--<item name="android:windowBackground">@android:color/transparent</item>-->
+        <!--<item name="android:windowIsFloating">true</item>-->
+        <!--<item name="android:windowContentOverlay">@null</item>-->
+        <!--<item name="android:windowCloseOnTouchOutside">false</item>-->
+    <!--</style>-->
+
+<!--</resources>-->
+
+
 <resources>
 
-    <!-- Application theme. -->
-    <style name="CoinBleskTheme" parent="android:Theme.Material.Light">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-    </style>
+<style name="Base.Theme.CoinBleskApp" parent="Theme.AppCompat.NoActionBar">
 
-    <style name="Theme_Dialog_Alert">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowCloseOnTouchOutside">false</item>
-    </style>
+    <item name="colorPrimary">@color/my_primary</item>
+
+    <!--   darker variant for the status bar and contextual app bars -->
+    <item name="colorPrimaryDark">@color/my_primary_dark</item>
+
+    <!--   theme UI controls like checkboxes and text fields e.g. FloatActionButton -->
+    <item name="colorAccent">@color/my_accent</item>
+
+    <!-- Title Text Color -->
+    <item name="android:textColorPrimary">@color/my_primary_text</item>
+
+    <!-- color of the menu overflow icon (three vertical dots) -->
+    <item name="android:textColorSecondary">@color/my_secondary_text</item>
+
+
+    <item name="android:windowBackground">@color/window_background</item>
+</style>
+
+<!--
+   Base application theme, dependent on API level. This theme is replaced
+   by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+-->
+<style name="AppBaseTheme" parent="Base.Theme.CoinBleskApp">
+    <!--
+        Theme customizations available in newer API levels can go in
+        res/values-vXX/styles.xml, while customizations related to
+        backward-compatibility can go here.
+    -->
+</style>
+
+<!-- Application theme. -->
+<style name="AppTheme" parent="AppBaseTheme">
+    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+</style>
 
 </resources>

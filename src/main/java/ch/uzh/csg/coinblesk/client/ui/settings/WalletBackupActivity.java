@@ -3,7 +3,6 @@ package ch.uzh.csg.coinblesk.client.ui.settings;
 import android.content.ComponentName;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.view.View;
 import android.widget.Button;
@@ -21,10 +20,7 @@ public class WalletBackupActivity extends WalletActivity {
 
     private TextView mTextWalletSeed;
     private ProgressBar mProgressBar;
-    private Button mCopyButton;
     private Button mEmailRefundTxButton;
-    private Handler mHandler;
-    private String mnemonic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +28,12 @@ public class WalletBackupActivity extends WalletActivity {
         setContentView(R.layout.activity_wallet_backup);
         setScreenOrientation();
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        setupActionBar();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar_mnemonic);
         mTextWalletSeed = (TextView) findViewById(R.id.settings_walletBackupSeed);
         mEmailRefundTxButton = (Button) findViewById(R.id.walletBackup_emailRefundTxButton);
-        mHandler = new Handler();
 
         initClickListeners();
     }
@@ -67,7 +63,6 @@ public class WalletBackupActivity extends WalletActivity {
             protected void onPostExecute(String result) {
                 mProgressBar.setVisibility(View.GONE);
                 mTextWalletSeed.setText(result);
-                mnemonic = result;
                 initClickListeners();
             }
         };

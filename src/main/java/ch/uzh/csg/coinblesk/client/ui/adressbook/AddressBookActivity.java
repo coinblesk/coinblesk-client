@@ -21,19 +21,21 @@ import android.widget.Toast;
 import java.util.Iterator;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.AbstractAsyncActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 
 /**
  * Activity for showing and modifying address book contacts. 
  *
  */
-public class AddressBookActivity extends AbstractAsyncActivity {
+public class AddressBookActivity extends BaseActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_address_book);
 		setUpGui();
+		setupActionBar();
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
 	@Override

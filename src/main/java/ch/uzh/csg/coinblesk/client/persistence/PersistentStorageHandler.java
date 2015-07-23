@@ -28,11 +28,9 @@ public class PersistentStorageHandler implements StorageHandler {
     /**
      * Instantiates a new {@link PersistentStorageHandler}.
      *
-     * @param context the application's context used to be able to write on the
-     *                private storage
      */
     public PersistentStorageHandler(Context context) {
-        this.data = PersistenceFactory.getCloudStorage(context);
+        this.data = new CoinBleskCloudData(context);
     }
 
     @Override

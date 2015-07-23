@@ -322,6 +322,11 @@
         The refund transaction is time-locked though, which means that you can only claim you bitcoins after the time-lock has expired. Caution: As soon as the refund transaction is valid (after the time-lock expired),
         instant transactions are no longer possible. Your bitcoins need to be "re-deposited" after the time-lock has expired to allow instant transactions. This will be done automatically by the App, but it is
         possible that instant transactions are not possible if you haven\'t openend the app for a very long time (~3 months). </string>
+    <string name="settings_exchange_primary">Primary Exchange</string>
+    <string name="settings_exchange_username">Exchange Username or Account Number</string>
+    <string name="settings_exchange_api_key">Exchange API Key</string>
+    <string name="settings_exchange_api_secret">Exchange API Secret</string>
+
 
     <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
@@ -379,5 +384,10 @@
     <!--Restore or Create New Wallet-->
     <string name="restoreOrCreate_passphrase_placeholder">Enter Backup Phrase...</string>
     <string name="restoreOrCreate_toast_restoreFailed">Failed to restore wallet. Are you sure you entered the backup phrase correctly?</string>
+
+    <!--Merchant Mode-->
+    <string name="merchantMode_toast_merchantModeActiveButNoExchanges">Merchant mode only works if at least one exchange is configured correctly.</string>
+    <string name="merchantMode_toast_sellingFailed">Failed to exchange BTC</string>
+
 
 </resources>

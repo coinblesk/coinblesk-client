@@ -8,7 +8,7 @@ import java.math.BigDecimal;
  */
 public class Constants {
 //	public static final String BASE_URI = "http://bitcoin.csg.uzh.ch/server";
-	public static final String BASE_URI_SSL = "http://192.168.42.232:8080/coinblesk";
+	public static final String BASE_URI_SSL = "http://192.168.42.148:8080/coinblesk";
 //	public static final String BASE_URI = "http://bitcoin-clone2.csg.uzh.ch/server";
 //	public static final String BASE_URI_SSL = "http://bitcoin-clone2.csg.uzh.ch/server";
 	

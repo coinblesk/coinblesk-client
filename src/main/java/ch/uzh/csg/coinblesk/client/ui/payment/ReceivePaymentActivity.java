@@ -42,18 +42,11 @@ import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
-import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
-import ch.uzh.csg.paymentlib.IPaymentEventHandler;
-import ch.uzh.csg.paymentlib.IServerResponseListener;
-import ch.uzh.csg.paymentlib.PaymentEvent;
-import ch.uzh.csg.paymentlib.PaymentRequestInitializer;
-import ch.uzh.csg.paymentlib.container.PaymentInfos;
-import ch.uzh.csg.paymentlib.messages.PaymentError;
 
 /**
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
@@ -83,8 +76,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	private CountDownTimer timer;
 
 	private NfcAdapter nfcAdapter;
-	private IServerResponseListener responseListener;
-	private PaymentRequestInitializer paymentRequestInitializer;
 	private boolean serverResponseSuccessful = false;
 	private static boolean isPortrait  = false;
 
@@ -106,7 +97,8 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		}
 
 		Constants.inputUnit = INPUT_UNIT_CHF;
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		setupActionBar();
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		exchangeRate = BigDecimal.ZERO;
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -246,7 +238,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	public void launchExchangeRateRequest() {
 		if (ConnectionCheck.isNetworkAvailable(this)) {
 			showLoadingProgressDialog();
-			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
+			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest("", new RequestCompleteListener<ExchangeRateTransferObject>() {
 				public void onTaskComplete(ExchangeRateTransferObject response) {
 					dismissProgressDialog();
 					dismissNfcInProgressDialog();
@@ -336,17 +328,17 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		refreshCurrencyTextViews();
 
 		if (amountBTC.compareTo(BigDecimal.ZERO) > 0) {
-			PaymentInfos paymentInfos;
-			try {
-				paymentInfos = new PaymentInfos(Currency.BTC,
-						Converter.getLongFromBigDecimal(amountBTC),
-						Currency.CHF,
-						Converter.getLongFromBigDecimal(inputUnitValue));
-				initializeNFC(paymentInfos);
-			} catch (Exception e) {
-				displayResponse(getResources().getString(
-						R.string.unexcepted_error));
-			}
+//			PaymentInfos paymentInfos;
+//			try {
+//				paymentInfos = new PaymentInfos(Currency.BTC,
+//						Converter.getLongFromBigDecimal(amountBTC),
+//						Currency.CHF,
+//						Converter.getLongFromBigDecimal(inputUnitValue));
+//				initializeNFC(paymentInfos);
+//			} catch (Exception e) {
+//				displayResponse(getResources().getString(
+//						R.string.unexcepted_error));
+//			}
 			showNfcInstructions();
 		} else {
 			hideNfcInstructions();
@@ -354,10 +346,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	}
 
 	private void clearPaymentInfos() {
-		if (paymentRequestInitializer != null){
-			paymentRequestInitializer.disable();
-			paymentRequestInitializer = null;
-		}
+//		if (paymentRequestInitializer != null){
+//			paymentRequestInitializer.disable();
+//			paymentRequestInitializer = null;
+//		}
 		hideNfcInstructions();
 		Constants.inputValueCalculator = BigDecimal.ZERO;
 		receiveAmount = "0";
@@ -464,133 +456,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 		}
 
 		public void onNothingSelected(AdapterView<?> parent) {
-		}
-	};
-
-	/**
-	 * Initializes NFC communication depending on isSendingMode.
-	 * @param paymentInfos details about transaction (currency, amount, input currency and amount)
-	 * @throws Exception
-	 */
-	private void initializeNFC(PaymentInfos paymentInfos) throws Exception {
-
-		//TODO
-
-//		nfcAdapter = createAdapter(ReceivePaymentActivity.this);
-//		if (nfcAdapter == null) {
-//			return;
-//		}
-//
-//		//disable android beam (touch to beam screen)
-//		nfcAdapter.setNdefPushMessage(null, this, this);
-//
-//		if(isSendingMode){
-//			try {
-//				if (paymentRequestInitializer != null) {
-//					paymentRequestInitializer.disable();
-//					paymentRequestInitializer = null;
-//				}
-//				paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.SEND_PAYMENT);
-//				paymentRequestInitializer.enableNfc();
-//			} catch (Exception e) {
-//				displayResponse(getResources().getString(R.string.unexcepted_error));
-//				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
-//			}
-//		}
-//		else {
-//			try {
-//				if (paymentRequestInitializer != null) {
-//					paymentRequestInitializer.disable();
-//					paymentRequestInitializer = null;
-//				}
-//				paymentRequestInitializer = new PaymentRequestInitializer(ReceivePaymentActivity.this, eventHandler, userInfos, paymentInfos, serverInfos, persistencyHandler, PaymentType.REQUEST_PAYMENT);
-//				paymentRequestInitializer.enableNfc();
-//			} catch (Exception e) {
-//				displayResponse(getResources().getString(R.string.unexcepted_error));
-//				launchActivity(ReceivePaymentActivity.this, MainActivity.class);
-//			}
-//		}
-	}
-
-	/**
-	 * Handles Events received from the nfcPaymentLibrary. Differs between error and successful cases.
-	 */
-	private IPaymentEventHandler eventHandler = new IPaymentEventHandler() {
-		public void handleMessage(PaymentEvent event, Object object, IServerResponseListener caller) {
-
-			switch (event) {
-			case ERROR:
-				PaymentError err = (PaymentError) object;
-				if (err != null){
-					switch (err) {
-					case DUPLICATE_REQUEST:
-						dismissNfcInProgressDialog();
-						showDialog(getResources().getString(R.string.transaction_duplicate_error), false);
-						break;
-					case NO_SERVER_RESPONSE:
-						dismissNfcInProgressDialog();
-						showDialog(getResources().getString(R.string.error_transaction_failed), false);
-						break;
-					case PAYER_REFUSED:
-						dismissNfcInProgressDialog();
-						showDialog(getResources().getString(R.string.transaction_rejected), false);
-						break;
-					case REQUESTS_NOT_IDENTIC:
-						dismissNfcInProgressDialog();
-						showDialog(getResources().getString(R.string.transaction_server_rejected), false);
-						break;
-					case SERVER_REFUSED:
-						dismissNfcInProgressDialog();
-						String errorMessage = err.getErrorCause();
-						if (errorMessage != null && errorMessage.equals("BALANCE")){
-							showDialog(getResources().getString(R.string.transaction_server_rejected_balance), false);
-						} else {
-							showDialog(getResources().getString(R.string.transaction_server_rejected), false);
-						}
-						break;
-					case UNEXPECTED_ERROR:
-						//check if Mensa Tablet (with external reader) is connected, if yes ignore unexpected errors
-						if (!serverResponseSuccessful) {
-							if (Constants.IS_MENSA_MODE && !isPortrait) {
-								break;
-							}
-							else {
-								dismissNfcInProgressDialog();
-								showDialog(getResources().getString(R.string.error_transaction_failed), false);
-							}
-						}
-						break;
-					case INIT_FAILED:
-						//ignore
-						break;
-					default:
-						break;
-					}
-					resetStates();
-				}
-				break;
-			case FORWARD_TO_SERVER:
-				try {
-					showNfcProgressDialog(true);
-					ServerPaymentRequest serverPaymentRequest = DecoderFactory.decode(ServerPaymentRequest.class, (byte[]) object);
-					responseListener = caller;
-					launchTransactionRequest(serverPaymentRequest);
-				} catch (Exception e) {
-					displayResponse(getResources().getString(R.string.unexcepted_error));
-				}
-				break;
-			case SUCCESS:
-				serverResponseSuccessful = true;
-				showSuccessDialog(object, isSendingMode);
-				if (paymentRequestInitializer != null)
-					paymentRequestInitializer.disableNfc(); 
-				break;
-			case INITIALIZED:
-				showNfcProgressDialog(true);
-				break;
-			default: 
-				break;
-			}
 		}
 	};
 
@@ -1217,11 +1082,7 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 	 * Resets the NFC communication and hides the animated NFC image.
 	 */
 	private void resetNfc() {
-		if (paymentRequestInitializer != null){
-			paymentRequestInitializer.disable();
-			paymentRequestInitializer = null;
-			hideNfcInstructions();
-		}
+		hideNfcInstructions();
 	}
 
 }

@@ -19,7 +19,7 @@ import ch.uzh.csg.coinblesk.client.wallet.WalletService.LocalBinder;
  * @author rvoellmy
  *
  */
-public class WalletActivity extends AbstractAsyncActivity implements ServiceConnection {
+public class WalletActivity extends BaseActivity implements ServiceConnection {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(WalletActivity.class);
     

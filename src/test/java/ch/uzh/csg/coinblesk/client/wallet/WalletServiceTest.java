@@ -162,7 +162,7 @@ public class WalletServiceTest {
 
         RequestFactory requestFactory = new DefaultRequestFactory() {
             @Override
-            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, TransferObject output, Context context) {
+            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, Context context) {
                 // check if the request is correct
                 Assert.assertNotNull(input);
                 Assert.assertNotNull(input.getPartialTx());

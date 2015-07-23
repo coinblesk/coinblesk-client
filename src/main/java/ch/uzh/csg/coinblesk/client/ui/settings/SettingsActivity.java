@@ -19,9 +19,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 
 /**
@@ -35,11 +38,22 @@ import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends BaseActivity {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SettingsActivity.class);
 
 	private static final boolean ALWAYS_SIMPLE_PREFS = false;
 	private MenuItem menuWarning;
 	protected static Context context;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_with_toolbar);
+
+		setupActionBar();
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+	}
 
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
@@ -50,8 +64,7 @@ public class SettingsActivity extends PreferenceActivity {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		}
 
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		context = getApplicationContext();
+		CoinBleskApplication application = (CoinBleskApplication) getApplicationContext();
 		setupSimplePreferencesScreen();
 
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -61,7 +74,7 @@ public class SettingsActivity extends PreferenceActivity {
 				if(key.equals("numberOfLastTransactions")) {
 					int value = Integer.parseInt(sharedPreferences.getString("numberOfLastTransactions", "3"));
 					if(value <= 0 || value > 5){
-						Toast.makeText(context, "please enter number between 1 and 5", Toast.LENGTH_LONG).show();
+						Toast.makeText(SettingsActivity.this, "please enter number between 1 and 5", Toast.LENGTH_LONG).show();
 						SharedPreferences.Editor prefEditor = prefs.edit();
 				        prefEditor.putString("numberOfLastTransactions", "3");
 				        prefEditor.commit();
@@ -69,6 +82,8 @@ public class SettingsActivity extends PreferenceActivity {
 				}
 			}
 		});
+
+        prefs.registerOnSharedPreferenceChangeListener(application.getMerchantModeManager());
 	}
 
 	@Override
@@ -117,12 +132,7 @@ public class SettingsActivity extends PreferenceActivity {
 		}
 
 		// Add all preferences for settings in one view
-		getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsPreferenceFragement()).commit();
-	}
-
-	@Override
-	public boolean onIsMultiPane() {
-		return isXLargeTablet(this) && !isSimplePreferences(this);
+		getFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsPreferenceFragement()).commit();
 	}
 
 	/**
@@ -142,13 +152,6 @@ public class SettingsActivity extends PreferenceActivity {
 	 */
 	private static boolean isSimplePreferences(Context context) {
 		return ALWAYS_SIMPLE_PREFS || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB || !isXLargeTablet(context);
-	}
-
-	@Override
-	public void onBuildHeaders(List<Header> target) {
-		if (!isSimplePreferences(this)) {
-			loadHeadersFromResource(R.xml.pref_headers, target);
-		}
 	}
 
 	/**
@@ -176,16 +179,12 @@ public class SettingsActivity extends PreferenceActivity {
 	};
 
 	private static void bindPreferenceSummaryToValue(Preference preference) {
+
 		// Set the listener to watch for value changes.
 		preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
 		// Trigger the listener immediately with the preference's current value.
 		sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(),""));
-	}
-
-	@Override
-	protected boolean isValidFragment(String fragmentName){
-		return true;
 	}
 
 	/**
@@ -195,10 +194,10 @@ public class SettingsActivity extends PreferenceActivity {
 	 * immediately updated upon calling this method. The exact display format is
 	 * dependent on the type of preference. This class represents the view for
 	 * small devices.
-	 * 
+	 *
 	 * @see #sBindPreferenceSummaryToValueListener
 	 */
-	public static class SettingsPreferenceFragement extends PreferenceFragment{
+	public static class SettingsPreferenceFragement extends PreferenceFragment {
 		@Override
 		public void onCreate(final Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
@@ -209,9 +208,6 @@ public class SettingsActivity extends PreferenceActivity {
 			paymentHeader.setTitle(R.string.pref_header_payments);
 			getPreferenceScreen().addPreference(paymentHeader);
 			addPreferencesFromResource(R.xml.pref_payment);
-			bindPreferenceSummaryToValue(findPreference("bitcoin_list"));
-			bindPreferenceSummaryToValue(findPreference("fee_amount"));
-			bindPreferenceSummaryToValue(findPreference("auto_accept_amount"));
 
 			// add wallet preferences
 			PreferenceCategory walletHeader = new PreferenceCategory(getActivity());
@@ -219,13 +215,18 @@ public class SettingsActivity extends PreferenceActivity {
 			getPreferenceScreen().addPreference(walletHeader);
 			addPreferencesFromResource(R.xml.pref_wallet);
 
+            // add merchant preferences
+            PreferenceCategory merchantHeader = new PreferenceCategory(getActivity());
+            merchantHeader.setTitle(R.string.pref_header_merchant);
+            getPreferenceScreen().addPreference(merchantHeader);
+            addPreferencesFromResource(R.xml.pref_merchant);
 
 		}
 	}
 
 	/**
 	 * This class represents the view for tablets and larger devices.
-	 * Here the value's are bind which are declared in the general part.
+	 * Here the value's are bind which are declared in the general part.r
 	 */
 	public static class GeneralPreferenceFragment extends PreferenceFragment {
 		@Override
@@ -246,7 +247,6 @@ public class SettingsActivity extends PreferenceActivity {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
-			addPreferencesFromResource(R.xml.pref_payment);
 			PreferenceCategory fakeHeader = new PreferenceCategory(getActivity());
 			getPreferenceScreen().addPreference(fakeHeader);
 			bindPreferenceSummaryToValue(findPreference("fee_amount"));

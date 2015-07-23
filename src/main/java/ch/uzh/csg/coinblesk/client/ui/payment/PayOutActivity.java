@@ -67,7 +67,8 @@ public class PayOutActivity extends WalletActivity {
         setContentView(R.layout.activity_pay_out);
         setScreenOrientation();
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        setupActionBar();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         chfBalance = (TextView) findViewById(R.id.payOut_BalanceCHF);
         btcBalance = (TextView) findViewById(R.id.payOut_Balance);
@@ -201,7 +202,7 @@ public class PayOutActivity extends WalletActivity {
      */
     public void launchExchangeRateRequest() {
         showLoadingProgressDialog();
-        RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
+        RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest("", new RequestCompleteListener<ExchangeRateTransferObject>() {
             public void onTaskComplete(ExchangeRateTransferObject response) {
                 dismissProgressDialog();
                 if (response.isSuccessful()) {

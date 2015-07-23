@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="19"
-        android:targetSdkVersion="21" />
+        android:targetSdkVersion="22" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.NFC" />
@@ -23,11 +23,12 @@
 
 
     <application
+        android:backupAgent="ch.uzh.csg.coinblesk.client.persistence.CoinBleskCloudData"
         android:name=".CoinBleskApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/CoinBleskTheme" >
+        android:theme="@style/AppTheme" >
         <meta-data
             android:name="com.google.android.backup.api_key"
             android:value="AEdPqrEAAAAIHYaIPvfcNV9O6jA91IszSWW63KdHhty9CN3QLQ" />
@@ -35,7 +36,6 @@
         <activity android:name=".ui.main.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -150,7 +150,7 @@
             <meta-data android:name="android.nfc.cardemulation.host_apdu_service" android:resource="@xml/apduservice"/>
             <meta-data android:name="android.nfc.disable_beam_default" android:value="true" />
         </service>
-
+        
     </application>
 
 </manifest>

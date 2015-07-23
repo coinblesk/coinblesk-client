@@ -85,7 +85,8 @@ public class SendPaymentActivity extends WalletActivity {
 		setScreenOrientation();
 
 		Constants.inputUnit = INPUT_UNIT_CHF;
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		setupActionBar();
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		exchangeRate = BigDecimal.ZERO;
 
 		setUpGui();
@@ -177,7 +178,7 @@ public class SendPaymentActivity extends WalletActivity {
 	public void launchExchangeRateRequest() {
 		if (ConnectionCheck.isNetworkAvailable(this)) {
 			showLoadingProgressDialog();
-			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest(new RequestCompleteListener<ExchangeRateTransferObject>() {
+			RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest("TODO", new RequestCompleteListener<ExchangeRateTransferObject>() {
 				@Override
 				public void onTaskComplete(ExchangeRateTransferObject response) {
 					dismissProgressDialog();
