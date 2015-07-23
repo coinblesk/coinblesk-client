@@ -63,11 +63,11 @@ import ch.uzh.csg.coinblesk.client.wallet.WalletListener;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.util.Converter;
-import ch.uzh.csg.nfclib.NfcInitiatorHandler;
-import ch.uzh.csg.nfclib.NfcLibException;
-import ch.uzh.csg.nfclib.NfcResponseHandler;
+import ch.uzh.csg.comm.NfcInitiatorHandler;
+import ch.uzh.csg.comm.NfcResponseHandler;
+import ch.uzh.csg.comm.ResponseLater;
 import ch.uzh.csg.nfclib.NfcSetup;
-import ch.uzh.csg.nfclib.ResponseLater;
+
 
 /**
  * This class shows the main view of the user with the balance of the user's
@@ -430,7 +430,7 @@ public class MainActivity extends AbstractPaymentActivity {
     /**
      * Initializes NFC adapter and user payment information.
      */
-    private void initializeNFC() throws NfcLibException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+    private void initializeNFC() throws Exception, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
 
         NfcSetup initiator = new NfcSetup(new NfcInitiatorHandler() {
 
@@ -563,7 +563,6 @@ public class MainActivity extends AbstractPaymentActivity {
      *
      * @param username
      * @param amount
-     * @param answer2
      */
     private void showCustomDialog(String username, long amount) {
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
