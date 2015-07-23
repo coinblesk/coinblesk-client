@@ -458,26 +458,35 @@ public class MainActivity extends AbstractPaymentActivity {
             PublicKey remotePubKey;
 
             @Override
-            public void handleMessageReceived(byte[] bytes) throws Exception {
-                //get 2nd message (maybe check amount here) -> send to server for check if valid, not spend, etc.
-                //continue with 3rd message
-
-                PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
-                remotePubKey = protocol.publicKey();
-
-                LOGGER.debug("message received... State is {}.", current);
-
-                //get 5th message: ok
-            }
-
-            @Override
             public void handleFailed(String s) {
-
+                System.err.println("111failed it:"+s);
             }
 
             @Override
             public void handleStatus(String s) {
+                System.err.println("111got it:"+s);
+            }
 
+            @Override
+            public void handleMessageReceived(byte[] bytes) throws Exception {
+                //get 2nd message (maybe check amount here) -> send to server for check if valid, not spend, etc.
+                //continue with 3rd message
+
+                PaymentProtocol protocol = PaymentProtocol.fromBytesUnverified(bytes);
+                if(protocol.type() == PaymentProtocol.Type.CONTACT_AND_PAYMENT_REQUEST) {
+                    //this is the half signed transactiotn
+                    remotePubKey = protocol.publicKey();
+                    current =State.FIRST;
+                }
+                protocol = PaymentProtocol.fromBytes(bytes, remotePubKey);
+                if(protocol.type() == PaymentProtocol.Type.FROM_SERVER_REQUEST_OK) {
+                    System.err.println("got it!!!!!!!!");
+                }
+
+
+                LOGGER.debug("message received... State is {}.", current);
+
+                //get 5th message: ok
             }
 
             @Override
@@ -495,10 +504,12 @@ public class MainActivity extends AbstractPaymentActivity {
                 switch(current) {
                     case INIT:
                         current = State.FIRST;
-                        return PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), "Hans", new byte[6], 100000, new byte[20]).toBytes(keyPair.getPrivate());
+                        //
+                        return PaymentProtocol.initCommunictaion(keyPair.getPublic(), "Hans", new byte[6]).toBytes(keyPair.getPrivate());
                     case FIRST:
                         current = State.SECOND;
-                        return PaymentProtocol.fromServerRequestOk(new byte[2000]).toBytes(keyPair.getPrivate());
+                        return PaymentProtocol.contactAndPaymentResponseOk(new byte[3000]).toBytes(keyPair.getPrivate());
+
                     default:
                         throw new RuntimeException("Should never be reached");
                 }
@@ -528,10 +539,12 @@ public class MainActivity extends AbstractPaymentActivity {
                 remotePubKey = protocol.publicKey();
 
                 switch(protocol.type()) {
-                    case CONTACT_AND_PAYMENT_REQUEST:
-                        return PaymentProtocol.contactAndPaymentResponseOk(keyPair.getPublic(), "Heiri", new byte[6], new byte[3000]).toBytes(keyPair.getPrivate());
-                    case FROM_SERVER_REQUEST_OK:
-                        return null;
+                    case INIT_COMM:
+                        return PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), "Hans", new byte[6], 100000, new byte[20]).toBytes(keyPair.getPrivate());
+                    case CONTACT_AND_PAYMENT_RESPONSE_OK:
+                        //check server
+                        return PaymentProtocol.fromServerRequestOk(new byte[4000]).toBytes(keyPair.getPrivate());
+
                 }
 
                 return new byte[0];
@@ -539,12 +552,12 @@ public class MainActivity extends AbstractPaymentActivity {
 
             @Override
             public void handleFailed(String s) {
-
+                System.err.println("222failed it:"+s);
             }
 
             @Override
             public void handleStatus(String s) {
-
+                System.err.println("222 got it:"+s);
             }
         }, this);
 

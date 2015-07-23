@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 final public class PaymentProtocol {
 
-    public enum Type{CONTACT_AND_PAYMENT_REQUEST, CONTACT_AND_PAYMENT_RESPONSE_OK, CONTACT_AND_PAYMENT_RESPONSE_NOK, FROM_SERVER_REQUEST_OK, FROM_SERVER_REQUEST_NOK/*, UNUSED1, UNUSED2, UNUSED3*/}
+    public enum Type{CONTACT_AND_PAYMENT_REQUEST, CONTACT_AND_PAYMENT_RESPONSE_OK, CONTACT_AND_PAYMENT_RESPONSE_NOK, FROM_SERVER_REQUEST_OK, FROM_SERVER_REQUEST_NOK, INIT_COMM/*, UNUSED1, UNUSED2*/}
 
     //5 bits max 64, for now its version 0
     final private int version = 0;
@@ -153,21 +153,18 @@ final public class PaymentProtocol {
 
 
                 break;
-            case CONTACT_AND_PAYMENT_RESPONSE_OK:
-            	
-            	final byte[] publicKeyEncoded2 = publicKey.getEncoded();
+            case INIT_COMM:
+                final byte[] publicKeyEncoded2 = publicKey.getEncoded();
                 final int publicKeyLen2 = publicKeyEncoded2.length;
                 if(publicKeyLen2 > 255) {
-                	throw new RuntimeException("user is too large");
+                    throw new RuntimeException("user is too large");
                 }
                 final byte[] userEncoded2 = user.getBytes("UTF-8");
                 final int userLen2 = userEncoded2.length;
                 if(userLen2 > 255) {
-                	throw new RuntimeException("user is too large");
+                    throw new RuntimeException("user is too large");
                 }
-            	
-                final int halfSignedTransactionLen = halfSignedTransaction.length;
-                data = new byte[HEADER_LENGTH+publicKeyLen2 + 1 +halfSignedTransactionLen + 2 + BT_LENGTH + userLen2 + 1];
+                data = new byte[HEADER_LENGTH+publicKeyLen2 + 1 + BT_LENGTH + userLen2 + 1];
                 data[offset++] = header;
 
                 //public key
@@ -181,6 +178,11 @@ final public class PaymentProtocol {
                 //bluetooth
                 System.arraycopy(btAddress,0,data, offset, BT_LENGTH);
                 offset += BT_LENGTH;
+                break;
+            case CONTACT_AND_PAYMENT_RESPONSE_OK:
+                final int halfSignedTransactionLen = halfSignedTransaction.length;
+                data = new byte[HEADER_LENGTH+halfSignedTransactionLen + 2];
+                data[offset++] = header;
 
                 //transaction
                 offset = encodeShort(halfSignedTransactionLen, data, offset);
@@ -215,6 +217,10 @@ final public class PaymentProtocol {
         return retVal;
     }
 
+    public static PaymentProtocol fromBytesUnverified(final byte[] data) throws InvalidKeySpecException, UnsupportedEncodingException, NoSuchProviderException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
+        return fromBytes(data, null);
+    }
+
     public static PaymentProtocol fromBytes(final byte[] data, PublicKey publicKey) throws InvalidKeySpecException, UnsupportedEncodingException, NoSuchProviderException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
         if(data.length<1) {
             throw new RuntimeException("could not parse bytes");
@@ -230,7 +236,7 @@ final public class PaymentProtocol {
         final PaymentProtocol paymentMessage = new PaymentProtocol(type);
         switch (type) {
             case CONTACT_AND_PAYMENT_REQUEST:
-            case CONTACT_AND_PAYMENT_RESPONSE_OK:
+            case INIT_COMM:
                 //public key and user
                 final int publicKeyLen = data[offset++] & 0xff;
                 final byte[] publicKeyEncoded = new byte[publicKeyLen];
@@ -264,23 +270,23 @@ final public class PaymentProtocol {
                     System.arraycopy(data, offset, sendTo, 0, SENDTO_LENGTH);
                     offset += SENDTO_LENGTH;
                     paymentMessage.sendTo = sendTo;
-                    break;
-                } else {
-                    final short transactionLen = decodeShort(data,offset);
-                    offset += 2;
-                    final byte[] transactionEncoded = new byte[transactionLen];
-                    System.arraycopy(data,offset,transactionEncoded,0, transactionLen);
-                    offset += transactionLen;
-                    paymentMessage.halfSignedTransaction = transactionEncoded;
-                    break;
                 }
-            case FROM_SERVER_REQUEST_OK:
-                final short transactionLen = decodeShort(data,offset);
+                break;
+            case CONTACT_AND_PAYMENT_RESPONSE_OK:
+                final short transactionLen1 = decodeShort(data,offset);
                 offset += 2;
-                final byte[] transactionEncoded = new byte[transactionLen];
-                System.arraycopy(data,offset,transactionEncoded,0, transactionLen);
-                offset += transactionLen;
-                paymentMessage.fullySignedTransaction = transactionEncoded;
+                final byte[] transactionEncoded1 = new byte[transactionLen1];
+                System.arraycopy(data,offset,transactionEncoded1,0, transactionLen1);
+                offset += transactionLen1;
+                paymentMessage.halfSignedTransaction = transactionEncoded1;
+                break;
+            case FROM_SERVER_REQUEST_OK:
+                final short transactionLen2 = decodeShort(data,offset);
+                offset += 2;
+                final byte[] transactionEncoded2 = new byte[transactionLen2];
+                System.arraycopy(data,offset,transactionEncoded2,0, transactionLen2);
+                offset += transactionLen2;
+                paymentMessage.fullySignedTransaction = transactionEncoded2;
                 break;
 
             case FROM_SERVER_REQUEST_NOK:
@@ -290,7 +296,9 @@ final public class PaymentProtocol {
         }
 
         //check signature
-        paymentMessage.signatureVerified = verify(publicKey, data, offset);
+        if(publicKey != null) {
+            paymentMessage.signatureVerified = verify(publicKey, data, offset);
+        }
         return paymentMessage;
     }
 
@@ -337,6 +345,22 @@ final public class PaymentProtocol {
         return ecdsaSign.sign();
     }
 
+    public static PaymentProtocol initCommunictaion(final PublicKey publicKey, final String user, final byte[] btAddress) {
+        if(publicKey == null) {
+            throw new RuntimeException("public key cannot be null");
+        }
+        if(user == null) {
+            throw new RuntimeException("user cannot be null");
+        }
+        if(btAddress.length != BT_LENGTH) {
+            throw new RuntimeException("wrong length of the bluetooth address");
+        }
+        final PaymentProtocol paymentMessage = new PaymentProtocol(Type.INIT_COMM);
+        paymentMessage.publicKey = publicKey;
+        paymentMessage.user = user;
+        paymentMessage.btAddress =btAddress;
+        return paymentMessage;
+    }
 
     public static PaymentProtocol contactAndPaymentRequest(final PublicKey publicKey, final String user, final byte[] btAddress, final long satoshis, final byte[] sendTo) {
     	if(publicKey == null) {
@@ -360,11 +384,8 @@ final public class PaymentProtocol {
         return paymentMessage;
     }
 
-    public static PaymentProtocol contactAndPaymentResponseOk(final PublicKey publicKey, final String user, final byte[] btAddress, final byte[] halfSignedTransaction) {
+    public static PaymentProtocol contactAndPaymentResponseOk(final byte[] halfSignedTransaction) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.CONTACT_AND_PAYMENT_RESPONSE_OK);
-        paymentMessage.publicKey = publicKey;
-        paymentMessage.user = user;
-        paymentMessage.btAddress =btAddress;
         paymentMessage.halfSignedTransaction = halfSignedTransaction;
         return paymentMessage;
     }
