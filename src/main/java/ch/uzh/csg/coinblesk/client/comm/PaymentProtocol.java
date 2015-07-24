@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 final public class PaymentProtocol {
 
-    public enum Type{CONTACT_AND_PAYMENT_REQUEST, CONTACT_AND_PAYMENT_RESPONSE_OK, CONTACT_AND_PAYMENT_RESPONSE_NOK, FROM_SERVER_REQUEST_OK, FROM_SERVER_REQUEST_NOK, INIT_COMM/*, UNUSED1, UNUSED2*/}
+    public enum Type{CONTACT_AND_PAYMENT_REQUEST, CONTACT_AND_PAYMENT_RESPONSE_OK, CONTACT_AND_PAYMENT_RESPONSE_NOK, FROM_SERVER_REQUEST_OK, FROM_SERVER_REQUEST_NOK, PAYMENT_OK /*, UNUSED1, UNUSED2 */}
 
     //5 bits max 64, for now its version 0
     final private int version = 0;
@@ -153,32 +153,6 @@ final public class PaymentProtocol {
 
 
                 break;
-            case INIT_COMM:
-                final byte[] publicKeyEncoded2 = publicKey.getEncoded();
-                final int publicKeyLen2 = publicKeyEncoded2.length;
-                if(publicKeyLen2 > 255) {
-                    throw new RuntimeException("user is too large");
-                }
-                final byte[] userEncoded2 = user.getBytes("UTF-8");
-                final int userLen2 = userEncoded2.length;
-                if(userLen2 > 255) {
-                    throw new RuntimeException("user is too large");
-                }
-                data = new byte[HEADER_LENGTH+publicKeyLen2 + 1 + BT_LENGTH + userLen2 + 1];
-                data[offset++] = header;
-
-                //public key
-                data[offset++] = (byte) publicKeyLen2;
-                System.arraycopy(publicKeyEncoded2,0,data, offset, publicKeyLen2);
-                offset += publicKeyLen2;
-                //user
-                data[offset++] = (byte) userLen2;
-                System.arraycopy(userEncoded2,0,data, offset, userLen2);
-                offset += userLen2;
-                //bluetooth
-                System.arraycopy(btAddress,0,data, offset, BT_LENGTH);
-                offset += BT_LENGTH;
-                break;
             case CONTACT_AND_PAYMENT_RESPONSE_OK:
                 final int halfSignedTransactionLen = halfSignedTransaction.length;
                 data = new byte[HEADER_LENGTH+halfSignedTransactionLen + 2];
@@ -202,6 +176,7 @@ final public class PaymentProtocol {
                 break;
             case CONTACT_AND_PAYMENT_RESPONSE_NOK:
             case FROM_SERVER_REQUEST_NOK:
+            case PAYMENT_OK:
                 data = new byte[HEADER_LENGTH];
                 data[offset++] = header;
                 break;
@@ -236,7 +211,6 @@ final public class PaymentProtocol {
         final PaymentProtocol paymentMessage = new PaymentProtocol(type);
         switch (type) {
             case CONTACT_AND_PAYMENT_REQUEST:
-            case INIT_COMM:
                 //public key and user
                 final int publicKeyLen = data[offset++] & 0xff;
                 final byte[] publicKeyEncoded = new byte[publicKeyLen];
@@ -291,7 +265,7 @@ final public class PaymentProtocol {
 
             case FROM_SERVER_REQUEST_NOK:
             case CONTACT_AND_PAYMENT_RESPONSE_NOK:
-
+            case PAYMENT_OK:
                 break;
         }
 
@@ -345,23 +319,6 @@ final public class PaymentProtocol {
         return ecdsaSign.sign();
     }
 
-    public static PaymentProtocol initCommunictaion(final PublicKey publicKey, final String user, final byte[] btAddress) {
-        if(publicKey == null) {
-            throw new RuntimeException("public key cannot be null");
-        }
-        if(user == null) {
-            throw new RuntimeException("user cannot be null");
-        }
-        if(btAddress.length != BT_LENGTH) {
-            throw new RuntimeException("wrong length of the bluetooth address");
-        }
-        final PaymentProtocol paymentMessage = new PaymentProtocol(Type.INIT_COMM);
-        paymentMessage.publicKey = publicKey;
-        paymentMessage.user = user;
-        paymentMessage.btAddress =btAddress;
-        return paymentMessage;
-    }
-
     public static PaymentProtocol contactAndPaymentRequest(final PublicKey publicKey, final String user, final byte[] btAddress, final long satoshis, final byte[] sendTo) {
     	if(publicKey == null) {
     		throw new RuntimeException("public key cannot be null");
@@ -403,6 +360,11 @@ final public class PaymentProtocol {
 
     public static PaymentProtocol fromServerRequestNok() {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.FROM_SERVER_REQUEST_NOK);
+        return paymentMessage;
+    }
+
+    public static PaymentProtocol paymentOk() {
+        final PaymentProtocol paymentMessage = new PaymentProtocol(Type.PAYMENT_OK);
         return paymentMessage;
     }
 

@@ -54,8 +54,8 @@ public class PayOutActivity extends WalletActivity {
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
 
-        updateBalance();
         checkOnlineModeAndProceed();
+        updateBalance();
 
     }
 

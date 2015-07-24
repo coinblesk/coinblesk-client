@@ -47,6 +47,7 @@ import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
+import ch.uzh.csg.comm.NfcLibException;
 
 /**
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
@@ -136,6 +137,13 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
         } else {
             receiveAmountTextView = (TextView) findViewById(R.id.receivePayment_amount);
             initializeCalculator();
+        }
+
+        try {
+            MainActivity.initiator.stopInitiating(this);
+            MainActivity.initiator.startInitiating(this);
+        } catch (NfcLibException e) {
+            e.printStackTrace();
         }
     }
 

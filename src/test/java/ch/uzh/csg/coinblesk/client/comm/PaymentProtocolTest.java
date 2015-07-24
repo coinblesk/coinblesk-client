@@ -1,13 +1,10 @@
 package ch.uzh.csg.coinblesk.client.comm;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.Random;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.security.KeyPair;
+import java.util.Random;
 
 public class PaymentProtocolTest {
 	
@@ -100,20 +97,6 @@ public class PaymentProtocolTest {
 		PaymentProtocol pm2 = PaymentProtocol.fromBytes(transfer, kp.getPublic());
 		Assert.assertEquals(pm1, pm2);
 		Assert.assertTrue(pm2.isVerified());
-	}
-
-	@Test
-	public void testInit() throws Exception {
-		KeyPair kp = PaymentProtocol.generateKeys();
-		byte[] tx = new byte[5000];
-		Random rnd = new Random(1);
-		rnd.nextBytes(tx);
-		PaymentProtocol pm1 = PaymentProtocol.initCommunictaion(kp.getPublic(), "hallo", new byte[6]);
-		byte[] transfer = pm1.toBytes(kp.getPrivate());
-		PaymentProtocol pm2 = PaymentProtocol.fromBytes(transfer, kp.getPublic());
-		Assert.assertEquals(pm1, pm2);
-		Assert.assertTrue(pm2.isVerified());
-
 	}
 
 

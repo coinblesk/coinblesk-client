@@ -3,6 +3,7 @@ package ch.uzh.csg.coinblesk.client.ui.main;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -49,6 +50,8 @@ import java.util.List;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.comm.PaymentProtocol;
+import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
+import ch.uzh.csg.coinblesk.client.payment.PaymentRequestReceiver;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
 import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
 import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
@@ -96,9 +99,14 @@ public class MainActivity extends AbstractPaymentActivity {
     private Thread updateProgressTask;
     private TextView mBlockchainSyncStatusText;
 
+    private PaymentRequestReceiver paymentRequestReceiver;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.paymentRequestReceiver = new PaymentRequestReceiver();
+        registerReceiver(paymentRequestReceiver, new IntentFilter(PaymentRequest.ACTION));
 
         setContentView(R.layout.activity_main);
 
@@ -174,7 +182,7 @@ public class MainActivity extends AbstractPaymentActivity {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         mDrawerToggle = new ActionBarDrawerToggle(
-                this,  mDrawerLayout, mToolbar,
+                this, mDrawerLayout, mToolbar,
                 R.string.drawer_open, R.string.drawer_close
         );
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -188,7 +196,7 @@ public class MainActivity extends AbstractPaymentActivity {
 
         final WalletService walletService = getWalletService();
 
-        if(walletService.getSyncProgress().isFinished()) {
+        if (walletService.getSyncProgress().isFinished()) {
             return;
         }
 
@@ -212,7 +220,7 @@ public class MainActivity extends AbstractPaymentActivity {
 
                     double progress = syncProgress.getProgress();
 
-                    if(progress >= 0) {
+                    if (progress >= 0) {
                         // make progress bar visible
                         mProgressBar.setVisibility(View.VISIBLE);
                         mBlockchainSyncStatusText.setVisibility(View.VISIBLE);
@@ -332,7 +340,7 @@ public class MainActivity extends AbstractPaymentActivity {
         getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
             @Override
             public void onTaskComplete(ExchangeRateTransferObject response) {
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
                     TextView chfBalance = (TextView) findViewById(R.id.mainActivity_balanceCHF);
                     CurrencyViewHandler.clearTextView(chfBalance);
@@ -446,12 +454,14 @@ public class MainActivity extends AbstractPaymentActivity {
         INIT, FIRST, SECOND
     }
 
+    public static NfcSetup initiator;
+
     /**
      * Initializes NFC adapter and user payment information.
      */
     private void initializeNFC() throws Exception, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
 
-        NfcSetup initiator = new NfcSetup(new NfcInitiatorHandler() {
+        initiator = new NfcSetup(new NfcInitiatorHandler() {
 
             State current = State.INIT;
             KeyPair keyPair = PaymentProtocol.generateKeys();
@@ -459,12 +469,12 @@ public class MainActivity extends AbstractPaymentActivity {
 
             @Override
             public void handleFailed(String s) {
-                System.err.println("111failed it:"+s);
+                System.err.println("111failed it:" + s);
             }
 
             @Override
             public void handleStatus(String s) {
-                System.err.println("111got it:"+s);
+                System.err.println("111got it:" + s);
             }
 
             @Override
@@ -473,16 +483,16 @@ public class MainActivity extends AbstractPaymentActivity {
                 //continue with 3rd message
 
                 PaymentProtocol protocol = PaymentProtocol.fromBytesUnverified(bytes);
-                if(protocol.type() == PaymentProtocol.Type.CONTACT_AND_PAYMENT_REQUEST) {
+                if (protocol.type() == PaymentProtocol.Type.CONTACT_AND_PAYMENT_REQUEST) {
                     //this is the half signed transactiotn
                     remotePubKey = protocol.publicKey();
-                    current =State.FIRST;
+                    current = State.FIRST;
                 }
                 protocol = PaymentProtocol.fromBytes(bytes, remotePubKey);
-                if(protocol.type() == PaymentProtocol.Type.FROM_SERVER_REQUEST_OK) {
+                if (protocol.type() == PaymentProtocol.Type.FROM_SERVER_REQUEST_OK) {
+
                     System.err.println("got it!!!!!!!!");
                 }
-
 
                 LOGGER.debug("message received... State is {}.", current);
 
@@ -501,19 +511,17 @@ public class MainActivity extends AbstractPaymentActivity {
 
                 //3rd message: server says ok, amount ok from server, signed
                 // -> send ok with transaction (optional only signature), signed
-                switch(current) {
+                switch (current) {
                     case INIT:
                         current = State.FIRST;
-                        //
-                        return PaymentProtocol.initCommunictaion(keyPair.getPublic(), "Hans", new byte[6]).toBytes(keyPair.getPrivate());
+                        return PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), "Hans", new byte[6], 100000, new byte[20]).toBytes(keyPair.getPrivate());
                     case FIRST:
                         current = State.SECOND;
-                        return PaymentProtocol.contactAndPaymentResponseOk(new byte[3000]).toBytes(keyPair.getPrivate());
+                        return PaymentProtocol.fromServerRequestOk(new byte[2000]).toBytes(keyPair.getPrivate());
 
                     default:
                         throw new RuntimeException("Should never be reached");
                 }
-
 
             }
 
@@ -538,13 +546,12 @@ public class MainActivity extends AbstractPaymentActivity {
                 PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
                 remotePubKey = protocol.publicKey();
 
-                switch(protocol.type()) {
-                    case INIT_COMM:
-                        return PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), "Hans", new byte[6], 100000, new byte[20]).toBytes(keyPair.getPrivate());
-                    case CONTACT_AND_PAYMENT_RESPONSE_OK:
+                switch (protocol.type()) {
+                    case CONTACT_AND_PAYMENT_REQUEST:
                         //check server
-                        return PaymentProtocol.fromServerRequestOk(new byte[4000]).toBytes(keyPair.getPrivate());
-
+                        return PaymentProtocol.contactAndPaymentResponseOk(new byte[3000]).toBytes(keyPair.getPrivate());
+                    case FROM_SERVER_REQUEST_OK:
+                        return PaymentProtocol.paymentOk().toBytes(keyPair.getPrivate());
                 }
 
                 return new byte[0];
@@ -552,17 +559,14 @@ public class MainActivity extends AbstractPaymentActivity {
 
             @Override
             public void handleFailed(String s) {
-                System.err.println("222failed it:"+s);
+                System.err.println("222failed it:" + s);
             }
 
             @Override
             public void handleStatus(String s) {
-                System.err.println("222 got it:"+s);
+                System.err.println("222 got it:" + s);
             }
         }, this);
-
-        //
-        initiator.startInitiating(this);
 
     }
 
