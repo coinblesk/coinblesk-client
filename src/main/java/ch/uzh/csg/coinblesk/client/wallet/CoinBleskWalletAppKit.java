@@ -156,7 +156,7 @@ public class CoinBleskWalletAppKit extends WalletAppKit {
 
         // bitcoinJ will synchronize 1 week ahead of the specified time because
         // of time skews. So using the current time is absolutely safe
-        DeterministicSeed seed = new DeterministicSeed(new SecureRandom(), 256, "", System.currentTimeMillis() / 1000);
+        DeterministicSeed seed = new DeterministicSeed(new SecureRandom(), 128, "", System.currentTimeMillis() / 1000);
 
         return seed;
     }
