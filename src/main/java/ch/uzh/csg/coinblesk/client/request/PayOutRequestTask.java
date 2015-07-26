@@ -5,16 +5,16 @@ import android.content.Context;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
-import ch.uzh.csg.coinblesk.responseobject.TransferObject;
+import ch.uzh.csg.coinblesk.responseobject.SignedTxTransferObject;
 
 /**
  * This class sends a request to payout a defined amount of bitcoins to the
  * inserted bitcoin-address.
  */
-public class PayOutRequestTask extends RequestTask<ServerSignatureRequestTransferObject, TransferObject> {
+public class PayOutRequestTask extends RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> {
 		
-	public PayOutRequestTask(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, Context context) {
-		super(input, new TransferObject(), Constants.BASE_URI_SSL + "/wallet/signAndBroadcastTx", cro, context);
+	public PayOutRequestTask(RequestCompleteListener<SignedTxTransferObject> cro, ServerSignatureRequestTransferObject input, Context context) {
+		super(input, new SignedTxTransferObject(), Constants.BASE_URL + "/wallet/signAndBroadcastTx", cro, context);
 	}
 
 }

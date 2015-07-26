@@ -1,5 +1,7 @@
 package ch.uzh.csg.coinblesk.client.wallet;
 
+import org.bitcoinj.core.Address;
+import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.MnemonicCode;
@@ -30,6 +32,10 @@ public class BitcoinUtils {
 
     public static Coin bigDecimalToCoin(BigDecimal amount) {
         return Coin.parseCoin(amount.toString());
+    }
+
+    public static Coin satoshiToCoin(long satoshi) {
+        return Coin.valueOf(satoshi);
     }
 
     /**
@@ -71,6 +77,38 @@ public class BitcoinUtils {
                 return MainNetParams.get();
             default:
                 throw new RuntimeException("Please set the server property bitcoin.net to (unittest|regtest|testnet|mainnet)");
+        }
+    }
+
+    /**
+     * Converts a String of a bitcoin address in a byte array of length 20 (Hash160).
+     *
+     * @param bitcoinAddress
+     * @param bitcoinNet
+     * @return
+     */
+    public static byte[] addressToBytes(String bitcoinAddress, BitcoinNet bitcoinNet) {
+        try {
+            Address addr = new Address(getNetworkParameters(bitcoinNet), bitcoinAddress);
+            return addr.getHash160();
+        } catch (AddressFormatException e) {
+            LOGGER.error("Invalid bitcoin address: {}", bitcoinAddress);
+            return null;
+        }
+    }
+
+    /**
+     * Checks if the passed address is a valid P2SH address.
+     *
+     * @param address    the string of the bitcoin address
+     * @param bitcoinNet the bitcoinNet
+     * @return true if the address is a valid P2SH address.
+     */
+    public static boolean isP2SHAddress(String address, BitcoinNet bitcoinNet) {
+        try {
+            return new Address(getNetworkParameters(bitcoinNet), address).isP2SHAddress();
+        } catch (AddressFormatException e) {
+            return false;
         }
     }
 }

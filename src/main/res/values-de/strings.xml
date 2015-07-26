@@ -77,16 +77,12 @@
 
     <!-- Drawer Navigation -->
     <string-array name="drawerItems_array">
-        <item>Benutzerprofil</item>
         <item>Neue Transaktion erstellen</item>
         <item>Verlauf Transaktionen</item>
         <item>Einstellungen</item>
         <item>Konto aufladen</item>
         <item>Auszahlen an BTC Adresse</item>
         <item>Adressbuch</item>
-        <item>Mit Server verbinden</item>
-        <item>Hilfe</item>
-        <item>Abmelden</item>
     </string-array>
 
     <!-- History Strings -->

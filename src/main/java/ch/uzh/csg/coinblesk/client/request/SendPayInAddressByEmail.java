@@ -11,7 +11,7 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 public class SendPayInAddressByEmail extends RequestTask<TransferObject, TransferObject> {
 
 	public SendPayInAddressByEmail(RequestCompleteListener<TransferObject> cro, TransferObject input, TransferObject output, Context context) {
-		super(input, output, Constants.BASE_URI_SSL + "/transaction/payIn/getByEmail", cro, context);
+		super(input, output, Constants.BASE_URL + "/transaction/payIn/getByEmail", cro, context);
 	}
 
 }

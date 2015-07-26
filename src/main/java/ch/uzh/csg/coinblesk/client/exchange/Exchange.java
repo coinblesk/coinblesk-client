@@ -197,19 +197,23 @@ public class Exchange {
                         RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest = requestFactory.exchangeRateRequest(pair.counterSymbol, new RequestCompleteListener<ExchangeRateTransferObject>() {
                             @Override
                             public void onTaskComplete(ExchangeRateTransferObject response) {
-                                Currency symbol = response.getExchangeRates().keySet().iterator().next();
-                                BigDecimal forexExchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
-                                BigDecimal btcExchangeRateInBaseCurrency = null;
-                                btcExchangeRateInBaseCurrency = forexExchangeRate.multiply(exchangeRate);
+                                if(response.isSuccessful()) {
+                                    Currency symbol = response.getExchangeRates().keySet().iterator().next();
+                                    BigDecimal forexExchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                                    BigDecimal btcExchangeRateInBaseCurrency = forexExchangeRate.multiply(exchangeRate);
+                                    exchangeRateObj.setExchangeRate(symbol, btcExchangeRateInBaseCurrency.toString());
 
-                                exchangeRateObj.setExchangeRate(symbol, btcExchangeRateInBaseCurrency.toString());
+                                    // save forex exchange rate in cache
+                                    forexCache.put(pair.counterSymbol, new SymbolAndExchangeRate(symbol, forexExchangeRate));
 
-                                // save forex exchange rate in cache
-                                forexCache.put(pair.counterSymbol, new SymbolAndExchangeRate(symbol, forexExchangeRate));
-
-                                // execute listener
-                                exchangeRateObj.setSuccessful(true);
-                                cro.onTaskComplete(exchangeRateObj);
+                                    // execute listener
+                                    exchangeRateObj.setSuccessful(true);
+                                    cro.onTaskComplete(exchangeRateObj);
+                                } else {
+                                    exchangeRateObj.setSuccessful(false);
+                                    exchangeRateObj.setMessage(response.getMessage());
+                                    cro.onTaskComplete(exchangeRateObj);
+                                }
                             }
                         }, context);
                         exchangeRateRequest.execute();

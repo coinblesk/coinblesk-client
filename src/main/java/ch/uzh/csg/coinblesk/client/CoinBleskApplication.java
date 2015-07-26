@@ -5,7 +5,7 @@ import android.app.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.uzh.csg.coinblesk.client.exchange.MerchantModeManager;
+import ch.uzh.csg.coinblesk.client.exchange.ExchangeManager;
 import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
 import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
@@ -21,7 +21,7 @@ public class CoinBleskApplication extends Application {
 
     private StorageHandler mStorageHandler;
     private RequestFactory requestFactory;
-    private MerchantModeManager merchantModeManager;
+    private ExchangeManager merchantModeManager;
 
     @Override
     public void onCreate() {
@@ -30,7 +30,7 @@ public class CoinBleskApplication extends Application {
 
         mStorageHandler = new PersistentStorageHandler(this);
         requestFactory = new DefaultRequestFactory();
-        merchantModeManager = new MerchantModeManager(this);
+        merchantModeManager = new ExchangeManager(this);
 
         LOGGER.info("CoinBlesk is starting...");
     }
@@ -56,7 +56,7 @@ public class CoinBleskApplication extends Application {
         return this.requestFactory;
     }
 
-    public MerchantModeManager getMerchantModeManager() {
+    public ExchangeManager getMerchantModeManager() {
         return merchantModeManager;
     }
 

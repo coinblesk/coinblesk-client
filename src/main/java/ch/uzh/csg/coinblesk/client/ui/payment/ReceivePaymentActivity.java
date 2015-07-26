@@ -31,17 +31,21 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.common.base.Preconditions;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
+import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
@@ -244,22 +248,28 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
         if (ConnectionCheck.isNetworkAvailable(this)) {
             showLoadingProgressDialog();
             getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
-                public void onTaskComplete(ExchangeRateTransferObject response) {
-                    dismissProgressDialog();
-                    dismissNfcInProgressDialog();
-                    if (response.isSuccessful()) {
-                        CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
-                        exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
-                        CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
-                        BigDecimal balance = getWalletService().getBalance();
-                        CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
-                        TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
-                        balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
-                    } else {
-                        displayResponse(getResources().getString(R.string.no_connection_server));
-                        finish();
-                        launchActivity(ReceivePaymentActivity.this, MainActivity.class);
-                    }
+                public void onTaskComplete(final ExchangeRateTransferObject response) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            dismissProgressDialog();
+                            dismissNfcInProgressDialog();
+                            if (response.isSuccessful()) {
+                                exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
+
+                                CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
+                                CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
+                                BigDecimal balance = getWalletService().getBalance();
+                                CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
+                                TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
+                                balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
+                            } else {
+                                displayResponse(getResources().getString(R.string.no_connection_server));
+                                finish();
+                                launchActivity(ReceivePaymentActivity.this, MainActivity.class);
+                            }
+                        }
+                    });
                 }
             });
 
@@ -329,17 +339,11 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
         refreshCurrencyTextViews();
 
         if (amountBTC.compareTo(BigDecimal.ZERO) > 0) {
-//			PaymentInfos paymentInfos;
-//			try {
-//				paymentInfos = new PaymentInfos(Currency.BTC,
-//						Converter.getLongFromBigDecimal(amountBTC),
-//						Currency.CHF,
-//						Converter.getLongFromBigDecimal(inputUnitValue));
-//				initializeNFC(paymentInfos);
-//			} catch (Exception e) {
-//				displayResponse(getResources().getString(
-//						R.string.unexcepted_error));
-//			}
+            String address = getWalletService().getBitcoinAddress();
+            Preconditions.checkState(BitcoinUtils.isP2SHAddress(address, getCoinBleskApplication().getStorageHandler().getBitcoinNet()), "NFC payments to non-P2SH addresses is not currently supported.");
+
+            Intent paymentRequestIntent = PaymentRequest.create(amountBTC, address, getWalletService().getBitcoinAddress()).getIntent();
+            sendBroadcast(paymentRequestIntent);
             showNfcInstructions();
         } else {
             hideNfcInstructions();
@@ -347,10 +351,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
     }
 
     private void clearPaymentInfos() {
-//		if (paymentRequestInitializer != null){
-//			paymentRequestInitializer.disable();
-//			paymentRequestInitializer = null;
-//		}
         hideNfcInstructions();
         Constants.inputValueCalculator = BigDecimal.ZERO;
         receiveAmount = "0";

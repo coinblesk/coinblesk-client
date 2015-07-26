@@ -10,7 +10,7 @@ import org.bitcoinj.core.Wallet;
 import java.math.BigDecimal;
 
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
-import ch.uzh.csg.coinblesk.client.exchange.MerchantModeManager;
+import ch.uzh.csg.coinblesk.client.exchange.ExchangeManager;
 
 /**
  * Created by rvoellmy on 7/22/15.
@@ -25,7 +25,7 @@ public class MerchantModeSellListener extends AbstractWalletEventListener {
 
     @Override
     public void onCoinsReceived(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
-        MerchantModeManager merchantModeManager = ((CoinBleskApplication) context.getApplicationContext()).getMerchantModeManager();
+        ExchangeManager merchantModeManager = ((CoinBleskApplication) context.getApplicationContext()).getMerchantModeManager();
 
         if(!merchantModeManager.merchantModeActive()) return;
 

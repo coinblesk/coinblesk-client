@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,13 +57,13 @@ import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 import ch.uzh.csg.coinblesk.client.util.Constants;
+import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 
 public class WalletService extends android.app.Service {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(WalletService.class);
 
     private final static String WALLET_FILES_PREFIX = "_bitcoinj";
-
 
     /**
      * The maximum duration until the refund transaction is broadcast.
@@ -75,6 +76,14 @@ public class WalletService extends android.app.Service {
      * will be invalidated
      */
     public final static int REFUND_LOCKTIME_THRESHOLD = 2;
+
+    /**
+     * If the wallet service is in NFC mode, transactions are not sent to the server for
+     * signing, but to the other client via NFC.
+     * TODO: Make this less ugly, eg. by broadcasting an intent with the server signature request.
+     */
+    public static boolean nfcMode = false;
+    public static ServerSignatureRequestTransferObject sigReq;
 
     public class LocalBinder extends Binder {
         public WalletService getService() {
@@ -97,6 +106,16 @@ public class WalletService extends android.app.Service {
         this.listeners = new HashMap<>();
     }
 
+    /**
+     * Indicates whether the wallet service is in NFC mode. If so, transactions are not sent to the server for signing,
+     * but sent to the other client requesting bitcoins via NFC.
+     *
+     * @return true if in NFC mode
+     */
+    public static boolean isNfcMode() {
+        return nfcMode;
+    }
+
     public SyncProgress getSyncProgress() {
         return syncProgress;
     }
@@ -105,18 +124,21 @@ public class WalletService extends android.app.Service {
     public void addBitcoinListener(String id, WalletListener listener) {
         listeners.put(id, listener);
     }
+
     public void addBitcoinListener(Class clazz, WalletListener listener) {
         addBitcoinListener(clazz.getName(), listener);
     }
+
     public void removeBitcoinListener(String listenerId) {
         listeners.remove(listenerId);
     }
+
     public void removeBitcoinListener(Class clazz) {
         removeBitcoinListener(clazz.getName());
     }
 
     private void notifyOnNewTransaction() {
-        for(WalletListener listener : listeners.values()) {
+        for (WalletListener listener : listeners.values()) {
             listener.onWalletChange();
         }
     }
@@ -405,10 +427,69 @@ public class WalletService extends android.app.Service {
         }
     }
 
+    private void createPayment(Address address, Coin amount, boolean nfcPayment) throws AddressFormatException, InsufficientMoneyException {
+
+        // create the send request
+        Wallet.SendRequest req = Wallet.SendRequest.to(address, amount);
+        req.fee = BitcoinUtils.bigDecimalToCoin(Constants.DEFAULT_FEE);
+        req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
+
+        if (nfcPayment) req.memo = DefaultTransactionMemos.NFC_TX_MEMO;
+
+        getAppKit().wallet().completeTx(req);
+
+        if (nfcPayment) return; // we are not responsible for sending the tx to the server....
+
+        for (TransactionInput txIn : req.tx.getInputs()) {
+            if (txIn.getConnectedOutput().getScriptPubKey().isPayToScriptHash()) {
+                // at least one input needs to be signed by the server,
+                // which means that we are not responsible for broadcasting the transaction
+                return;
+            }
+        }
+
+        getAppKit().peerGroup().broadcastTransaction(req.tx);
+        getAppKit().wallet().maybeCommitTx(req.tx);
+    }
+
+    /**
+     * Creates an NFC payment. This means that the half signed transaction is NOT sent to the server, but is returned synchronously.
+     * It is important to note that the bytes returned are *NOT* the half signed transaction, but the byte serialized JSON of
+     * a {@link ServerSignatureRequestTransferObject}
+     * <strong>IMPORTANT: </strong> This method is only intended for sending to P2SH addresses. You pass the hash160 of a normal
+     * P2PKH address, the bitcoins will be lost forever!
+     *
+     * @param scriptHash the hash of the redeem script (P2SH address)
+     * @param satoshis the amount to send, in satoshis
+     * @return The byte serialized JSON of the {@link ServerSignatureRequestTransferObject}.
+     * @throws AddressFormatException
+     * @throws InsufficientMoneyException
+     */
+    public byte[] createNfcPayment(byte[] scriptHash, long satoshis) throws AddressFormatException, InsufficientMoneyException {
+        try {
+            Address address = Address.fromP2SHHash(getNetworkParams(bitcoinNet), scriptHash);
+            nfcMode = true;
+            createPayment(address, BitcoinUtils.satoshiToCoin(satoshis), true);
+            return sigReq.toJson().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException();
+        } finally {
+            nfcMode = false;
+            sigReq = null;
+        }
+    }
+
+    public void createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
+        NetworkParameters params = getNetworkParams(bitcoinNet);
+        Address btcAddress = new Address(params, address);
+        createPayment(btcAddress, BitcoinUtils.bigDecimalToCoin(amount), false);
+    }
+
     /**
      * Broadcasts the stored refund transaction.
      */
     public void broadcastRefundTx() {
+
 
         byte[] serializedRefundTx = Base64.decode(storage.getRefundTx(), Base64.NO_WRAP);
         Transaction refundTx = new Transaction(getNetworkParams(bitcoinNet), serializedRefundTx);
@@ -480,15 +561,6 @@ public class WalletService extends android.app.Service {
         }
     }
 
-    /**
-     * Checks if the stored refund transaction is already valid.
-     *
-     * @return true if a valid refund transaction is stored on the device
-     */
-    public boolean isRefundTxValid() {
-        return getCurrentBlockHeight() >= storage.getRefundTxValidBlock();
-    }
-
     public String getBitcoinAddress() {
         return getAppKit().wallet().currentReceiveAddress().toString();
     }
@@ -499,30 +571,6 @@ public class WalletService extends android.app.Service {
 
     public BigDecimal getBalance() {
         return BitcoinUtils.coinToBigDecimal(getAppKit().wallet().getBalance(BalanceType.AVAILABLE));
-    }
-
-    public void createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
-        NetworkParameters params = getNetworkParams(bitcoinNet);
-        Address btcAddress = new Address(params, address);
-        Coin sendAmount = BitcoinUtils.bigDecimalToCoin(amount);
-
-        // create the send request
-        Wallet.SendRequest req = Wallet.SendRequest.to(btcAddress, sendAmount);
-        req.fee = BitcoinUtils.bigDecimalToCoin(Constants.DEFAULT_FEE);
-        req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
-
-        getAppKit().wallet().completeTx(req);
-
-        for (TransactionInput txIn : req.tx.getInputs()) {
-            if (txIn.getConnectedOutput().getScriptPubKey().isPayToScriptHash()) {
-                // at least one input needs to be signed by the server,
-                // which means that we are not responsible for broadcasting the transaction
-                return;
-            }
-        }
-
-        getAppKit().peerGroup().broadcastTransaction(req.tx);
-        getAppKit().wallet().maybeCommitTx(req.tx);
     }
 
 
@@ -613,6 +661,18 @@ public class WalletService extends android.app.Service {
         }
 
         return new TransactionHistory(allTransactions);
+    }
+
+    /**
+     * Adds a raw transaction to the wallet, if not already present, and broadcasts it to the network.
+     *
+     * @param txBytes
+     */
+    public void commitAndBroadcastTx(byte[] txBytes) {
+        Transaction tx = new Transaction(getNetworkParams(bitcoinNet), txBytes);
+        tx.setMemo(DefaultTransactionMemos.SERVER_SIGNED_TX);
+        getAppKit().wallet().maybeCommitTx(tx);
+        getAppKit().peerGroup().broadcastTransaction(tx);
     }
 
     /**

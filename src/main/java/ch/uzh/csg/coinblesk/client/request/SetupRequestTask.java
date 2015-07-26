@@ -14,7 +14,7 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 public class SetupRequestTask extends RequestTask<TransferObject, SetupRequestObject> {
 
 	public SetupRequestTask(RequestCompleteListener<SetupRequestObject> cro, Context context) {
-		super(new SetupRequestObject(), Constants.BASE_URI_SSL + "/wallet/setupInfo", cro, context);
+		super(new SetupRequestObject(), Constants.BASE_URL + "/wallet/setupInfo", cro, context);
 	}
 
 }

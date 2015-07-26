@@ -14,7 +14,7 @@ import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 public class RefundTxRequestTask extends RequestTask<ServerSignatureRequestTransferObject, RefundTxTransferObject> {
 
 	public RefundTxRequestTask(RequestCompleteListener<RefundTxTransferObject> cro, ServerSignatureRequestTransferObject input, RefundTxTransferObject output, Context context) {
-		super(input, output, Constants.BASE_URI_SSL + "/wallet/signRefundTx", cro, context);
+		super(input, output, Constants.BASE_URL + "/wallet/signRefundTx", cro, context);
 	}
 
 }

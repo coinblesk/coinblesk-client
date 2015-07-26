@@ -36,7 +36,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     public static final String REFUND_TX = "refund-tx";
     public static final String REFUND_TX_VALID_BLOCK = "refund-tx-valid-block";
 
-    private final SharedPreferences prefs;
+    private SharedPreferences prefs;
     private Gson gson;
 
     public CoinBleskCloudData(Context context) {
@@ -45,13 +45,15 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     }
 
     public CoinBleskCloudData() {
-        this.prefs = new CloudBackedSharedPreferences(COINBLESK_PREFS_BACKUP_KEY, getApplicationContext());
-        this.gson = new GsonBuilder().create();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        this.prefs = new CloudBackedSharedPreferences(COINBLESK_PREFS_BACKUP_KEY, getApplicationContext());
+        this.gson = new GsonBuilder().create();
+
         // allocate a helper and install it
         SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, COINBLSEK_DATA);
         addHelper(COINBLESK_PREFS_BACKUP_KEY, helper);

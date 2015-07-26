@@ -27,6 +27,9 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.request.SendPayInAddressByEmail;
@@ -40,6 +43,9 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
  * user has to transfer bitcoins to in order to pay in into our system.
  */
 public class PayInActivity extends WalletActivity {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(PayInActivity.class);
+
     public String payInAddress;
     private Button copyClipboardBtn;
     private Button sendAsMailBtn;
@@ -64,7 +70,6 @@ public class PayInActivity extends WalletActivity {
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
         new GetReceiveAddressTask().execute();
-        //TODO
         payInAddress = getWalletService().getBitcoinAddress();
     }
 
@@ -109,6 +114,7 @@ public class PayInActivity extends WalletActivity {
                 ClipData clip = ClipData.newPlainText("BTC Address", payInAddress);
                 clipboard.setPrimaryClip(clip);
                 displayResponse(getResources().getString(R.string.copy_clipboard));
+                LOGGER.debug("Copied Bitcoin address to clipboard: {}", payInAddress);
             }
         });
 

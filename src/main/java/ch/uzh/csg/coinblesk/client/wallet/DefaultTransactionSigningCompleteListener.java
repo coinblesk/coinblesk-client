@@ -23,7 +23,7 @@ public class DefaultTransactionSigningCompleteListener extends TransactionSignin
     @Override
     public void onSuccess(Transaction tx) {
         if(!tx.isTimeLocked()) {
-            // the signerd transaction was a normal transaction. Commit it to the wallet,
+            // the signed transaction was a normal transaction. Commit it to the wallet,
             // if it was not already seen on the network.
             wallet.maybeCommitTx(tx);
 

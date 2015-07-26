@@ -6,6 +6,8 @@ import android.content.Intent;
 
 public class PaymentRequestReceiver extends BroadcastReceiver {
 
+    public static final String ACTION = "ch.uzh.coinblesk.PAYMENT_REQUEST";
+
     private PaymentRequest activePaymentRequest;
 
     public PaymentRequestReceiver() {

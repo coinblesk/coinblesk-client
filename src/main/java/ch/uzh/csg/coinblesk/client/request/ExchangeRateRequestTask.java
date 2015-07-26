@@ -13,6 +13,6 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 public class ExchangeRateRequestTask extends RequestTask<TransferObject, ExchangeRateTransferObject> {
 	
 	public ExchangeRateRequestTask(String symbol, RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) {
-		super(new ExchangeRateTransferObject(), Constants.BASE_URI_SSL + "/wallet/exchangeRate/" + symbol, cro, context);
+		super(new ExchangeRateTransferObject(), Constants.BASE_URL + "/wallet/exchangeRate/" + symbol, cro, context);
 	}
 }

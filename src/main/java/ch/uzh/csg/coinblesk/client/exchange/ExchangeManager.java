@@ -23,9 +23,9 @@ import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 /**
  * Created by rvoellmy on 7/21/15.
  */
-public class MerchantModeManager implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MerchantModeManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeManager.class);
 
     private Set<Exchange> exchanges;
     private Context context;
@@ -33,7 +33,7 @@ public class MerchantModeManager implements SharedPreferences.OnSharedPreference
 
     private Set<String> primaryExchangeKeys;
 
-    public MerchantModeManager(Context context) {
+    public ExchangeManager(Context context) {
         this.exchanges = new HashSet<>();
         this.context = context;
 

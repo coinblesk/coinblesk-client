@@ -26,7 +26,7 @@ import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
-import ch.uzh.csg.coinblesk.responseobject.TransferObject;
+import ch.uzh.csg.coinblesk.responseobject.SignedTxTransferObject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -97,10 +97,19 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
         String serializedTx = android.util.Base64.encodeToString(tx.bitcoinSerialize(), android.util.Base64.NO_WRAP);
         txSigRequest.setPartialTx(serializedTx);
 
-        if (!tx.isTimeLocked()) {
-            launchServerRequest(tx, txSigRequest);
-        } else {
+        if (tx.isTimeLocked()) {
+            // refund transaction
             launchRefundTxRequest(tx, txSigRequest);
+        } else {
+
+            if(WalletService.isNfcMode()) {
+                // nfc transaction: we don't need to send it to the server, we just broadcast an intent to the receiver(s)
+                //context.sendBroadcast(HalfSignedTxReceiver.createIntent(txSigRequest));
+                WalletService.sigReq = txSigRequest;
+            } else {
+                // normal transaction
+                launchServerRequest(tx, txSigRequest);
+            }
         }
 
         return true;
@@ -116,8 +125,8 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
     private void launchServerRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest) {
         RequestFactory requestFactory = ((CoinBleskApplication) context.getApplicationContext()).getRequestFactory();
-        RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequestTask = requestFactory.payOutRequest(new RequestCompleteListener<TransferObject>() {
-            public void onTaskComplete(TransferObject response) {
+        RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> payOutRequestTask = requestFactory.payOutRequest(new RequestCompleteListener<SignedTxTransferObject>() {
+            public void onTaskComplete(SignedTxTransferObject response) {
 
                 // we notify the listeners with the partial transaction here. We don't need the
                 // fully signed transaction, the server will broadcast it, and we can commit it to the

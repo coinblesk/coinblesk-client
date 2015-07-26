@@ -56,6 +56,7 @@ import ch.uzh.csg.coinblesk.client.testutils.TestUtils;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
+import ch.uzh.csg.coinblesk.responseobject.SignedTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
@@ -162,7 +163,7 @@ public class WalletServiceTest {
 
         RequestFactory requestFactory = new DefaultRequestFactory() {
             @Override
-            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> completeListener, ServerSignatureRequestTransferObject input, Context context) {
+            public RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> payOutRequest(RequestCompleteListener<SignedTxTransferObject> completeListener, ServerSignatureRequestTransferObject input, Context context) {
                 // check if the request is correct
                 Assert.assertNotNull(input);
                 Assert.assertNotNull(input.getPartialTx());
@@ -202,7 +203,7 @@ public class WalletServiceTest {
         ((CoinBleskApplication) RuntimeEnvironment.application).setRequestFactory(requestFactory);
 
         // send a coin to the wallet
-        FakeTxBuilder.BlockPair bp = injectTx(walletService.getBitcoinAddress(), fundingAmount);
+        injectTx(walletService.getBitcoinAddress(), fundingAmount);
         Assert.assertEquals(0, fundingAmount.compareTo(walletService.getBalance()));
 
         // create a transaction

@@ -33,10 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:columnCount="1"
-                android:layout_marginTop="70dp"
                 android:orientation="vertical">
-
-
 
                 <TextView
                     android:id="@+id/mainActivityBlockchainSyncText"
@@ -44,6 +41,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:visibility="gone"
                     />
 
                 <ProgressBar
@@ -53,6 +51,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:focusableInTouchMode="true"
+                    android:visibility="gone"
+
                     />
 
                 <TextView

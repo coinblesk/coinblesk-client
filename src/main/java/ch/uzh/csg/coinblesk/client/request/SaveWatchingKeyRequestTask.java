@@ -14,7 +14,7 @@ import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 public class SaveWatchingKeyRequestTask extends RequestTask<WatchingKeyTransferObject, TransferObject> {
 
 	public SaveWatchingKeyRequestTask(RequestCompleteListener<TransferObject> cro, WatchingKeyTransferObject input, Context context) {
-		super(input, new TransferObject(), Constants.BASE_URI_SSL + "/wallet/saveWatchingKey", cro, context);
+		super(input, new TransferObject(), Constants.BASE_URL + "/wallet/saveWatchingKey", cro, context);
 	}
 
 }

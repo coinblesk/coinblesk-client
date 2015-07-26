@@ -202,19 +202,27 @@ public class PayOutActivity extends WalletActivity {
         showLoadingProgressDialog();
 
         getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
-            public void onTaskComplete(ExchangeRateTransferObject response) {
-                dismissProgressDialog();
-                if (response.isSuccessful()) {
-                    exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
-                    BigDecimal balance = getWalletService().getBalance();
-                    CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.payout_exchangeRate));
-                    CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
-                } else {
-                    exchangeRate = BigDecimal.ZERO;
-                    displayResponse(response.getMessage());
-                    chfBalance.setText("");
-                }
-                initClickListener();
+            public void onTaskComplete(final ExchangeRateTransferObject response) {
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dismissProgressDialog();
+                        if (response.isSuccessful()) {
+                            exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
+                            final BigDecimal balance = getWalletService().getBalance();
+                            CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
+
+                        } else {
+                            exchangeRate = BigDecimal.ZERO;
+                            displayResponse(response.getMessage());
+                            chfBalance.setText("");
+                        }
+                        initClickListener();
+                    }
+                });
+
+
             }
         });
     }
@@ -225,7 +233,7 @@ public class PayOutActivity extends WalletActivity {
 
         CurrencyViewHandler.setBTC(btcBalance, balance, this);
         CurrencyViewHandler.clearTextView(chfBalance);
-        if(exchangeRate != null) {
+        if (exchangeRate != null) {
             CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
         }
     }

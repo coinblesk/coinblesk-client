@@ -50,7 +50,7 @@
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginTop="20dp"
-                android:height="50dp"
+                android:height="60dp"
                 android:text=""
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -62,7 +62,7 @@
                 android:layout_alignParentTop="true"
                 android:text="@string/settings_walletBackupSeedTitle"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@android:color/primary_text_light" />
+                />
 
             <TextView
                 android:id="@+id/textView2"
@@ -73,7 +73,7 @@
                 android:layout_marginTop="10dp"
                 android:text="@string/settings_walletBackupRefundTransactionTitle"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@android:color/primary_text_light" />
+                />
 
             <TextView
                 android:id="@+id/textView3"
@@ -97,4 +97,5 @@
 
         </RelativeLayout>
     </android.support.v4.widget.DrawerLayout>
+
 </RelativeLayout>

@@ -18,6 +18,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,18 +41,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.util.List;
 
+import ch.uzh.csg.coinblesk.JsonConverter;
+import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.comm.PaymentProtocol;
+import ch.uzh.csg.coinblesk.client.payment.HalfSignedTxReceiver;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequestReceiver;
+import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
 import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
 import ch.uzh.csg.coinblesk.client.ui.payment.AbstractPaymentActivity;
@@ -59,12 +63,15 @@ import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
+import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.TransactionObject;
 import ch.uzh.csg.coinblesk.client.wallet.WalletListener;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
+import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
+import ch.uzh.csg.coinblesk.responseobject.SignedTxTransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
 import ch.uzh.csg.comm.NfcInitiatorHandler;
 import ch.uzh.csg.comm.NfcResponseHandler;
@@ -100,13 +107,18 @@ public class MainActivity extends AbstractPaymentActivity {
     private TextView mBlockchainSyncStatusText;
 
     private PaymentRequestReceiver paymentRequestReceiver;
+    private HalfSignedTxReceiver halfSignedTxReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // register receivers
         this.paymentRequestReceiver = new PaymentRequestReceiver();
-        registerReceiver(paymentRequestReceiver, new IntentFilter(PaymentRequest.ACTION));
+        registerReceiver(paymentRequestReceiver, new IntentFilter(PaymentRequestReceiver.ACTION));
+
+        this.halfSignedTxReceiver = new HalfSignedTxReceiver();
+        registerReceiver(halfSignedTxReceiver, new IntentFilter(HalfSignedTxReceiver.ACTION));
 
         setContentView(R.layout.activity_main);
 
@@ -233,7 +245,7 @@ public class MainActivity extends AbstractPaymentActivity {
 
                         // show sync status text
                         String syncText = String.format(getResources().getString(R.string.main_bitcoinSynchronizing),
-                                String.format("%.1f", progress * 100));
+                                String.format("%.0f", progress * 100));
 
                         mBlockchainSyncStatusText.setText(syncText);
                     }
@@ -304,6 +316,8 @@ public class MainActivity extends AbstractPaymentActivity {
     protected void onDestroy() {
         super.onDestroy();
         getWalletService().removeBitcoinListener(this.getClass());
+        unregisterReceiver(paymentRequestReceiver);
+        unregisterReceiver(halfSignedTxReceiver);
     }
 
     private void initTxListener() {
@@ -327,9 +341,7 @@ public class MainActivity extends AbstractPaymentActivity {
             @Override
             protected void onPostExecute(final BigDecimal balance) {
                 CurrencyViewHandler.setBTC((TextView) findViewById(R.id.mainActivityTextViewBTCs), balance, getApplicationContext());
-
-                // TODO: fix this
-                //setFiatBalance(balance);
+                setFiatBalance(balance);
             }
         };
         displayBalanceTaks.execute();
@@ -341,10 +353,16 @@ public class MainActivity extends AbstractPaymentActivity {
             @Override
             public void onTaskComplete(ExchangeRateTransferObject response) {
                 if (response.isSuccessful()) {
-                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
-                    TextView chfBalance = (TextView) findViewById(R.id.mainActivity_balanceCHF);
-                    CurrencyViewHandler.clearTextView(chfBalance);
-                    CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, btcBalance);
+                    final BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                    final TextView chfBalance = (TextView) findViewById(R.id.mainActivity_balanceCHF);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            CurrencyViewHandler.clearTextView(chfBalance);
+                            CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, btcBalance);
+                        }
+                    });
                 }
             }
         });
@@ -459,22 +477,26 @@ public class MainActivity extends AbstractPaymentActivity {
     /**
      * Initializes NFC adapter and user payment information.
      */
-    private void initializeNFC() throws Exception, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+    private void initializeNFC() throws Exception, NoSuchAlgorithmException, NoSuchProviderException {
 
         initiator = new NfcSetup(new NfcInitiatorHandler() {
 
             State current = State.INIT;
             KeyPair keyPair = PaymentProtocol.generateKeys();
             PublicKey remotePubKey;
+            byte[] halfSignedTx;
+            byte[] signedTx;
+            boolean txSigned = false;
 
             @Override
             public void handleFailed(String s) {
-                System.err.println("111failed it:" + s);
+                LOGGER.error("NFC communication failed: {}", s);
+                current = State.INIT;
             }
 
             @Override
             public void handleStatus(String s) {
-                System.err.println("111got it:" + s);
+                LOGGER.error("NFC communication status: {}", s);
             }
 
             @Override
@@ -483,20 +505,24 @@ public class MainActivity extends AbstractPaymentActivity {
                 //continue with 3rd message
 
                 PaymentProtocol protocol = PaymentProtocol.fromBytesUnverified(bytes);
-                if (protocol.type() == PaymentProtocol.Type.CONTACT_AND_PAYMENT_REQUEST) {
-                    //this is the half signed transactiotn
+
+                LOGGER.debug("received nfc message {}, current state is {}", protocol.type().toString(), current.toString());
+
+                if (protocol.type() == PaymentProtocol.Type.CONTACT_AND_PAYMENT_RESPONSE_OK) {
+                    //this is the half signed transaction
                     remotePubKey = protocol.publicKey();
+                    halfSignedTx = protocol.halfSignedTransaction();
                     current = State.FIRST;
+                    return;
                 }
+
                 protocol = PaymentProtocol.fromBytes(bytes, remotePubKey);
-                if (protocol.type() == PaymentProtocol.Type.FROM_SERVER_REQUEST_OK) {
 
-                    System.err.println("got it!!!!!!!!");
+                if (protocol.type() == PaymentProtocol.Type.PAYMENT_OK) {
+                    LOGGER.info("NFC payment complete!");
+                    current = State.INIT;
                 }
 
-                LOGGER.debug("message received... State is {}.", current);
-
-                //get 5th message: ok
             }
 
             @Override
@@ -511,14 +537,82 @@ public class MainActivity extends AbstractPaymentActivity {
 
                 //3rd message: server says ok, amount ok from server, signed
                 // -> send ok with transaction (optional only signature), signed
+
+                LOGGER.debug("Sending next NFC message, current state is {}", current);
+
                 switch (current) {
                     case INIT:
                         current = State.FIRST;
-                        return PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), "Hans", new byte[6], 100000, new byte[20]).toBytes(keyPair.getPrivate());
-                    case FIRST:
-                        current = State.SECOND;
-                        return PaymentProtocol.fromServerRequestOk(new byte[2000]).toBytes(keyPair.getPrivate());
+                       if (paymentRequestReceiver.hasActivePaymentRequest()) {
+                            PaymentRequest paymentRequest = paymentRequestReceiver.getActivePaymentRequest();
 
+                            String user = paymentRequest.getUser();
+                            long satoshi = paymentRequest.getSatoshi();
+                            String address = paymentRequest.getAddress();
+                            BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
+
+                            LOGGER.debug("Sending payment request for {} satoshi to user {} (address: {})", satoshi, user, address);
+                            return PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
+                        } else {
+                            LOGGER.debug("No active payment request: Abort");
+                            return new byte[0];
+                        }
+                    case FIRST:
+
+                        // TODO: Make this async
+                        final Object lock = new Object();
+
+                        try {
+                            current = State.SECOND;
+
+                            String sigReqJson = new String(halfSignedTx, "UTF-8");
+
+                            LOGGER.debug("Sending signature request to server: {}", sigReqJson);
+
+                            RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> signTask = getCoinBleskApplication().getRequestFactory().payOutRequest(new RequestCompleteListener<SignedTxTransferObject>() {
+                                @Override
+                                public void onTaskComplete(SignedTxTransferObject response) {
+                                    if (response.isSuccessful()) {
+                                        LOGGER.debug("Received fully signed transaction from server.");
+                                        signedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
+                                    } else {
+                                        LOGGER.warn("Server didn't sign the transaction: {}", response.getMessage());
+                                        signedTx = null;
+                                    }
+                                    txSigned = true;
+
+                                    synchronized (lock) {
+                                        lock.notifyAll();
+                                    }
+
+                                }
+                            }, JsonConverter.fromJson(sigReqJson, ServerSignatureRequestTransferObject.class), MainActivity.this);
+
+                            signTask.execute();
+
+
+                            // TODO: make this async
+                            synchronized (lock) {
+                                try {
+                                    while (!txSigned) {
+                                        lock.wait();
+                                    }
+                                } catch (InterruptedException e) {
+                                    // ignore
+                                }
+                            }
+
+                            if (signedTx != null) {
+                                LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", signedTx.length);
+                                return PaymentProtocol.fromServerRequestOk(signedTx).toBytes(keyPair.getPrivate());
+
+                            } else {
+                                LOGGER.debug("Sending server request NOK to other client.");
+                                return PaymentProtocol.fromServerRequestNok().toBytes(keyPair.getPrivate());
+                            }
+                        } finally {
+                            paymentRequestReceiver.inactivatePaymentRequest();
+                        }
                     default:
                         throw new RuntimeException("Should never be reached");
                 }
@@ -535,7 +629,7 @@ public class MainActivity extends AbstractPaymentActivity {
             KeyPair keyPair = PaymentProtocol.generateKeys();
 
             @Override
-            public byte[] handleMessageReceived(byte[] bytes, ResponseLater responseLater) throws Exception {
+            public byte[] handleMessageReceived(byte[] bytes, final ResponseLater responseLater) throws Exception {
                 //get 1st message request / get 1st message send
                 //2nd return partially signed transaction
                 // request: BTC from message, public key, signed, username
@@ -543,14 +637,38 @@ public class MainActivity extends AbstractPaymentActivity {
                 //4th (optional check if signed by server), get ok, reply
                 //5th reply ok, public key, signed
 
-                PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
+                final PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
                 remotePubKey = protocol.publicKey();
+
+                LOGGER.debug("received nfc message {}", protocol.type().toString());
 
                 switch (protocol.type()) {
                     case CONTACT_AND_PAYMENT_REQUEST:
-                        //check server
-                        return PaymentProtocol.contactAndPaymentResponseOk(new byte[3000]).toBytes(keyPair.getPrivate());
+                        // check the payment request
+                        // TODO
+
+                        // create the half signed transaction
+                        long satoshis = protocol.satoshis();
+                        byte[] btcAddress = protocol.sendTo();
+                        byte[] halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
+
+                        LOGGER.debug("Sending partially signed transaction over NFC, total size of message is {} bytes", halfSignedTx.length);
+
+                        return PaymentProtocol.contactAndPaymentResponseOk(halfSignedTx).toBytes(keyPair.getPrivate());
                     case FROM_SERVER_REQUEST_OK:
+
+                        // get the fully signed tx, commit and broadcast it
+                        AsyncTask<Void, Void, Void> commitAndBroadcastTx = new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                byte[] signedTx = protocol.fullySignedTransaction();
+                                LOGGER.debug("Broadcasting fully signed transaction and commit it to wallet");
+                                getWalletService().commitAndBroadcastTx(signedTx);
+                                return null;
+                            }
+                        };
+                        commitAndBroadcastTx.execute();
+
                         return PaymentProtocol.paymentOk().toBytes(keyPair.getPrivate());
                 }
 
@@ -559,12 +677,12 @@ public class MainActivity extends AbstractPaymentActivity {
 
             @Override
             public void handleFailed(String s) {
-                System.err.println("222failed it:" + s);
+                LOGGER.error("NFC connection failed: {}", s);
             }
 
             @Override
             public void handleStatus(String s) {
-                System.err.println("222 got it:" + s);
+                LOGGER.info("received NFC message: {}", s);
             }
         }, this);
 
