@@ -235,7 +235,7 @@ public class SettingsActivity extends BaseActivity {
 			addPreferencesFromResource(R.xml.pref_general);
 			PreferenceCategory fakeHeader = new PreferenceCategory(getActivity());
 			getPreferenceScreen().addPreference(fakeHeader);
-			bindPreferenceSummaryToValue(findPreference("bitcoin_list"));
+			bindPreferenceSummaryToValue(findPreference("bitcoin_unit"));
 		}
 	}
 
