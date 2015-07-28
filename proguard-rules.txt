@@ -3,9 +3,11 @@
 -dontwarn
 -repackageclasses ''
 -allowaccessmodification
--optimizations !code/simplification/arithmetic
+-optimizations !code/simplification/arithmetic,!field
 -keepattributes SourceFile,LineNumberTable,Signature,*Annotation*,InnerClasses,AnnotationDefault
 -dontskipnonpubliclibraryclassmembers
+-dontobfuscate
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
 
 -keep public class * extends android.app.Activity
 -keep public class * extends android.app.Application
@@ -53,3 +55,4 @@
 
 -keep class org.spongycastle.**
 -keep class org.bitcoinj.crypto.MnemonicCode { *; }
+-keep class org.bitcoinj.core.AbstractBlockChain { *; }
