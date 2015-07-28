@@ -33,6 +33,9 @@ import android.widget.TextView;
 
 import com.google.common.base.Preconditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -57,6 +60,9 @@ import ch.uzh.csg.comm.NfcLibException;
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
  */
 public class ReceivePaymentActivity extends AbstractPaymentActivity {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReceivePaymentActivity.class);
+
     private String[] strings;
     private String[] stringsNormal = {"CHF", "BTC"};
     private String[] stringsTablet = {"CHF", "Rp", "BTC"};
@@ -145,9 +151,15 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 
         try {
             MainActivity.initiator.stopInitiating(this);
+
+        } catch(Throwable e) {
+            LOGGER.error("FAIL:", e);
+        }
+
+        try {
             MainActivity.initiator.startInitiating(this);
         } catch (NfcLibException e) {
-            e.printStackTrace();
+            LOGGER.debug("NFC failed: ", e);
         }
     }
 

@@ -92,11 +92,11 @@ public class Exchange {
         // set the currency in this priority: USD, EUR
         for (CurrencyPair pair : exchange.getMetaData().getCurrencyPairs()) {
             if (pair.equals(CurrencyPair.BTC_USD) || pair.equals(new CurrencyPair(Currencies.XBT, Currencies.USD))) {
-                this.pair = pair;
+                this.pair = CurrencyPair.BTC_USD;
                 break;
             }
             if (pair.equals(CurrencyPair.BTC_EUR) || pair.equals(new CurrencyPair(Currencies.XBT, Currencies.EUR))) {
-                this.pair = pair;
+                this.pair = CurrencyPair.BTC_EUR;
                 break;
             }
         }

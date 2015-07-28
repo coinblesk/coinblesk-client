@@ -45,7 +45,7 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
         primaryExchangeKeys.add("primary_exchange_api_secret");
 
         // add default exchange without credentials for exchange rate
-        addExchange(new Exchange(Exchange.BITSTAMP));
+        addExchange(new Exchange(Exchange.KRAKEN));
     }
 
     /**

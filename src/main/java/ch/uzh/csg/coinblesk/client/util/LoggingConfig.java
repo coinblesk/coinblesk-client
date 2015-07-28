@@ -1,26 +1,28 @@
 package ch.uzh.csg.coinblesk.client.util;
 
-import android.os.Environment;
+import org.bitcoinj.core.BitcoinSerializer;
+import org.bitcoinj.core.Peer;
+import org.bitcoinj.core.PeerGroup;
+import org.bitcoinj.net.NioClientManager;
+import org.slf4j.LoggerFactory;
 
-import org.apache.log4j.Level;
-
-import java.io.File;
-
-import de.mindpipe.android.logging.log4j.LogConfigurator;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.android.BasicLogcatConfigurator;
 
 public class LoggingConfig {
 
     public static void configure() {
-        final LogConfigurator logConfigurator = new LogConfigurator();
+        BasicLogcatConfigurator.configureDefaultContext();
 
-        logConfigurator.setUseLogCatAppender(true);
-        logConfigurator.setFileName(Environment.getExternalStorageDirectory() + File.separator + "coinblesk.log");
-        logConfigurator.setRootLevel(Level.DEBUG);
+        // root level logger
+        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.DEBUG);
 
-        // Set log level of a specific logger
-        logConfigurator.setLevel("org.bitcoinj", Level.INFO);
-        
-        logConfigurator.configure();
+        ((Logger) LoggerFactory.getLogger(BitcoinSerializer.class)).setLevel(Level.ERROR);
+        ((Logger) LoggerFactory.getLogger(Peer.class)).setLevel(Level.ERROR);
+        ((Logger) LoggerFactory.getLogger(PeerGroup.class)).setLevel(Level.WARN);
+        ((Logger) LoggerFactory.getLogger(NioClientManager.class)).setLevel(Level.WARN);
     }
 
 }

@@ -542,8 +542,7 @@ public class MainActivity extends AbstractPaymentActivity {
 
                 switch (current) {
                     case INIT:
-                        current = State.FIRST;
-                       if (paymentRequestReceiver.hasActivePaymentRequest()) {
+                        if (paymentRequestReceiver.hasActivePaymentRequest()) {
                             PaymentRequest paymentRequest = paymentRequestReceiver.getActivePaymentRequest();
 
                             String user = paymentRequest.getUser();
@@ -552,6 +551,7 @@ public class MainActivity extends AbstractPaymentActivity {
                             BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
 
                             LOGGER.debug("Sending payment request for {} satoshi to user {} (address: {})", satoshi, user, address);
+                            current = State.FIRST;
                             return PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
                         } else {
                             LOGGER.debug("No active payment request: Abort");

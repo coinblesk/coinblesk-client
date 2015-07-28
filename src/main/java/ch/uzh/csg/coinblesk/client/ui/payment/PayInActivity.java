@@ -31,12 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.request.SendPayInAddressByEmail;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
-import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
-import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
  * This class is the view for pay ins. It displays the bitcoin address where a
@@ -197,15 +193,22 @@ public class PayInActivity extends WalletActivity {
     }
 
     private void launchRequest() {
-        showLoadingProgressDialog();
-        RequestTask<TransferObject, TransferObject> sendToEmail = new SendPayInAddressByEmail(new RequestCompleteListener<TransferObject>() {
-            @Override
-            public void onTaskComplete(TransferObject response) {
-                dismissProgressDialog();
-                displayResponse(response.getMessage());
-            }
-        }, new TransferObject(), new TransferObject(), getApplicationContext());
-        sendToEmail.execute();
+
+        // TODO: need email address from user...
+
+//        showLoadingProgressDialog();
+//        Mailer mailer = new Mailer();
+//        mailer.setSubject("Your CoinBlesk Bitcoin Address");
+//
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("This is your Bitcoin Address: ");
+//        sb.append(getWalletService().getBitcoinAddress());
+//        sb.append("\n");
+//        sb.append("It is save to share this address with anyone.");
+//
+//        mailer.setMessage(sb.toString());
+//        Intent mailIntent = mailer.getIntent()
+
     }
 
 

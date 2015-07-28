@@ -79,6 +79,34 @@ public class ExchangeTest {
             }
         }, Mockito.mock(Context.class));
 
+
+        // do the same with another exchange that has other currencies
+        exchange = new Exchange(Exchange.KRAKEN);
+        exchange.getBTCExchangeRateInDefaultCurrency(new RequestCompleteListener<ExchangeRateTransferObject>() {
+            @Override
+            public void onTaskComplete(ExchangeRateTransferObject response) {
+                System.out.println(response.toJson());
+                Assert.assertNotNull(response);
+                Assert.assertTrue(response.isSuccessful());
+                Assert.assertFalse(response.getExchangeRates().isEmpty());
+                Assert.assertTrue(new BigDecimal(response.getExchangeRates().values().iterator().next()).signum() > 0);
+            }
+        }, mockContext);
+
+        Robolectric.getBackgroundThreadScheduler().runOneTask();
+
+        // try again, this should load the exchange rate from the cache.
+        exchange.getBTCExchangeRateInDefaultCurrency(new RequestCompleteListener<ExchangeRateTransferObject>() {
+            @Override
+            public void onTaskComplete(ExchangeRateTransferObject response) {
+                System.out.println(response.toJson());
+                Assert.assertNotNull(response);
+                Assert.assertTrue(response.isSuccessful());
+                Assert.assertFalse(response.getExchangeRates().isEmpty());
+                Assert.assertTrue(new BigDecimal(response.getExchangeRates().values().iterator().next()).signum() > 0);
+            }
+        }, Mockito.mock(Context.class));
+
     }
 
     private Context mockExchangeRateRequest() {

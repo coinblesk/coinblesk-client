@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.Service;
 
 import junit.framework.Assert;
 
-import org.apache.log4j.Level;
 import org.bitcoinj.core.AbstractBlockChain;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
@@ -79,7 +78,6 @@ public class WalletServiceTest {
 
     @BeforeClass
     public static void setupClass() throws Exception {
-        TestUtils.configureLogger(Level.DEBUG);
 
         if (!testDirectory.exists()) {
             testDirectory.mkdirs();

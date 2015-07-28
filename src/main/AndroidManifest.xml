@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ch.uzh.csg.coinblesk.client"
     android:versionCode="2"
-    android:versionName="v1.0" >
+    android:versionName="v2.0" >
 
     <uses-sdk
         android:minSdkVersion="19"
