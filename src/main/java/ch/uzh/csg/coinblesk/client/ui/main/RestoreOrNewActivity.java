@@ -201,6 +201,7 @@ public class RestoreOrNewActivity extends WalletActivity {
         Intent intent = new Intent(RestoreOrNewActivity.this, MainActivity.class);
         dismissProgressDialog();
         startActivity(intent);
+        finish();
     }
 
 }
