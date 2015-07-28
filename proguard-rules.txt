@@ -52,3 +52,4 @@
 -keep class com.xeiam.xchange.** { *; }
 
 -keep class org.spongycastle.**
+-keep class org.bitcoinj.crypto.MnemonicCode { *; }
