@@ -55,4 +55,3 @@
 
 -keep class org.spongycastle.**
 -keep class org.bitcoinj.crypto.MnemonicCode { *; }
--keep class org.bitcoinj.core.AbstractBlockChain { *; }

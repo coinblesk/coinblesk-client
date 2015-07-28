@@ -137,7 +137,7 @@ public class WalletService extends android.app.Service {
         removeBitcoinListener(clazz.getName());
     }
 
-    private void notifyOnNewTransaction() {
+    private void notifyNewTransaction() {
         for (WalletListener listener : listeners.values()) {
             listener.onWalletChange();
         }
@@ -145,9 +145,15 @@ public class WalletService extends android.app.Service {
 
     private void initTxListener() {
         getAppKit().wallet().addEventListener(new AbstractWalletEventListener() {
+
             @Override
-            public void onWalletChanged(Wallet wallet) {
-                notifyOnNewTransaction();
+            public void onCoinsReceived(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
+                notifyNewTransaction();
+            }
+
+            @Override
+            public void onCoinsSent(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
+                notifyNewTransaction();
             }
         });
     }
