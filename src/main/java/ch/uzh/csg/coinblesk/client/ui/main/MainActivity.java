@@ -40,12 +40,16 @@ import android.widget.Toast;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import ch.uzh.csg.coinblesk.JsonConverter;
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
@@ -485,8 +489,11 @@ public class MainActivity extends AbstractPaymentActivity {
             KeyPair keyPair = PaymentProtocol.generateKeys();
             PublicKey remotePubKey;
             byte[] halfSignedTx;
-            byte[] signedTx;
-            boolean txSigned = false;
+            RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> signTask;
+            AtomicReference<byte[]> result = new AtomicReference<byte[]>();
+
+            Thread t;
+            AtomicReference<byte[]> result2 = new AtomicReference<byte[]>();
 
             @Override
             public void handleFailed(String s) {
@@ -542,77 +549,95 @@ public class MainActivity extends AbstractPaymentActivity {
 
                 switch (current) {
                     case INIT:
-                        if (paymentRequestReceiver.hasActivePaymentRequest()) {
-                            PaymentRequest paymentRequest = paymentRequestReceiver.getActivePaymentRequest();
-
-                            String user = paymentRequest.getUser();
-                            long satoshi = paymentRequest.getSatoshi();
-                            String address = paymentRequest.getAddress();
-                            BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
-
-                            LOGGER.debug("Sending payment request for {} satoshi to user {} (address: {})", satoshi, user, address);
+                        if(result2.get()!=null) {
                             current = State.FIRST;
-                            return PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
-                        } else {
-                            LOGGER.debug("No active payment request: Abort");
-                            return new byte[0];
+                            return result2.get();
                         }
+                        if(t !=null) {
+                            return null;
+                        }
+                        t = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    if (paymentRequestReceiver.hasActivePaymentRequest()) {
+                                        PaymentRequest paymentRequest = paymentRequestReceiver.getActivePaymentRequest();
+
+                                        String user = paymentRequest.getUser();
+                                        long satoshi = paymentRequest.getSatoshi();
+                                        String address = paymentRequest.getAddress();
+                                        BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
+
+                                        LOGGER.debug("Sending payment request for {} satoshi to user {} (address: {})", satoshi, user, address);
+
+                                        byte[] retVal = PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
+                                        result2.set(retVal);
+                                    } else {
+                                        LOGGER.debug("No active payment request: Abort");
+                                        result2.set(new byte[0]);
+                                    }
+                                } catch (Exception e) {
+                                    LOGGER.error("No active payment request: Abort ", e);
+                                    result2.set(new byte[0]);
+                                }
+                            }
+                        });
+                        t.start();
+                        return null;
+
                     case FIRST:
 
-                        // TODO: Make this async
-                        final Object lock = new Object();
 
-                        try {
-                            current = State.SECOND;
+                            if(result.get()!=null) {
+                                current = State.SECOND;
+                                return result.get();
+                            }
+
+                            if(signTask != null) {
+                                return null;
+                            }
 
                             String sigReqJson = new String(halfSignedTx, "UTF-8");
 
                             LOGGER.debug("Sending signature request to server: {}", sigReqJson);
 
-                            RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> signTask = getCoinBleskApplication().getRequestFactory().payOutRequest(new RequestCompleteListener<SignedTxTransferObject>() {
+                            signTask = getCoinBleskApplication().getRequestFactory().payOutRequest(new RequestCompleteListener<SignedTxTransferObject>() {
                                 @Override
                                 public void onTaskComplete(SignedTxTransferObject response) {
-                                    if (response.isSuccessful()) {
-                                        LOGGER.debug("Received fully signed transaction from server.");
-                                        signedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
-                                    } else {
-                                        LOGGER.warn("Server didn't sign the transaction: {}", response.getMessage());
-                                        signedTx = null;
-                                    }
-                                    txSigned = true;
+                                    try {
+                                        byte[] signedTx;
+                                        if (response.isSuccessful()) {
+                                            LOGGER.debug("Received fully signed transaction from server.");
+                                            signedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
+                                        } else {
+                                            LOGGER.warn("Server didn't sign the transaction: {}", response.getMessage());
+                                            signedTx = null;
+                                        }
+                                        byte[] responseMsg;
 
-                                    synchronized (lock) {
-                                        lock.notifyAll();
+                                        if (signedTx != null) {
+                                            LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", signedTx.length);
+                                            responseMsg = PaymentProtocol.fromServerRequestOk(signedTx).toBytes(keyPair.getPrivate());
+                                        } else {
+                                            LOGGER.debug("Sending server request NOK to other client.");
+                                            responseMsg = PaymentProtocol.fromServerRequestNok().toBytes(keyPair.getPrivate());
+                                        }
+                                        result.set(responseMsg);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    } finally {
+                                        paymentRequestReceiver.inactivatePaymentRequest();
                                     }
-
                                 }
                             }, JsonConverter.fromJson(sigReqJson, ServerSignatureRequestTransferObject.class), MainActivity.this);
 
                             signTask.execute();
+                        return null;
 
 
-                            // TODO: make this async
-                            synchronized (lock) {
-                                try {
-                                    while (!txSigned) {
-                                        lock.wait();
-                                    }
-                                } catch (InterruptedException e) {
-                                    // ignore
-                                }
-                            }
 
-                            if (signedTx != null) {
-                                LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", signedTx.length);
-                                return PaymentProtocol.fromServerRequestOk(signedTx).toBytes(keyPair.getPrivate());
 
-                            } else {
-                                LOGGER.debug("Sending server request NOK to other client.");
-                                return PaymentProtocol.fromServerRequestNok().toBytes(keyPair.getPrivate());
-                            }
-                        } finally {
-                            paymentRequestReceiver.inactivatePaymentRequest();
-                        }
+
                     default:
                         throw new RuntimeException("Should never be reached");
                 }
@@ -625,53 +650,83 @@ public class MainActivity extends AbstractPaymentActivity {
             }
         }, new NfcResponseHandler() {
 
-            PublicKey remotePubKey;
+            //PublicKey remotePubKey;
             KeyPair keyPair = PaymentProtocol.generateKeys();
 
             @Override
-            public byte[] handleMessageReceived(byte[] bytes, final ResponseLater responseLater) throws Exception {
+            public byte[] handleMessageReceived(final byte[] bytes, final ResponseLater responseLater) throws Exception {
                 //get 1st message request / get 1st message send
                 //2nd return partially signed transaction
                 // request: BTC from message, public key, signed, username
                 // send: BTC entered by user, public key, signed, username
                 //4th (optional check if signed by server), get ok, reply
                 //5th reply ok, public key, signed
+                System.err.println("time BB1: "+System.currentTimeMillis());
 
-                final PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
-                remotePubKey = protocol.publicKey();
-
-                LOGGER.debug("received nfc message {}", protocol.type().toString());
-
-                switch (protocol.type()) {
+                //remotePubKey = protocol.publicKey();
+                PaymentProtocol.Type type = PaymentProtocol.type(bytes);
+                LOGGER.debug("received nfc message {}", type.toString());
+                System.err.println("time BB2: " + System.currentTimeMillis());
+                switch (type) {
                     case CONTACT_AND_PAYMENT_REQUEST:
+                        System.err.println("time BB3: " + System.currentTimeMillis());
                         // check the payment request
                         // TODO
 
                         // create the half signed transaction
-                        long satoshis = protocol.satoshis();
-                        byte[] btcAddress = protocol.sendTo();
-                        byte[] halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    final PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
+                                    long satoshis = protocol.satoshis();
+                                    byte[] btcAddress = protocol.sendTo();
+                                    byte[] halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
 
-                        LOGGER.debug("Sending partially signed transaction over NFC, total size of message is {} bytes", halfSignedTx.length);
+                                    LOGGER.debug("Sending partially signed transaction over NFC, total size of message is {} bytes", halfSignedTx.length);
 
-                        return PaymentProtocol.contactAndPaymentResponseOk(halfSignedTx).toBytes(keyPair.getPrivate());
+                                    byte[] response = PaymentProtocol.contactAndPaymentResponseOk(halfSignedTx).toBytes(keyPair.getPrivate());
+                                    responseLater.response(response);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();
+                        System.err.println("time BB4: " + System.currentTimeMillis());
+                        return null;
                     case FROM_SERVER_REQUEST_OK:
 
                         // get the fully signed tx, commit and broadcast it
                         AsyncTask<Void, Void, Void> commitAndBroadcastTx = new AsyncTask<Void, Void, Void>() {
                             @Override
                             protected Void doInBackground(Void... params) {
-                                byte[] signedTx = protocol.fullySignedTransaction();
-                                LOGGER.debug("Broadcasting fully signed transaction and commit it to wallet");
-                                getWalletService().commitAndBroadcastTx(signedTx);
+                                try {
+                                    final PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
+                                    byte[] signedTx = protocol.fullySignedTransaction();
+                                    LOGGER.debug("Broadcasting fully signed transaction and commit it to wallet");
+                                    getWalletService().commitAndBroadcastTx(signedTx);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                                 return null;
                             }
                         };
                         commitAndBroadcastTx.execute();
 
-                        return PaymentProtocol.paymentOk().toBytes(keyPair.getPrivate());
-                }
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    byte[] data = PaymentProtocol.paymentOk().toBytes(keyPair.getPrivate());
+                                    responseLater.response(data);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }}).start();
 
+                        return null;
+                }
+                System.err.println("time BB5: " + System.currentTimeMillis());
                 return new byte[0];
             }
 

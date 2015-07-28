@@ -196,6 +196,10 @@ final public class PaymentProtocol {
         return fromBytes(data, null);
     }
 
+    public static Type type(final byte[] data) {
+        return Type.values()[data[0] & 0x7];
+    }
+
     public static PaymentProtocol fromBytes(final byte[] data, PublicKey publicKey) throws InvalidKeySpecException, UnsupportedEncodingException, NoSuchProviderException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
         if(data.length<1) {
             throw new RuntimeException("could not parse bytes");
