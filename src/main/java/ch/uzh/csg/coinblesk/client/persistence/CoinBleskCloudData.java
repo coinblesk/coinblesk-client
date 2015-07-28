@@ -35,6 +35,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     public static final String TRUSTED_CONTACTS = "trusted-contacts";
     public static final String REFUND_TX = "refund-tx";
     public static final String REFUND_TX_VALID_BLOCK = "refund-tx-valid-block";
+    public static final String USERNAME = "username";
 
     private SharedPreferences prefs;
     private Gson gson;
@@ -149,6 +150,16 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     @Override
     public long getRefundTxValidBlock() {
         return prefs.getLong(REFUND_TX_VALID_BLOCK, RefundTx.NO_REFUND_TX_VALID_BLOCK);
+    }
+
+    @Override
+    public void setUsername(String username) {
+        prefs.edit().putString(USERNAME, username).commit();
+    }
+
+    @Override
+    public String getUsername() {
+        return prefs.getString(USERNAME, null);
     }
 
     @Override

@@ -52,8 +52,8 @@ public class RestoreOrNewActivityTest extends BaseInstrumentationTest<RestoreOrN
 
     public void testRestoreWallet() throws Exception {
 
-        solo.clearEditText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase));
-        solo.enterText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase), RESTORE_SEED);
+        solo.clearEditText((EditText) solo.getView(R.id.restoreOrNew_editText_passphrase));
+        solo.enterText((EditText) solo.getView(R.id.restoreOrNew_editText_passphrase), RESTORE_SEED);
         solo.clickOnView(solo.getView(R.id.restoreOrNew_button_restoreWallet));
 
         checkifMainActivity();
@@ -78,8 +78,8 @@ public class RestoreOrNewActivityTest extends BaseInstrumentationTest<RestoreOrN
 
     public void testRestoreWallet_wrongPassphrase() throws Exception {
         String invalidPassphrase = "some invalid passphrase";
-        solo.clearEditText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase));
-        solo.enterText((EditText) solo.getView(R.id.restoreOrNew_edit_passphrase), invalidPassphrase);
+        solo.clearEditText((EditText) solo.getView(R.id.restoreOrNew_editText_passphrase));
+        solo.enterText((EditText) solo.getView(R.id.restoreOrNew_editText_passphrase), invalidPassphrase);
         solo.clickOnView(solo.getView(R.id.restoreOrNew_button_restoreWallet));
         solo.waitForText(solo.getString(R.string.restoreOrCreate_toast_restoreFailed), 0, TIMEOUT);
 

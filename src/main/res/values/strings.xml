@@ -304,7 +304,8 @@
 
     <!-- Shared Preferences -->
     <string name="sharedPreferences_isFirstTime">isFirstTime</string>
-    <string name="stored_username"></string>
+    <string name="sharedPreferences_username">Set Your Username</string>
+    <string name="sharedPreferences_usernameDescription">Other CoinBlesk users will see this username when they receive bitcoins from you.</string>
     <string name="sharedPreferences_numberOfLastTransactionsTitle">Number of last transactions</string>
     <string name="sharedPreferences_numberOfLastTransactionsDescription">Number of last transactions to show in account overview (enter number from 1 to 5)</string>
 
@@ -382,6 +383,8 @@
     <string name="restoreOrNew_title">Wallet Setup</string>
 
     <!--Restore or Create New Wallet-->
+    <string name="restoreOrNew_username_placeholder">Please enter a Username...</string>
+    <string name="restoreOrNew_usernameMissing_toast">Please enter a Username</string>
     <string name="restoreOrCreate_passphrase_placeholder">Enter Backup Phrase...</string>
     <string name="restoreOrCreate_toast_restoreFailed">Failed to restore wallet. Are you sure you entered the backup phrase correctly?</string>
 

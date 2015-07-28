@@ -16,6 +16,16 @@ public class MemoryStorageHandler implements StorageHandler {
     private String serverWatchingKey;
 
     @Override
+    public String getUsername() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public void setUsername(String username) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
     public Set<String> getAddressBook() {
         throw new UnsupportedOperationException("Not implemented");
     }
