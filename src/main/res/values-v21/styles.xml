@@ -3,6 +3,6 @@
           Base application theme for API 21+. This theme replaces
           MyTheme from resources/values/styles.xml on API 21+ devices.
       -->
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
     </style>
 </resources>
