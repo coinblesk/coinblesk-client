@@ -126,7 +126,7 @@ public class CurrencyViewHandler {
 	 */
 	public static String getBitcoinUnit(Context context) {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-		String bitcoinUnit = settings.getString("bitcoin_list", "");
+		String bitcoinUnit = settings.getString("bitcoin_unit", "");
 
 		if (bitcoinUnit.equals(Constants.MICRO_BTC)) {
 			return "μBTC";
@@ -150,7 +150,7 @@ public class CurrencyViewHandler {
 	 */
 	public static BigDecimal getBitcoinsRespectingUnit(BigDecimal amountBtc, Context context) {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-		String bitcoinUnit = settings.getString("bitcoin_list", "");
+		String bitcoinUnit = settings.getString("bitcoin_unit", "");
 		if (bitcoinUnit.equals(Constants.MICRO_BTC)) {
 			return amountBtc.divide(new BigDecimal("1000000"));
 		} else if (bitcoinUnit.equals(Constants.MILI_BTC)) {
@@ -193,7 +193,7 @@ public class CurrencyViewHandler {
 	 */
 	public static BigDecimal getBTCAmountInDefinedUnit(BigDecimal amountBtc, Context context) {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-		String bitcoinUnit = settings.getString("bitcoin_list", "");
+		String bitcoinUnit = settings.getString("bitcoin_unit", "");
 		BigDecimal factor;
 		if (bitcoinUnit.equals(Constants.MICRO_BTC)) {
 			factor = new BigDecimal("1000000");

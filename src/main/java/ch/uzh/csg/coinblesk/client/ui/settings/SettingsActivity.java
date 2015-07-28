@@ -83,7 +83,19 @@ public class SettingsActivity extends BaseActivity {
 			}
 		});
 
+		// special listener for exchange settings.
         prefs.registerOnSharedPreferenceChangeListener(application.getMerchantModeManager());
+
+		// special listener for username -> store in storage handler
+		prefs.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
+			@Override
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if(key.equals("username")) {
+					getCoinBleskApplication().getStorageHandler().setUsername(sharedPreferences.getString(key, "Anonymous"));
+				}
+			}
+		});
+
 	}
 
 	@Override
@@ -235,7 +247,7 @@ public class SettingsActivity extends BaseActivity {
 			addPreferencesFromResource(R.xml.pref_general);
 			PreferenceCategory fakeHeader = new PreferenceCategory(getActivity());
 			getPreferenceScreen().addPreference(fakeHeader);
-			bindPreferenceSummaryToValue(findPreference("bitcoin_list"));
+			bindPreferenceSummaryToValue(findPreference("bitcoin_unit"));
 		}
 	}
 

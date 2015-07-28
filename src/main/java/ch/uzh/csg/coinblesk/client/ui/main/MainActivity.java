@@ -168,6 +168,12 @@ public class MainActivity extends AbstractPaymentActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        // do nothing...
+        // prevents going back to the RestoreOrNewActivity from the home screen...
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);

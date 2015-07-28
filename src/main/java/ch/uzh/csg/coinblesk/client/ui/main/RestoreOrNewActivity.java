@@ -2,9 +2,11 @@ package ch.uzh.csg.coinblesk.client.ui.main;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -37,6 +39,7 @@ public class RestoreOrNewActivity extends WalletActivity {
     private Button mRestoreWalletButton;
     private Button mCreateNewWalletButton;
     private EditText mBackupPhraseField;
+    private EditText mUsernameField;
 
     private StorageHandler storageHandler;
 
@@ -47,7 +50,8 @@ public class RestoreOrNewActivity extends WalletActivity {
 
         mRestoreWalletButton = (Button) findViewById(R.id.restoreOrNew_button_restoreWallet);
         mCreateNewWalletButton = (Button) findViewById(R.id.restoreOrNew_button_createNewWallet);
-        mBackupPhraseField = (EditText) findViewById(R.id.restoreOrNew_edit_passphrase);
+        mBackupPhraseField = (EditText) findViewById(R.id.restoreOrNew_editText_passphrase);
+        mBackupPhraseField = (EditText) findViewById(R.id.restoreOrNew_editText_username);
 
         storageHandler = getCoinBleskApplication().getStorageHandler();
     }
@@ -151,6 +155,10 @@ public class RestoreOrNewActivity extends WalletActivity {
             @Override
             public void onClick(View v) {
 
+                if (isUsernameMissing()) {
+                    return;
+                }
+
                 getSetupInfo(new RequestCompleteListener<SetupRequestObject>() {
                     @Override
                     public void onTaskComplete(final SetupRequestObject response) {
@@ -167,8 +175,6 @@ public class RestoreOrNewActivity extends WalletActivity {
                         }
                     }
                 });
-
-
             }
         });
     }
@@ -177,6 +183,11 @@ public class RestoreOrNewActivity extends WalletActivity {
         mCreateNewWalletButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (isUsernameMissing()) {
+                    return;
+                }
+
                 LOGGER.debug("Setting up a new wallet...");
                 getSetupInfo(new RequestCompleteListener<SetupRequestObject>() {
                     @Override
@@ -197,10 +208,28 @@ public class RestoreOrNewActivity extends WalletActivity {
     }
 
     private void startMainActivity() {
+
+        // save the username before starting the main activity
+        String username = mUsernameField.getText().toString();
+        getCoinBleskApplication().getStorageHandler().setUsername(username);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putString("username", username).apply();
+
+        // init the wallet service and start the main activity
         getWalletService().init(getCoinBleskApplication().getStorageHandler());
         Intent intent = new Intent(RestoreOrNewActivity.this, MainActivity.class);
         dismissProgressDialog();
         startActivity(intent);
+        finish();
+    }
+
+    private boolean isUsernameMissing() {
+        // check if username is set
+        if(mUsernameField.getText().toString().isEmpty()) {
+            displayResponse(getString(R.string.restoreOrNew_usernameMissing_toast));
+            return true;
+        }
+        return false;
     }
 
 }

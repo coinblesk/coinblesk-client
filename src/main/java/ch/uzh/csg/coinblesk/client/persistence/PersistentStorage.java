@@ -25,6 +25,9 @@ public interface PersistentStorage {
     void setRefundTxValidBlock(long validBlockNr);
     long getRefundTxValidBlock();
 
+    void setUsername(String username);
+    String getUsername();
+
     /**
      * Deletes all data
      */

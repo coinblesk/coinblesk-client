@@ -5,6 +5,9 @@ package ch.uzh.csg.coinblesk.client.wallet;
  */
 public abstract class WalletListener {
 
+    /**
+     * Is notified when bitcoins are received or sent from this wallet.
+     */
     public abstract void onWalletChange();
 
 }

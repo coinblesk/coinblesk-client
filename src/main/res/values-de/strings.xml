@@ -306,6 +306,8 @@
     <!-- Shared Preferences -->
     <string name="stored_username"></string>
     <string name="sharedPreferences_isFirstTime"></string>
+    <string name="sharedPreferences_username">Username wählen</string>
+    <string name="sharedPreferences_usernameDescription">Dieser Username wird bei anderen CoinBlesk Benutzern angezeigt, wenn Zahlungen ausgeführt werden.</string>
     <string name="sharedPreferences_numberOfLastTransactionsTitle">Anzahl letzter Transaktionen</string>
     <string name="sharedPreferences_numberOfLastTransactionsDescription">Anzahl anzuzeigende letzte Transaktionen in Kontoübersicht (Nummer zwischen 1 und 5 eingeben)</string>
 

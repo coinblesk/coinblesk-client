@@ -34,6 +34,16 @@ public class PersistentStorageHandler implements StorageHandler {
     }
 
     @Override
+    public String getUsername() {
+        return data.getUsername();
+    }
+
+    @Override
+    public void setUsername(String username) {
+        data.setUsername(username);
+    }
+
+    @Override
     public Set<String> getAddressBook() {
         if (addressbook == null) {
             addressbook = data.getAddressBookContacts();

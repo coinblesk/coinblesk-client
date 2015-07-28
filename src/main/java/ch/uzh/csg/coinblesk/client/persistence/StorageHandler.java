@@ -9,6 +9,9 @@ import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
  */
 public interface StorageHandler {
 
+    String getUsername();
+    void setUsername(String username);
+
     /**
      * Returns an alphabetically ordered Set<String> with all usernames stored
      * in address book.

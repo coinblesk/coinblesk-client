@@ -17,16 +17,8 @@
         android:title="@string/pref_title_bitcoin_unit" />
 
       <EditTextPreference
-          android:defaultValue="@string/settings_autoAccept_editText_defaultValue"
-          android:dependency="auto_accept"
-          android:numeric="integer"
-          android:inputType="number"
-          android:key="auto_accept_amount"
-          android:maxLength="3"
-          android:maxLines="1"
-          android:selectAllOnFocus="true"
-          android:singleLine="true"
-          android:title="@string/settings_autoAccept_editText_title" />
-
+          android:title="@string/sharedPreferences_username"
+          android:summary="@string/sharedPreferences_usernameDescription"
+          android:key="username"/>
 
 </PreferenceScreen>
