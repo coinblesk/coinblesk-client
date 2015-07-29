@@ -51,7 +51,7 @@ public class RestoreOrNewActivity extends WalletActivity {
         mRestoreWalletButton = (Button) findViewById(R.id.restoreOrNew_button_restoreWallet);
         mCreateNewWalletButton = (Button) findViewById(R.id.restoreOrNew_button_createNewWallet);
         mBackupPhraseField = (EditText) findViewById(R.id.restoreOrNew_editText_passphrase);
-        mBackupPhraseField = (EditText) findViewById(R.id.restoreOrNew_editText_username);
+        mUsernameField = (EditText) findViewById(R.id.restoreOrNew_editText_username);
 
         storageHandler = getCoinBleskApplication().getStorageHandler();
     }
