@@ -2,6 +2,7 @@ package ch.uzh.csg.coinblesk.client.wallet;
 
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Base64;
@@ -49,7 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 import java.util.concurrent.locks.ReentrantLock;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
@@ -100,10 +101,19 @@ public class WalletService extends android.app.Service {
     private SyncProgress syncProgress;
     private Map<String, WalletListener> listeners;
 
+    private final Handler handler;
 
     public WalletService() {
         this.syncProgress = new SyncProgress();
         this.listeners = new HashMap<>();
+
+        // set user thread
+        this.handler = new Handler();
+        Threading.USER_THREAD = new Executor() {
+            @Override public void execute(Runnable runnable) {
+                handler.post(runnable);
+            }
+        };
     }
 
     /**
@@ -349,7 +359,7 @@ public class WalletService extends android.app.Service {
                     }
 
                 }
-            }, Executors.newSingleThreadExecutor());
+            }, Threading.USER_THREAD);
 
             return clientWalletKit.startAsync();
         } finally {

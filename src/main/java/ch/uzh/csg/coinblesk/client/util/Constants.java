@@ -23,11 +23,6 @@ public class Constants {
 	public static final String MICRO_BTC = "1";
 
 	/**
-	 * Regex pattern for usernames
-	 */
-	public static final String USERNAME_PATTERN = "^[A-Za-z0-9_-]{3,25}$";
-
-	/**
 	 * Decimal points of CHF amounts
 	 */
 	public static final int SCALE_CHF = 2;

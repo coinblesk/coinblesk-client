@@ -7,9 +7,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.method.DigitsKeyListener;
@@ -38,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.security.PublicKey;
 import java.util.ArrayList;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
@@ -50,16 +49,13 @@ import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.customserialization.Currency;
-import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
-import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
-import ch.uzh.csg.coinblesk.util.Converter;
 import ch.uzh.csg.comm.NfcLibException;
 
 /**
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
  */
-public class ReceivePaymentActivity extends AbstractPaymentActivity {
+public class ReceivePaymentActivity extends PaymentActivity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReceivePaymentActivity.class);
 
@@ -83,16 +79,14 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
     private MenuItem sessionCountdownMenuItem;
     private MenuItem sessionRefreshMenuItem;
     private TextView sessionCountdown;
-    private CountDownTimer timer;
-
-    private NfcAdapter nfcAdapter;
-    private boolean serverResponseSuccessful = false;
     private static boolean isPortrait = false;
 
     protected static final String INPUT_UNIT_CHF = "CHF";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        initNfcListener();
 
         isSeller = true;
         super.onCreate(savedInstanceState);
@@ -150,17 +144,34 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
         }
 
         try {
-            MainActivity.initiator.stopInitiating(this);
+            initiator.stopInitiating(this);
 
-        } catch(Throwable e) {
+        } catch (Exception e) {
             LOGGER.error("FAIL:", e);
         }
 
         try {
-            MainActivity.initiator.startInitiating(this);
+            initiator.startInitiating(this);
         } catch (NfcLibException e) {
             LOGGER.debug("NFC failed: ", e);
         }
+
+    }
+
+    private void initNfcListener() {
+        setNfcPaymentListener(new DefaultNfcListener() {
+            @Override
+            public void onPaymentReceived(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
+                super.onPaymentReceived(amount, senderPubKey, senderUserName);
+                showSuccessDialog(false, amount, senderUserName);
+            }
+
+            @Override
+            public void onPaymentFinish(boolean success) {
+                super.onPaymentFinish(success);
+                clearPaymentInfos();
+            }
+        });
     }
 
     @Override
@@ -231,27 +242,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
             }
         }
     }
-
-    protected void startTimer(long duration, long interval) {
-        if (timer != null) {
-            timer.cancel();
-        }
-        timer = new CountDownTimer(duration, interval) {
-
-            @Override
-            public void onFinish() {
-                //Session Timeout is already handled by TimeHandler
-            }
-
-            @Override
-            public void onTick(long millisecondsLeft) {
-                int secondsLeft = (int) Math.round((millisecondsLeft / (double) 1000));
-            }
-        };
-
-        timer.start();
-    }
-
 
     /**
      * Launches request for updating Exchange Rate
@@ -352,9 +342,10 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
 
         if (amountBTC.compareTo(BigDecimal.ZERO) > 0) {
             String address = getWalletService().getBitcoinAddress();
+            String user = getCoinBleskApplication().getStorageHandler().getUsername();
             Preconditions.checkState(BitcoinUtils.isP2SHAddress(address, getCoinBleskApplication().getStorageHandler().getBitcoinNet()), "NFC payments to non-P2SH addresses is not currently supported.");
 
-            Intent paymentRequestIntent = PaymentRequest.create(amountBTC, address, getWalletService().getBitcoinAddress()).getIntent();
+            Intent paymentRequestIntent = PaymentRequest.create(amountBTC, user, address).getIntent();
             sendBroadcast(paymentRequestIntent);
             showNfcInstructions();
         } else {
@@ -379,7 +370,6 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
      */
     private void showNfcInstructions() {
         findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.VISIBLE);
-        ;
         ImageView nfcActivity = (ImageView) findViewById(R.id.receivePayment_nfcIcon);
         nfcActivity.setVisibility(View.VISIBLE);
         nfcActivity.setBackgroundResource(R.drawable.animation_nfc);
@@ -473,42 +463,25 @@ public class ReceivePaymentActivity extends AbstractPaymentActivity {
     };
 
     /**
-     * Launches request to send a new transaction to the server.
-     *
-     * @param serverPaymentRequest object with transaction details
-     */
-    private void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    /**
      * Shows a dialog indicating if transaction was successful or not.
      *
-     * @param object    (object with {@link PaymentResponse})
      * @param isSending (isSending = true if initiator sends bitcoins, false if initiator requests bitcoins)
      */
-    private void showSuccessDialog(Object object, boolean isSending) {
-        dismissNfcInProgressDialog();
+    private void showSuccessDialog(boolean isSending, BigDecimal amountBtc, String user) {
         String answer;
-        if (object == null || !(object instanceof PaymentResponse)) {
-            answer = getResources().getString(R.string.error_transaction_failed);
-        } else {
-            PaymentResponse pr = (PaymentResponse) object;
-            BigDecimal amountBtc = Converter.getBigDecimalFromLong(pr.getAmount());
 
-            if (isSending) {
-                getCoinBleskApplication().getStorageHandler().addAddressBookEntry(pr.getUsernamePayee());
-                answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
-                        CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")",
-                        pr.getUsernamePayee());
-            } else {
-                getCoinBleskApplication().getStorageHandler().addAddressBookEntry(pr.getUsernamePayer());
-                answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
-                        CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")",
-                        pr.getUsernamePayer());
-            }
+        if (isSending) {
+            getCoinBleskApplication().getStorageHandler().addAddressBookEntry(user);
+            answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
+                    CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")", user);
+        } else {
+            getCoinBleskApplication().getStorageHandler().addAddressBookEntry(user);
+            answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
+                    CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")", user);
         }
+
         showDialog(answer, true);
+
     }
 
     //Tablet View, define more or adapt buttons for quickly entering fixed prices as in shops etc. here and in sw720dp\activity_receive_payment

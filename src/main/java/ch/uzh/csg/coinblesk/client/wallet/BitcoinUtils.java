@@ -38,6 +38,10 @@ public class BitcoinUtils {
         return Coin.valueOf(satoshi);
     }
 
+    public static BigDecimal satoshiToBigDecimal(long satoshi) {
+        return new BigDecimal(Coin.valueOf(satoshi).toPlainString());
+    }
+
     /**
      * Checvks if the passed mnemonic is a valid BIP32 mnemonic seed
      *
