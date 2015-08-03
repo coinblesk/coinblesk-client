@@ -274,6 +274,14 @@ public class WalletService extends android.app.Service {
 
         // notify listeners about wallet changes
         initTxListener();
+
+
+        // for debugging
+        LOGGER.debug("Transactions stored in wallet:");
+        for(Transaction tx : getAppKit().wallet().getTransactions(true)) {
+            LOGGER.debug(tx.toString());
+            LOGGER.debug("Confidence: {}", tx.getConfidence());
+        }
     }
 
     private Service init(StorageHandler storage, @Nullable String mnemonic, @Nullable Long creationTime) {

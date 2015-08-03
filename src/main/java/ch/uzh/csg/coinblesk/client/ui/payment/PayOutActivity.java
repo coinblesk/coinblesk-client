@@ -203,26 +203,16 @@ public class PayOutActivity extends WalletActivity {
 
         getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
             public void onTaskComplete(final ExchangeRateTransferObject response) {
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dismissProgressDialog();
-                        if (response.isSuccessful()) {
-                            exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
-                            final BigDecimal balance = getWalletService().getBalance();
-                            CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
-
-                        } else {
-                            exchangeRate = BigDecimal.ZERO;
-                            displayResponse(response.getMessage());
-                            chfBalance.setText("");
-                        }
-                        initClickListener();
-                    }
-                });
-
-
+                dismissProgressDialog();
+                if (response.isSuccessful()) {
+                    exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
+                    final BigDecimal balance = getWalletService().getBalance();
+                    CurrencyViewHandler.setToCHF(chfBalance, exchangeRate, balance);
+                } else {
+                    exchangeRate = BigDecimal.ZERO;
+                    chfBalance.setText("");
+                }
+                initClickListener();
             }
         });
     }

@@ -11,7 +11,7 @@ public class Constants {
 	/**
 	 * The base URL of the server.
 	 */
-	public static final String BASE_URL = "http://192.168.0.101:8080/coinblesk";
+	public static final String BASE_URL = "http://192.168.1.129:8080/coinblesk";
 
 	/**
 	 * Amount of confirmations a transaction needs to be considered as confirmed

@@ -169,6 +169,7 @@ public class ReceivePaymentActivity extends PaymentActivity {
             public void onPaymentFinish(boolean success) {
                 super.onPaymentFinish(success);
 
+
                 try {
                     // reset NFC state
                     initiator.stopInitiating(ReceivePaymentActivity.this);

@@ -18,7 +18,6 @@ public class NfcPaymentListener {
     }
 
     public void onPaymentSuccess(BigDecimal amount, PublicKey receiverPubKey, String receiverUserName) {
-        onPaymentFinish(true);
     }
 
     public void onPaymentError(String msg) {

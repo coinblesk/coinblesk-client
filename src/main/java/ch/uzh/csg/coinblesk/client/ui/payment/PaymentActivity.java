@@ -297,6 +297,7 @@ public abstract class PaymentActivity extends WalletActivity {
                 if (protocol.type() == PaymentProtocol.Type.PAYMENT_OK) {
                     LOGGER.info("NFC payment complete!");
                     current = State.INIT;
+                    listener.onPaymentFinish(true);
                 }
 
             }
