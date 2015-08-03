@@ -49,7 +49,7 @@
     <string name="signUpCheckBox">Ich stimme den AGBs zu</string>
     <string name="signUpAgreeBtn">Registrieren</string>
     <string name="registration_field_not_empty">Bitte alle Felder ausfüllen.</string>
-    <string name="registration_email_not_valid">E-Mail Adresse ist nicht gültig.</string>
+    <string name="email_address_not_valid">E-Mail Adresse ist nicht gültig.</string>
     <string name="registration_password_lenght_error">Passwort ungültig. Bitte verwenden Sie ein Passwort mit 4 bis 20 Zeichen.</string>
     <string name="registration_username_error">Benutzername ungültig. \nNur Buchstaben und Nummern mit minimal 4 Zeichen sind erlaubt.</string>
     <string name="registration_tou_not_accepted">Bitte lesen und akzeptieren Sie die AGB.</string>
@@ -148,7 +148,7 @@
     <string name="payIn_instruction">Bitte überweisen Sie ihre Bitcoins an die folgende BTC-Adresse. Sobald die Überweisung im BTC-Netzwerk 6x bestätigt ist wird der Betrag ihrem Konto gutgeschrieben. Dies dauert ungefähr eine Stunde.</string>
     <string name="payIn_copy">In Zwischenablage kopieren</string>
     <string name="copy_clipboard">Adresse in Zwischenablage gespeichert</string>
-    <string name="payIn_sendMail">Adresse als Email erhalten</string>
+    <string name="payIn_sendMail">Adresse per Email senden</string>
     <string name="payIn_addressTitle">Bitcoin Adresse:</string>
     <string name="payIn_showQR">QR Code anzeigen</string>
     <string name="payIn_closeQR">Schliessen</string>

@@ -1,29 +1,34 @@
-package ch.uzh.csg.coinblesk.client.persistence;
+package ch.uzh.csg.coinblesk.client.storage;
 
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.SharedPreferencesBackupHelper;
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import android.util.Base64;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Set;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import ch.uzh.csg.coinblesk.client.wallet.RefundTx;
 
-public class CoinBleskCloudData  extends BackupAgentHelper implements PersistentStorage {
+public class CoinBleskCloudData  extends BackupAgentHelper implements PreferencesHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CoinBleskCloudData.class);
-    
+
     // The names of the SharedPreferences groups that the application maintains.  These
     // are the same strings that are passed to getSharedPreferences(String, int).
-    public final String COINBLSEK_DATA = "CoinBleskSharedData";
+    public static final String COINBLSEK_DATA = "CoinBleskSharedData";
 
     // An arbitrary string used within the BackupAgentHelper implementation to
     // identify the SharedPreferenceBackupHelper's data.
@@ -31,18 +36,28 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
 
     public static final String BITCOIN_NET = "bitcoin-net";
     public static final String SERVER_WATCHING_KEY = "server-watching-key";
-    public static final String CONTACTS = "contacts";
-    public static final String TRUSTED_CONTACTS = "trusted-contacts";
     public static final String REFUND_TX = "refund-tx";
     public static final String REFUND_TX_VALID_BLOCK = "refund-tx-valid-block";
     public static final String USERNAME = "username";
+    public static final String PRIV_KEY = "private-key";
+    public static final String PUB_KEY = "public-key";
 
     private SharedPreferences prefs;
-    private Gson gson;
+
+    private final static KeyFactory keyFactory;
+
+    static {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+        try {
+            keyFactory = KeyFactory.getInstance("ECDSA", "SC");
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public CoinBleskCloudData(Context context) {
         this.prefs = new CloudBackedSharedPreferences(COINBLESK_PREFS_BACKUP_KEY, context);
-        this.gson = new GsonBuilder().create();
+
     }
 
     public CoinBleskCloudData() {
@@ -53,61 +68,11 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
         super.onCreate();
 
         this.prefs = new CloudBackedSharedPreferences(COINBLESK_PREFS_BACKUP_KEY, getApplicationContext());
-        this.gson = new GsonBuilder().create();
 
         // allocate a helper and install it
         SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, COINBLSEK_DATA);
         addHelper(COINBLESK_PREFS_BACKUP_KEY, helper);
-    }
-    
-    @Override
-    public void removeTrustedAddressBookEntry(String username) {
-        Set<String> addresses = getAddresses(true);
-        addresses.remove(username);
-        saveAddressBook(addresses, true);
-    }
 
-    @Override
-    public void removeAddressBookContact(String username) {
-        Set<String> addresses = getAddresses(false);
-        addresses.remove(username);
-        saveAddressBook(addresses, true);
-    }
-
-    @Override
-    public void addTrustedAddressBookContact(String username) {
-        Set<String> addresses = getAddresses(true);
-        addresses.add(username);
-        saveAddressBook(addresses, true);
-    }
-
-    @Override
-    public Set<String> getTrusteAddressBookdContacts() {
-        return getAddresses(true);
-    }
-
-    @Override
-    public void addAddressBookContact(String username) {
-        Set<String> contactSet = getAddresses(false);
-        contactSet.add(username);
-        saveAddressBook(contactSet, false);
-    }
-
-    private void saveAddressBook(Collection<String> contacts, boolean trustet) {
-        String[] contactArray = contacts.toArray(new String[contacts.size()]);
-        String json = gson.toJson(contactArray);
-        prefs.edit().putString(trustet ? TRUSTED_CONTACTS : CONTACTS, json).commit();
-    }
-
-    private Set<String> getAddresses(boolean trustet) {
-        String json = prefs.getString(trustet ? TRUSTED_CONTACTS : CONTACTS, "[]");
-        String[] contacts = gson.fromJson(json, String[].class);
-        return Sets.newHashSet(contacts);
-    }
-
-    @Override
-    public Set<String> getAddressBookContacts() {
-        return getAddresses(false);
     }
 
     @Override
@@ -117,7 +82,6 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
 
     @Override
     public void setServerWatchingKey(String serverWatchingKey) {
-        LOGGER.debug("Saved server watching key: {}", serverWatchingKey);
         prefs.edit().putString(SERVER_WATCHING_KEY, serverWatchingKey).commit();
     }
 
@@ -128,7 +92,6 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
 
     @Override
     public void setBitcoinNet(String bitcoinNet) {
-        LOGGER.debug("Saved server bitcoin network: {}", bitcoinNet);
         prefs.edit().putString(BITCOIN_NET, bitcoinNet).commit();
     }
 
@@ -160,6 +123,33 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Persistent
     @Override
     public String getUsername() {
         return prefs.getString(USERNAME, null);
+    }
+
+    @Override
+    public void setKeyPair(KeyPair keyPair) {
+        byte[] privKey = keyPair.getPrivate().getEncoded();
+        byte[] pubKey = keyPair.getPublic().getEncoded();
+
+        prefs.edit().putString(PUB_KEY, Base64.encodeToString(pubKey, Base64.NO_WRAP)).commit();
+        prefs.edit().putString(PRIV_KEY, Base64.encodeToString(privKey, Base64.NO_WRAP)).commit();
+    }
+
+    @Override
+    public KeyPair getKeyPair() {
+
+        String privKeyBase64 = prefs.getString(PRIV_KEY, null);
+        String pubKeyBase64 = prefs.getString(PUB_KEY, null);
+
+        if(privKeyBase64 == null || pubKeyBase64 == null) { return null; }
+
+        try {
+            PrivateKey privKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(privKeyBase64, Base64.NO_WRAP)));
+            PublicKey pubKey = keyFactory.generatePublic(new X509EncodedKeySpec(Base64.decode(pubKeyBase64, Base64.NO_WRAP)));
+            return new KeyPair(pubKey, privKey);
+        } catch (InvalidKeySpecException e) {
+            LOGGER.error("Failed to deserialize key pair...");
+            return null;
+        }
     }
 
     @Override

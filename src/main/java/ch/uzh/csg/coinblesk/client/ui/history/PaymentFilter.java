@@ -6,17 +6,17 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-import ch.uzh.csg.coinblesk.client.wallet.TransactionObject;
+import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 
 /**
  * Created by rvoellmy on 5/25/15.
  */
 public class PaymentFilter extends Filter {
 
-    private final List<TransactionObject> originalTransactions;
-    private final List<TransactionObject> filteredTransactions;
+    private final List<TransactionMetaData> originalTransactions;
+    private final List<TransactionMetaData> filteredTransactions;
 
-    public PaymentFilter(HistoryAdapter adapter, List<TransactionObject> originalTransactions) {
+    public PaymentFilter(HistoryAdapter adapter, List<TransactionMetaData> originalTransactions) {
         this.originalTransactions = originalTransactions;
         this.filteredTransactions = Lists.newArrayListWithExpectedSize(originalTransactions.size());
     }

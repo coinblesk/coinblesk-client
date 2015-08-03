@@ -13,7 +13,7 @@ import org.junit.Before;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
-import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.PersistentStorageHandler;
 import testutils.BitcoinTestUtils;
 
 /**

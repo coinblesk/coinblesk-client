@@ -1,6 +1,7 @@
 package ch.uzh.csg.coinblesk.client.util;
 
 import org.bitcoinj.core.BitcoinSerializer;
+import org.bitcoinj.core.HeadersMessage;
 import org.bitcoinj.core.Peer;
 import org.bitcoinj.core.PeerGroup;
 import org.bitcoinj.net.NioClientManager;
@@ -23,6 +24,8 @@ public class LoggingConfig {
         ((Logger) LoggerFactory.getLogger(Peer.class)).setLevel(Level.ERROR);
         ((Logger) LoggerFactory.getLogger(PeerGroup.class)).setLevel(Level.WARN);
         ((Logger) LoggerFactory.getLogger(NioClientManager.class)).setLevel(Level.WARN);
+        ((Logger) LoggerFactory.getLogger(HeadersMessage.class)).setLevel(Level.WARN);
+
     }
 
 }

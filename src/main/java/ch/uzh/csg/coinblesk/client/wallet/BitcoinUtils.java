@@ -1,9 +1,14 @@
 package ch.uzh.csg.coinblesk.client.wallet;
 
+import android.content.Context;
+import android.text.format.DateUtils;
+import android.util.Base64;
+
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Transaction;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
@@ -15,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
@@ -114,5 +120,50 @@ public class BitcoinUtils {
         } catch (AddressFormatException e) {
             return false;
         }
+    }
+
+    /**
+     * @return a P2SH, created from a given script hash.
+     */
+    public static String getAddressFromScriptHash(byte[] scriptHash, BitcoinNet bitcoinNet) {
+        return Address.fromP2SHHash(getNetworkParameters(bitcoinNet), scriptHash).toString();
+    }
+
+    /**
+     * Takes a raw transaction and returns the transaction hash
+     *
+     * @param rawTx the raw transaction to get the hash from
+     * @return the hash of the transaction (txId)
+     */
+    public static String getTxHash(byte[] rawTx, BitcoinNet bitcoinNet) {
+        Transaction tx = new Transaction(getNetworkParameters(bitcoinNet), rawTx);
+        return tx.getHashAsString();
+    }
+
+    /**
+     * Converts a Base64 encoded transaction to a hex encoded transaction
+     *
+     * @param base64Tx
+     * @return
+     */
+    public static String base64TxToHex(String base64Tx) {
+        byte[] rawTx = Base64.decode(base64Tx, Base64.NO_WRAP);
+        return bytesToHex(rawTx);
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        final char[] hexArray = "0123456789ABCDEF".toCharArray();
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
+    public static String refundTxValidBlockToFriendlyString(long blocksRemaining, Context context) {
+        Date validDate = new Date(System.currentTimeMillis() + 1000 * 60 * 10 * blocksRemaining);
+        return DateUtils.getRelativeDateTimeString(context, validDate.getTime(), DateUtils.WEEK_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0).toString();
     }
 }

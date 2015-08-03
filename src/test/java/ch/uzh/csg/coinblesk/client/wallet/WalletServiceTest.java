@@ -45,8 +45,8 @@ import java.util.Set;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
-import ch.uzh.csg.coinblesk.client.persistence.MemoryStorageHandler;
-import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.MemoryStorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
@@ -56,7 +56,6 @@ import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.SignedTxTransferObject;
-import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 
 /**
  * Created by rvoellmy on 6/7/15.
@@ -64,7 +63,7 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 @PrepareForTest({WalletService.class})
 @RunWith(RobolectricTestRunner.class)
 @PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*", "javax.crypto.*"})
-@Config(manifest = "src/main/AndroidManifest.xml")
+@Config(manifest = "src/main/AndroidManifest.xml", sdk = 21)
 public class WalletServiceTest {
 
     private static final BitcoinNet bitcoinNet = BitcoinNet.UNITTEST;
@@ -191,7 +190,7 @@ public class WalletServiceTest {
                 }
                 Assert.assertTrue("Output was not found in the generated transaction", outputFound);
 
-                TransferObject response = new TransferObject();
+                SignedTxTransferObject response = new SignedTxTransferObject();
                 response.setSuccessful(true);
 
                 return new MockRequestTask(completeListener, response);
@@ -229,6 +228,7 @@ public class WalletServiceTest {
 
         ((CoinBleskApplication) RuntimeEnvironment.application).setStorageHandler(storage);
         walletService.init(storage);
+        walletService.getService().awaitRunning();
 
         // mock server response
         RequestFactory requestFactory = new DefaultRequestFactory() {
@@ -260,7 +260,6 @@ public class WalletServiceTest {
         Thread.sleep(1000);
 
         Assert.assertNotSame(storage.getRefundTxValidBlock(), RefundTx.NO_REFUND_TX_VALID_BLOCK);
-
         Assert.assertNotNull(storage.getRefundTx());
         Transaction refundTx = new Transaction(params, Base64.decode(storage.getRefundTx(), Base64.NO_WRAP));
         Assert.assertTrue(refundTx.isTimeLocked());
@@ -286,6 +285,9 @@ public class WalletServiceTest {
         Address addr2 = privateChain.getKey(KeyChain.KeyPurpose.RECEIVE_FUNDS).toAddress(params);
 
         Assert.assertEquals(addr, addr2);
+
+        // check if we can still get P2SH addresses
+        Assert.assertTrue(BitcoinUtils.isP2SHAddress(walletService.getBitcoinAddress(), bitcoinNet));
 
         // Check if we can send coins without server
         FakeTxBuilder.BlockPair bp = injectTx(addr.toString(), BigDecimal.TEN);
@@ -327,6 +329,7 @@ public class WalletServiceTest {
 
         Set<Transaction> txsAfterRestore = extractAppKit(walletService).wallet().getTransactions(false);
         Assert.assertEquals(txsAfterRestore, txsBeforeRestore);
+
     }
 
     @Test

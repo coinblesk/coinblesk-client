@@ -1,6 +1,11 @@
 package ch.uzh.csg.coinblesk.client.util;
 
+import android.content.Context;
 import android.content.Intent;
+import android.util.Patterns;
+import android.widget.Toast;
+
+import ch.uzh.csg.coinblesk.client.R;
 
 /**
  * Created by rvoellmy on 7/27/15.
@@ -8,27 +13,36 @@ import android.content.Intent;
 public class Mailer {
 
     private String message;
-    private String recipient;
+    private String[] recipients;
     private String subject = "";
 
     public void setMessage(String message) {
         this.message = message;
     }
 
-    public void setRecipient(String recipient) {
-        this.recipient = recipient;
+    public void setRecipient(String... recipients) {
+        this.recipients = recipients;
     }
 
     public void setSubject(String subject) {
         this.subject = subject;
     }
 
-    public Intent getIntent() {
+    public void sendEmail(Context context) {
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("message/rfc822");
-        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{recipient});
+        i.putExtra(Intent.EXTRA_EMAIL  , recipients);
         i.putExtra(Intent.EXTRA_SUBJECT, subject);
         i.putExtra(Intent.EXTRA_TEXT   , message);
-        return i;
+        try {
+            context.startActivity(Intent.createChooser(i, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(context, context.getString(R.string.no_email_client_installed), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    public static boolean validEmail(String email) {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 }

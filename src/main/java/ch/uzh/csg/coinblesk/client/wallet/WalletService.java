@@ -2,7 +2,6 @@ package ch.uzh.csg.coinblesk.client.wallet;
 
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Base64;
@@ -50,13 +49,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 
@@ -101,19 +101,9 @@ public class WalletService extends android.app.Service {
     private SyncProgress syncProgress;
     private Map<String, WalletListener> listeners;
 
-    private final Handler handler;
-
     public WalletService() {
         this.syncProgress = new SyncProgress();
         this.listeners = new HashMap<>();
-
-        // set user thread
-        this.handler = new Handler();
-        Threading.USER_THREAD = new Executor() {
-            @Override public void execute(Runnable runnable) {
-                handler.post(runnable);
-            }
-        };
     }
 
     /**
@@ -356,10 +346,11 @@ public class WalletService extends android.app.Service {
                         postInit();
                     } catch (IllegalStateException e) {
                         // this happens if the wallet service was shut somewhere in the process of this. Not a problem
+                        LOGGER.debug("Post init failed", e);
                     }
 
                 }
-            }, Threading.USER_THREAD);
+            }, Executors.newSingleThreadExecutor());
 
             return clientWalletKit.startAsync();
         } finally {
@@ -443,7 +434,7 @@ public class WalletService extends android.app.Service {
         }
     }
 
-    private void createPayment(Address address, Coin amount, boolean nfcPayment) throws AddressFormatException, InsufficientMoneyException {
+    private String createPayment(Address address, Coin amount, boolean nfcPayment) throws AddressFormatException, InsufficientMoneyException {
 
         // create the send request
         Wallet.SendRequest req = Wallet.SendRequest.to(address, amount);
@@ -454,18 +445,21 @@ public class WalletService extends android.app.Service {
 
         getAppKit().wallet().completeTx(req);
 
-        if (nfcPayment) return; // we are not responsible for sending the tx to the server....
+        if (nfcPayment)
+            return req.tx.getHashAsString(); // we are not responsible for sending the tx to the server....
 
         for (TransactionInput txIn : req.tx.getInputs()) {
             if (txIn.getConnectedOutput().getScriptPubKey().isPayToScriptHash()) {
                 // at least one input needs to be signed by the server,
                 // which means that we are not responsible for broadcasting the transaction
-                return;
+                return req.tx.getHashAsString();
             }
         }
 
         getAppKit().peerGroup().broadcastTransaction(req.tx);
         getAppKit().wallet().maybeCommitTx(req.tx);
+
+        return req.tx.getHashAsString();
     }
 
     /**
@@ -476,7 +470,7 @@ public class WalletService extends android.app.Service {
      * P2PKH address, the bitcoins will be lost forever!
      *
      * @param scriptHash the hash of the redeem script (P2SH address)
-     * @param satoshis the amount to send, in satoshis
+     * @param satoshis   the amount to send, in satoshis
      * @return The byte serialized JSON of the {@link ServerSignatureRequestTransferObject}.
      * @throws AddressFormatException
      * @throws InsufficientMoneyException
@@ -495,10 +489,10 @@ public class WalletService extends android.app.Service {
         }
     }
 
-    public void createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
+    public String createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
         NetworkParameters params = getNetworkParams(bitcoinNet);
         Address btcAddress = new Address(params, address);
-        createPayment(btcAddress, BitcoinUtils.bigDecimalToCoin(amount), false);
+        return createPayment(btcAddress, BitcoinUtils.bigDecimalToCoin(amount), false);
     }
 
     /**
@@ -601,10 +595,6 @@ public class WalletService extends android.app.Service {
             Wallet.SendRequest req = Wallet.SendRequest.emptyWallet(privateAddr);
             req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
 
-            // calculate the blocktime.
-            long lockTime = getLockTime(REFUND_LOCKTIME_MONTH);
-            req.tx.setLockTime(lockTime);
-
             // at least one input needs a so-called sequence number set to 0.
             // For details, see: https://bitcoin.org/en/developer-guide#locktime-and-sequence-number
             List<Transaction> unspents = new ArrayList<>(getAppKit().wallet().getTransactionPool(WalletTransaction.Pool.UNSPENT).values());
@@ -623,8 +613,13 @@ public class WalletService extends android.app.Service {
             }
             Preconditions.checkNotNull(outputToAdd, "Couldn't find an unspent output that belongs to us");
             req.tx.addInput(outputToAdd);
-
             req.tx.getInput(0).setSequenceNumber(0);
+
+            // set the locktime
+            long lockTime = getLockTime(REFUND_LOCKTIME_MONTH);
+            req.tx.setLockTime(lockTime);
+
+
             req.tx.setMemo(DefaultTransactionMemos.REFUND_TX_MEMO);
 
             getAppKit().wallet().completeTx(req);
@@ -641,11 +636,14 @@ public class WalletService extends android.app.Service {
     }
 
     public TransactionHistory getTransactionHistory() {
-        int maxNumberOfTransactions = 500;
+        return getTransactionHistory(200);
+    }
+
+    public TransactionHistory getTransactionHistory(int maxNumberOfTransactions) {
 
         List<Transaction> txs = getAppKit().wallet().getRecentTransactions(maxNumberOfTransactions, false);
 
-        List<TransactionObject> allTransactions = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
+        List<TransactionMetaData> allTransactions = Lists.newArrayListWithCapacity(maxNumberOfTransactions);
 
 
         for (Transaction tx : txs) {
@@ -654,22 +652,25 @@ public class WalletService extends android.app.Service {
             BigDecimal amount = BitcoinUtils.coinToBigDecimal(tx.getValue(getAppKit().wallet()));
 
             // now let's translate the bitcoinJ Transaction to our simplified Transaction object
-            TransactionObject transaction = new TransactionObject();
+            TransactionMetaData transaction = storage.getTransactionMetaData(tx.getHashAsString());
+            transaction = transaction != null ? transaction : new TransactionMetaData();
+
             transaction.setAmount(amount.abs());
             transaction.setTimestamp(tx.getUpdateTime());
+            transaction.setConfirmations(tx.getConfidence().getDepthInBlocks());
 
             if (amount.signum() < 0) {
                 // negative amount -> pay out
-                transaction.setType(TransactionObject.TransactionType.PAY_OUT);
+                transaction.maybeSetType(TransactionMetaData.TransactionType.PAY_OUT);
             } else {
                 // positive amount -> pay in
                 if (tx.getConfidence().getDepthInBlocks() >= Constants.MIN_CONFIRMATIONS) {
                     // confirmed tx
-                    transaction.setType(TransactionObject.TransactionType.PAY_IN);
+                    transaction.maybeSetType(TransactionMetaData.TransactionType.PAY_IN);
                 } else {
                     // TODO: work with confidence instead of confirmations
                     // unconfirmed tx
-                    transaction.setType(TransactionObject.TransactionType.PAY_IN_UNVERIFIED);
+                    transaction.maybeSetType(TransactionMetaData.TransactionType.PAY_IN_UNVERIFIED);
                 }
             }
 
@@ -682,13 +683,27 @@ public class WalletService extends android.app.Service {
     /**
      * Adds a raw transaction to the wallet, if not already present, and broadcasts it to the network.
      *
-     * @param txBytes
+     * @param txBytes   the raw transaction
+     * @param instantTx true if this is a transaction signed by the server
+     * @return the transaction hash
      */
-    public void commitAndBroadcastTx(byte[] txBytes) {
+    public String commitAndBroadcastTx(byte[] txBytes, boolean instantTx) {
+
         Transaction tx = new Transaction(getNetworkParams(bitcoinNet), txBytes);
-        tx.setMemo(DefaultTransactionMemos.SERVER_SIGNED_TX);
-        getAppKit().wallet().maybeCommitTx(tx);
-        getAppKit().peerGroup().broadcastTransaction(tx);
+        if (instantTx) tx.setMemo(DefaultTransactionMemos.SERVER_SIGNED_TX);
+
+        try {
+            // check if we have this transaction already in our wallet. This is well possible, because the
+            // server also broadcasts the transaction, and maybe we already received it.
+            if (getAppKit().wallet().getTransaction(tx.getHash()) == null) {
+                getAppKit().wallet().maybeCommitTx(tx);
+                getAppKit().peerGroup().broadcastTransaction(tx);
+            }
+        } catch (IllegalStateException e) {
+            LOGGER.error("Failed to commit and broadcast transaction. ", e);
+        }
+
+        return tx.getHashAsString();
     }
 
     /**

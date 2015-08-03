@@ -14,7 +14,6 @@ import com.xeiam.xchange.currency.CurrencyPair;
 import com.xeiam.xchange.dto.Order;
 import com.xeiam.xchange.dto.trade.LimitOrder;
 import com.xeiam.xchange.kraken.KrakenExchange;
-import com.xeiam.xchange.service.polling.marketdata.PollingMarketDataService;
 import com.xeiam.xchange.service.polling.trade.PollingTradeService;
 
 import org.slf4j.Logger;
@@ -173,56 +172,46 @@ public class Exchange {
             @Override
             public void onSuccess(final BigDecimal exchangeRate) {
 
+                // load forex exchange rate from cache
+                SymbolAndExchangeRate exchangeRateAndCurrency = forexCache.getIfPresent(pair.counterSymbol);
+                if (exchangeRateAndCurrency != null) {
+                    // found in cache: execute listener
+                    exchangeRateObj.setExchangeRate(exchangeRateAndCurrency.currency, exchangeRateAndCurrency.exchangeRate.multiply(exchangeRate).toString());
+                    exchangeRateObj.setSuccessful(true);
+                    cro.onTaskComplete(exchangeRateObj);
+                    return;
+                }
 
-                AsyncTask<Void, Void, Void> exchangeRateTask = new AsyncTask<Void, Void, Void>() {
+                // exchange rate no in cache -> load from server
+
+                final CoinBleskApplication application = (CoinBleskApplication) context.getApplicationContext();
+                RequestFactory requestFactory = application.getRequestFactory();
+
+                RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest = requestFactory.exchangeRateRequest(pair.counterSymbol, new RequestCompleteListener<ExchangeRateTransferObject>() {
                     @Override
-                    protected Void doInBackground(Void... params) {
+                    public void onTaskComplete(ExchangeRateTransferObject response) {
+                        if (response.isSuccessful()) {
+                            Currency symbol = response.getExchangeRates().keySet().iterator().next();
+                            BigDecimal forexExchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                            BigDecimal btcExchangeRateInBaseCurrency = forexExchangeRate.multiply(exchangeRate);
+                            exchangeRateObj.setExchangeRate(symbol, btcExchangeRateInBaseCurrency.toString());
 
-                        final ExchangeRateTransferObject exchangeRateObj = new ExchangeRateTransferObject();
+                            // save forex exchange rate in cache
+                            forexCache.put(pair.counterSymbol, new SymbolAndExchangeRate(symbol, forexExchangeRate));
 
-                        // forex exchange rate
-                        SymbolAndExchangeRate exchangeRateAndCurrency = forexCache.getIfPresent(pair.counterSymbol);
-                        if (exchangeRateAndCurrency != null) {
-                            // found in cache: execute listener
-                            exchangeRateObj.setExchangeRate(exchangeRateAndCurrency.currency, exchangeRateAndCurrency.exchangeRate.multiply(exchangeRate).toString());
+                            // execute listener
                             exchangeRateObj.setSuccessful(true);
                             cro.onTaskComplete(exchangeRateObj);
-                            return null;
+                        } else {
+                            exchangeRateObj.setSuccessful(false);
+                            exchangeRateObj.setMessage(response.getMessage());
+                            cro.onTaskComplete(exchangeRateObj);
                         }
-
-                        // exchange rate not saved in cache: get it from server
-                        final CoinBleskApplication application = (CoinBleskApplication) context.getApplicationContext();
-                        RequestFactory requestFactory = application.getRequestFactory();
-
-                        RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest = requestFactory.exchangeRateRequest(pair.counterSymbol, new RequestCompleteListener<ExchangeRateTransferObject>() {
-                            @Override
-                            public void onTaskComplete(ExchangeRateTransferObject response) {
-                                if(response.isSuccessful()) {
-                                    Currency symbol = response.getExchangeRates().keySet().iterator().next();
-                                    BigDecimal forexExchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
-                                    BigDecimal btcExchangeRateInBaseCurrency = forexExchangeRate.multiply(exchangeRate);
-                                    exchangeRateObj.setExchangeRate(symbol, btcExchangeRateInBaseCurrency.toString());
-
-                                    // save forex exchange rate in cache
-                                    forexCache.put(pair.counterSymbol, new SymbolAndExchangeRate(symbol, forexExchangeRate));
-
-                                    // execute listener
-                                    exchangeRateObj.setSuccessful(true);
-                                    cro.onTaskComplete(exchangeRateObj);
-                                } else {
-                                    exchangeRateObj.setSuccessful(false);
-                                    exchangeRateObj.setMessage(response.getMessage());
-                                    cro.onTaskComplete(exchangeRateObj);
-                                }
-                            }
-                        }, context);
-                        exchangeRateRequest.execute();
-
-                        return null;
                     }
+                }, context);
 
-                };
-                exchangeRateTask.execute();
+                exchangeRateRequest.execute();
+
             }
 
             @Override
@@ -236,21 +225,32 @@ public class Exchange {
     }
 
     /**
-     * @return the current bid price of this market
-     * @throws IOException if the connection to the exchange failed
+     * Obtains the exchange rate from the primary exchange. If the request failed, the secondary exchange will be asked for the exchange rate.
+     * This method is blocking! This prevents that many exchange rate requests are created at the same time, instead of just once,
+     * and then loading it from the cache.
+     *
+     * @param listener the exchange rate listener
      */
     private void getExchangeRate(final ExchangeRateListener listener) {
-        AsyncTask<Void, Void, Void> exchangeRateTask = new AsyncTask<Void, Void, Void>() {
+
+        AsyncTask<Void, Void, BigDecimal> exchangeRateTask = new AsyncTask<Void, Void, BigDecimal>() {
             @Override
-            protected Void doInBackground(Void... params) {
-                PollingMarketDataService marketDataService = exchange.getPollingMarketDataService();
+            protected BigDecimal doInBackground(Void... params) {
                 try {
-                    listener.onSuccess(marketDataService.getTicker(pair).getBid());
+                    return exchange.getPollingMarketDataService().getTicker(pair).getBid();
                 } catch (IOException e) {
                     LOGGER.error("failed to get exchange rate from {}: {}", getExchangeId(), e);
-                    listener.onError(e.getMessage());
                 }
                 return null;
+            }
+
+            @Override
+            protected void onPostExecute(BigDecimal exchangeRate) {
+                if (exchangeRate != null) {
+                    listener.onSuccess(exchangeRate);
+                } else {
+                    listener.onError("Failed to obtain exchange rate from bitcoin exchange");
+                }
             }
         };
         exchangeRateTask.execute();

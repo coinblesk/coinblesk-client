@@ -57,8 +57,9 @@ public class SettingsActivity extends BaseActivity {
 
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
-		super.onPostCreate(savedInstanceState);	
-		if (getResources().getBoolean(R.bool.portrait_only)) {
+		super.onPostCreate(savedInstanceState);
+
+		if (getResources().getBoolean(R.bool.small_device)) {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		} else {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -139,9 +140,9 @@ public class SettingsActivity extends BaseActivity {
 	 * shown.
 	 */
 	private void setupSimplePreferencesScreen() {
-		if (!isSimplePreferences(this)) {
-			return;
-		}
+//		if (!isSimplePreferences(this)) {
+//			return;
+//		}
 
 		// Add all preferences for settings in one view
 		getFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsPreferenceFragement()).commit();

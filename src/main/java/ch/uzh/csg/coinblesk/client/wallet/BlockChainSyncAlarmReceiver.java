@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
-import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 
 public class BlockChainSyncAlarmReceiver extends BroadcastReceiver implements ServiceConnection {
 

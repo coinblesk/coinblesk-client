@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
+import ch.uzh.csg.coinblesk.client.util.Mailer;
 
 /**
  * This class is the view for pay ins. It displays the bitcoin address where a
@@ -194,20 +195,15 @@ public class PayInActivity extends WalletActivity {
 
     private void launchRequest() {
 
-        // TODO: need email address from user...
+        showLoadingProgressDialog();
+        Mailer mailer = new Mailer();
+        mailer.setSubject(getString(R.string.payIn_bitcoinAddressEmailSubject));
 
-//        showLoadingProgressDialog();
-//        Mailer mailer = new Mailer();
-//        mailer.setSubject("Your CoinBlesk Bitcoin Address");
-//
-//        StringBuilder sb = new StringBuilder();
-//        sb.append("This is your Bitcoin Address: ");
-//        sb.append(getWalletService().getBitcoinAddress());
-//        sb.append("\n");
-//        sb.append("It is save to share this address with anyone.");
-//
-//        mailer.setMessage(sb.toString());
-//        Intent mailIntent = mailer.getIntent()
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format(getString(R.string.payIn_bitcoinAddressEmailBody), getWalletService().getBitcoinAddress()));
+
+        mailer.setMessage(sb.toString());
+        mailer.sendEmail(this);
 
     }
 

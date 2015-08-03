@@ -1,13 +1,14 @@
 package ch.uzh.csg.coinblesk.client;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 
@@ -18,21 +19,49 @@ import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
  * currency to another is also handled in this class.
  */
 public class CurrencyViewHandler {
-	
+
+
 	/**
-	 * The swiss currency is represented in decimal format with an precision of
-	 * two digits. The CHF balance is achieved by converting a user's bitcoin
-	 * balance using the given exchange rate. The view depends on the
-	 * accessibility of the exchange rate. When exchange rate is not accessible
-	 * the text view is not initialized.
-	 * 
-	 * @param textView
-	 *            The TextView for CHF currency amount in the activity.
-	 * @param exchangeRate
-	 *            The rate of one bitcoin in relation to CHF.
-	 * @param amountBtc
-	 *            The user's bitcoin balance.
+	 * Returns a string containing the BTC and CHF amount, e.g. 3.682 mBTC (7.12 CHF)
+	 * @param exchangeRate the current exchange rate of the default currency to bitcoin
+	 * @param amountBtc the bitcoin amount
+	 * @return astring of the Bitcoin amount in the user defined unit, and the according CHF amount.
 	 */
+	public static String getAmountInCHFandBTC(BigDecimal exchangeRate, BigDecimal amountBtc, Context context) {
+
+		// chf string
+		BigDecimal chf = amountBtc.multiply(exchangeRate);
+		String chfString = CurrencyFormatter.formatChf(chf) + " CHF";
+
+		// btc string
+		BigDecimal amount = getBTCAmountInDefinedUnit(amountBtc, context);
+		String btcString = CurrencyFormatter.formatBTC(amount) + " " + getBitcoinUnit(context);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(btcString);
+		sb.append(" (");
+		sb.append(chfString);
+		sb.append(")");
+
+		return sb.toString();
+
+	}
+
+
+		/**
+         * The swiss currency is represented in decimal format with an precision of
+         * two digits. The CHF balance is achieved by converting a user's bitcoin
+         * balance using the given exchange rate. The view depends on the
+         * accessibility of the exchange rate. When exchange rate is not accessible
+         * the text view is not initialized.
+         *
+         * @param textView
+         *            The TextView for CHF currency amount in the activity.
+         * @param exchangeRate
+         *            The rate of one bitcoin in relation to CHF.
+         * @param amountBtc
+         *            The user's bitcoin balance.
+         */
 	public static void setToCHF(TextView textView, BigDecimal exchangeRate, BigDecimal amountBtc) {
 		BigDecimal chf = amountBtc.multiply(exchangeRate);
 		textView.setText(CurrencyFormatter.formatChf(chf) + " CHF");
@@ -143,7 +172,7 @@ public class CurrencyViewHandler {
 	 * 
 	 * @param amountBtc
 	 *            entered bitcoin value
-	 * @param contexts
+	 * @param context
 	 *            Needed to get the predefined bitcoin unit from the shared
 	 *            preferences.
 	 * @return the plain BTC value without any transformation

@@ -2,7 +2,6 @@ package ch.uzh.csg.coinblesk.client.ui.adressbook;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -12,22 +11,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Iterator;
-
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
+import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 
 /**
  * Activity for showing and modifying address book contacts. 
  *
  */
-public class AddressBookActivity extends BaseActivity {
+public class AddressBookActivity extends WalletActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,37 +42,6 @@ public class AddressBookActivity extends BaseActivity {
 	}
 
 	private void setUpGui() {
-		Button addContact = (Button) findViewById(R.id.addressBook_addButton);
-		addContact.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View v) {
-				AlertDialog.Builder alert = new AlertDialog.Builder(v.getContext());
-				alert.setTitle(getString(R.string.addressBook_addContact_title));
-				alert.setMessage(getString(R.string.addressBook_addContact_message));
-
-				final EditText input = new EditText(v.getContext());
-				alert.setView(input);
-
-				alert.setPositiveButton(getString(R.string.addressBook_addContact_save),
-						new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						String username = input.getText().toString();
-						boolean saved = getCoinBleskApplication().getStorageHandler().addAddressBookEntry(username);
-						if (!saved) {
-							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show(); 
-						}
-						createAddressBookEntries();
-					}
-				});
-				alert.setNegativeButton(getString(R.string.addressBook_addContact_cancel),
-						new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// Dialog canceled
-					}
-				});
-				alert.show();
-			}
-		});
 
 		Button removeUntrusted = (Button) findViewById(R.id.addressBook_removeButton);
 		removeUntrusted.setOnClickListener(new OnClickListener() {
@@ -88,10 +54,7 @@ public class AddressBookActivity extends BaseActivity {
 				alert.setPositiveButton(getString(R.string.dialog_yes),
 						new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						boolean saved = getCoinBleskApplication().getStorageHandler().removeAllUntrustedAddressBookEntries();
-						if (!saved) {
-							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
-						}
+						getCoinBleskApplication().getStorageHandler().removeAllUntrustedAddressBookEntries();
 						createAddressBookEntries();
 					}
 				});
@@ -114,8 +77,8 @@ public class AddressBookActivity extends BaseActivity {
 		parent.removeAllViews();
 
 		int i = 0;
-		for (Iterator<String> it = getCoinBleskApplication().getStorageHandler().getAddressBook().iterator(); it.hasNext();) {
-			final String username = it.next();
+		for (final AddressBookEntry entry : getCoinBleskApplication().getStorageHandler().getAddressBook()) {
+			final String username = entry.getName();
 			View custom = inflater.inflate(R.layout.addressbook_entry_layout, null);
 			TextView tv = (TextView) custom.findViewById(R.id.textView1);
 			tv.setGravity(Gravity.LEFT);
@@ -124,15 +87,12 @@ public class AddressBookActivity extends BaseActivity {
 			delete.setImageResource(R.drawable.ic_navigation_cancel_light);
 			delete.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					Builder builder = new AlertDialog.Builder(v.getContext());
+					AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
 					builder.setTitle(R.string.addressBook_dialogTitle)
 					.setMessage(username)
 					.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
-							boolean saved = getCoinBleskApplication().getStorageHandler().removeAddressBookEntry(username);
-							if (!saved) {
-								Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
-							}
+							getCoinBleskApplication().getStorageHandler().deleteAddressBookEntry(entry.getPublicKey());
 							createAddressBookEntries();
 						}
 					})
@@ -142,26 +102,23 @@ public class AddressBookActivity extends BaseActivity {
 				}
 			});
 
-			final ImageView trusted = (ImageView) custom.findViewById(R.id.imageView2);
-			setTrustedImage(trusted, username);
-			trusted.setOnClickListener(new OnClickListener() {
+			final ImageView trustedImage = (ImageView) custom.findViewById(R.id.imageView2);
+			setTrustedImage(trustedImage, entry.isTrusted());
+
+			trustedImage.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					if (getCoinBleskApplication().getStorageHandler().isTrustedContact(username)){
-						boolean saved = getCoinBleskApplication().getStorageHandler().removeTrustedAddressBookEntry(username);
-						if (!saved) {
-							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
-						}
-						trusted.setImageResource(R.drawable.ic_not_starred);
+					if (entry.isTrusted()) {
+						entry.setTrusted(false);
+						trustedImage.setImageResource(R.drawable.ic_not_starred);
 						showToast(getString(R.string.addressBook_removeContact));
-					}
-					else{
-						boolean saved = getCoinBleskApplication().getStorageHandler().addTrustedAddressBookEntry(username);
-						if (!saved) {
-							Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_xmlSave_failed), Toast.LENGTH_LONG).show();
-						}
-						trusted.setImageResource(R.drawable.ic_starred);
+					} else {
+						entry.setTrusted(true);
+						trustedImage.setImageResource(R.drawable.ic_starred);
 						showToast(getString(R.string.addressBook_addContact));
 					}
+
+					getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
+
 				}
 			});
 
@@ -171,6 +128,7 @@ public class AddressBookActivity extends BaseActivity {
 				custom.setBackgroundColor(Color.LTGRAY);
 			}
 			parent.addView(custom);
+
 			i++;
 		}
 	}
@@ -179,8 +137,8 @@ public class AddressBookActivity extends BaseActivity {
 		Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 	}
 
-	private void setTrustedImage(ImageView img, String username) {
-		if (getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
+	private void setTrustedImage(ImageView img, boolean isTrusted) {
+		if (isTrusted) {
 			img.setImageResource(R.drawable.ic_starred);
 		} else {
 			img.setImageResource(R.drawable.ic_not_starred);

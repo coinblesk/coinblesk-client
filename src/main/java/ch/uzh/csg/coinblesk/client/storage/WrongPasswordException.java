@@ -1,4 +1,4 @@
-package ch.uzh.csg.coinblesk.client.persistence;
+package ch.uzh.csg.coinblesk.client.storage;
 
 /**
  * This exception is thrown when the xml file in the shared preferences cannot be

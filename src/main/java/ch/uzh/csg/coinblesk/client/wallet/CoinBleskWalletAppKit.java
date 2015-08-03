@@ -21,7 +21,7 @@ import java.io.File;
 import java.security.SecureRandom;
 
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
-import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 
 /**
  * Created by rvoellmy on 5/24/15.

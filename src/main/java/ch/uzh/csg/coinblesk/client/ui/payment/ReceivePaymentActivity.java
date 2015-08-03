@@ -78,7 +78,6 @@ public class ReceivePaymentActivity extends PaymentActivity {
     private MenuItem menuWarning;
     private MenuItem sessionCountdownMenuItem;
     private MenuItem sessionRefreshMenuItem;
-    private TextView sessionCountdown;
     private static boolean isPortrait = false;
 
     protected static final String INPUT_UNIT_CHF = "CHF";
@@ -92,7 +91,7 @@ public class ReceivePaymentActivity extends PaymentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receive_payment);
         setScreenOrientation();
-        if (getResources().getBoolean(R.bool.portrait_only)) {
+        if (getResources().getBoolean(R.bool.small_device)) {
             isPortrait = true;
             strings = stringsNormal;
         } else {
@@ -169,6 +168,18 @@ public class ReceivePaymentActivity extends PaymentActivity {
             @Override
             public void onPaymentFinish(boolean success) {
                 super.onPaymentFinish(success);
+
+                try {
+                    // reset NFC state
+                    initiator.stopInitiating(ReceivePaymentActivity.this);
+                    initiator.startInitiating(ReceivePaymentActivity.this);
+                } catch (NfcLibException e) {
+                    LOGGER.debug("NFC failed: ", e);
+                }
+
+                // reset UI
+                resetNfc();
+                enableMensaButtons();
                 clearPaymentInfos();
             }
         });
@@ -218,7 +229,6 @@ public class ReceivePaymentActivity extends PaymentActivity {
 
         //setup timer
         sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
-        sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
         sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
         sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
@@ -251,31 +261,26 @@ public class ReceivePaymentActivity extends PaymentActivity {
             showLoadingProgressDialog();
             getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
                 public void onTaskComplete(final ExchangeRateTransferObject response) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            dismissProgressDialog();
-                            dismissNfcInProgressDialog();
-                            if (response.isSuccessful()) {
-                                exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
+                    dismissProgressDialog();
+                    dismissNfcInProgressDialog();
+                    if (response.isSuccessful()) {
+                        exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
 
-                                CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
-                                CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
-                                BigDecimal balance = getWalletService().getBalance();
-                                CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
-                                TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
-                                balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
-                            } else {
-                                displayResponse(getResources().getString(R.string.no_connection_server));
-                                finish();
-                                launchActivity(ReceivePaymentActivity.this, MainActivity.class);
-                            }
-                        }
-                    });
+                        CurrencyViewHandler.clearTextView((TextView) findViewById(R.id.receivePayment_exchangeRate));
+                        CurrencyViewHandler.setExchangeRateView(exchangeRate, (TextView) findViewById(R.id.receivePayment_exchangeRate));
+                        BigDecimal balance = getWalletService().getBalance();
+                        CurrencyViewHandler.setBTC((TextView) findViewById(R.id.receivePayment_balance), balance, getBaseContext());
+                        TextView balanceTv = (TextView) findViewById(R.id.receivePayment_balance);
+                        balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
+                    } else {
+                        displayResponse(getResources().getString(R.string.no_connection_server));
+                        finish();
+                        launchActivity(ReceivePaymentActivity.this, MainActivity.class);
+                    }
                 }
             });
-
         }
+
     }
 
     /**
@@ -354,15 +359,20 @@ public class ReceivePaymentActivity extends PaymentActivity {
     }
 
     private void clearPaymentInfos() {
-        hideNfcInstructions();
-        Constants.inputValueCalculator = BigDecimal.ZERO;
-        receiveAmount = "0";
-        if (isPortrait) {
-            receiveAmountEditText.setText(receiveAmount);
-        } else {
-            receiveAmountTextView.setText(receiveAmount);
-        }
-        refreshCurrencyTextViews();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hideNfcInstructions();
+                Constants.inputValueCalculator = BigDecimal.ZERO;
+                receiveAmount = "0";
+                if (!isPortrait) {
+                    clearCalculator();
+                    receiveAmountTextView.setText("");
+                }
+
+            }
+        });
+
     }
 
     /**
@@ -378,20 +388,8 @@ public class ReceivePaymentActivity extends PaymentActivity {
     }
 
     private void hideNfcInstructions() {
-        findViewById(R.id.receivePayment_establishNfcConnectionInfo)
-                .setVisibility(View.INVISIBLE);
+        findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.INVISIBLE);
         findViewById(R.id.receivePayment_nfcIcon).setVisibility(View.INVISIBLE);
-    }
-
-    protected void refreshActivity() {
-        receiveAmount = "0";
-        if (isPortrait)
-            receiveAmountEditText.setText("");
-        else {
-            receiveAmountTextView.setText("");
-            clearCalculator();
-        }
-        this.recreate();
     }
 
     private class MyAdapter extends ArrayAdapter<String> {
@@ -418,6 +416,7 @@ public class ReceivePaymentActivity extends PaymentActivity {
 
             return row;
         }
+
     }
 
     private OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
@@ -471,11 +470,9 @@ public class ReceivePaymentActivity extends PaymentActivity {
         String answer;
 
         if (isSending) {
-            getCoinBleskApplication().getStorageHandler().addAddressBookEntry(user);
             answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
                     CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")", user);
         } else {
-            getCoinBleskApplication().getStorageHandler().addAddressBookEntry(user);
             answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
                     CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")", user);
         }
@@ -864,7 +861,7 @@ public class ReceivePaymentActivity extends PaymentActivity {
 
     private void clearCalculator() {
         mensaButtonAmount = BigDecimal.ZERO;
-        list.setText("");
+        if (list != null) list.setText("");
         calcDialogDisplay.setText("");
         mathVariable1 = 0;
         mathVariable2 = 0;

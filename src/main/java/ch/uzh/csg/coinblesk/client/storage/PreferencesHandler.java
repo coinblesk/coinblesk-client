@@ -1,17 +1,11 @@
-package ch.uzh.csg.coinblesk.client.persistence;
+package ch.uzh.csg.coinblesk.client.storage;
 
-import java.util.Set;
+import java.security.KeyPair;
 
-public interface PersistentStorage {
-    
-    void removeTrustedAddressBookEntry(String username);
-    void removeAddressBookContact(String username);
-
-    void addTrustedAddressBookContact(String username);
-    Set<String> getTrusteAddressBookdContacts();
-
-    void addAddressBookContact(String username);
-    Set<String> getAddressBookContacts();
+/**
+ * Interface for persisting coinblesk specific data.
+ */
+public interface PreferencesHandler {
 
     String getServerWatchingKey();
     void setServerWatchingKey(String serverWatchingKey);
@@ -27,6 +21,9 @@ public interface PersistentStorage {
 
     void setUsername(String username);
     String getUsername();
+
+    void setKeyPair(KeyPair keyPair);
+    KeyPair getKeyPair();
 
     /**
      * Deletes all data

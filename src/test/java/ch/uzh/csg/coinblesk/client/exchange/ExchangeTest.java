@@ -79,6 +79,8 @@ public class ExchangeTest {
             }
         }, Mockito.mock(Context.class));
 
+        Robolectric.getBackgroundThreadScheduler().runOneTask();
+
 
         // do the same with another exchange that has other currencies
         exchange = new Exchange(Exchange.KRAKEN);

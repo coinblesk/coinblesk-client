@@ -5,7 +5,7 @@ import android.util.Base64;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.Wallet;
 
-import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 
 /**
  * Created by rvoellmy on 7/4/15.

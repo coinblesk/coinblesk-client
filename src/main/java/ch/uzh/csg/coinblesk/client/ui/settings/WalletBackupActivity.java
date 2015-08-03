@@ -8,9 +8,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.util.Mailer;
+import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
+import ch.uzh.csg.coinblesk.client.wallet.RefundTx;
 
 /**
  * This class is the view that informs the user about the involved parties to
@@ -43,7 +47,36 @@ public class WalletBackupActivity extends WalletActivity {
         mEmailRefundTxButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO
+
+                long refundTxValidBlock = getCoinBleskApplication().getStorageHandler().getRefundTxValidBlock();
+                String base64Tx = getCoinBleskApplication().getStorageHandler().getRefundTx();
+
+                if(refundTxValidBlock == RefundTx.NO_REFUND_TX_VALID_BLOCK || null == base64Tx) {
+                    Toast.makeText(WalletBackupActivity.this, R.string.refundTxMail_noRefundTxYet, Toast.LENGTH_LONG);
+                    return;
+                }
+
+                // send email
+                String hexTx = BitcoinUtils.base64TxToHex(base64Tx);
+                String username = getCoinBleskApplication().getStorageHandler().getUsername();
+                String refundTxValid = BitcoinUtils.refundTxValidBlockToFriendlyString(refundTxValidBlock - getWalletService().getCurrentBlockHeight(), WalletBackupActivity.this);
+                String subject = getString(R.string.refundTxMail_subject);
+
+                StringBuilder message = new StringBuilder();
+                message.append(String.format(getString(R.string.refundTxMail_salutation), username));
+                message.append("\n\n");
+                message.append(String.format(getString(R.string.refundTxMail_explanation), refundTxValid));
+                message.append("\n\n");
+                message.append(hexTx);
+                message.append("\n\n");
+                message.append(getString(R.string.refundTxMail_ending));
+
+                Mailer mailer = new Mailer();
+                mailer.setMessage(message.toString());
+                mailer.setSubject(subject);
+
+                mailer.sendEmail(WalletBackupActivity.this);
+
             }
         });
     }

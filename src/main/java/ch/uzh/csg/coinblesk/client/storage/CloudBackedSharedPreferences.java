@@ -1,4 +1,4 @@
-package ch.uzh.csg.coinblesk.client.persistence;
+package ch.uzh.csg.coinblesk.client.storage;
 
 import android.app.backup.BackupManager;
 import android.content.Context;

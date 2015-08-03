@@ -33,6 +33,8 @@ import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequestReceiver;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
+import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
+import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
@@ -146,7 +148,7 @@ public abstract class PaymentActivity extends WalletActivity {
     /**
      * Displays a custom dialog with a given message and an image indicating if task was successful or not.
      *
-     * @param message      to be displayed to the user
+     * @param message      to be displayed to the receiver
      * @param isSuccessful boolean to indicate if task was successful
      */
     protected void showDialog(String message, boolean isSuccessful) {
@@ -233,14 +235,14 @@ public abstract class PaymentActivity extends WalletActivity {
 
 
     /**
-     * Initializes NFC adapter and user payment information.
+     * Initializes NFC adapter and receiver payment information.
      */
     protected void initializeNFC() throws Exception {
 
         initiator = new NfcSetup(new NfcInitiatorHandler() {
 
             State current = State.INIT;
-            KeyPair keyPair = PaymentProtocol.generateKeys();
+            KeyPair keyPair;
             PublicKey remotePubKey;
             byte[] halfSignedTx;
             RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> signTask;
@@ -250,6 +252,17 @@ public abstract class PaymentActivity extends WalletActivity {
             AtomicReference<byte[]> result2 = new AtomicReference<>();
 
             private PaymentRequest paymentRequest;
+
+            {
+                // initialize key pair
+                KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
+                if (keyPair == null) {
+                    this.keyPair = PaymentProtocol.generateKeys();
+                    getCoinBleskApplication().getStorageHandler().setKeyPair(this.keyPair);
+                } else {
+                    this.keyPair = keyPair;
+                }
+            }
 
             @Override
             public void handleFailed(String s) {
@@ -295,8 +308,8 @@ public abstract class PaymentActivity extends WalletActivity {
 
             @Override
             public byte[] nextMessage() throws Exception {
-                //1st message: amount BTC, which user, to which address, public key -> request signed
-                //1st message: which user, to which address, public key -> send signed
+                //1st message: amount BTC, which receiver, to which address, public key -> request signed
+                //1st message: which receiver, to which address, public key -> send signed
 
                 //3rd message: server says ok, amount ok from server, signed
                 // -> send ok with transaction (optional only signature), signed
@@ -324,7 +337,7 @@ public abstract class PaymentActivity extends WalletActivity {
                                         String address = paymentRequest.getAddress();
                                         BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
 
-                                        LOGGER.debug("Sending payment request for {} satoshi to user {} (address: {})", satoshi, user, address);
+                                        LOGGER.debug("Sending payment request for {} satoshi to receiver {} (address: {})", satoshi, user, address);
 
                                         byte[] retVal = PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
                                         result2.set(retVal);
@@ -336,24 +349,26 @@ public abstract class PaymentActivity extends WalletActivity {
                                         result2.set(new byte[0]);
                                     }
                                 } catch (Exception e) {
-                                    LOGGER.error("No active payment request: Abort ", e);
-                                    listener.onPaymentError("No active payment request");
+                                    LOGGER.error("Sending payment request failed", e);
+                                    listener.onPaymentError(e.getMessage());
                                     result2.set(new byte[0]);
                                 }
                             }
                         });
                         t.start();
+
                         return null;
 
                     case FIRST:
 
-
                         if (result.get() != null) {
                             current = State.SECOND;
+                            LOGGER.debug("returning NFC response of size {}", result.get().length);
                             return result.get();
                         }
 
                         if (signTask != null) {
+                            LOGGER.debug("Not yet ready, returning null");
                             return null;
                         }
 
@@ -364,39 +379,65 @@ public abstract class PaymentActivity extends WalletActivity {
                         signTask = getCoinBleskApplication().getRequestFactory().payOutRequest(new RequestCompleteListener<SignedTxTransferObject>() {
                             @Override
                             public void onTaskComplete(SignedTxTransferObject response) {
+
+                                byte[] responseMsg = new byte[0];
+
                                 try {
-                                    byte[] signedTx;
                                     if (response.isSuccessful()) {
                                         LOGGER.debug("Received fully signed transaction from server.");
-                                        signedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
+                                        final byte[] fullySignedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
+                                        listener.onPaymentReceived(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, "CoinBlesk user");
+                                        LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", fullySignedTx.length);
+                                        responseMsg = PaymentProtocol.fromServerRequestOk(fullySignedTx).toBytes(keyPair.getPrivate());
+                                        listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, "CoinBlesk user");
+                                        getWalletService().commitAndBroadcastTx(fullySignedTx, true);
+
+
+                                        // save transaction metadata in background....
+                                        AsyncTask<Void, Void, Void> saveMetadataTask = new AsyncTask<Void, Void, Void>() {
+                                            @Override
+                                            protected Void doInBackground(Void... params) {
+                                                String txId = BitcoinUtils.getTxHash(fullySignedTx, getWalletService().getBitcoinNet());
+                                                TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
+                                                txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
+                                                txMetaData.setReceiver("You");
+                                                txMetaData.setSender("CoinBlesk User");
+                                                txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_IN);
+                                                getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
+                                                LOGGER.debug("Saved transaction meta data");
+                                                return null;
+                                            }
+                                        };
+                                        saveMetadataTask.execute();
+
                                     } else {
                                         LOGGER.warn("Server didn't sign the transaction: {}", response.getMessage());
-                                        signedTx = null;
-                                    }
-                                    byte[] responseMsg;
-
-                                    if (signedTx != null) {
-                                        listener.onPaymentReceived(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, paymentRequest.getUser());
-                                        LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", signedTx.length);
-                                        responseMsg = PaymentProtocol.fromServerRequestOk(signedTx).toBytes(keyPair.getPrivate());
-
-                                        listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, paymentRequest.getUser());
-                                    } else {
                                         LOGGER.debug("Sending server request NOK to other client.");
                                         responseMsg = PaymentProtocol.fromServerRequestNok().toBytes(keyPair.getPrivate());
-
                                         listener.onPaymentError("Failed to get the signature from the server");
-
                                     }
-                                    result.set(responseMsg);
+
                                 } catch (Exception e) {
                                     LOGGER.error("Payment error: {}", e);
                                     listener.onPaymentError(e.getMessage());
+
+                                    try {
+                                        responseMsg = PaymentProtocol.fromServerRequestNok().toBytes(keyPair.getPrivate());
+                                        result.set(responseMsg);
+                                    } catch (Exception e1) {
+                                        LOGGER.error("NFC communication failed completely, was not able to send NOK to other client: ", e1);
+                                        e1.printStackTrace();
+                                    }
+
+                                } finally {
+                                    LOGGER.debug("setting NFC response ({} bytes)", responseMsg.length);
+                                    result.set(responseMsg);
                                 }
                             }
                         }, JsonConverter.fromJson(sigReqJson, ServerSignatureRequestTransferObject.class), PaymentActivity.this);
 
                         signTask.execute();
+
                         return null;
 
                     default:
@@ -411,31 +452,40 @@ public abstract class PaymentActivity extends WalletActivity {
             }
         }, new NfcResponseHandler() {
 
-            KeyPair keyPair = PaymentProtocol.generateKeys();
+            KeyPair keyPair;
 
             // payment details
             private PublicKey remotePubKey;
             private long satoshis;
-            private String user;
+            private String receiver;
+            private byte[] btcAddress;
+
+            {
+                // initialize key pair
+                KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
+                if (keyPair == null) {
+                    this.keyPair = PaymentProtocol.generateKeys();
+                    getCoinBleskApplication().getStorageHandler().setKeyPair(this.keyPair);
+                } else {
+                    this.keyPair = keyPair;
+                }
+            }
 
             @Override
             public byte[] handleMessageReceived(final byte[] bytes, final ResponseLater responseLater) throws Exception {
                 //get 1st message request / get 1st message send
                 //2nd return partially signed transaction
                 // request: BTC from message, public key, signed, username
-                // send: BTC entered by user, public key, signed, username
+                // send: BTC entered by receiver, public key, signed, username
                 //4th (optional check if signed by server), get ok, reply
                 //5th reply ok, public key, signed
-                System.err.println("time BB1: " + System.currentTimeMillis());
 
                 //remotePubKey = protocol.publicKey();
                 PaymentProtocol.Type type = PaymentProtocol.type(bytes);
                 LOGGER.debug("received nfc message {}", type.toString());
-                System.err.println("time BB2: " + System.currentTimeMillis());
+
                 switch (type) {
                     case CONTACT_AND_PAYMENT_REQUEST:
-                        System.err.println("time BB3: " + System.currentTimeMillis());
-
 
                         // check the payment request
                         // TODO
@@ -447,9 +497,9 @@ public abstract class PaymentActivity extends WalletActivity {
                                 try {
                                     final PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
                                     satoshis = protocol.satoshis();
-                                    byte[] btcAddress = protocol.sendTo();
+                                    btcAddress = protocol.sendTo();
                                     remotePubKey = protocol.publicKey();
-                                    user = protocol.user();
+                                    receiver = protocol.user();
 
                                     byte[] halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
 
@@ -458,49 +508,70 @@ public abstract class PaymentActivity extends WalletActivity {
                                     byte[] response = PaymentProtocol.contactAndPaymentResponseOk(halfSignedTx).toBytes(keyPair.getPrivate());
                                     responseLater.response(response);
 
-                                    listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(satoshis), protocol.publicKey(), protocol.user());
+                                    listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(satoshis), protocol.publicKey(), receiver);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
                         }).start();
-                        System.err.println("time BB4: " + System.currentTimeMillis());
+
                         return null;
                     case FROM_SERVER_REQUEST_OK:
 
                         // get the fully signed tx, commit and broadcast it
-                        AsyncTask<Void, Void, Void> commitAndBroadcastTx = new AsyncTask<Void, Void, Void>() {
+                        new Thread(new Runnable() {
                             @Override
-                            protected Void doInBackground(Void... params) {
+                            public void run() {
+
                                 try {
                                     final PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
                                     byte[] signedTx = protocol.fullySignedTransaction();
                                     LOGGER.debug("Broadcasting fully signed transaction and commit it to wallet");
-                                    getWalletService().commitAndBroadcastTx(signedTx);
-                                } catch (Exception e) {
-                                    LOGGER.error("Failed to commit and broadcast transaction: {}", e);
-                                }
-                                return null;
-                            }
-                        };
-                        commitAndBroadcastTx.execute();
 
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
+                                    final String txId = getWalletService().commitAndBroadcastTx(signedTx, true);
                                     byte[] data = PaymentProtocol.paymentOk().toBytes(keyPair.getPrivate());
                                     responseLater.response(data);
-                                    listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, user);
+                                    listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
+
+                                    // save transaction metadata and address book entry in background....
+                                    AsyncTask<Void, Void, Void> saveMetadataTask = new AsyncTask<Void, Void, Void>() {
+                                        @Override
+                                        protected Void doInBackground(Void... params) {
+                                            // save transaction metadata
+                                            TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
+                                            txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
+                                            txMetaData.setReceiver(receiver);
+                                            txMetaData.setSender("You");
+                                            txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_OUT);
+                                            getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
+                                            LOGGER.debug("Saved transaction meta data");
+
+                                            // save (or update)  user in address book
+                                            AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
+                                            entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
+                                            entry.setName(receiver);
+                                            entry.setBitcoinAddress(BitcoinUtils.getAddressFromScriptHash(btcAddress, getWalletService().getBitcoinNet()));
+                                            getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
+                                            LOGGER.debug("Saved address book entry");
+                                            return null;
+                                        }
+                                    };
+                                    saveMetadataTask.execute();
+
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    LOGGER.error("Failed to commit and broadcast transaction", e);
                                 }
                             }
                         }).start();
 
                         return null;
+
+                    case FROM_SERVER_REQUEST_NOK:
+                        LOGGER.debug("Received NOK from other client...");
+                        listener.onPaymentError("The other client refused the payment.");
+
                 }
-                System.err.println("time BB5: " + System.currentTimeMillis());
+
                 return new byte[0];
             }
 

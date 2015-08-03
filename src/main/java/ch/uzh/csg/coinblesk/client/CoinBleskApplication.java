@@ -1,21 +1,21 @@
 package ch.uzh.csg.coinblesk.client;
 
-import android.app.Application;
+import com.activeandroid.ActiveAndroid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.exchange.ExchangeManager;
-import ch.uzh.csg.coinblesk.client.persistence.PersistentStorageHandler;
-import ch.uzh.csg.coinblesk.client.persistence.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
+import ch.uzh.csg.coinblesk.client.storage.PersistentStorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.util.LoggingConfig;
 
 /**
  * Entry point for the CoinBlesk app. Everything that needs to be set up before the app starts should be done here.
  */
-public class CoinBleskApplication extends Application {
+public class CoinBleskApplication extends com.activeandroid.app.Application {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CoinBleskApplication.class);
 
@@ -27,6 +27,8 @@ public class CoinBleskApplication extends Application {
     public void onCreate() {
         super.onCreate();
         LoggingConfig.configure();
+
+        ActiveAndroid.initialize(this);
 
         mStorageHandler = new PersistentStorageHandler(this);
         requestFactory = new DefaultRequestFactory();

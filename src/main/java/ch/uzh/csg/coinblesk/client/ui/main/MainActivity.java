@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -44,6 +45,7 @@ import java.util.List;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
 import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
@@ -52,7 +54,6 @@ import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
-import ch.uzh.csg.coinblesk.client.wallet.TransactionObject;
 import ch.uzh.csg.coinblesk.client.wallet.WalletListener;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
@@ -95,7 +96,7 @@ public class MainActivity extends PaymentActivity {
         setContentView(R.layout.activity_main);
 
         setScreenOrientation();
-        isPortrait = getResources().getBoolean(R.bool.portrait_only);
+        isPortrait = getResources().getBoolean(R.bool.small_device);
 
         initializeDrawer();
         initializeGui();
@@ -191,7 +192,7 @@ public class MainActivity extends PaymentActivity {
             return;
         }
 
-        final int updateInterval = 3000; // == 1s
+        final int updateInterval = 1000; // == 1s
         final Handler handler = new Handler();
 
         updateProgressTask = new Thread() {
@@ -207,30 +208,33 @@ public class MainActivity extends PaymentActivity {
                     mProgressBar.setVisibility(View.GONE);
                     mBlockchainSyncStatusText.setVisibility(View.GONE);
                     return;
+                } else if(syncProgress.getProgress() <= 0) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mBlockchainSyncStatusText.setVisibility(View.GONE);
                 } else {
 
                     double progress = syncProgress.getProgress();
 
-                    if (progress >= 0) {
-                        // make progress bar visible
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        mBlockchainSyncStatusText.setVisibility(View.VISIBLE);
+                    // make progress bar visible
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    mBlockchainSyncStatusText.setVisibility(View.VISIBLE);
 
-                        // set progress
-                        int progressPercentage = (int) (progress * mProgressBar.getMax()) + 1;
-                        progressPercentage = Math.max(0, progressPercentage);
-                        LOGGER.debug("Updating blockchain sync progress bar. current progress is {}%", progressPercentage);
-                        mProgressBar.setProgress(progressPercentage);
+                    // set progress
+                    int progressPercentage = (int) (progress * mProgressBar.getMax()) + 1;
+                    progressPercentage = Math.max(0, progressPercentage);
+                    LOGGER.debug("Updating blockchain sync progress bar. current progress is {}%", progressPercentage);
 
-                        // show sync status text
-                        String syncText = String.format(getResources().getString(R.string.main_bitcoinSynchronizing),
-                                String.format("%.0f", progress * 100));
+                    mProgressBar.setIndeterminate(false);
+                    mProgressBar.setProgress(progressPercentage);
 
-                        mBlockchainSyncStatusText.setText(syncText);
-                    }
+                    // show sync status text
+                    String syncText = String.format(getResources().getString(R.string.main_bitcoinSynchronizing),
+                            String.format("%.0f", progress * 100));
 
-                    handler.postDelayed(updateProgressTask, updateInterval);
+                    mBlockchainSyncStatusText.setText(syncText);
                 }
+
+                handler.postDelayed(updateProgressTask, updateInterval);
             }
         };
 
@@ -353,38 +357,27 @@ public class MainActivity extends PaymentActivity {
 
     private void createHistoryViews() {
 
-        AsyncTask<Void, Void, List<TransactionObject>> getTransactionHistoryTask = new AsyncTask<Void, Void, List<TransactionObject>>() {
+        AsyncTask<Void, Void, List<TransactionMetaData>> getTransactionHistoryTask = new AsyncTask<Void, Void, List<TransactionMetaData>>() {
             @Override
-            protected List<TransactionObject> doInBackground(Void... params) {
-                return getWalletService().getTransactionHistory().getAllTransactions();
+            protected List<TransactionMetaData> doInBackground(Void... params) {
+                return getWalletService().getTransactionHistory(10).getAllTransactions();
             }
 
             @Override
-            protected void onPostExecute(List<TransactionObject> history) {
-                LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mainActivity_history);
-                linearLayout.removeAllViews();
-                for (int i = 0; i < getNumberOfLastTransactions(); i++) {
-                    if (i < history.size()) {
-                        TextView tView = new TextView(getApplicationContext());
-                        tView.setGravity(Gravity.LEFT);
-                        tView.setTextColor(Color.DKGRAY);
-                        int drawable = getImage(history.get(i));
-                        tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
-                        tView.setText(HistoryTransactionFormatter.formatHistoryTransaction(history.get(i), getApplicationContext()));
-                        tView.setClickable(true);
-                        if (i % 2 == 0) {
-                            tView.setBackgroundColor(Color.LTGRAY);
-                        }
-                        tView.setOnClickListener(new View.OnClickListener() {
-                            public void onClick(View v) {
-                                Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-                                Bundle b = new Bundle();
-                                intent.putExtras(b);
-                                startActivity(intent);
+            protected void onPostExecute(final List<TransactionMetaData> history) {
+                createHistoryViews(history, null);
+
+                // create history with current exchange rate
+                if (ConnectionCheck.isNetworkAvailable(MainActivity.this)) {
+                    getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
+                        @Override
+                        public void onTaskComplete(ExchangeRateTransferObject response) {
+                            if (response.isSuccessful()) {
+                                BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                                createHistoryViews(history, exchangeRate);
                             }
-                        });
-                        linearLayout.addView(tView);
-                    }
+                        }
+                    });
                 }
             }
         };
@@ -392,13 +385,43 @@ public class MainActivity extends PaymentActivity {
 
     }
 
-    private int getImage(TransactionObject tx) {
+    private void createHistoryViews(List<TransactionMetaData> history, @Nullable BigDecimal exchangeRate) {
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mainActivity_history);
+        linearLayout.removeAllViews();
+        for (int i = 0; i < getNumberOfLastTransactions(); i++) {
+            if (i < history.size()) {
+                TextView tView = new TextView(getApplicationContext());
+                tView.setGravity(Gravity.LEFT);
+                tView.setTextColor(Color.DKGRAY);
+                int drawable = getImage(history.get(i));
+                tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
+                tView.setText(HistoryTransactionFormatter.formatHistoryTransaction(history.get(i), exchangeRate, getApplicationContext()));
+                tView.setClickable(true);
+                if (i % 2 == 0) {
+                    tView.setBackgroundColor(Color.LTGRAY);
+                }
+                tView.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+                        Bundle b = new Bundle();
+                        intent.putExtras(b);
+                        startActivity(intent);
+                    }
+                });
+                linearLayout.addView(tView);
+            }
+        }
+    }
+
+    private int getImage(TransactionMetaData tx) {
         switch (tx.getType()) {
             case PAY_IN:
+            case COINBLESK_PAY_IN:
                 return R.drawable.ic_pay_in;
             case PAY_IN_UNVERIFIED:
                 return R.drawable.ic_pay_in_un;
             case PAY_OUT:
+            case COINBLESK_PAY_OUT:
                 return R.drawable.ic_pay_out;
             default:
                 throw new IllegalArgumentException("Unknown transaction type " + tx.getType());
@@ -458,12 +481,12 @@ public class MainActivity extends PaymentActivity {
             BigDecimal amountChf = CurrencyViewHandler.getAmountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount));
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             boolean isAutoAcceptEnabled = sharedPref.getBoolean("auto_accept", false);
-            if (isAutoAcceptEnabled && getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
-                String value = sharedPref.getString("auto_accept_amount", "0");
-                int limit = Integer.parseInt(value);
-                if (amountChf.compareTo(new BigDecimal(limit)) <= 0)
-                    return true;
-            }
+//            if (isAutoAcceptEnabled && getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
+//                String value = sharedPref.getString("auto_accept_amount", "0");
+//                int limit = Integer.parseInt(value);
+//                if (amountChf.compareTo(new BigDecimal(limit)) <= 0)
+//                    return true;
+//            }
             return false;
         } else {
             return false;
@@ -526,10 +549,6 @@ public class MainActivity extends PaymentActivity {
         });
     }
 
-    protected void refreshActivity() {
-        this.recreate();
-    }
-
     private void initNfcListener() {
         setNfcPaymentListener(new DefaultNfcListener() {
 
@@ -572,11 +591,9 @@ public class MainActivity extends PaymentActivity {
         }
 
         if (isSending) {
-            getCoinBleskApplication().getStorageHandler().addAddressBookEntry(user);
             answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
                     CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue, user);
         } else {
-            getCoinBleskApplication().getStorageHandler().addAddressBookEntry(user);
             answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
                     CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue, user);
         }

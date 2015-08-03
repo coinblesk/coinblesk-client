@@ -6,7 +6,8 @@
     -->
     <dimen name="activity_horizontal_margin">15dp</dimen>
     <dimen name="activity_vertical_margin">5dp</dimen>
-    <bool name="portrait_only">false</bool>
+
+    <bool name="small_device">false</bool>
     
     <dimen name="calc_dialog_button_width">110dp</dimen>
     <dimen name="calc_dialog_text_size">26sp</dimen>

@@ -27,6 +27,7 @@ import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
+import ch.uzh.csg.coinblesk.responseobject.SignedTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 import testutils.MockRequestTask;
@@ -46,7 +47,7 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
 
     protected SetupRequestObject setupResponse;
     protected ExchangeRateTransferObject exchangeRateResponse;
-    protected TransferObject payOutResponse;
+    protected SignedTxTransferObject payOutResponse;
     protected RefundTxTransferObject refundTxResponse;
     protected TransferObject saveWatchingKeyResponse;
 
@@ -71,7 +72,7 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
         exchangeRateResponse.setSuccessful(true);
         exchangeRateResponse.setExchangeRate(Currency.CHF, "300.00");
 
-        payOutResponse = new TransferObject();
+        payOutResponse = new SignedTxTransferObject();
         payOutResponse.setSuccessful(true);
 
         refundTxResponse = new RefundTxTransferObject();
@@ -106,7 +107,7 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
             }
 
             @Override
-            public RequestTask<ServerSignatureRequestTransferObject, TransferObject> payOutRequest(RequestCompleteListener<TransferObject> cro, ServerSignatureRequestTransferObject input, Context context) {
+            public RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> payOutRequest(RequestCompleteListener<SignedTxTransferObject> cro, ServerSignatureRequestTransferObject input, Context context) {
                 Assert.assertNotNull(input.getPartialTx());
                 Assert.assertNotNull(input.getIndexAndDerivationPaths());
                 Assert.assertFalse(input.getIndexAndDerivationPaths().isEmpty());
@@ -126,10 +127,9 @@ public class BaseInstrumentationTest<T extends Activity> extends ActivityInstrum
             }
 
             @Override
-            public RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest(RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) {
+            public RequestTask<TransferObject, ExchangeRateTransferObject> exchangeRateRequest(String symbol, RequestCompleteListener<ExchangeRateTransferObject> cro, Context context) {
                 return new MockRequestTask<>(cro, exchangeRateResponse);
             }
-
 
         };
 

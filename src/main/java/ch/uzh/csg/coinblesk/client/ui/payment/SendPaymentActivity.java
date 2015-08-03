@@ -239,10 +239,10 @@ public class SendPaymentActivity extends WalletActivity {
                     paymentResponsePayer.getUsernamePayee());
             showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
 
-            boolean saved = getCoinBleskApplication().getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
-            if (!saved) {
-                displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-            }
+//            boolean saved = getCoinBleskApplication().getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
+//            if (!saved) {
+//                displayResponse(getResources().getString(R.string.error_xmlSave_failed));
+//            }
         } else if (paymentResponsePayer.getStatus() == ServerResponseStatus.DUPLICATE_REQUEST) {
             showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, getResources().getString(R.string.transaction_duplicate_error));
         } else if (paymentResponsePayer.getReason().equals("BALANCE")) {
@@ -434,7 +434,7 @@ public class SendPaymentActivity extends WalletActivity {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             Set<String> receiverEntries = null;
-            receiverEntries = getCoinBleskApplication().getStorageHandler().getAddressBook();
+//            receiverEntries = getCoinBleskApplication().getStorageHandler().getAddressBook();
 
             final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
 
@@ -453,11 +453,11 @@ public class SendPaymentActivity extends WalletActivity {
                 entry.setPadding(0, 0, 0, 10);
                 entry.setTextColor(Color.BLACK);
                 entry.setText(username);
-                if (getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
-                    entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null, null, null);
-                } else {
-                    entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null, null, null);
-                }
+//                if (getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
+//                    entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null, null, null);
+//                } else {
+//                    entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null, null, null);
+//                }
 
                 entry.setClickable(true);
                 entry.setOnClickListener(new OnClickListener() {

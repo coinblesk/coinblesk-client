@@ -123,7 +123,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      * screen.
      */
     public void setScreenOrientation() {
-        if (getResources().getBoolean(R.bool.portrait_only)) {
+        if (getResources().getBoolean(R.bool.small_device)) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -202,6 +202,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     public RequestFactory getRequestFactory() {
         return getCoinBleskApplication().getRequestFactory();
+    }
+
+    public boolean isTablet() {
+        return !getResources().getBoolean(R.bool.small_device);
     }
 
 }

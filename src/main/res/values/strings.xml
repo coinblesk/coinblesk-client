@@ -35,27 +35,7 @@
     <string name="invalid_client_version_title">Update available</string>
     <string name="invalid_client_version">Please update this app. This version is outdated and is no longer supported.</string>
 
-    <!-- Reset Password Activity -->
-    <string name="resetPW_descriptionTextView">To reset your password please insert your registrated Email address below and click Reset</string>
-    <string name="resetPW_emailEditText">Enter your e-mail address</string>
-    <string name="resetPW_resetButton">Reset Password</string>
 
-    <!-- Registration Strings -->
-    <string name="signUpEditUsernameText">Enter your username</string>
-    <string name="signUpEditEmailText">Enter your e-mail address</string>
-    <string name="signUpEditPasswordText">Enter your password</string>
-    <string name="signUpEditConfirmPasswordText">Confirm your password</string>
-    <string name="signUpTermOfUseTextView">Read term and conditions</string>
-    <string name="signUpCheckBox">I agree to the term of Service</string>
-    <string name="signUpAgreeBtn">Sign up</string>
-    <string name="registration_field_not_empty">Please fill out all fields.</string>
-    <string name="registration_email_not_valid">E-Mail address is not valid.</string>
-    <string name="registration_password_lenght_error">Password has an invalid form! Please insert a password with a length of 4 until 20 characters.</string>
-    <string name="registration_username_error">Username has an invalid form!\nOnly letters and numbers with a minimum length of 4 charcters are excepted.</string>
-    <string name="registration_tou_not_accepted">Please read and accept the term of use.</string>
-    <string name="registration_password_not_equal">The entered passwords do not match, please try again.</string>
-    <string name="registration_successful">Please check your emails to verify your account. Your Account has successfully been created. Without verification you can not login.</string>
-    
     <!-- Popup Window -->
     <string name="termOfUseTitleView">Terms and Conditions</string>
     <string name="termOfUseTextView">This application was developed as part of a Master Project at the Institute for 
@@ -137,7 +117,14 @@
 
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">You paid %1$s to %2$s</string>
-    <string name="payment_notification_success_payee">You got %1$s from %2$s</string>
+    <string name="payment_notification_success_payee">You received %1$s from %2$s</string>
+
+    <!--Transactions-->
+    <string name="transaction_coinblesk_instant_pay_in">CoinBlesk instant transaction. You received %1$s from %2$s.</string>
+    <string name="transaction_pay_out">You sent %1$s to %2$s</string>
+    <string name="transaction_pay_in">You received %1$s from the Bitcoin network</string>
+    <string name="transaction_pay_in_unverified">You received %1$s from the Bitcoin network (%2$s confirmations)</string>
+
 
     <!-- Spinner currency -->
     <string name="textView_currency">currency</string>
@@ -147,12 +134,15 @@
     <string name="payIn_instruction">Please submit your bitcoins to the following address. As soon as the incoming payment is verified we update your account balance. This takes approximately 1 hour.</string>
     <string name="payIn_copy">Copy To Clipboard</string>
     <string name="copy_clipboard">Address copied to clipboard</string>
-    <string name="payIn_sendMail">Send to Email</string>
+    <string name="payIn_sendMail">Send by Email</string>
     <string name="payIn_addressTitle">Bitcoin Address:</string>
     <string name="payIn_showQR">Show QR Code</string>
     <string name="payIn_closeQR">Close</string>
 	<string name="payIn_qr_error">Error: Can\'t create QR code.</string>
-    
+    <string name="payIn_bitcoinAddressEmailBody">This is your CoinBlesk Bitcoin address: %1$s \n\nIt is safe to share this address with anyone.</string>
+    <string name="payIn_bitcoinAddressEmailSubject">Your CoinBlesk Bitcoin Address</string>
+
+
     <!-- PayOut Strings -->
     <string name="setting_payOut_balance_title">Balance limit in Bitcoins</string>
     <string name="setting_payOut_balance_Value">Min. Value is at 0.0001 BTC</string>
@@ -234,7 +224,7 @@
     <string name="profileEditPasswordBtn">Change your password</string>
     <string name="profileEditDeletedUserAccountBtn">Delete Account</string>
     <string name="delete_dialog_title">Confirm delete</string>
-    <string name="delete_dialog_message">Are you sure to delete your user account?</string>
+    <string name="delete_dialog_message">Are you sure to delete your receiver account?</string>
 
     <!-- Update Account Strings -->
     <!-- E-Mail -->
@@ -329,6 +319,7 @@
     <string name="settings_exchange_api_secret">Exchange API Secret</string>
 
 
+
     <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
     <string name="choosePayment_requestPaymentBtnText">Request Bitcoins</string>
@@ -388,9 +379,22 @@
     <string name="restoreOrCreate_passphrase_placeholder">Enter Backup Phrase...</string>
     <string name="restoreOrCreate_toast_restoreFailed">Failed to restore wallet. Are you sure you entered the backup phrase correctly?</string>
 
+    <!--Refund transaction-->
+    <string name="refundTxMail_salutation">Dear %1$s,</string>
+    <string name="refundTxMail_noRefundTxYet">No refund transaction was created yet.</string>
+    <string name="refundTxMail_explanation">Below is your refund transaction. It will become valid approximately %1$s. You can copy the transaction and broadcast it e.g. at https://blockchain.info/pushtx. After
+            broadcasting the transaction, you can reclaim your bitcoins by importing your backup phrase in an other bitcoin client, such as the Electrum bitcoin client. You can find your backup phrase under settings -> wallet backup. /n
+            Important: You will only be able to reclaim the bitcoins you received up to now with this refund transaction. If you send or receive bitcoins via the CoinBlesk app, this refund transaction is no longer valid. </string>
+    <string name="refundTxMail_ending">Thank you for using CoinBlesk.</string>
+    <string name="refundTxMail_subject">CoinBlesk Refund Transaction</string>
+
     <!--Merchant Mode-->
     <string name="merchantMode_toast_merchantModeActiveButNoExchanges">Merchant mode only works if at least one exchange is configured correctly.</string>
     <string name="merchantMode_toast_sellingFailed">Failed to exchange BTC</string>
 
+
+    <!-- Generic Strings -->
+    <string name="email_address_not_valid">E-Mail address is not valid.</string>
+    <string name="no_email_client_installed">No email client found on device</string>
 
 </resources>

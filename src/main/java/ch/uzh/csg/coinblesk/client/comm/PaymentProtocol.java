@@ -61,6 +61,7 @@ final public class PaymentProtocol {
     private boolean signatureVerified = false;
 
     private final static KeyFactory keyFactory;
+
     static {
     	Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
         try {
