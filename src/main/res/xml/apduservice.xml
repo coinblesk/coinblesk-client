@@ -8,6 +8,9 @@
         <aid-filter android:name="F0F00777FF5500" />
         <aid-filter android:name="F0F00777FF5536" />
         <aid-filter android:name="F0F00777FF55F5" />
+        <aid-filter android:name="F0F00777FF5400" />
+        <aid-filter android:name="F0F00777FF5436" />
+        <aid-filter android:name="F0F00777FF54F5" />
     </aid-group>
 
 </host-apdu-service>
