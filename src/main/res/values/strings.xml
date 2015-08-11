@@ -350,6 +350,7 @@
     <!-- Error Strings -->
     <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting CoinBlesk app preferences in Android Settings.</string>
     <string name="error_transaction_failed">Transmission error: Please check your history to verify if the transaction was successful or not.</string>
+    <string name="error_no_confirmation">Payment was sent, but no confirmation was received. Check your history to verify if the transaction was successful or not.</string>
     <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
     <string name="exchangeRate_error">Current exchange rate is not available at the moment.</string>
     <string name="transaction_rejected">Payer has rejected the payment.</string>

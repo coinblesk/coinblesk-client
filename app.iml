@@ -118,8 +118,8 @@
     <orderEntry type="library" exported="" scope="TEST" name="asm-tree-5.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="powermock-module-junit4-common-1.6.1" level="project" />
     <orderEntry type="library" exported="" name="protobuf-java-2.5.0" level="project" />
-    <orderEntry type="library" exported="" name="android-kitkat-nfc-library-0.1.2" level="project" />
     <orderEntry type="library" exported="" name="commons-codec-1.10" level="project" />
+    <orderEntry type="library" exported="" name="android-kitkat-nfc-library-0.1.2" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="javassist-3.18.2-GA" level="project" />
     <orderEntry type="library" exported="" name="xchange-openexchangerates-3.0.0" level="project" />
     <orderEntry type="library" exported="" name="xchange-kraken-3.0.0" level="project" />
@@ -133,9 +133,9 @@
     <orderEntry type="library" exported="" scope="TEST" name="accessibility-test-framework-1.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-22.2.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="ant-launcher-1.8.0" level="project" />
+    <orderEntry type="library" exported="" name="activeandroid-3.1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" name="prov-1.51.0.0" level="project" />
     <orderEntry type="library" exported="" name="jsr305-3.0.0" level="project" />
-    <orderEntry type="library" exported="" name="activeandroid-3.1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="xpp3_min-1.1.4c" level="project" />
     <orderEntry type="library" exported="" name="json-smart-1.3" level="project" />
     <orderEntry type="library" exported="" name="cardview-v7-21.0.3" level="project" />
@@ -144,8 +144,8 @@
     <orderEntry type="library" exported="" name="logback-android-core-1.1.1-4" level="project" />
     <orderEntry type="library" exported="" name="bitcoinj-core-0.13.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-util-5.0.1" level="project" />
-    <orderEntry type="library" exported="" name="okhttp-2.2.0" level="project" />
     <orderEntry type="library" exported="" name="core-1.51.0.0" level="project" />
+    <orderEntry type="library" exported="" name="okhttp-2.2.0" level="project" />
     <orderEntry type="library" exported="" name="jsr311-api-1.1.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="bcprov-jdk16-1.46" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="objenesis-2.1" level="project" />
@@ -155,9 +155,9 @@
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-3.0-rc3" level="project" />
     <orderEntry type="library" exported="" name="xchange-core-3.0.0" level="project" />
     <orderEntry type="library" exported="" name="guava-16.0.1" level="project" />
+    <orderEntry type="library" exported="" name="xchange-bitstamp-3.0.0" level="project" />
     <orderEntry type="library" exported="" name="rescu-1.7.2" level="project" />
     <orderEntry type="library" exported="" name="jackson-core-2.4.0" level="project" />
-    <orderEntry type="library" exported="" name="xchange-bitstamp-3.0.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-resources-3.0-rc3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="powermock-classloading-xstream-1.6.1" level="project" />
     <orderEntry type="library" exported="" name="apktool-lib-1.4.4-3" level="project" />

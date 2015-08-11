@@ -676,7 +676,6 @@ public class WalletService extends android.app.Service {
                     // confirmed tx
                     transaction.maybeSetType(TransactionMetaData.TransactionType.PAY_IN);
                 } else {
-                    // TODO: work with confidence instead of confirmations
                     // unconfirmed tx
                     transaction.maybeSetType(TransactionMetaData.TransactionType.PAY_IN_UNVERIFIED);
                 }

@@ -2,6 +2,8 @@ package ch.uzh.csg.coinblesk.client.exchange;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 
 import com.xeiam.xchange.ExchangeSpecification;
@@ -17,6 +19,7 @@ import java.util.Set;
 
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 
@@ -177,6 +180,22 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
     }
 
     public void getExchangeRate(final RequestCompleteListener<ExchangeRateTransferObject> rcl) {
+
+
+        // fail immediately if no internet connection is available
+        if(!ConnectionCheck.isNetworkAvailable(context)) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    ExchangeRateTransferObject transferObject = new ExchangeRateTransferObject();
+                    transferObject.setSuccessful(false);
+                    transferObject.setMessage("No internet connection available");
+                    rcl.onTaskComplete(transferObject);
+                }
+            });
+            return;
+        }
+
         getExchangeRate(exchanges.iterator(), rcl);
     }
 }

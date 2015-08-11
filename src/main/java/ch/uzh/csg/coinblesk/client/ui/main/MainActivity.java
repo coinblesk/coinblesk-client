@@ -57,7 +57,6 @@ import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.WalletListener;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
-import ch.uzh.csg.coinblesk.util.Converter;
 
 
 /**
@@ -468,89 +467,28 @@ public class MainActivity extends PaymentActivity {
         }
     }
 
-
-    /**
-     * Checks if auto accepting of payments are enabled for given username and amount.
-     *
-     * @param username
-     * @param amount
-     * @return boolean if transaction shall be autoaccepted
-     */
-    private boolean checkAutoAccept(String username, long amount) {
-        if (exchangeRate != null) {
-            BigDecimal amountChf = CurrencyViewHandler.getAmountInCHF(exchangeRate, Converter.getBigDecimalFromLong(amount));
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-            boolean isAutoAcceptEnabled = sharedPref.getBoolean("auto_accept", false);
-//            if (isAutoAcceptEnabled && getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
-//                String value = sharedPref.getString("auto_accept_amount", "0");
-//                int limit = Integer.parseInt(value);
-//                if (amountChf.compareTo(new BigDecimal(limit)) <= 0)
-//                    return true;
-//            }
-            return false;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Opens dialog to prompt user if he wants to accept or reject an incoming payment request.
-     *
-     * @param username
-     * @param amount
-     */
-    private void showCustomDialog(String username, long amount) {
-        LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewGroup group = (ViewGroup) findViewById(R.id.pay_payment_popup);
-        final View layout = inflater.inflate(R.layout.pay_payment_popup, group);
-        popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, true);
-
-        final TextView receiverTv = (TextView) layout.findViewById(R.id.payPayment_username);
-        receiverTv.setText(username);
-        final TextView amountTv = (TextView) layout.findViewById(R.id.payPayment_amountBTC);
-        amountTv.setText(CurrencyViewHandler.formatBTCAsString(Converter.getBigDecimalFromLong(amount), getApplicationContext()));
-
-        if (exchangeRate != null) {
-            final TextView amountChfTv = (TextView) layout.findViewById(R.id.payPayment_amountCHF);
-            amountChfTv.setText(CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, Converter.getBigDecimalFromLong(amount)));
-            final TextView exchangeRateTv = (TextView) layout.findViewById(R.id.payPayment_exchangeRateValue);
-            CurrencyViewHandler.setExchangeRateView(exchangeRate, exchangeRateTv);
-            final TextView balanceTvChf = (TextView) layout.findViewById(R.id.payPayment_balanceCHF);
-            balanceTvChf.setText(CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, getWalletService().getUnconfirmedBalance()));
-        }
-        final TextView balanceTvBtc = (TextView) layout.findViewById(R.id.payPayment_balanceBTC);
-        balanceTvBtc.setText(CurrencyViewHandler.formatBTCAsString(getWalletService().getUnconfirmedBalance(), getApplicationContext()));
-
-        layout.post(new Runnable() {
-            public void run() {
-                dismissNfcInProgressDialog();
-                popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
-            }
-        });
-
-        final Button rejectButton = (Button) layout.findViewById(R.id.payPayment_reject);
-        rejectButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                paymentAccepted = false;
-                showNfcProgressDialog(false);
-                //answer2.rejectPayment();
-                popupWindow.dismiss();
-            }
-        });
-
-        final Button acceptButton = (Button) layout.findViewById(R.id.payPayment_accept);
-        acceptButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                paymentAccepted = true;
-                //answer2.acceptPayment();
-                popupWindow.dismiss();
-                showNfcProgressDialog(false);
-            }
-        });
-    }
-
     private void initNfcListener() {
         setNfcPaymentListener(new DefaultNfcListener() {
+
+            private boolean paymentSent = false;
+            private boolean paymentSuccess = false;
+
+            @Override
+            public void onPaymentFinish(boolean success) {
+                super.onPaymentFinish(success);
+
+                // redraw the history
+                createHistoryViews();
+
+                if(paymentSent && !paymentSuccess) {
+                    String msg = getString(R.string.error_no_confirmation);
+                    showDialog(msg, false);
+                }
+
+                // reset state
+                paymentSent = false;
+                paymentSuccess = false;
+            }
 
             @Override
             public void onPaymentReceived(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
@@ -561,7 +499,14 @@ public class MainActivity extends PaymentActivity {
             @Override
             public void onPaymentSent(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
                 super.onPaymentSent(amount, senderPubKey, senderUserName);
+                paymentSent = true;
+            }
+
+            @Override
+            public void onPaymentSuccess(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
+                super.onPaymentSent(amount, senderPubKey, senderUserName);
                 showSuccessDialog(true, amount, senderUserName);
+                paymentSuccess = true;
             }
 
             @Override
@@ -582,22 +527,33 @@ public class MainActivity extends PaymentActivity {
      *
      * @param isSending (isSending = true if initiator sends bitcoins, false if initiator requests bitcoins)
      */
-    private void showSuccessDialog(boolean isSending, BigDecimal amountBtc, String user) {
+    private void showSuccessDialog(final boolean isSending, final BigDecimal amountBtc, final String user) {
         dismissNfcInProgressDialog();
-        String answer;
-        String chfValue = "";
-        if (exchangeRate != null) {
-            chfValue = " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")";
-        }
 
-        if (isSending) {
-            answer = String.format(getResources().getString(R.string.payment_notification_success_payer),
-                    CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue, user);
-        } else {
-            answer = String.format(getResources().getString(R.string.payment_notification_success_payee),
-                    CurrencyViewHandler.formatBTCAsString(amountBtc, this) + chfValue, user);
-        }
-        showDialog(answer, true);
+        getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
+            @Override
+            public void onTaskComplete(ExchangeRateTransferObject response) {
+                String amountString;
+                if (response.isSuccessful()) {
+                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                    amountString = CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, amountBtc, MainActivity.this);
+                } else {
+                    amountString = CurrencyViewHandler.formatBTCAsString(amountBtc, MainActivity.this);
+                }
+
+                String msg;
+                if (isSending) {
+                    msg = String.format(getResources().getString(R.string.payment_notification_success_payer),
+                            CurrencyViewHandler.formatBTCAsString(amountBtc, MainActivity.this) + amountString, user);
+                } else {
+                    msg = String.format(getResources().getString(R.string.payment_notification_success_payee),
+                            CurrencyViewHandler.formatBTCAsString(amountBtc, MainActivity.this) + amountString, user);
+                }
+                showDialog(msg, true);
+            }
+        });
+
+
     }
 
 }

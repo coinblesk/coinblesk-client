@@ -159,6 +159,18 @@ public class ReceivePaymentActivity extends PaymentActivity {
 
     private void initNfcListener() {
         setNfcPaymentListener(new DefaultNfcListener() {
+
+            @Override
+            public void onPaymentError(String msg) {
+                showErrorDialog(isSendingMode, msg);
+            }
+
+            @Override
+            public void onPaymentRejected() {
+                super.onPaymentRejected();
+                showErrorDialog(isSendingMode, getString(R.string.transaction_rejected));
+            }
+
             @Override
             public void onPaymentReceived(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
                 super.onPaymentReceived(amount, senderPubKey, senderUserName);
@@ -168,7 +180,6 @@ public class ReceivePaymentActivity extends PaymentActivity {
             @Override
             public void onPaymentFinish(boolean success) {
                 super.onPaymentFinish(success);
-
 
                 try {
                     // reset NFC state
@@ -182,6 +193,7 @@ public class ReceivePaymentActivity extends PaymentActivity {
                 resetNfc();
                 enableMensaButtons();
                 clearPaymentInfos();
+
             }
         });
     }
@@ -389,8 +401,13 @@ public class ReceivePaymentActivity extends PaymentActivity {
     }
 
     private void hideNfcInstructions() {
-        findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.INVISIBLE);
-        findViewById(R.id.receivePayment_nfcIcon).setVisibility(View.INVISIBLE);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.receivePayment_establishNfcConnectionInfo).setVisibility(View.INVISIBLE);
+                findViewById(R.id.receivePayment_nfcIcon).setVisibility(View.INVISIBLE);
+            }
+        });
     }
 
     private class MyAdapter extends ArrayAdapter<String> {
@@ -463,7 +480,7 @@ public class ReceivePaymentActivity extends PaymentActivity {
     };
 
     /**
-     * Shows a dialog indicating if transaction was successful or not.
+     * Shows a dialog indicating that the NFC payment was successful
      *
      * @param isSending (isSending = true if initiator sends bitcoins, false if initiator requests bitcoins)
      */
@@ -480,6 +497,15 @@ public class ReceivePaymentActivity extends PaymentActivity {
 
         showDialog(answer, true);
 
+    }
+
+    /**
+     * Shows a dialog indicating that the NFC payment failed
+     *
+     * @param isSending (isSending = true if initiator sends bitcoins, false if initiator requests bitcoins)
+     */
+    private void showErrorDialog(boolean isSending, String msg) {
+        showDialog(msg, false);
     }
 
     //Tablet View, define more or adapt buttons for quickly entering fixed prices as in shops etc. here and in sw720dp\activity_receive_payment
