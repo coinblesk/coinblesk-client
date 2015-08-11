@@ -337,7 +337,7 @@ public abstract class PaymentActivity extends WalletActivity {
 
                 LOGGER.debug("received nfc message {}, current state is {}", protocol.type().toString(), current.toString());
 
-                if (protocol.type() == PaymentProtocol.Type.CONTACT_AND_PAYMENT_RESPONSE_OK) {
+                if (protocol.type() == PaymentProtocol.Type.PAYMENT_REQUEST_RESPONSE) {
                     //this is the half signed transaction
                     remotePubKey = protocol.publicKey();
                     halfSignedTx = protocol.halfSignedTransaction();
@@ -345,7 +345,7 @@ public abstract class PaymentActivity extends WalletActivity {
                     return;
                 }
 
-                if (protocol.type() == PaymentProtocol.Type.CONTACT_AND_PAYMENT_RESPONSE_NOK) {
+                if (protocol.type() == PaymentProtocol.Type.PAYMENT_NOK) {
                     // payment rejected by counterparty
                     listener.onPaymentRejected();
                     listener.onPaymentFinish(true);
@@ -401,7 +401,7 @@ public abstract class PaymentActivity extends WalletActivity {
 
                                         LOGGER.debug("Sending payment request for {} satoshi to receiver {} (address: {})", satoshi, user, address);
 
-                                        byte[] retVal = PaymentProtocol.contactAndPaymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
+                                        byte[] retVal = PaymentProtocol.paymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
                                         result2.set(retVal);
 
                                         listener.onPaymentRequestSent(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()));
@@ -450,7 +450,7 @@ public abstract class PaymentActivity extends WalletActivity {
                                         final byte[] fullySignedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
                                         listener.onPaymentReceived(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, "CoinBlesk user");
                                         LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", fullySignedTx.length);
-                                        responseMsg = PaymentProtocol.fromServerRequestOk(fullySignedTx).toBytes(keyPair.getPrivate());
+                                        responseMsg = PaymentProtocol.fullTransaction(fullySignedTx).toBytes(keyPair.getPrivate());
                                         listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, "CoinBlesk user");
                                         getWalletService().commitAndBroadcastTx(fullySignedTx, true);
 
@@ -475,7 +475,7 @@ public abstract class PaymentActivity extends WalletActivity {
                                     } else {
                                         LOGGER.warn("Server didn't sign the transaction: {}", response.getMessage());
                                         LOGGER.debug("Sending server request NOK to other client.");
-                                        responseMsg = PaymentProtocol.fromServerRequestNok().toBytes(keyPair.getPrivate());
+                                        responseMsg = PaymentProtocol.serverNok().toBytes(keyPair.getPrivate());
                                         listener.onPaymentError("Failed to get the signature from the server");
                                     }
 
@@ -484,7 +484,7 @@ public abstract class PaymentActivity extends WalletActivity {
                                     listener.onPaymentError(e.getMessage());
 
                                     try {
-                                        responseMsg = PaymentProtocol.fromServerRequestNok().toBytes(keyPair.getPrivate());
+                                        responseMsg = PaymentProtocol.serverNok().toBytes(keyPair.getPrivate());
                                         result.set(responseMsg);
                                     } catch (Exception e1) {
                                         LOGGER.error("NFC communication failed completely, was not able to send NOK to other client: ", e1);
@@ -542,7 +542,7 @@ public abstract class PaymentActivity extends WalletActivity {
                 LOGGER.debug("received nfc message {}", type.toString());
 
                 switch (type) {
-                    case CONTACT_AND_PAYMENT_REQUEST:
+                    case PAYMENT_REQUEST:
 
                         // create the half signed transaction
                         new Thread(new Runnable() {
@@ -571,12 +571,12 @@ public abstract class PaymentActivity extends WalletActivity {
                                                 // the user accepted the payment
                                                 byte[] halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
                                                 LOGGER.debug("Sending partially signed transaction over NFC, total size of message is {} bytes", halfSignedTx.length);
-                                                byte[] response = PaymentProtocol.contactAndPaymentResponseOk(halfSignedTx).toBytes(keyPair.getPrivate());
+                                                byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), "user here", new byte[6] ,halfSignedTx).toBytes(keyPair.getPrivate());
                                                 responseLater.response(response);
                                                 listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
                                             } else {
                                                 // user rejected the payment
-                                                byte[] response = PaymentProtocol.contactAndPaymentResponseNok().toBytes(keyPair.getPrivate());
+                                                byte[] response = PaymentProtocol.paymentNok().toBytes(keyPair.getPrivate());
                                                 responseLater.response(response);
                                                 listener.onPaymentFinish(true);
                                             }
@@ -592,7 +592,7 @@ public abstract class PaymentActivity extends WalletActivity {
                         }).start();
 
                         return null;
-                    case FROM_SERVER_REQUEST_OK:
+                    case FULL_TRANSACTION:
 
                         // get the fully signed tx, commit and broadcast it
                         new Thread(new Runnable() {
@@ -646,7 +646,7 @@ public abstract class PaymentActivity extends WalletActivity {
 
                         return null;
 
-                    case FROM_SERVER_REQUEST_NOK:
+                    case SERVER_NOK:
                         LOGGER.debug("Received NOK from other client...");
                         listener.onPaymentError("The other client refused the payment.");
 
