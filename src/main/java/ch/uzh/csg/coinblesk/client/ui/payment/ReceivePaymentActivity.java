@@ -39,6 +39,7 @@ import java.math.RoundingMode;
 import java.security.PublicKey;
 import java.util.ArrayList;
 
+import ch.uzh.csg.coinblesk.Currency;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
@@ -48,7 +49,6 @@ import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
-import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.comm.NfcLibException;
 

@@ -13,12 +13,12 @@ import org.robolectric.annotation.Config;
 
 import java.math.BigDecimal;
 
+import ch.uzh.csg.coinblesk.Currency;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.testutils.MockRequestTask;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
-import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 

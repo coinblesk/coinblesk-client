@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -34,6 +33,7 @@ import android.widget.TextView;
 import java.math.BigDecimal;
 import java.util.Set;
 
+import ch.uzh.csg.coinblesk.Currency;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
@@ -43,7 +43,6 @@ import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
-import ch.uzh.csg.coinblesk.customserialization.Currency;
 import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
 import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
@@ -111,21 +110,21 @@ public class SendPaymentActivity extends WalletActivity {
 
         launchExchangeRateRequest();
 
-        menuWarning.setEnabled(true);
-        menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                launchExchangeRateRequest();
-                return false;
-            }
-        });
-
-        sessionRefreshMenuItem.setEnabled(true);
-        sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                launchExchangeRateRequest();
-                return false;
-            }
-        });
+//        menuWarning.setEnabled(true);
+//        menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+//            public boolean onMenuItemClick(MenuItem item) {
+//                launchExchangeRateRequest();
+//                return false;
+//            }
+//        });
+//
+//        sessionRefreshMenuItem.setEnabled(true);
+//        sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+//            public boolean onMenuItemClick(MenuItem item) {
+//                launchExchangeRateRequest();
+//                return false;
+//            }
+//        });
     }
 
     @Override
@@ -145,8 +144,8 @@ public class SendPaymentActivity extends WalletActivity {
     protected void initializeMenuItems(Menu menu) {
         menuWarning = menu.findItem(R.id.action_warning);
         offlineMode = menu.findItem(R.id.menu_offlineMode);
-        TextView offlineModeTV = (TextView) offlineMode.getActionView();
-        offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
+//        TextView offlineModeTV = (TextView) offlineMode.getActionView();
+//        offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
 
         //setup timer
         sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);

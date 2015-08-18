@@ -298,6 +298,7 @@ public abstract class PaymentActivity extends WalletActivity {
             KeyPair keyPair;
             PublicKey remotePubKey;
             byte[] halfSignedTx;
+            String user;
             RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> signTask;
             AtomicReference<byte[]> result = new AtomicReference<>();
 
@@ -341,6 +342,7 @@ public abstract class PaymentActivity extends WalletActivity {
                     //this is the half signed transaction
                     remotePubKey = protocol.publicKey();
                     halfSignedTx = protocol.halfSignedTransaction();
+                    user = protocol.user();
                     current = State.FIRST;
                     return;
                 }
@@ -448,10 +450,10 @@ public abstract class PaymentActivity extends WalletActivity {
                                     if (response.isSuccessful()) {
                                         LOGGER.debug("Received fully signed transaction from server.");
                                         final byte[] fullySignedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
-                                        listener.onPaymentReceived(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, "CoinBlesk user");
+                                        listener.onPaymentReceived(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
                                         LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", fullySignedTx.length);
                                         responseMsg = PaymentProtocol.fullTransaction(fullySignedTx).toBytes(keyPair.getPrivate());
-                                        listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, "CoinBlesk user");
+                                        listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
                                         getWalletService().commitAndBroadcastTx(fullySignedTx, true);
 
 
@@ -463,7 +465,7 @@ public abstract class PaymentActivity extends WalletActivity {
                                                 TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
                                                 txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
                                                 txMetaData.setReceiver("You");
-                                                txMetaData.setSender("CoinBlesk User");
+                                                txMetaData.setSender(user);
                                                 txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_IN);
                                                 getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
                                                 LOGGER.debug("Saved transaction meta data");
@@ -570,8 +572,9 @@ public abstract class PaymentActivity extends WalletActivity {
                                             if (accepted) {
                                                 // the user accepted the payment
                                                 byte[] halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
+                                                String username = getCoinBleskApplication().getStorageHandler().getUsername();
                                                 LOGGER.debug("Sending partially signed transaction over NFC, total size of message is {} bytes", halfSignedTx.length);
-                                                byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), "user here", new byte[6] ,halfSignedTx).toBytes(keyPair.getPrivate());
+                                                byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), username, new byte[6], halfSignedTx).toBytes(keyPair.getPrivate());
                                                 responseLater.response(response);
                                                 listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
                                             } else {
