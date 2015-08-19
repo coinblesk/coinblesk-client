@@ -238,7 +238,7 @@ public abstract class PaymentActivity extends WalletActivity {
     private void checkAutoAccept(final long satoshis, final String receiver, PublicKey remotePubKey, final UserPaymentConfirmation confirmation) {
         // check whether to auto accept the payment or not
         AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
-        if(!entry.isTrusted()) {
+        if(entry == null || !entry.isTrusted()) {
             showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, confirmation);
         } else {
             getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {

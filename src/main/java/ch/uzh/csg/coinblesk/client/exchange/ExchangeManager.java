@@ -35,6 +35,7 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
     private boolean merchantModeActivated;
 
     private Set<String> primaryExchangeKeys;
+    private Set<String> secondaryExchangeKeys;
 
     public ExchangeManager(Context context) {
         this.exchanges = new HashSet<>();
@@ -46,6 +47,13 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
         primaryExchangeKeys.add("primary_exchange_username");
         primaryExchangeKeys.add("primary_exchange_api_key");
         primaryExchangeKeys.add("primary_exchange_api_secret");
+
+        this.secondaryExchangeKeys = new HashSet<>();
+        secondaryExchangeKeys.add("merchant_mode");
+        secondaryExchangeKeys.add("primary_exchange");
+        secondaryExchangeKeys.add("primary_exchange_username");
+        secondaryExchangeKeys.add("primary_exchange_api_key");
+        secondaryExchangeKeys.add("primary_exchange_api_secret");
 
         // add default exchange without credentials for exchange rate
         addExchange(new Exchange(Exchange.KRAKEN));
@@ -112,29 +120,24 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
         if (key.equals("merchant_mode")) {
             merchantModeActivated = sharedPreferences.getBoolean("merchant_mode", false);
         }
-
-        if (primaryExchangeKeys.contains(key)) {
-            addExchange(sharedPreferences);
+        if(!merchantModeActive()) {
+            return;
+        }
+        if (primaryExchangeKeys.contains(key) || secondaryExchangeKeys.contains(key)) {
+            updateExchanges(sharedPreferences);
         }
     }
 
+    private Exchange createExchange(SharedPreferences sharedPreferences, boolean primary) {
 
-    private void addExchange(SharedPreferences sharedPreferences) {
-        // primary exchange settings changes, check if settings complete
-        for (String pref : primaryExchangeKeys) {
-            if (!sharedPreferences.contains(pref)) return;
-        }
-
-        // all necessary values are there -> set up exchange
-        CoinBleskApplication application = (CoinBleskApplication) context.getApplicationContext();
+        String prefix = primary ? "primary" : "secondary";
 
         // determine exchange id
         String exchange;
-        switch (sharedPreferences.getString("primary_exchange", "").toLowerCase()) {
+        switch (sharedPreferences.getString(prefix + "_exchange", "").toLowerCase()) {
             case "kraken":
                 exchange = Exchange.KRAKEN;
                 break;
@@ -142,17 +145,38 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
                 exchange = Exchange.BITSTAMP;
                 break;
             default:
-                return;
+                throw new RuntimeException("Should never happen");
         }
 
         // set the credentials
         ExchangeSpecification exSpec = new ExchangeSpecification(exchange);
-        exSpec.setUserName(sharedPreferences.getString("primary_exchange_username", ""));
-        exSpec.setApiKey(sharedPreferences.getString("primary_exchange_api_key", ""));
-        exSpec.setSecretKey(sharedPreferences.getString("primary_exchange_api_secret", ""));
+        exSpec.setUserName(sharedPreferences.getString(prefix + "_exchange_username", ""));
+        exSpec.setApiKey(sharedPreferences.getString(prefix + "_exchange_api_key", ""));
+        exSpec.setSecretKey(sharedPreferences.getString(prefix + "_exchange_api_secret", ""));
 
-        // create exchange
-        application.getMerchantModeManager().addExchange(new Exchange(exSpec));
+        return new Exchange(exSpec);
+    }
+
+    private void updateExchanges(SharedPreferences sharedPreferences) {
+
+        // check if settings complete
+        boolean primaryExchangeSetUp = true;
+        boolean secondaryExchangeSetUp = true;
+        for (String pref : primaryExchangeKeys) {
+            primaryExchangeSetUp &= sharedPreferences.contains(pref);
+        }
+        for (String pref : secondaryExchangeKeys) {
+            secondaryExchangeSetUp &= sharedPreferences.contains(pref);
+        }
+
+        // create exchanges (if the settings are complete)
+        CoinBleskApplication application = (CoinBleskApplication) context.getApplicationContext();
+
+        if(primaryExchangeSetUp) {
+            application.getMerchantModeManager().addExchange(createExchange(sharedPreferences, true));
+        } else if (secondaryExchangeSetUp){
+            application.getMerchantModeManager().addExchange(createExchange(sharedPreferences, false));
+        }
     }
 
     private void getExchangeRate(final Iterator<Exchange> exchangeIterator, final RequestCompleteListener<ExchangeRateTransferObject> rcl) {
@@ -183,7 +207,7 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
 
 
         // fail immediately if no internet connection is available
-        if(!ConnectionCheck.isNetworkAvailable(context)) {
+        if (!ConnectionCheck.isNetworkAvailable(context)) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {

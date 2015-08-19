@@ -6,6 +6,8 @@
         android:summary="@string/pref_description_merchant_mode"
         android:title="@string/pref_title_merchant_mode"/>
 
+    <!--primary exchange-->
+
     <ListPreference
         android:dependency="merchant_mode"
         android:entries="@array/pref_primary_exchange_list"
@@ -35,6 +37,42 @@
         android:dependency="merchant_mode"
         android:inputType="text"
         android:key="primary_exchange_api_secret"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/settings_exchange_api_secret" />
+
+    <!--secondary exchange-->
+
+    <ListPreference
+        android:dependency="merchant_mode"
+        android:entries="@array/pref_secondary_exchange_list"
+        android:entryValues="@array/pref_secondary_exchange_values"
+        android:key="secondary_exchange"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/settings_exchange_secondary" />
+
+    <EditTextPreference
+        android:dependency="merchant_mode"
+        android:inputType="text"
+        android:key="secondary_exchange_username"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/settings_exchange_username" />
+    <EditTextPreference
+        android:dependency="merchant_mode"
+        android:inputType="text"
+        android:key="secondary_exchange_api_key"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/settings_exchange_api_key" />
+    <EditTextPreference
+        android:dependency="merchant_mode"
+        android:inputType="text"
+        android:key="secondary_exchange_api_secret"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"
