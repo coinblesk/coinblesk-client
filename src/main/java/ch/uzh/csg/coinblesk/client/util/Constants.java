@@ -6,14 +6,14 @@ import ch.uzh.csg.coinblesk.Currency;
 
 
 /**
- * Class for saving static constants of MBPS.
+ * Class for saving static constants of CoinBlesk.
  */
 public class Constants {
 
 	/**
 	 * The base URL of the server.
 	 */
-	public static final String BASE_URL = "http://192.168.1.209:8080/coinblesk-server";
+	public static final String BASE_URL = "http://192.168.1.129:8080/coinblesk";
 
 	/**
 	 * Amount of confirmations a transaction needs to be considered as confirmed

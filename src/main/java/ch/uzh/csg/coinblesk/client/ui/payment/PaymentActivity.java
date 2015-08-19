@@ -488,8 +488,9 @@ public abstract class PaymentActivity extends WalletActivity {
                                         AsyncTask<Void, Void, Void> saveMetadataTask = new AsyncTask<Void, Void, Void>() {
                                             @Override
                                             protected Void doInBackground(Void... params) {
+                                                BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
                                                 // tx meta data
-                                                String txId = BitcoinUtils.getTxHash(fullySignedTx, getWalletService().getBitcoinNet());
+                                                String txId = BitcoinUtils.getTxHash(fullySignedTx, bitcoinNet);
                                                 TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
                                                 txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
                                                 txMetaData.setReceiver("You");
@@ -499,13 +500,12 @@ public abstract class PaymentActivity extends WalletActivity {
                                                 LOGGER.debug("Saved transaction meta data");
 
                                                 // save (or update)  user in address book
-                                                // --> not supported for now. The P2SH address would have to be extracted from the half signed tx by hashing the redeem script
-//                                                AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
-//                                                entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
-//                                                entry.setName(user);
-//                                                entry.setBitcoinAddress(null); //TODO: bitcoin address?
-//                                                getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
-//                                                LOGGER.debug("Saved address book entry");
+                                                AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
+                                                entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
+                                                entry.setName(user);
+                                                entry.setBitcoinAddress(BitcoinUtils.getSenderAddressFromP2SHTx(fullySignedTx, bitcoinNet));
+                                                getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
+                                                LOGGER.debug("Saved address book entry");
 
                                                 return null;
                                             }

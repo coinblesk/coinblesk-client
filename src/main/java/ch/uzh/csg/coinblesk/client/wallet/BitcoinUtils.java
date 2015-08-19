@@ -9,6 +9,7 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
@@ -165,6 +166,19 @@ public class BitcoinUtils {
     public static String refundTxValidBlockToFriendlyString(long blocksRemaining, Context context) {
         Date validDate = new Date(System.currentTimeMillis() + 1000 * 60 * 10 * blocksRemaining);
         return DateUtils.getRelativeDateTimeString(context, validDate.getTime(), DateUtils.WEEK_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0).toString();
+    }
+
+    /**
+     * This Method takes the first input of a transaction and "extracts" the
+     * P2SH address of the sender out of it.
+     * @return the bitcoin address of the sender of a P2SH spending transaction.
+     */
+    public static String getSenderAddressFromP2SHTx(byte[] rawTx, BitcoinNet bitcoinNet) {
+        NetworkParameters params = getNetworkParameters(bitcoinNet);
+        Transaction tx = new Transaction(params, rawTx);
+        byte[] redeemScript = tx.getInput(0).getScriptSig().getChunks().get(tx.getInput(0).getScriptSig().getChunks().size() - 1).data;
+        byte[] hash160 = Utils.sha256hash160(redeemScript);
+        return Address.fromP2SHHash(params, hash160).toString();
     }
 
 }
