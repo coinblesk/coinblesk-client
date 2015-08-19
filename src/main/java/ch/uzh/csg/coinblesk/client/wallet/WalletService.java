@@ -291,7 +291,7 @@ public class WalletService extends android.app.Service {
         this.storage = storage;
 
         bitcoinNet = storage.getBitcoinNet();
-        serverWatchingKey = storage.getWatchingKey();
+        serverWatchingKey = storage.getServerWatchingKey();
 
         // check state
         Preconditions.checkNotNull(bitcoinNet, "bitcoinnet has to be set in the storage for the wallet service to start.");
@@ -310,8 +310,11 @@ public class WalletService extends android.app.Service {
             NetworkParameters params = getNetworkParams(bitcoinNet);
 
             clientWalletKit = new CoinBleskWalletAppKit(params, getFilesDir(), getWalletFilesPrefix(bitcoinNet));
+
             clientWalletKit
-                    .marryWallet(serverWatchingKey, mnemonic, creationTime)
+                    .marryWallet(serverWatchingKey, mnemonic, creationTime);
+
+            clientWalletKit
                     .setAndroidContext(getCoinbleskApplication())
                     .setBlockingStartup(false)
                     .setDownloadListener(new DownloadProgressTracker() {

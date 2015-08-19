@@ -16,13 +16,7 @@ public interface StorageHandler {
     String getUsername();
     void setUsername(String username);
 
-    String getWatchingKey();
-
-    void setWatchingKey(String watchingKey);
-
     BitcoinNet getBitcoinNet();
-
-    void setBitcoinNet(BitcoinNet bitcoinNet);
 
     /**
      * @return the last, base64 encoded refund transaction
@@ -83,4 +77,15 @@ public interface StorageHandler {
     List<AddressBookEntry> getAddressBook();
 
     void deleteAddressBookEntry(PublicKey pubKey);
+
+    String getServerWatchingKey();
+    void setBitcoinNetAndServerWatchingKey(BitcoinNet bitcoinNet, String serverWatchingKey);
+
+    boolean hasSentClientWatchingKey();
+
+    void sentClientWatchingKey(boolean b);
+
+    void setStorageHandlerCallback(StorageHandlerCallback storageHandlerCallback);
+
+    void setStorageFailed(boolean failed);
 }

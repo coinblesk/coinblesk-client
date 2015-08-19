@@ -45,17 +45,14 @@
         <meta-data android:name="AA_SERIALIZERS"
             android:value="ch.uzh.csg.coinblesk.client.storage.serializer.PublicKeySerializer, ch.uzh.csg.coinblesk.client.storage.serializer.BigDecimalSerializer" />
 
-        <activity android:name=".ui.main.SplashActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".ui.main.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_main" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
         </activity>
         <activity
             android:name=".ui.history.HistoryActivity"
@@ -114,7 +111,7 @@
                 android:value=".ui.settings.SettingsActivity" />
         </activity>
 
-        <service android:name=".wallet.WalletService" />
+
 
         <activity
             android:name=".ui.payment.ChoosePaymentActivity"
@@ -141,20 +138,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.main.MainActivity" />
         </activity>
-        <activity
-            android:name=".ui.main.RestoreOrNewActivity"
-            android:label="@string/restoreOrNew_title"
-            android:noHistory="true">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.main.MainActivity" />
-        </activity>
 
         <receiver
             android:name=".wallet.BlockChainSyncAlarmReceiver"
             android:enabled="true"
             android:exported="true" >
         </receiver>
+
+        <service android:name=".wallet.WalletService" />
 
         <service
             android:name="ch.uzh.csg.nfclib.HostApduServiceNfcLib"

@@ -22,7 +22,7 @@ import java.security.spec.X509EncodedKeySpec;
 
 import ch.uzh.csg.coinblesk.client.wallet.RefundTx;
 
-public class CoinBleskCloudData  extends BackupAgentHelper implements PreferencesHandler {
+public class CoinBleskCloudData  extends BackupAgentHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CoinBleskCloudData.class);
 
@@ -35,7 +35,11 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Preference
     public static final String COINBLESK_PREFS_BACKUP_KEY = "CoinBleskPrefs";
 
     public static final String BITCOIN_NET = "bitcoin-net";
+
     public static final String SERVER_WATCHING_KEY = "server-watching-key";
+    public static final String CLIENT_WATCHING_KEY = "client-watching-key";
+
+
     public static final String REFUND_TX = "refund-tx";
     public static final String REFUND_TX_VALID_BLOCK = "refund-tx-valid-block";
     public static final String USERNAME = "username";
@@ -75,57 +79,62 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Preference
 
     }
 
-    @Override
+    public boolean hasSentClientWatchingKey() {
+        return prefs.getBoolean(CLIENT_WATCHING_KEY, false);
+    }
+
+    public void sentClientWatchingKey(boolean hasSentWatchingKey) {
+        prefs.edit().putBoolean(CLIENT_WATCHING_KEY, hasSentWatchingKey).commit();
+    }
+
     public String getServerWatchingKey() {
         return prefs.getString(SERVER_WATCHING_KEY, null);
     }
 
-    @Override
     public void setServerWatchingKey(String serverWatchingKey) {
         prefs.edit().putString(SERVER_WATCHING_KEY, serverWatchingKey).commit();
     }
 
-    @Override
     public String getBitcoinNet() {
         return prefs.getString(BITCOIN_NET, null);
     }
 
-    @Override
+
     public void setBitcoinNet(String bitcoinNet) {
         prefs.edit().putString(BITCOIN_NET, bitcoinNet).commit();
     }
 
-    @Override
+
     public void setRefundTx(String base64EncodedTx) {
         prefs.edit().putString(REFUND_TX, base64EncodedTx).commit();
     }
 
-    @Override
+
     public String getRefundTx() {
         return prefs.getString(REFUND_TX, null);
     }
 
-    @Override
+
     public void setRefundTxValidBlock(long validBlockNr) {
         prefs.edit().putLong(REFUND_TX_VALID_BLOCK, validBlockNr).commit();
     }
 
-    @Override
+
     public long getRefundTxValidBlock() {
         return prefs.getLong(REFUND_TX_VALID_BLOCK, RefundTx.NO_REFUND_TX_VALID_BLOCK);
     }
 
-    @Override
+
     public void setUsername(String username) {
         prefs.edit().putString(USERNAME, username).commit();
     }
 
-    @Override
+
     public String getUsername() {
         return prefs.getString(USERNAME, null);
     }
 
-    @Override
+
     public void setKeyPair(KeyPair keyPair) {
         byte[] privKey = keyPair.getPrivate().getEncoded();
         byte[] pubKey = keyPair.getPublic().getEncoded();
@@ -134,7 +143,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Preference
         prefs.edit().putString(PRIV_KEY, Base64.encodeToString(privKey, Base64.NO_WRAP)).commit();
     }
 
-    @Override
+
     public KeyPair getKeyPair() {
 
         String privKeyBase64 = prefs.getString(PRIV_KEY, null);
@@ -152,7 +161,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper implements Preference
         }
     }
 
-    @Override
+
     public void clear() {
         prefs.edit().clear().commit();
     }

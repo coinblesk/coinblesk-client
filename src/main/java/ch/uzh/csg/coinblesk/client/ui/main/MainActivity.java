@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -36,15 +37,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.util.concurrent.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.security.PublicKey;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.request.RequestTask;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandlerCallback;
 import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
 import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
@@ -57,6 +64,9 @@ import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
 import ch.uzh.csg.coinblesk.client.wallet.WalletListener;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
+import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
+import ch.uzh.csg.coinblesk.responseobject.TransferObject;
+import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 
 
 /**
@@ -91,6 +101,30 @@ public class MainActivity extends PaymentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // check if this is a new installation
+        if(!getCoinBleskApplication().getStorageHandler().hasUserData()) {
+            //its new, so create a wallet and set a default username
+            final String androidId = Settings.Secure.getString(getApplicationContext().getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
+            //TODO: make this setting available in the menu
+            getCoinBleskApplication().getStorageHandler().setUsername("Coinblesk User " + androidId);
+            showLoadingProgressDialog();
+            requestSetup(new RequestCompleteListener<SetupRequestObject>() {
+                @Override
+                public void onTaskComplete(SetupRequestObject response) {
+                    if (response.isSuccessful()) {
+                        LOGGER.debug("set bitcoinnet and serverwatching key");
+                        getCoinBleskApplication().getStorageHandler().setBitcoinNetAndServerWatchingKey(response.getBitcoinNet(), response.getServerWatchingKey());
+                        getCoinBleskApplication().getStorageHandler().setStorageFailed(false);
+                    } else {
+                        getCoinBleskApplication().getStorageHandler().setStorageFailed(true);
+                    }
+                    //now we continue in onServiceConnected, where we dismiss the loading dialog
+                }
+            });
+        } else {
+            getCoinBleskApplication().getStorageHandler().setStorageFailed(false);
+        }
 
         setContentView(R.layout.activity_main);
 
@@ -108,6 +142,82 @@ public class MainActivity extends PaymentActivity {
             Toast.makeText(this, e.toString(), Toast.LENGTH_LONG);
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        super.onServiceConnected(name, service);
+
+        LOGGER.debug("service connected");
+
+        getCoinBleskApplication().getStorageHandler().setStorageHandlerCallback(new StorageHandlerCallback() {
+            @Override
+            public void storageHandlerSet(StorageHandler storageHandler) {
+
+                LOGGER.debug("we have stored the data");
+
+                Service walletService = getWalletService().init(getCoinBleskApplication().getStorageHandler());
+                walletService.awaitRunning();
+
+                if (!getCoinBleskApplication().getStorageHandler().hasSentClientWatchingKey()) {
+                    sendClientWatchingKey(new RequestCompleteListener<TransferObject>() {
+                        @Override
+                        public void onTaskComplete(TransferObject response) {
+                            LOGGER.debug("sent client data");
+                            if (response.isSuccessful()) {
+                                getCoinBleskApplication().getStorageHandler().sentClientWatchingKey(true);
+                            } else {
+                                displayResponse(getString(R.string.establish_internet_connection));
+                                finish();
+                            }
+                        }
+                    });
+
+                }
+
+                displayUserBalance();
+                initiateProgressBar();
+                createHistoryViews();
+                initTxListener();
+                dismissProgressDialog();
+            }
+
+            @Override
+            public void failed() {
+                LOGGER.debug("sent client data failed");
+                displayResponse(getString(R.string.establish_internet_connection));
+                finish();
+            }
+        });
+    }
+
+
+    private void requestSetup(final RequestCompleteListener<SetupRequestObject> cro) {
+
+        RequestTask<TransferObject, SetupRequestObject> task = getCoinBleskApplication().getRequestFactory().setupRequest(new RequestCompleteListener<SetupRequestObject>() {
+            @Override
+            public void onTaskComplete(SetupRequestObject response) {
+                cro.onTaskComplete(response);
+            }
+        }, this);
+        task.execute();
+    }
+
+    private void sendClientWatchingKey(final RequestCompleteListener<TransferObject> cro) {
+
+        WatchingKeyTransferObject input = new WatchingKeyTransferObject();
+        input.setWatchingKey(getWalletService().getWatchingKey());
+        input.setBitcoinNet(getWalletService().getBitcoinNet());
+
+        RequestTask<WatchingKeyTransferObject, TransferObject> task = getCoinBleskApplication().getRequestFactory().saveWatchingKeyRequest(new RequestCompleteListener<TransferObject>() {
+            @Override
+            public void onTaskComplete(TransferObject response) {
+                cro.onTaskComplete(response);
+
+            }
+        }, input, this);
+
+        task.execute();
     }
 
     @Override
@@ -285,14 +395,9 @@ public class MainActivity extends PaymentActivity {
         showFirstTimeInformation();
     }
 
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        super.onServiceConnected(name, service);
-        displayUserBalance();
-        initiateProgressBar();
-        createHistoryViews();
-        initTxListener();
-    }
+
+
+
 
     @Override
     protected void onDestroy() {

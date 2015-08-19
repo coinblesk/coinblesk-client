@@ -17,45 +17,36 @@ import ch.uzh.csg.coinblesk.client.wallet.WalletService.LocalBinder;
  * Base class for {@link Activity} that utilizes Wallet functionality.
  * 
  * @author rvoellmy
+ * @author Thomas Bocek
  *
  */
-public class WalletActivity extends BaseActivity implements ServiceConnection {
+public abstract class WalletActivity extends BaseActivity implements ServiceConnection {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(WalletActivity.class);
     
-    private WalletService walletService;
+    private WalletService walletService = null;
     private boolean walletConnected = false;
     
     @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        LocalBinder binder = (LocalBinder) service;
+    public void onServiceConnected(final ComponentName name, final IBinder service) {
+        final LocalBinder binder = (LocalBinder) service;
         walletService = binder.getService();
         walletConnected = true;
     }
 
     @Override
-    public void onServiceDisconnected(ComponentName name) {
+    public void onServiceDisconnected(final ComponentName name) {
         LOGGER.debug("{} disconnected from the wallet service.", name.toShortString());
+        walletService = null;
         walletConnected = false;
     }
     
-    
     @Override
     protected void onStart() {
-
         super.onStart();
-        
-        // bind to wallet service
-        Intent intent = new Intent(this, WalletService.class);
-        bindService(intent, this, Context.BIND_AUTO_CREATE);
+        startWalletService();
     }
-    
-    
-    public WalletService getWalletService() {
-        return walletService;
-    }
-    
-    
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -64,9 +55,18 @@ public class WalletActivity extends BaseActivity implements ServiceConnection {
 
     }
 
+    protected void startWalletService() {
+        if(!walletConnected || walletService == null) {
+            final Intent serviceIntent = new Intent(this, WalletService.class);
+            bindService(serviceIntent, this, Context.BIND_AUTO_CREATE);
+        }
+    }
+
     protected boolean walletConnected() {
         return walletConnected;
     }
-
-
+    
+    public WalletService getWalletService() {
+        return walletService;
+    }
 }

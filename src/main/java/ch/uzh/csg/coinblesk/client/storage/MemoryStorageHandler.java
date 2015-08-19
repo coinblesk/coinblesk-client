@@ -18,6 +18,9 @@ public class MemoryStorageHandler implements StorageHandler {
     private String refundTx;
     private BitcoinNet bitcoinNet;
     private String serverWatchingKey;
+    private boolean hasSentClientWatchingKey;
+    private StorageHandlerCallback storageHandlerCallback = null;
+    private boolean storageFailed = false;
 
     @Override
     public String getUsername() {
@@ -30,13 +33,17 @@ public class MemoryStorageHandler implements StorageHandler {
     }
 
     @Override
-    public String getWatchingKey() {
+    public String getServerWatchingKey() {
         return serverWatchingKey;
     }
 
     @Override
-    public void setWatchingKey(String watchingKey) {
-        this.serverWatchingKey = watchingKey;
+    public boolean hasSentClientWatchingKey() {
+        return hasSentClientWatchingKey;
+    }
+    @Override
+    public void sentClientWatchingKey(boolean hasSentClientWatchingKey) {
+        this.hasSentClientWatchingKey = hasSentClientWatchingKey;
     }
 
     @Override
@@ -45,8 +52,12 @@ public class MemoryStorageHandler implements StorageHandler {
     }
 
     @Override
-    public void setBitcoinNet(BitcoinNet bitcoinNet) {
+    public void setBitcoinNetAndServerWatchingKey(BitcoinNet bitcoinNet, String serverWatchingKey) {
         this.bitcoinNet = bitcoinNet;
+        this.serverWatchingKey = serverWatchingKey;
+        if(storageHandlerCallback != null) {
+            storageHandlerCallback.storageHandlerSet(this);
+        }
     }
 
     @Override
@@ -71,8 +82,7 @@ public class MemoryStorageHandler implements StorageHandler {
 
     @Override
     public boolean hasUserData() {
-        return getBitcoinNet() != null &&
-                getWatchingKey() != null;
+        return getBitcoinNet() != null && getServerWatchingKey()!=null;
     }
 
     @Override
@@ -121,5 +131,26 @@ public class MemoryStorageHandler implements StorageHandler {
     @Override
     public void deleteAddressBookEntry(PublicKey pubKey) {
         throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public void setStorageHandlerCallback(StorageHandlerCallback storageHandlerCallback) {
+        if(getServerWatchingKey() != null && getBitcoinNet() != null) {
+            storageHandlerCallback.storageHandlerSet(this);
+        } else if(storageFailed) {
+            storageHandlerCallback.failed();
+        } else {
+            this.storageHandlerCallback = storageHandlerCallback;
+        }
+    }
+
+    @Override
+    public void setStorageFailed(boolean failed) {
+        this.storageFailed = failed;
+        if(storageHandlerCallback != null && failed) {
+            storageHandlerCallback.failed();
+        } else if(storageHandlerCallback != null && !failed) {
+            storageHandlerCallback.storageHandlerSet(this);
+        }
     }
 }

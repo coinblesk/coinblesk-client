@@ -21,8 +21,11 @@ public class PersistentStorageHandler implements StorageHandler {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PersistentStorageHandler.class);
 
-    private PreferencesHandler data;
+    private CoinBleskCloudData data;
     private DatabaseHandler db;
+    private StorageHandlerCallback storageHandlerCallback = null;
+    private boolean storageFailed = false;
+
 
     /**
      * Instantiates a new {@link PersistentStorageHandler}.
@@ -41,16 +44,18 @@ public class PersistentStorageHandler implements StorageHandler {
     public void setUsername(String username) {
         data.setUsername(username);
     }
-
-
     @Override
-    public String getWatchingKey() {
+    public String getServerWatchingKey() {
         return data.getServerWatchingKey();
     }
 
     @Override
-    public void setWatchingKey(String watchingKey) {
-        data.setServerWatchingKey(watchingKey);
+    public boolean hasSentClientWatchingKey() {
+        return data.hasSentClientWatchingKey();
+    }
+    @Override
+    public void sentClientWatchingKey(boolean hasSentClientWatchingKey) {
+        data.sentClientWatchingKey(hasSentClientWatchingKey);
     }
 
     @Override
@@ -60,8 +65,13 @@ public class PersistentStorageHandler implements StorageHandler {
     }
 
     @Override
-    public void setBitcoinNet(BitcoinNet bitcoinNet) {
+    public void setBitcoinNetAndServerWatchingKey(BitcoinNet bitcoinNet, String serverWatchingKey) {
         data.setBitcoinNet(bitcoinNet.toString());
+        data.setServerWatchingKey(serverWatchingKey);
+        if(storageHandlerCallback != null) {
+            storageHandlerCallback.storageHandlerSet(this);
+            storageHandlerCallback = null;
+        }
     }
 
     @Override
@@ -86,8 +96,7 @@ public class PersistentStorageHandler implements StorageHandler {
 
     @Override
     public boolean hasUserData() {
-        return getBitcoinNet() != null &&
-                getWatchingKey() != null;
+        return getBitcoinNet() != null && getServerWatchingKey()!=null;
     }
 
     @Override
@@ -144,5 +153,27 @@ public class PersistentStorageHandler implements StorageHandler {
         db.deleteAddressBookEntry(pubKey);
     }
 
+    @Override
+    public void setStorageHandlerCallback(StorageHandlerCallback storageHandlerCallback) {
+        if(data.getServerWatchingKey() != null && data.getBitcoinNet() != null) {
+            storageHandlerCallback.storageHandlerSet(this);
+        } else if(storageFailed) {
+            storageHandlerCallback.failed();
+        } else {
+            this.storageHandlerCallback = storageHandlerCallback;
+        }
+    }
+
+    @Override
+    public void setStorageFailed(boolean failed) {
+        this.storageFailed = failed;
+        if(storageHandlerCallback != null && failed) {
+            storageHandlerCallback.failed();
+            storageHandlerCallback = null;
+        } else if(storageHandlerCallback != null && !failed) {
+            storageHandlerCallback.storageHandlerSet(this);
+            storageHandlerCallback = null;
+        }
+    }
 
 }

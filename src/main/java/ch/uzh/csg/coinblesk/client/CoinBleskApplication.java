@@ -45,6 +45,8 @@ public class CoinBleskApplication extends com.activeandroid.app.Application {
         this.mStorageHandler = storageHandler;
     }
 
+
+
     /**
      * Set the request factory. This method is only used for testing to set a custom request factory that mocks server responses.
      * @param requestFactory
