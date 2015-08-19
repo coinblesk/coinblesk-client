@@ -125,6 +125,8 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Transact
                             descAndAmount.amount = CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, tx.getAmount(), context);
                             switch (tx.getType()) {
                                 case PAY_OUT:
+                                    descAndAmount.description = String.format(context.getText(R.string.transaction_pay_out_receiver_unknown).toString(), btcAmount);
+                                    break;
                                 case COINBLESK_PAY_OUT:
                                     descAndAmount.description = String.format(context.getText(R.string.transaction_pay_out).toString(), descAndAmount.amount, tx.getReceiver());
                                     break;

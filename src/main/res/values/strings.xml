@@ -122,6 +122,7 @@
     <!--Transactions-->
     <string name="transaction_coinblesk_instant_pay_in">CoinBlesk instant transaction. You received %1$s from %2$s.</string>
     <string name="transaction_pay_out">You sent %1$s to %2$s</string>
+    <string name="transaction_pay_out_receiver_unknown">You sent %1$s</string>
     <string name="transaction_pay_in">You received %1$s from the Bitcoin network</string>
     <string name="transaction_pay_in_unverified">You received %1$s from the Bitcoin network (%2$s confirmations)</string>
 
