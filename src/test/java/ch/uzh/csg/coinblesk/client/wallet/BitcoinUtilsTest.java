@@ -46,4 +46,5 @@ public class BitcoinUtilsTest extends TestCase {
         Assert.assertEquals(0, fiftyBtc.compareTo(new BigDecimal("50")));
     }
 
+
 }

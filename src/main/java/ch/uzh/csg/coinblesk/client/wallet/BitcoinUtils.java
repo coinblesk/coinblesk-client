@@ -166,4 +166,5 @@ public class BitcoinUtils {
         Date validDate = new Date(System.currentTimeMillis() + 1000 * 60 * 10 * blocksRemaining);
         return DateUtils.getRelativeDateTimeString(context, validDate.getTime(), DateUtils.WEEK_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0).toString();
     }
+
 }

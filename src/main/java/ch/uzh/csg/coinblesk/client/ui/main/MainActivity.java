@@ -51,6 +51,7 @@ import ch.uzh.csg.coinblesk.client.ui.navigation.DrawerItemClickListener;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.PaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
+import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.SyncProgress;
@@ -333,7 +334,7 @@ public class MainActivity extends PaymentActivity {
             @Override
             public void onTaskComplete(ExchangeRateTransferObject response) {
                 if (response.isSuccessful()) {
-                    final BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                    final BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
                     final TextView chfBalance = (TextView) findViewById(R.id.mainActivity_balanceCHF);
 
                     runOnUiThread(new Runnable() {
@@ -372,7 +373,7 @@ public class MainActivity extends PaymentActivity {
                         @Override
                         public void onTaskComplete(ExchangeRateTransferObject response) {
                             if (response.isSuccessful()) {
-                                BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                                BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
                                 createHistoryViews(history, exchangeRate);
                             }
                         }
@@ -535,7 +536,7 @@ public class MainActivity extends PaymentActivity {
             public void onTaskComplete(ExchangeRateTransferObject response) {
                 String amountString;
                 if (response.isSuccessful()) {
-                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
                     amountString = CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, amountBtc, MainActivity.this);
                 } else {
                     amountString = CurrencyViewHandler.formatBTCAsString(amountBtc, MainActivity.this);
