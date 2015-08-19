@@ -13,6 +13,7 @@ import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Base64;
 
@@ -37,6 +38,7 @@ import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
 import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
@@ -233,6 +235,31 @@ public abstract class PaymentActivity extends WalletActivity {
         alertbox.show();
     }
 
+    private void checkAutoAccept(final long satoshis, final String receiver, PublicKey remotePubKey, final UserPaymentConfirmation confirmation) {
+        // check whether to auto accept the payment or not
+        AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
+        if(!entry.isTrusted()) {
+            showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, confirmation);
+        } else {
+            getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
+                @Override
+                public void onTaskComplete(ExchangeRateTransferObject response) {
+                    if (response.isSuccessful()) {
+                        BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
+                        BigDecimal fiatAmount = BitcoinUtils.satoshiToBigDecimal(satoshis).multiply(exchangeRate);
+                        int autoAcceptAmount = PreferenceManager.getDefaultSharedPreferences(PaymentActivity.this).getInt("auto_accept_amount", 0);
+                        if (new BigDecimal(autoAcceptAmount).compareTo(fiatAmount) > 0) {
+                            LOGGER.debug("Auto-accepting payment of {} {}. Auto accept amount is {} {}", fiatAmount, Constants.CURRENCY, autoAcceptAmount, Constants.CURRENCY);
+                            confirmation.onDecision(true);
+                        } else {
+                            // ask the user
+                            showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, confirmation);
+                        }
+                    }
+                }
+            });
+        }
+    }
 
     private void showConfirmationDialog(final BigDecimal amount, final String user, final UserPaymentConfirmation confirmation) {
 
@@ -241,8 +268,8 @@ public abstract class PaymentActivity extends WalletActivity {
             public void onTaskComplete(ExchangeRateTransferObject response) {
 
                 String amountString;
-                if(response.isSuccessful()) {
-                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                if (response.isSuccessful()) {
+                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
                     amountString = CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, amount, PaymentActivity.this);
                 } else {
                     amountString = amount.toString();
@@ -472,7 +499,7 @@ public abstract class PaymentActivity extends WalletActivity {
                                                 LOGGER.debug("Saved transaction meta data");
 
                                                 // save (or update)  user in address book
-                                                // --> not supported for now.
+                                                // --> not supported for now. The P2SH address would have to be extracted from the half signed tx by hashing the redeem script
 //                                                AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
 //                                                entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
 //                                                entry.setName(user);
@@ -576,7 +603,7 @@ public abstract class PaymentActivity extends WalletActivity {
                                 remotePubKey = protocol.publicKey();
                                 receiver = protocol.user();
 
-                                showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, new UserPaymentConfirmation() {
+                                checkAutoAccept(satoshis, receiver, remotePubKey, new UserPaymentConfirmation() {
                                     @Override
                                     public void onDecision(boolean accepted) {
                                         try {
@@ -600,7 +627,6 @@ public abstract class PaymentActivity extends WalletActivity {
                                         }
                                     }
                                 });
-
 
                             }
                         }).start();

@@ -27,6 +27,7 @@ import ch.uzh.csg.coinblesk.Currency;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
+import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
@@ -192,7 +193,7 @@ public class Exchange {
                     public void onTaskComplete(ExchangeRateTransferObject response) {
                         if (response.isSuccessful()) {
                             Currency symbol = response.getExchangeRates().keySet().iterator().next();
-                            BigDecimal forexExchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                            BigDecimal forexExchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
                             BigDecimal btcExchangeRateInBaseCurrency = forexExchangeRate.multiply(exchangeRate);
                             exchangeRateObj.setExchangeRate(symbol, btcExchangeRateInBaseCurrency.toString());
 

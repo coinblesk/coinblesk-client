@@ -31,12 +31,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
-import java.util.Set;
+import java.util.List;
 
 import ch.uzh.csg.coinblesk.Currency;
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.request.RequestTask;
+import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
@@ -49,7 +50,6 @@ import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
 import ch.uzh.csg.coinblesk.customserialization.ServerPaymentResponse;
 import ch.uzh.csg.coinblesk.customserialization.ServerResponseStatus;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
-import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.util.Converter;
 
 /**
@@ -177,7 +177,8 @@ public class SendPaymentActivity extends WalletActivity {
     public void launchExchangeRateRequest() {
         if (ConnectionCheck.isNetworkAvailable(this)) {
             showLoadingProgressDialog();
-            RequestTask<TransferObject, ExchangeRateTransferObject> request = getRequestFactory().exchangeRateRequest("TODO", new RequestCompleteListener<ExchangeRateTransferObject>() {
+
+            getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
                 @Override
                 public void onTaskComplete(ExchangeRateTransferObject response) {
                     dismissProgressDialog();
@@ -190,8 +191,7 @@ public class SendPaymentActivity extends WalletActivity {
                         return;
                     }
                 }
-            }, this);
-            request.execute();
+            });
         }
     }
 
@@ -429,13 +429,11 @@ public class SendPaymentActivity extends WalletActivity {
      * Creates a dialog which shows all entries from addressbook. Selected item
      * will be written to SendPaymentActivity.receiverUsernameEditText.
      */
-    public class AddressBookDialog extends DialogFragment {
+    public static class AddressBookDialog extends DialogFragment {
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            Set<String> receiverEntries = null;
-//            receiverEntries = getCoinBleskApplication().getStorageHandler().getAddressBook();
-
-            final CharSequence[] cs = receiverEntries.toArray(new CharSequence[receiverEntries.size()]);
+            List<AddressBookEntry> receiverEntries = ((CoinBleskApplication) getActivity().getApplicationContext()).getStorageHandler().getAddressBook();
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(R.string.sendPayment_selectReceiver);
@@ -444,19 +442,19 @@ public class SendPaymentActivity extends WalletActivity {
             LinearLayout linearLayout = new LinearLayout(getActivity().getApplicationContext());
             linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-            for (int i = 0; i < cs.length; i++) {
+            for(AddressBookEntry addressBookEntry : receiverEntries) {
                 final TextView entry = new TextView(getActivity().getApplicationContext());
-                final String username = cs[i].toString();
+                final String username = addressBookEntry.getName();
 
                 entry.setGravity(android.view.Gravity.CENTER_VERTICAL);
                 entry.setPadding(0, 0, 0, 10);
                 entry.setTextColor(Color.BLACK);
                 entry.setText(username);
-//                if (getCoinBleskApplication().getStorageHandler().isTrustedContact(username)) {
-//                    entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null, null, null);
-//                } else {
-//                    entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null, null, null);
-//                }
+                if (addressBookEntry.isTrusted()) {
+                    entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_starred), null, null, null);
+                } else {
+                    entry.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_not_starred), null, null, null);
+                }
 
                 entry.setClickable(true);
                 entry.setOnClickListener(new OnClickListener() {
@@ -468,6 +466,7 @@ public class SendPaymentActivity extends WalletActivity {
 
                 linearLayout.addView(entry);
             }
+
             scrollView.addView(linearLayout);
             builder.setView(scrollView);
 

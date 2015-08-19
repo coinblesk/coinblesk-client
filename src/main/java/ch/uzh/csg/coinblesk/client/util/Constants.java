@@ -2,6 +2,8 @@ package ch.uzh.csg.coinblesk.client.util;
 
 import java.math.BigDecimal;
 
+import ch.uzh.csg.coinblesk.Currency;
+
 
 /**
  * Class for saving static constants of MBPS.
@@ -35,6 +37,7 @@ public class Constants {
 
 	public static BigDecimal inputValueCalculator = BigDecimal.ZERO;
 	public static String inputUnit = "CHF";
+	public static Currency CURRENCY = Currency.CHF;
 	
 	//TODO: Mensa Test Run Method
 	//shows (true) or hides (false) buttons specially created for shops etc.

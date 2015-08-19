@@ -48,6 +48,8 @@ public class HistoryTransactionFormatter {
 
         switch (tx.getType()) {
             case PAY_OUT:
+                description = String.format(context.getText(R.string.transaction_pay_out_receiver_unknown).toString(), btcAmount);
+                break;
             case COINBLESK_PAY_OUT:
                 description = String.format(context.getText(R.string.transaction_pay_out).toString(), btcAmount, tx.getReceiver());
                 break;

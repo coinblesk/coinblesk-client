@@ -21,6 +21,7 @@ import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
+import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.wallet.TransactionHistory;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
@@ -120,10 +121,12 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Transact
                         DescriptionAndAmount descAndAmount = new DescriptionAndAmount();
 
                         if (response.isSuccessful()) {
-                            BigDecimal exchangeRate = new BigDecimal(response.getExchangeRates().values().iterator().next());
+                            BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
                             descAndAmount.amount = CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, tx.getAmount(), context);
                             switch (tx.getType()) {
                                 case PAY_OUT:
+                                    descAndAmount.description = String.format(context.getText(R.string.transaction_pay_out_receiver_unknown).toString(), btcAmount);
+                                    break;
                                 case COINBLESK_PAY_OUT:
                                     descAndAmount.description = String.format(context.getText(R.string.transaction_pay_out).toString(), descAndAmount.amount, tx.getReceiver());
                                     break;
