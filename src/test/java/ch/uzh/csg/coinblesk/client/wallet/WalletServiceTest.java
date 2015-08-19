@@ -107,7 +107,7 @@ public class WalletServiceTest {
 
         // mock internal storage
         storage = PowerMockito.spy(new MemoryStorageHandler());
-        PowerMockito.doReturn(TestUtils.getServerWatchingKey(params)).when(storage).getWatchingKey();
+        PowerMockito.doReturn(TestUtils.getServerWatchingKey(params)).when(storage).getServerWatchingKey();
         PowerMockito.doReturn(bitcoinNet).when(storage).getBitcoinNet();
 
     }

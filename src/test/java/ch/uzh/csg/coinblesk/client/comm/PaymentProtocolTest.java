@@ -58,7 +58,7 @@ public class PaymentProtocolTest {
 		Random rnd = new Random(1);
 		byte[] tx = new byte[2000];
 		rnd.nextBytes(tx);
-		PaymentProtocol pm1 = PaymentProtocol.paymentRequestResponse(kp.getPublic(), "test", new byte[6], tx);
+		PaymentProtocol pm1 = PaymentProtocol.paymentRequestResponse(kp.getPublic(), "test", new byte[6], tx, 777);
 		byte[] transfer = pm1.toBytes(kp.getPrivate());
 		PaymentProtocol pm2 = PaymentProtocol.fromBytes(transfer, null);
 		Assert.assertEquals(pm1, pm2);
@@ -92,7 +92,7 @@ public class PaymentProtocolTest {
 		byte[] tx = new byte[5000];
 		Random rnd = new Random(1);
 		rnd.nextBytes(tx);
-		PaymentProtocol pm1 = PaymentProtocol.fullTransaction(tx);
+		PaymentProtocol pm1 = PaymentProtocol.fullTransaction(tx, 1000);
 		byte[] transfer = pm1.toBytes(kp.getPrivate());
 		PaymentProtocol pm2 = PaymentProtocol.fromBytes(transfer, kp.getPublic());
 		Assert.assertEquals(pm1, pm2);

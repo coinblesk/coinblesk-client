@@ -62,6 +62,10 @@ final public class PaymentProtocol {
     private byte[] btAddress;
     final private static int BT_LENGTH = 6;
 
+    //fix -4 bytes child path
+    private int childPath;
+    final private static int CHILD_PATH_LENGTH = 4;
+
     private boolean signatureVerified = false;
 
     private final static KeyFactory keyFactory;
@@ -125,7 +129,7 @@ final public class PaymentProtocol {
             	final byte[] publicKeyEncoded1 = publicKey.getEncoded();
                 final int publicKeyLen1 = publicKeyEncoded1.length;
                 if(publicKeyLen1 > 255) {
-                	throw new RuntimeException("user is too large");
+                	throw new RuntimeException("public key is too large");
                 }
                 final byte[] userEncoded1 = user.getBytes("UTF-8");
                 final int userLen1 = userEncoded1.length;
@@ -133,7 +137,7 @@ final public class PaymentProtocol {
                 	throw new RuntimeException("user is too large");
                 }
             	
-                data = new byte[HEADER_LENGTH+publicKeyLen1 + 1 +SENDTO_LENGTH+AMOUNT_LENGTH+BT_LENGTH+userLen1 + 1];
+                data = new byte[HEADER_LENGTH + publicKeyLen1 + 1 +SENDTO_LENGTH + AMOUNT_LENGTH + BT_LENGTH + userLen1 + 1];
                 data[offset++] = header;
 
                 //public key
@@ -161,7 +165,7 @@ final public class PaymentProtocol {
                 final byte[] publicKeyEncoded2 = publicKey.getEncoded();
                 final int publicKeyLen2 = publicKeyEncoded2.length;
                 if(publicKeyLen2 > 255) {
-                    throw new RuntimeException("user is too large");
+                    throw new RuntimeException("public key is too large");
                 }
                 final byte[] userEncoded2 = user.getBytes("UTF-8");
                 final int userLen2 = userEncoded2.length;
@@ -169,7 +173,7 @@ final public class PaymentProtocol {
                     throw new RuntimeException("user is too large");
                 }
 
-                data = new byte[HEADER_LENGTH+publicKeyLen2 + 1 +BT_LENGTH+userLen2 + 1];
+                data = new byte[HEADER_LENGTH + publicKeyLen2 + 1 + BT_LENGTH + userLen2 + 1];
                 data[offset++] = header;
 
                 //public key
@@ -192,7 +196,7 @@ final public class PaymentProtocol {
                 final byte[] publicKeyEncoded3 = publicKey.getEncoded();
                 final int publicKeyLen3 = publicKeyEncoded3.length;
                 if(publicKeyLen3 > 255) {
-                    throw new RuntimeException("user is too large");
+                    throw new RuntimeException("public is too large");
                 }
 
                 final byte[] userEncoded3 = user.getBytes("UTF-8");
@@ -201,7 +205,7 @@ final public class PaymentProtocol {
                     throw new RuntimeException("user is too large");
                 }
 
-                data = new byte[HEADER_LENGTH+halfSignedTransactionLen + 2 + userLen3 + 1 + publicKeyLen3 + 1+BT_LENGTH];
+                data = new byte[HEADER_LENGTH + halfSignedTransactionLen + CHILD_PATH_LENGTH + 2 + userLen3 + 1 + publicKeyLen3 + 1 + BT_LENGTH];
                 data[offset++] = header;
 
                 //public key
@@ -221,6 +225,8 @@ final public class PaymentProtocol {
                 offset = encodeShort(halfSignedTransactionLen, data, offset);
                 System.arraycopy(halfSignedTransaction,0,data, offset, halfSignedTransactionLen);
                 offset += halfSignedTransactionLen;
+                //child path
+                offset = encodeInt(childPath, data, offset);
 
                 break;
 
@@ -269,6 +275,8 @@ final public class PaymentProtocol {
                 offset = encodeShort((short) fullSignedTransactionLen, data, offset);
                 System.arraycopy(fullySignedTransaction,0,data, offset, fullSignedTransactionLen);
                 offset += fullSignedTransactionLen;
+                //child path
+                offset = encodeInt(childPath, data, offset);
 
                 break;
             case PAYMENT_NOK:
@@ -404,6 +412,9 @@ final public class PaymentProtocol {
                 System.arraycopy(data,offset,transactionEncoded1,0, transactionLen1);
                 offset += transactionLen1;
                 paymentMessage.halfSignedTransaction = transactionEncoded1;
+                //childpath
+                paymentMessage.childPath = decodeInt(data,offset);
+                offset += 4;
                 break;
 
             case PAYMENT_SEND_RESPONSE:
@@ -444,6 +455,9 @@ final public class PaymentProtocol {
                 System.arraycopy(data,offset,transactionEncoded2,0, transactionLen2);
                 offset += transactionLen2;
                 paymentMessage.fullySignedTransaction = transactionEncoded2;
+                //childpath
+                paymentMessage.childPath = decodeInt(data,offset);
+                offset += 4;
                 break;
 
             case SERVER_NOK:
@@ -471,7 +485,7 @@ final public class PaymentProtocol {
         final PaymentProtocol p = (PaymentProtocol) o;
         return Objects.equals(type, p.type) && Objects.equals(publicKey, p.publicKey) && Objects.equals(user, p.user)
                 && Arrays.equals(halfSignedTransaction, p.halfSignedTransaction) && Arrays.equals(fullySignedTransaction, p.fullySignedTransaction)
-                && Arrays.equals(sendTo, p.sendTo) && Arrays.equals(btAddress, p.btAddress) && satoshis == p.satoshis;
+                && Arrays.equals(sendTo, p.sendTo) && Arrays.equals(btAddress, p.btAddress) && satoshis == p.satoshis && childPath == p.childPath;
     }
 
     @Override
@@ -524,12 +538,13 @@ final public class PaymentProtocol {
         return paymentMessage;
     }
 
-    public static PaymentProtocol paymentRequestResponse(final PublicKey publicKey, final String user, final byte[] btAddress, final byte[] halfSignedTransaction) {
+    public static PaymentProtocol paymentRequestResponse(final PublicKey publicKey, final String user, final byte[] btAddress, final byte[] halfSignedTransaction, int childPath) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.PAYMENT_REQUEST_RESPONSE);
         paymentMessage.publicKey = publicKey;
         paymentMessage.user = user;
         paymentMessage.btAddress = btAddress;
         paymentMessage.halfSignedTransaction = halfSignedTransaction;
+        paymentMessage.childPath = childPath;
         return paymentMessage;
     }
 
@@ -559,9 +574,10 @@ final public class PaymentProtocol {
         return paymentMessage;
     }
 
-    public static PaymentProtocol fullTransaction(final byte[] fullySignedTransaction) {
+    public static PaymentProtocol fullTransaction(final byte[] fullySignedTransaction, int childPath) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.FULL_TRANSACTION);
         paymentMessage.fullySignedTransaction = fullySignedTransaction;
+        paymentMessage.childPath = childPath;
         return paymentMessage;
     }
 
@@ -595,7 +611,20 @@ final public class PaymentProtocol {
     private static long decodeLong(final byte[] data, final int offset) {
        return   ( (((long) data[offset    ] & 0xff) << 56) | (((long) data[offset + 1] & 0xff) << 48) | (((long) data[offset + 2] & 0xff) << 40)
                 | (((long) data[offset + 3] & 0xff) << 32) | (((long) data[offset + 4] & 0xff) << 24) | (((long) data[offset + 5] & 0xff) << 16)
-                | (((long) data[offset + 6] & 0xff) << 8) | (((long) data[offset + 7] & 0xff)));
+                | (((long) data[offset + 6] & 0xff) << 8)  | (((long) data[offset + 7] & 0xff)));
+    }
+
+    private static int encodeInt(final int value, final byte[] data, final int offset) {
+        data[offset  ] = (byte) (value >> 24);
+        data[offset+1] = (byte) (value >> 16);
+        data[offset+2] = (byte) (value >> 8);
+        data[offset+3] = (byte) value;
+        return offset + 4;
+    }
+
+    private static int decodeInt(final byte[] data, final int offset) {
+        return   ( ((data[offset    ] & 0xff) << 24) | (( data[offset + 1] & 0xff) << 16)
+                 | ((data[offset + 2] & 0xff) << 8)  | (( data[offset + 3] & 0xff)));
     }
 
     private static int encodeShort(final int value, final byte[] data, final int offset) {
