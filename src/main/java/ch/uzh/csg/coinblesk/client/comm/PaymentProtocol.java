@@ -62,8 +62,8 @@ final public class PaymentProtocol {
     private byte[] btAddress;
     final private static int BT_LENGTH = 6;
 
-    //fix -4 bytes child path
-    private int childPath;
+    //variable -4 bytes child path,
+    private int[] childPaths;
     final private static int CHILD_PATH_LENGTH = 4;
 
     private boolean signatureVerified = false;
@@ -114,6 +114,8 @@ final public class PaymentProtocol {
     public boolean isVerified() {
     	return signatureVerified;
     }
+
+    public int[] getChildPath() { return childPaths; }
 
 
     public byte[] toBytes(PrivateKey privateKey) throws UnsupportedEncodingException, NoSuchProviderException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
@@ -205,7 +207,8 @@ final public class PaymentProtocol {
                     throw new RuntimeException("user is too large");
                 }
 
-                data = new byte[HEADER_LENGTH + halfSignedTransactionLen + CHILD_PATH_LENGTH + 2 + userLen3 + 1 + publicKeyLen3 + 1 + BT_LENGTH];
+                final int childPathLen1 = childPaths.length;
+                data = new byte[HEADER_LENGTH + halfSignedTransactionLen + CHILD_PATH_LENGTH + (4 * childPathLen1) + 2 + userLen3 + 1 + publicKeyLen3 + 1 + BT_LENGTH];
                 data[offset++] = header;
 
                 //public key
@@ -226,7 +229,8 @@ final public class PaymentProtocol {
                 System.arraycopy(halfSignedTransaction,0,data, offset, halfSignedTransactionLen);
                 offset += halfSignedTransactionLen;
                 //child path
-                offset = encodeInt(childPath, data, offset);
+                offset = encodeInt(childPathLen1, data, offset);
+                offset = arrayCopy(childPaths, data, offset);
 
                 break;
 
@@ -269,14 +273,16 @@ final public class PaymentProtocol {
 
             case FULL_TRANSACTION:
                 final int fullSignedTransactionLen = fullySignedTransaction.length;
-                data = new byte[HEADER_LENGTH+fullSignedTransactionLen + 2 + BT_LENGTH];
+                final int childPathLen2 = childPaths.length;
+                data = new byte[HEADER_LENGTH+fullSignedTransactionLen + 2 + BT_LENGTH + CHILD_PATH_LENGTH + (4 * childPathLen2)];
                 data[offset++] = header;
                 //transaction
                 offset = encodeShort((short) fullSignedTransactionLen, data, offset);
                 System.arraycopy(fullySignedTransaction,0,data, offset, fullSignedTransactionLen);
                 offset += fullSignedTransactionLen;
                 //child path
-                offset = encodeInt(childPath, data, offset);
+                offset = encodeInt(childPathLen2, data, offset);
+                offset = arrayCopy(childPaths, data, offset);
 
                 break;
             case PAYMENT_NOK:
@@ -296,6 +302,8 @@ final public class PaymentProtocol {
         System.arraycopy(signature,0,retVal, offset, signatureLen);
         return retVal;
     }
+
+
 
     public static PaymentProtocol fromBytesUnverified(final byte[] data) throws InvalidKeySpecException, UnsupportedEncodingException, NoSuchProviderException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
         return fromBytes(data, null);
@@ -413,8 +421,12 @@ final public class PaymentProtocol {
                 offset += transactionLen1;
                 paymentMessage.halfSignedTransaction = transactionEncoded1;
                 //childpath
-                paymentMessage.childPath = decodeInt(data,offset);
+                final int childPathLen1 = decodeInt(data, offset);
                 offset += 4;
+                final int[] childPaths1 = new int[childPathLen1];
+                offset = arrayCopy(data, childPaths1, offset);
+                paymentMessage.childPaths = childPaths1;
+
                 break;
 
             case PAYMENT_SEND_RESPONSE:
@@ -456,8 +468,11 @@ final public class PaymentProtocol {
                 offset += transactionLen2;
                 paymentMessage.fullySignedTransaction = transactionEncoded2;
                 //childpath
-                paymentMessage.childPath = decodeInt(data,offset);
+                final int childPathLen2 = decodeInt(data, offset);
                 offset += 4;
+                final int[] childPaths2 = new int[childPathLen2];
+                offset = arrayCopy(data, childPaths2, offset);
+                paymentMessage.childPaths = childPaths2;
                 break;
 
             case SERVER_NOK:
@@ -473,6 +488,8 @@ final public class PaymentProtocol {
         return paymentMessage;
     }
 
+
+
     @Override
     public boolean equals(final Object o) {
         if(o == this) {
@@ -485,7 +502,7 @@ final public class PaymentProtocol {
         final PaymentProtocol p = (PaymentProtocol) o;
         return Objects.equals(type, p.type) && Objects.equals(publicKey, p.publicKey) && Objects.equals(user, p.user)
                 && Arrays.equals(halfSignedTransaction, p.halfSignedTransaction) && Arrays.equals(fullySignedTransaction, p.fullySignedTransaction)
-                && Arrays.equals(sendTo, p.sendTo) && Arrays.equals(btAddress, p.btAddress) && satoshis == p.satoshis && childPath == p.childPath;
+                && Arrays.equals(sendTo, p.sendTo) && Arrays.equals(btAddress, p.btAddress) && satoshis == p.satoshis && Arrays.equals(childPaths, p.childPaths);
     }
 
     @Override
@@ -538,13 +555,13 @@ final public class PaymentProtocol {
         return paymentMessage;
     }
 
-    public static PaymentProtocol paymentRequestResponse(final PublicKey publicKey, final String user, final byte[] btAddress, final byte[] halfSignedTransaction, int childPath) {
+    public static PaymentProtocol paymentRequestResponse(final PublicKey publicKey, final String user, final byte[] btAddress, final byte[] halfSignedTransaction, int[] childPaths) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.PAYMENT_REQUEST_RESPONSE);
         paymentMessage.publicKey = publicKey;
         paymentMessage.user = user;
         paymentMessage.btAddress = btAddress;
         paymentMessage.halfSignedTransaction = halfSignedTransaction;
-        paymentMessage.childPath = childPath;
+        paymentMessage.childPaths = childPaths;
         return paymentMessage;
     }
 
@@ -574,10 +591,10 @@ final public class PaymentProtocol {
         return paymentMessage;
     }
 
-    public static PaymentProtocol fullTransaction(final byte[] fullySignedTransaction, int childPath) {
+    public static PaymentProtocol fullTransaction(final byte[] fullySignedTransaction, int[] childPaths) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.FULL_TRANSACTION);
         paymentMessage.fullySignedTransaction = fullySignedTransaction;
-        paymentMessage.childPath = childPath;
+        paymentMessage.childPaths = childPaths;
         return paymentMessage;
     }
 
@@ -638,6 +655,25 @@ final public class PaymentProtocol {
 
     private static short decodeShort(final byte[] data, final int offset) {
         return   (short) (((data[offset] & 0xff) << 8) | ( data[offset + 1] & 0xff));
+    }
+
+    //encode
+    private int arrayCopy(final int[] childPaths, final byte[] data, int offset) {
+        final int len = childPaths.length;
+        for (int i=0;i<len;i++) {
+            offset = encodeInt(childPaths[i], data,offset);
+        }
+        return offset;
+    }
+
+    //decode
+    private static int arrayCopy(final byte[] data, final int[] childPaths, int offset) {
+        final int len = childPaths.length;
+        for (int i=0;i<len;i++) {
+            childPaths[i] = decodeInt(data, offset);
+            offset += 4;
+        }
+        return offset;
     }
 
     public static KeyPair generateKeys()
