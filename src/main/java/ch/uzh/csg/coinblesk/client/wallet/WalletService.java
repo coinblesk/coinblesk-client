@@ -19,18 +19,24 @@ import org.bitcoinj.core.DownloadProgressTracker;
 import org.bitcoinj.core.InsufficientMoneyException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Peer;
+import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.core.Wallet.BalanceType;
+import org.bitcoinj.crypto.ChildNumber;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.net.discovery.DnsDiscovery;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.params.UnitTestParams;
+import org.bitcoinj.script.Script;
 import org.bitcoinj.store.UnreadableWalletException;
 import org.bitcoinj.utils.Threading;
+import org.bitcoinj.wallet.DeterministicKeyChain;
 import org.bitcoinj.wallet.DeterministicSeed;
 import org.bitcoinj.wallet.KeyChain;
 import org.bitcoinj.wallet.KeyChainGroup;
@@ -97,6 +103,7 @@ public class WalletService extends android.app.Service {
     private final ReentrantLock lock = Threading.lock("WalletService");
     private BitcoinNet bitcoinNet;
     private String serverWatchingKey;
+    private DeterministicKeyChain serverKeyChain;
     private StorageHandler storage;
     private SyncProgress syncProgress;
     private Map<String, WalletListener> listeners;
@@ -278,7 +285,7 @@ public class WalletService extends android.app.Service {
 
         // for debugging
         LOGGER.debug("Transactions stored in wallet:");
-        for(Transaction tx : getAppKit().wallet().getTransactions(true)) {
+        for (Transaction tx : getAppKit().wallet().getTransactions(true)) {
             LOGGER.debug(tx.toString());
             LOGGER.debug("Confidence: {}", tx.getConfidence());
         }
@@ -594,6 +601,52 @@ public class WalletService extends android.app.Service {
         return BitcoinUtils.coinToBigDecimal(getAppKit().wallet().getBalance(BalanceType.AVAILABLE));
     }
 
+    /**
+     * Checks if a transaction was signed by the server. It does so by extracting the signatures from the
+     * raw transaction and checking them against the server public key.
+     *
+     * @param rawTx        the raw transaction that was signed by the server
+     * @param childNumbers the child numbers of the keys used to sign the transaction. They must be in the same order as the inputs
+     *                     of the raw transaction.
+     * @return true if the transaction was signed by the server
+     */
+    public boolean isTxSignedByServer(byte[] rawTx, int[] childNumbers) {
+
+        Transaction tx = new Transaction(getNetworkParams(bitcoinNet), rawTx);
+
+        if(tx.getInputs().size() != childNumbers.length) {
+            throw new IllegalArgumentException("Number of child numbers should be the same as number of inputs of the server signed transaction. ");
+        }
+
+        for (int i = 0; i < tx.getInputs().size(); i++) {
+            TransactionInput txIn = tx.getInputs().get(i);
+
+            // Master and account keys are always 0: M/0H/0/childNumbers[i]
+            List<ChildNumber> path = Lists.newArrayList(new ChildNumber(0, true), new ChildNumber(0), new ChildNumber(childNumbers[i]));
+
+            DeterministicKey pubKeyServer = getServerKeyChain().getKeyByPath(path, true);
+
+            Script redeemScript = new Script(txIn.getScriptSig().getChunks().get(txIn.getScriptSig().getChunks().size() - 1).data);
+            Sha256Hash sighash = tx.hashForSignature(i, redeemScript, Transaction.SigHash.ALL, false);
+            int insertionIndex = txIn.getScriptSig().getSigInsertionIndex(sighash, pubKeyServer);
+            byte[] bitcoinServerSig = txIn.getScriptSig().getChunks().get(insertionIndex).data;
+            byte[] serverSigDer = TransactionSignature.decodeFromBitcoin(bitcoinServerSig, false).encodeToDER();
+
+            if(!pubKeyServer.verify(sighash.getBytes(), serverSigDer)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private DeterministicKeyChain getServerKeyChain() {
+        if (serverKeyChain == null) {
+            DeterministicKey serverKey = DeterministicKey.deserializeB58(serverWatchingKey, getNetworkParams(bitcoinNet));
+            serverKeyChain = new DeterministicKeyChain(serverKey);
+        }
+        return serverKeyChain;
+    }
 
     /**
      * Creates a time-locked transaction signed by the coinblesk server that sends all available coins to a personal address, and
