@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,7 +63,6 @@ import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.util.Constants;
-import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 
 public class WalletService extends android.app.Service {
 
@@ -90,7 +88,7 @@ public class WalletService extends android.app.Service {
      * TODO: Make this less ugly, eg. by broadcasting an intent with the server signature request.
      */
     public static boolean nfcMode = false;
-    public static ServerSignatureRequestTransferObject sigReq;
+    public static HalfSignedTransaction sigReq;
 
     public class LocalBinder extends Binder {
         public WalletService getService() {
@@ -482,25 +480,21 @@ public class WalletService extends android.app.Service {
 
     /**
      * Creates an NFC payment. This means that the half signed transaction is NOT sent to the server, but is returned synchronously.
-     * It is important to note that the bytes returned are *NOT* the half signed transaction, but the byte serialized JSON of
-     * a {@link ServerSignatureRequestTransferObject}
      * <strong>IMPORTANT: </strong> This method is only intended for sending to P2SH addresses. You pass the hash160 of a normal
      * P2PKH address, the bitcoins will be lost forever!
      *
      * @param scriptHash the hash of the redeem script (P2SH address)
      * @param satoshis   the amount to send, in satoshis
-     * @return The byte serialized JSON of the {@link ServerSignatureRequestTransferObject}.
+     * @return The half signed, raw bitcoin transaction
      * @throws AddressFormatException
      * @throws InsufficientMoneyException
      */
-    public byte[] createNfcPayment(byte[] scriptHash, long satoshis) throws AddressFormatException, InsufficientMoneyException {
+    public HalfSignedTransaction createNfcPayment(byte[] scriptHash, long satoshis) throws AddressFormatException, InsufficientMoneyException {
         try {
             Address address = Address.fromP2SHHash(getNetworkParams(bitcoinNet), scriptHash);
             nfcMode = true;
             createPayment(address, BitcoinUtils.satoshiToCoin(satoshis), true);
-            return sigReq.toJson().getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException();
+            return sigReq;
         } finally {
             nfcMode = false;
             sigReq = null;
