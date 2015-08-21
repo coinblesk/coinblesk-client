@@ -62,9 +62,9 @@ final public class PaymentProtocol {
     private byte[] btAddress;
     final private static int BT_LENGTH = 6;
 
-    //variable -4 bytes child path,
-    private int[] childPaths;
-    final private static int CHILD_PATH_LENGTH = 4;
+    //variable -4 bytes child numbers,
+    private int[] childNumbers;
+    final private static int CHILD_NUMBERS_LENGTH = 4;
 
     private boolean signatureVerified = false;
 
@@ -115,7 +115,7 @@ final public class PaymentProtocol {
     	return signatureVerified;
     }
 
-    public int[] getChildPath() { return childPaths; }
+    public int[] getChildNumbers() { return childNumbers; }
 
 
     public byte[] toBytes(PrivateKey privateKey) throws UnsupportedEncodingException, NoSuchProviderException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
@@ -207,8 +207,8 @@ final public class PaymentProtocol {
                     throw new RuntimeException("user is too large");
                 }
 
-                final int childPathLen1 = childPaths.length;
-                data = new byte[HEADER_LENGTH + halfSignedTransactionLen + CHILD_PATH_LENGTH + (4 * childPathLen1) + 2 + userLen3 + 1 + publicKeyLen3 + 1 + BT_LENGTH];
+                final int childNumbersLen1 = childNumbers.length;
+                data = new byte[HEADER_LENGTH + halfSignedTransactionLen + CHILD_NUMBERS_LENGTH + (4 * childNumbersLen1) + 2 + userLen3 + 1 + publicKeyLen3 + 1 + BT_LENGTH];
                 data[offset++] = header;
 
                 //public key
@@ -228,9 +228,9 @@ final public class PaymentProtocol {
                 offset = encodeShort(halfSignedTransactionLen, data, offset);
                 System.arraycopy(halfSignedTransaction,0,data, offset, halfSignedTransactionLen);
                 offset += halfSignedTransactionLen;
-                //child path
-                offset = encodeInt(childPathLen1, data, offset);
-                offset = arrayCopy(childPaths, data, offset);
+                //child numbers
+                offset = encodeInt(childNumbersLen1, data, offset);
+                offset = arrayCopy(childNumbers, data, offset);
 
                 break;
 
@@ -273,16 +273,16 @@ final public class PaymentProtocol {
 
             case FULL_TRANSACTION:
                 final int fullSignedTransactionLen = fullySignedTransaction.length;
-                final int childPathLen2 = childPaths.length;
-                data = new byte[HEADER_LENGTH+fullSignedTransactionLen + 2 + BT_LENGTH + CHILD_PATH_LENGTH + (4 * childPathLen2)];
+                final int childNumbersLen2 = childNumbers.length;
+                data = new byte[HEADER_LENGTH+fullSignedTransactionLen + 2 + BT_LENGTH + CHILD_NUMBERS_LENGTH + (4 * childNumbersLen2)];
                 data[offset++] = header;
                 //transaction
                 offset = encodeShort((short) fullSignedTransactionLen, data, offset);
                 System.arraycopy(fullySignedTransaction,0,data, offset, fullSignedTransactionLen);
                 offset += fullSignedTransactionLen;
-                //child path
-                offset = encodeInt(childPathLen2, data, offset);
-                offset = arrayCopy(childPaths, data, offset);
+                //child number
+                offset = encodeInt(childNumbersLen2, data, offset);
+                offset = arrayCopy(childNumbers, data, offset);
 
                 break;
             case PAYMENT_NOK:
@@ -420,12 +420,12 @@ final public class PaymentProtocol {
                 System.arraycopy(data,offset,transactionEncoded1,0, transactionLen1);
                 offset += transactionLen1;
                 paymentMessage.halfSignedTransaction = transactionEncoded1;
-                //childpath
-                final int childPathLen1 = decodeInt(data, offset);
+                //childnumber
+                final int childNumbersLen1 = decodeInt(data, offset);
                 offset += 4;
-                final int[] childPaths1 = new int[childPathLen1];
-                offset = arrayCopy(data, childPaths1, offset);
-                paymentMessage.childPaths = childPaths1;
+                final int[] childNumbers1 = new int[childNumbersLen1];
+                offset = arrayCopy(data, childNumbers1, offset);
+                paymentMessage.childNumbers = childNumbers1;
 
                 break;
 
@@ -467,12 +467,12 @@ final public class PaymentProtocol {
                 System.arraycopy(data,offset,transactionEncoded2,0, transactionLen2);
                 offset += transactionLen2;
                 paymentMessage.fullySignedTransaction = transactionEncoded2;
-                //childpath
-                final int childPathLen2 = decodeInt(data, offset);
+                //childnumbers
+                final int childNumbersLen2 = decodeInt(data, offset);
                 offset += 4;
-                final int[] childPaths2 = new int[childPathLen2];
-                offset = arrayCopy(data, childPaths2, offset);
-                paymentMessage.childPaths = childPaths2;
+                final int[] childNumbers2 = new int[childNumbersLen2];
+                offset = arrayCopy(data, childNumbers2, offset);
+                paymentMessage.childNumbers = childNumbers2;
                 break;
 
             case SERVER_NOK:
@@ -502,7 +502,7 @@ final public class PaymentProtocol {
         final PaymentProtocol p = (PaymentProtocol) o;
         return Objects.equals(type, p.type) && Objects.equals(publicKey, p.publicKey) && Objects.equals(user, p.user)
                 && Arrays.equals(halfSignedTransaction, p.halfSignedTransaction) && Arrays.equals(fullySignedTransaction, p.fullySignedTransaction)
-                && Arrays.equals(sendTo, p.sendTo) && Arrays.equals(btAddress, p.btAddress) && satoshis == p.satoshis && Arrays.equals(childPaths, p.childPaths);
+                && Arrays.equals(sendTo, p.sendTo) && Arrays.equals(btAddress, p.btAddress) && satoshis == p.satoshis && Arrays.equals(childNumbers, p.childNumbers);
     }
 
     @Override
@@ -555,13 +555,13 @@ final public class PaymentProtocol {
         return paymentMessage;
     }
 
-    public static PaymentProtocol paymentRequestResponse(final PublicKey publicKey, final String user, final byte[] btAddress, final byte[] halfSignedTransaction, int[] childPaths) {
+    public static PaymentProtocol paymentRequestResponse(final PublicKey publicKey, final String user, final byte[] btAddress, final byte[] halfSignedTransaction, int[] childNumbers) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.PAYMENT_REQUEST_RESPONSE);
         paymentMessage.publicKey = publicKey;
         paymentMessage.user = user;
         paymentMessage.btAddress = btAddress;
         paymentMessage.halfSignedTransaction = halfSignedTransaction;
-        paymentMessage.childPaths = childPaths;
+        paymentMessage.childNumbers = childNumbers;
         return paymentMessage;
     }
 
@@ -591,10 +591,10 @@ final public class PaymentProtocol {
         return paymentMessage;
     }
 
-    public static PaymentProtocol fullTransaction(final byte[] fullySignedTransaction, int[] childPaths) {
+    public static PaymentProtocol fullTransaction(final byte[] fullySignedTransaction, int[] childNumbers) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.FULL_TRANSACTION);
         paymentMessage.fullySignedTransaction = fullySignedTransaction;
-        paymentMessage.childPaths = childPaths;
+        paymentMessage.childNumbers = childNumbers;
         return paymentMessage;
     }
 
@@ -658,19 +658,19 @@ final public class PaymentProtocol {
     }
 
     //encode
-    private int arrayCopy(final int[] childPaths, final byte[] data, int offset) {
-        final int len = childPaths.length;
+    private int arrayCopy(final int[] childNumbers, final byte[] data, int offset) {
+        final int len = childNumbers.length;
         for (int i=0;i<len;i++) {
-            offset = encodeInt(childPaths[i], data,offset);
+            offset = encodeInt(childNumbers[i], data,offset);
         }
         return offset;
     }
 
     //decode
-    private static int arrayCopy(final byte[] data, final int[] childPaths, int offset) {
-        final int len = childPaths.length;
+    private static int arrayCopy(final byte[] data, final int[] childNumbers, int offset) {
+        final int len = childNumbers.length;
         for (int i=0;i<len;i++) {
-            childPaths[i] = decodeInt(data, offset);
+            childNumbers[i] = decodeInt(data, offset);
             offset += 4;
         }
         return offset;
