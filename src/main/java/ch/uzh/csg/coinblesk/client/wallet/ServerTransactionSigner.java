@@ -90,7 +90,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                 continue;
             }
 
-            txSigRequest.addIndexAndDerivationPath(i, childNumbersToIntArray(propTx.keyPaths.get(scriptPubKey)));
+            txSigRequest.addChildNumber(getChildNumber(propTx.keyPaths.get(scriptPubKey)));
 
         }
 
@@ -115,12 +115,9 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
         return true;
     }
 
-    private int[] childNumbersToIntArray(List<ChildNumber> childNumbers) {
-        int[] path = new int[childNumbers.size()];
-        for (int i = 0; i < childNumbers.size(); i++) {
-            path[i] = childNumbers.get(i).getI();
-        }
-        return path;
+    private int getChildNumber(List<ChildNumber> childNumbers) {
+        // we don't need master/account key
+        return childNumbers.get(2).getI();
     }
 
     private void launchServerRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest) {

@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import ch.uzh.csg.coinblesk.responseobject.IndexAndDerivationPath;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 
 /**
@@ -76,16 +75,16 @@ public class MockServerKeyChain {
 
         Transaction tx = new Transaction(params, Base64.decode(serverSigReq.getPartialTx(), Base64.NO_WRAP));
 
-        for (IndexAndDerivationPath indexAndPath : serverSigReq.getIndexAndDerivationPaths()) {
+        for (int i = 0; i < tx.getInputs().size(); i++) {
 
-            TransactionInput txIn = tx.getInputs().get(indexAndPath.getIndex());
+            TransactionInput txIn = tx.getInput(i);
 
             Script inputScript = txIn.getScriptSig();
             Script redeemScript = new Script(inputScript.getChunks().get(inputScript.getChunks().size() - 1).data);
 
-            ImmutableList<ChildNumber> keyPath = ImmutableList.copyOf(getChildNumbers(indexAndPath.getDerivationPath()));
+            ImmutableList<ChildNumber> keyPath = ImmutableList.copyOf(childNumberToPath(serverSigReq.getChildNumbers().get(i)));
             DeterministicKey key = serverKeyChain.getKeyByPath(keyPath, true);
-            Sha256Hash sighash = tx.hashForSignature(indexAndPath.getIndex(), redeemScript, Transaction.SigHash.ALL, false);
+            Sha256Hash sighash = tx.hashForSignature(i, redeemScript, Transaction.SigHash.ALL, false);
             ECKey.ECDSASignature sig = key.sign(sighash);
 
             TransactionSignature txSig = new TransactionSignature(sig, Transaction.SigHash.ALL, false);
@@ -103,14 +102,12 @@ public class MockServerKeyChain {
         return tx;
     }
 
-    private List<ChildNumber> getChildNumbers(int[] path) {
-
-        List<ChildNumber> childNumbers = Lists.newArrayListWithCapacity(path.length);
-        for (int i : path) {
-            childNumbers.add(new ChildNumber(i));
-        }
-
-        return childNumbers;
+    /**
+     * Converts a child number to a path
+     * @return
+     */
+    private List<ChildNumber> childNumberToPath(int i) {
+        return Lists.newArrayList(new ChildNumber(0, true), new ChildNumber(0), new ChildNumber(i));
     }
 
     public static class P2SHScript extends Script {

@@ -161,15 +161,17 @@ public class WalletServiceTest {
             @Override
             public RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> payOutRequest(RequestCompleteListener<SignedTxTransferObject> completeListener, ServerSignatureRequestTransferObject input, Context context) {
 
+                Transaction unsignedTx = new Transaction(params, Base64.decode(input.getPartialTx(), Base64.NO_WRAP));
+                System.out.println("Unsigned transaction: " + unsignedTx);
+
+                int[] childNumbers = new int[input.getChildNumbers().size()];
+                for(int i = 0; i < input.getChildNumbers().size(); i++) {
+                    childNumbers[i] = input.getChildNumbers().get(i);
+                }
+                Assert.assertFalse(walletService.isTxSignedByServer(unsignedTx.unsafeBitcoinSerialize(), childNumbers));
                 // sign the client's transaction
                 Transaction tx = serverKeyChain.getServerSignature(input);
-
-                System.out.println("Server signed transaction: " + tx);
-
-                int[] childNumbers = new int[input.getIndexAndDerivationPaths().size()];
-                for(int i = 0; i < input.getIndexAndDerivationPaths().size(); i++) {
-                    childNumbers[i] = input.getIndexAndDerivationPaths().get(i).getDerivationPath()[2];
-                }
+                System.out.println("Signed transaction: " + unsignedTx);
 
                 Assert.assertTrue(walletService.isTxSignedByServer(tx.unsafeBitcoinSerialize(), childNumbers));
 
@@ -205,8 +207,8 @@ public class WalletServiceTest {
                 // check if the request is correct
                 Assert.assertNotNull(input);
                 Assert.assertNotNull(input.getPartialTx());
-                Assert.assertNotNull(input.getIndexAndDerivationPaths());
-                Assert.assertFalse(input.getIndexAndDerivationPaths().isEmpty());
+                Assert.assertNotNull(input.getChildNumbers());
+                Assert.assertFalse(input.getChildNumbers().isEmpty());
 
                 // assert that the partial tx is correct
                 byte[] partialTxBytes = Base64.decode(input.getPartialTx(), android.util.Base64.NO_WRAP);
