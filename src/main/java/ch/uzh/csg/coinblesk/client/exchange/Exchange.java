@@ -68,6 +68,7 @@ public class Exchange {
     private CurrencyPair pair;
 
     private Cache<String, SymbolAndExchangeRate> forexCache;
+    private Cache<String, BigDecimal> exchangeRateCache;
 
     public Exchange(String exchange) {
 
@@ -77,6 +78,7 @@ public class Exchange {
 
         // build the cache for the exchange rates
         this.forexCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build();
+        this.exchangeRateCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
     }
 
     public Exchange(ExchangeSpecification exSpec) {
@@ -227,13 +229,18 @@ public class Exchange {
 
     /**
      * Obtains the exchange rate from the primary exchange. If the request failed, the secondary exchange will be asked for the exchange rate.
-     * This method is blocking! This prevents that many exchange rate requests are created at the same time, instead of just once,
-     * and then loading it from the cache.
      *
      * @param listener the exchange rate listener
      */
     private void getExchangeRate(final ExchangeRateListener listener) {
 
+        BigDecimal exchangeRate = exchangeRateCache.getIfPresent(getExchangeId());
+        if(exchangeRate != null) {
+            LOGGER.debug("Loaded exchange rate from cache: {}", exchangeRate);
+            listener.onSuccess(exchangeRate);
+        }
+
+        LOGGER.debug("Exchange rate not in cache, get it from exchange {}", getExchangeId());
         AsyncTask<Void, Void, BigDecimal> exchangeRateTask = new AsyncTask<Void, Void, BigDecimal>() {
             @Override
             protected BigDecimal doInBackground(Void... params) {
@@ -249,6 +256,7 @@ public class Exchange {
             protected void onPostExecute(BigDecimal exchangeRate) {
                 if (exchangeRate != null) {
                     listener.onSuccess(exchangeRate);
+                    exchangeRateCache.put(getExchangeId(), exchangeRate);
                 } else {
                     listener.onError("Failed to obtain exchange rate from bitcoin exchange");
                 }
