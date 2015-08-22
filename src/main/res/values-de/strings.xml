@@ -315,8 +315,8 @@
     <!-- Settings -->
     <string name="settings_autoAccept_checkbox_summary">Für favorisierte Verkäufer automatisch Zahlungen akzeptieren bis zu definiertem Limit.</string>
     <string name="settings_autoAccept_checkbox_title">Automatisch Zahlungen akzeptieren</string>
-    <string name="settings_autoAccept_editText_defaultValue">10</string>
-    <string name="settings_autoAccept_editText_title">Automatisch akzeptieren Limite in CHF</string>
+    <string name="settings_autoAccept_editText_defaultValue">0.1</string>
+    <string name="settings_autoAccept_editText_title">Automatisch akzeptieren Limite in BTC</string>
     <string name="settings_walletBackupSeedExplanation">Bitte schreiben Sie die folgenden 12 Wörter auf, und bewahren Sie sie auf. Mit diesen 12 Wörtern können Sie Ihre Wallet wieder herstellen, falls Sie ihr Gerät verlieren, oder falls Sie CoinBlesk auf einem neuen Gerät installieren wollen. ZEIGEN SIE DIESE 12 WÖRTER NIEMANDEM!</string>
     <string name="settings_walletBackupSeedTitle">Wallet Backup Wörter</string>
     <string name="settings_walletBackupSeedCopyButtonText">In Zwischenablage kopieren</string>

@@ -12,7 +12,7 @@
         android:autoText="false"
         android:gravity="top"
         android:text="amount"
-        android:textSize="24dp" />
+        android:textSize="20dp" />
 
     <TextView
         android:id="@+id/transaction_description"

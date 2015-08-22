@@ -304,8 +304,8 @@
     <!-- Settings -->
     <string name="settings_autoAccept_checkbox_summary">Auto accept payments for favorite payees up to defined limit</string>
     <string name="settings_autoAccept_checkbox_title">Auto accept payments</string>
-    <string name="settings_autoAccept_editText_defaultValue">10</string>
-    <string name="settings_autoAccept_editText_title">Auto accept limit in CHF</string>
+    <string name="settings_autoAccept_editText_defaultValue">0.1</string>
+    <string name="settings_autoAccept_editText_title">Auto accept limit in BTC</string>
     <string name="settings_walletBackupSeedExplanation">To backup your wallet, please write down the following 12 words. If you lose your device, or you want to install CoinBlesk on a new device, you have to enter these 12 words in order to get access to your bitcoins. DO NOT SHARE THESE WORDS WITH ANYONE!</string>
     <string name="settings_walletBackupSeedTitle">Wallet Backup Phrase</string>
     <string name="settings_walletBackupSeedCopyButtonText">Copy to Clipboard</string>

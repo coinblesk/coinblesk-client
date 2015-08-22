@@ -134,7 +134,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_below="@id/sendPayment_currencySpinner"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="28dp"
                     android:text="@string/receivePayment_recipient" />
 
                 <TextView
@@ -142,7 +142,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-                    android:layout_below="@+id/sendPayment_CHFinBTC"
+                    android:layout_below="@+id/sendPayment_recipient"
                     android:layout_marginTop="15dp"
                     android:text="@string/sendPayment_pleaseSelectReceiver"
                     android:textSize="16sp" />

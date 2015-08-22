@@ -249,36 +249,26 @@ public abstract class PaymentActivity extends WalletActivity {
      */
     private void checkAccept(final long satoshis, final String receiver, PublicKey remotePubKey, final UserPaymentConfirmation confirmation) {
         // check whether to auto accept the payment or not
+        BigDecimal amount = BitcoinUtils.satoshiToBigDecimal(satoshis);
         AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
         if (entry == null || !entry.isTrusted()) {
-
             // for debugging
             if (entry == null) {
                 LOGGER.debug("User {} was not found in the address book", receiver);
             } else {
                 LOGGER.debug("User {} is not trusted", receiver);
             }
-
-            showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, confirmation);
+            showConfirmationDialog(amount, receiver, confirmation);
         } else {
-            getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
-                @Override
-                public void onTaskComplete(ExchangeRateTransferObject response) {
-                    if (response.isSuccessful()) {
-                        BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
-                        BigDecimal fiatAmount = BitcoinUtils.satoshiToBigDecimal(satoshis).multiply(exchangeRate);
-                        BigDecimal autoAcceptAmount = new BigDecimal(PreferenceManager.getDefaultSharedPreferences(PaymentActivity.this).getString("auto_accept_amount", "0"));
-                        if (autoAcceptAmount.compareTo(fiatAmount) > 0) {
-                            LOGGER.debug("Auto-accepting payment of {} {}. Auto accept amount is {} {}", fiatAmount, Constants.CURRENCY, autoAcceptAmount, Constants.CURRENCY);
-                            confirmation.onDecision(true);
-                        } else {
-                            LOGGER.debug("Amount of {} {} exceeds the auto-accept amount of {} {}. Asking user for confirmation.", fiatAmount, Constants.CURRENCY, autoAcceptAmount, Constants.CURRENCY);
-                            // ask the user
-                            showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, confirmation);
-                        }
-                    }
-                }
-            });
+            BigDecimal autoAcceptAmount = new BigDecimal(PreferenceManager.getDefaultSharedPreferences(PaymentActivity.this).getString("auto_accept_amount", "0"));
+            if (autoAcceptAmount.compareTo(amount) > 0) {
+                LOGGER.debug("Auto-accepting payment of {} BTC. Auto accept amount is {} BTC", amount, autoAcceptAmount);
+                confirmation.onDecision(true);
+            } else {
+                LOGGER.debug("Amount of {} exceeds the auto-accept amount of {}. Asking user for confirmation.", amount, autoAcceptAmount);
+                // ask the user
+                showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, confirmation);
+            }
         }
     }
 

@@ -12,10 +12,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.method.DigitsKeyListener;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -214,56 +211,6 @@ public class ReceivePaymentActivity extends PaymentActivity {
     public void onResume() {
         invalidateOptionsMenu();
         super.onResume();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        initializeMenuItems(menu);
-        invalidateOptionsMenu();
-        return true;
-    }
-
-    protected void initializeMenuItems(Menu menu) {
-        menuWarning = menu.findItem(R.id.action_warning);
-
-        menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                launchExchangeRateRequest();
-                return false;
-            }
-        });
-
-        //setup timer
-        sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
-        sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
-        sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                launchExchangeRateRequest();
-                return false;
-            }
-        });
-    }
-
-    @Override
-    public void invalidateOptionsMenu() {
-        if (menuWarning != null) {
-            if (ConnectionCheck.isNetworkAvailable(this)) {
-                menuWarning.setVisible(false);
-                sessionCountdownMenuItem.setVisible(true);
-                sessionRefreshMenuItem.setVisible(true);
-            } else {
-                menuWarning.setVisible(true);
-                sessionCountdownMenuItem.setVisible(false);
-                sessionRefreshMenuItem.setVisible(false);
-            }
-        }
     }
 
     /**

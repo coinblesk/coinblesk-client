@@ -11,11 +11,9 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -32,6 +30,8 @@ import android.widget.TextView;
 
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.InsufficientMoneyException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -53,6 +53,9 @@ import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
  * This is the UI to send a payment directly to a known receiver without the use of NFC communication.
  */
 public class SendPaymentActivity extends WalletActivity {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SendPaymentActivity.class);
+
     private String[] currencies = {"CHF", "BTC"};
     protected CalculatorDialog calculatorDialogFragment;
     protected static BigDecimal amountBTC = BigDecimal.ZERO;
@@ -64,12 +67,6 @@ public class SendPaymentActivity extends WalletActivity {
     private Button addressBookButton;
     private static TextView receiverUsernameTextView;
     private static AddressBookEntry selectedUser;
-
-    private MenuItem menuWarning;
-    private MenuItem offlineMode;
-    private MenuItem sessionCountdownMenuItem;
-    private MenuItem sessionRefreshMenuItem;
-    private TextView sessionCountdown;
 
     protected static final String INPUT_UNIT_CHF = "CHF";
 
@@ -104,48 +101,6 @@ public class SendPaymentActivity extends WalletActivity {
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
         launchExchangeRateRequest();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        initializeMenuItems(menu);
-        invalidateOptionsMenu();
-        return true;
-    }
-
-    protected void initializeMenuItems(Menu menu) {
-        menuWarning = menu.findItem(R.id.action_warning);
-        offlineMode = menu.findItem(R.id.menu_offlineMode);
-
-        //setup timer
-        sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
-        sessionCountdown = (TextView) sessionCountdownMenuItem.getActionView();
-        sessionRefreshMenuItem = menu.findItem(R.id.menu_refresh_session);
-
-    }
-
-    @Override
-    public void invalidateOptionsMenu() {
-        if (menuWarning != null) {
-            if (ConnectionCheck.isNetworkAvailable(this)) {
-                menuWarning.setVisible(false);
-                offlineMode.setVisible(false);
-                sessionCountdownMenuItem.setVisible(true);
-                sessionRefreshMenuItem.setVisible(true);
-            } else {
-                menuWarning.setVisible(true);
-                offlineMode.setVisible(true);
-                sessionCountdownMenuItem.setVisible(false);
-                sessionRefreshMenuItem.setVisible(false);
-            }
-        }
     }
 
     /**
@@ -293,7 +248,7 @@ public class SendPaymentActivity extends WalletActivity {
         sendAmount.setFocusable(false);
 
         descriptionOfInputUnit = (TextView) findViewById(R.id.sendPayment_enterAmountIn);
-        receiverUsernameTextView = (EditText) findViewById(R.id.sendPayment_receiver);
+        receiverUsernameTextView = (TextView) findViewById(R.id.sendPayment_receiver);
 
         Spinner spinner = (Spinner) findViewById(R.id.sendPayment_currencySpinner);
         spinner.setAdapter(new MyAdapter(this, R.layout.spinner_currency, currencies));
@@ -320,6 +275,16 @@ public class SendPaymentActivity extends WalletActivity {
     }
 
     private void showConfirmationDialog() {
+
+        if(selectedUser.isTrusted()) {
+            BigDecimal autoAcceptAmount = new BigDecimal(PreferenceManager.getDefaultSharedPreferences(this).getString("auto_accept_amount", "0"));
+            if (autoAcceptAmount.compareTo(amountBTC) > 0) {
+                LOGGER.debug("Auto-accepting payment of {} BTC. Auto accept amount is {} BTC", amountBTC, autoAcceptAmount);
+                createTransaction();
+                return;
+            }
+        }
+
         String message;
 
         if (selectedUser != null && amountBTC != null && amountBTC.compareTo(BigDecimal.ZERO) != 0) {
@@ -350,21 +315,31 @@ public class SendPaymentActivity extends WalletActivity {
 
     private void createTransaction() {
 
+        if(amountBTC.signum() <= 0) {
+            return;
+        }
+
         showLoadingProgressDialog();
 
         AsyncTask<Void, Void, Void> payOutTask = new AsyncTask<Void, Void, Void>() {
+
+            private String errorMsg;
 
             @Override
             protected Void doInBackground(Void... params) {
                 try {
                     getWalletService().createPayment(selectedUser.getBitcoinAddress(), amountBTC);
-                    onPaymentComplete(true, selectedUser.getName(), amountBTC, null);
                 } catch (AddressFormatException e) {
-                    onPaymentComplete(false, selectedUser.getName(), amountBTC, getString(R.string.payOut_error_address));
+                    errorMsg = getString(R.string.payOut_error_address);
                 } catch (InsufficientMoneyException e) {
-                    onPaymentComplete(false, selectedUser.getName(), amountBTC, getString(R.string.payOut_error_balance));
+                    errorMsg = getString(R.string.payOut_error_balance);
                 }
                 return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                onPaymentComplete(errorMsg == null, selectedUser.getName(), amountBTC, errorMsg);
             }
         };
 

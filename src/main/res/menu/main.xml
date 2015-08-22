@@ -1,34 +1,34 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <!-- Settings, should always be in the overflow -->
-    <item
-        android:id="@+id/menu_offlineMode"
-        android:actionViewClass="android.widget.TextView"
-        android:orderInCategory="100"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_offlineModeText"
-        android:visible="true"/>
-    <item
-        android:id="@+id/action_warning"
-        android:enabled="true"
-        android:icon="@drawable/ic_alerts_and_states_warning"
-        android:orderInCategory="200"
-        android:showAsAction="ifRoom"
-        android:title="@string/action_warning"
-        android:visible="true"/>
-    <item
-        android:id="@+id/menu_session_countdown"
-        android:actionViewClass="android.widget.TextView"
-        android:orderInCategory="100"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_sessionCountdown"/>
-    <item
-        android:id="@+id/menu_refresh_session"
-        android:enabled="true"
-        android:icon="@drawable/ic_navigation_refresh"
-        android:orderInCategory="200"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_refreshSession"
-        android:visible="true"/>
+    <!--<item-->
+        <!--android:id="@+id/menu_offlineMode"-->
+        <!--android:actionViewClass="android.widget.TextView"-->
+        <!--android:orderInCategory="100"-->
+        <!--android:showAsAction="ifRoom"-->
+        <!--android:title="@string/menu_offlineModeText"-->
+        <!--android:visible="true"/>-->
+    <!--<item-->
+        <!--android:id="@+id/action_warning"-->
+        <!--android:enabled="true"-->
+        <!--android:icon="@drawable/ic_alerts_and_states_warning"-->
+        <!--android:orderInCategory="200"-->
+        <!--android:showAsAction="ifRoom"-->
+        <!--android:title="@string/action_warning"-->
+        <!--android:visible="true"/>-->
+    <!--<item-->
+        <!--android:id="@+id/menu_session_countdown"-->
+        <!--android:actionViewClass="android.widget.TextView"-->
+        <!--android:orderInCategory="100"-->
+        <!--android:showAsAction="ifRoom"-->
+        <!--android:title="@string/menu_sessionCountdown"/>-->
+    <!--<item-->
+        <!--android:id="@+id/menu_refresh_session"-->
+        <!--android:enabled="true"-->
+        <!--android:icon="@drawable/ic_navigation_refresh"-->
+        <!--android:orderInCategory="200"-->
+        <!--android:showAsAction="ifRoom"-->
+        <!--android:title="@string/menu_refreshSession"-->
+        <!--android:visible="true"/>-->
 
 </menu>

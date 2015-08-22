@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.security.PublicKey;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
@@ -465,7 +464,8 @@ public class MainActivity extends PaymentActivity {
         AsyncTask<Void, Void, List<TransactionMetaData>> getTransactionHistoryTask = new AsyncTask<Void, Void, List<TransactionMetaData>>() {
             @Override
             protected List<TransactionMetaData> doInBackground(Void... params) {
-                return getWalletService().getTransactionHistory(10).getAllTransactions();
+                int numTransaction = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("numberOfLastTransactions", "3"));
+                return getWalletService().getTransactionHistory(numTransaction).getAllTransactions();
             }
 
             @Override
