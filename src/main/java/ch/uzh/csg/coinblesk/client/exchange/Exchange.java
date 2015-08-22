@@ -238,6 +238,7 @@ public class Exchange {
         if(exchangeRate != null) {
             LOGGER.debug("Loaded exchange rate from cache: {}", exchangeRate);
             listener.onSuccess(exchangeRate);
+            return;
         }
 
         LOGGER.debug("Exchange rate not in cache, get it from exchange {}", getExchangeId());
@@ -257,6 +258,7 @@ public class Exchange {
                 if (exchangeRate != null) {
                     listener.onSuccess(exchangeRate);
                     exchangeRateCache.put(getExchangeId(), exchangeRate);
+                    LOGGER.debug("Saved exchange rate of exchange {} in cache", getExchangeId());
                 } else {
                     listener.onError("Failed to obtain exchange rate from bitcoin exchange");
                 }
