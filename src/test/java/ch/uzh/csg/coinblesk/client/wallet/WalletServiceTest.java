@@ -45,13 +45,14 @@ import java.util.Set;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
-import ch.uzh.csg.coinblesk.client.storage.MemoryStorageHandler;
-import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
+import ch.uzh.csg.coinblesk.client.storage.MemoryStorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
+import ch.uzh.csg.coinblesk.client.testutils.BitcoinTestUtils;
 import ch.uzh.csg.coinblesk.client.testutils.MockRequestTask;
-import ch.uzh.csg.coinblesk.client.testutils.TestUtils;
+import ch.uzh.csg.coinblesk.client.testutils.MockServerKeyChain;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.RefundTxTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
@@ -74,6 +75,7 @@ public class WalletServiceTest {
     private WalletService walletService;
     private static BlockStore blockStore;
     private StorageHandler storage;
+    private MockServerKeyChain serverKeyChain;
 
     @BeforeClass
     public static void setupClass() throws Exception {
@@ -102,12 +104,15 @@ public class WalletServiceTest {
         walletService = Robolectric.buildService(WalletService.class).bind().get();
         walletService = PowerMockito.spy(walletService);
 
+        // create the server key chain
+        serverKeyChain = new MockServerKeyChain(params);
+
         // mocks
         PowerMockito.doReturn(testDirectory).when(walletService).getFilesDir();
 
         // mock internal storage
         storage = PowerMockito.spy(new MemoryStorageHandler());
-        PowerMockito.doReturn(TestUtils.getServerWatchingKey(params)).when(storage).getServerWatchingKey();
+        PowerMockito.doReturn(serverKeyChain.getServerWatchingKey()).when(storage).getServerWatchingKey();
         PowerMockito.doReturn(bitcoinNet).when(storage).getBitcoinNet();
 
     }
@@ -149,6 +154,44 @@ public class WalletServiceTest {
     }
 
     @Test
+    public void isTxSignedByServer() throws Exception {
+        walletService.init(storage);
+
+        RequestFactory requestFactory = new DefaultRequestFactory() {
+            @Override
+            public RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> payOutRequest(RequestCompleteListener<SignedTxTransferObject> completeListener, ServerSignatureRequestTransferObject input, Context context) {
+
+                Transaction unsignedTx = new Transaction(params, Base64.decode(input.getPartialTx(), Base64.NO_WRAP));
+                System.out.println("Unsigned transaction: " + unsignedTx);
+
+                int[] childNumbers = new int[input.getChildNumbers().size()];
+                for(int i = 0; i < input.getChildNumbers().size(); i++) {
+                    childNumbers[i] = input.getChildNumbers().get(i);
+                }
+                Assert.assertFalse(walletService.isTxSignedByServer(unsignedTx.unsafeBitcoinSerialize(), childNumbers));
+                // sign the client's transaction
+                Transaction tx = serverKeyChain.getServerSignature(input);
+                System.out.println("Signed transaction: " + unsignedTx);
+
+                Assert.assertTrue(walletService.isTxSignedByServer(tx.unsafeBitcoinSerialize(), childNumbers));
+
+                SignedTxTransferObject response = new SignedTxTransferObject();
+                response.setSuccessful(true);
+
+                return new MockRequestTask(completeListener, response);
+            }
+        };
+
+        ((CoinBleskApplication) RuntimeEnvironment.application).setRequestFactory(requestFactory);
+
+        // send bitcoins to the wallet
+        injectTx(walletService.getBitcoinAddress(), new BigDecimal("10"));
+
+        // create a transaction
+        walletService.createPayment(BitcoinTestUtils.getRandomAddress(params).toString(), new BigDecimal("1"));
+    }
+
+    @Test
     public void testCreatePayment() throws Exception {
 
         walletService.init(storage);
@@ -164,8 +207,8 @@ public class WalletServiceTest {
                 // check if the request is correct
                 Assert.assertNotNull(input);
                 Assert.assertNotNull(input.getPartialTx());
-                Assert.assertNotNull(input.getIndexAndDerivationPaths());
-                Assert.assertFalse(input.getIndexAndDerivationPaths().isEmpty());
+                Assert.assertNotNull(input.getChildNumbers());
+                Assert.assertFalse(input.getChildNumbers().isEmpty());
 
                 // assert that the partial tx is correct
                 byte[] partialTxBytes = Base64.decode(input.getPartialTx(), android.util.Base64.NO_WRAP);
@@ -458,6 +501,8 @@ public class WalletServiceTest {
         appKit.wallet().receiveFromBlock(tx, bp.storedBlock, AbstractBlockChain.NewBlockType.BEST_CHAIN, 0);
         appKit.wallet().notifyNewBestBlock(bp.storedBlock);
         appKit.wallet().getTransaction(tx.getHash());  // Can be null if tx is a double spend that's otherwise irrelevant.
+
+        System.out.println("Injected tx: " + tx);
 
         return bp;
 

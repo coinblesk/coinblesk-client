@@ -13,7 +13,7 @@ public class Constants {
 	/**
 	 * The base URL of the server.
 	 */
-	public static final String BASE_URL = "http://192.168.1.129:8080/coinblesk";
+	public static final String BASE_URL = "http://192.168.0.183:8080/coinblesk";
 
 	/**
 	 * Amount of confirmations a transaction needs to be considered as confirmed
@@ -47,7 +47,7 @@ public class Constants {
 	public static String DATE_FORMAT = "dd-MM-yyyy' 'HH:mm:ss";
 
 	/**
-	 * Determines the earlies creation date of a coin blesk backup phrase (mnemonic).
+	 * Determines the earlies creation date of a CoinBlesk backup phrase (mnemonic).
 	 * This will speed up blockchain synchronization significantly, as we don't have
 	 * to download block earlier than this date.
 	 */

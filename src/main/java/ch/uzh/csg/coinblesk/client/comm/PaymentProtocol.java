@@ -123,7 +123,6 @@ final public class PaymentProtocol {
         return type;
     }
 
-
     public byte[] toBytes(PrivateKey privateKey) throws UnsupportedEncodingException, NoSuchProviderException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
         final byte header = (byte) ((type.ordinal() & 0x7) | (version << 3));
         final byte[] data;
@@ -707,4 +706,7 @@ final public class PaymentProtocol {
         return g.generateKeyPair();
     }
 
+    public Type type() {
+        return type;
+    }
 }

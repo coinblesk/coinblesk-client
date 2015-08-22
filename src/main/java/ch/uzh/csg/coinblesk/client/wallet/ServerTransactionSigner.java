@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Base64;
 import android.widget.Toast;
 
+import com.google.common.collect.Lists;
+
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
@@ -55,11 +57,10 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
 
         checkNotNull(context, "Context needs to be initialized in order to perform this request");
 
-        ServerSignatureRequestTransferObject txSigRequest = new ServerSignatureRequestTransferObject();
-
         Transaction tx = propTx.partialTx;
-        int numInputs = tx.getInputs().size();
-        for (int i = 0; i < numInputs; i++) {
+        List<Integer> childNumbers = Lists.newArrayListWithCapacity(tx.getInputs().size());
+
+        for (int i = 0; i < tx.getInputs().size(); i++) {
             TransactionInput txIn = tx.getInput(i);
             TransactionOutput txOut = txIn.getConnectedOutput();
             if (txOut == null) {
@@ -90,37 +91,40 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                 continue;
             }
 
-            txSigRequest.addIndexAndDerivationPath(i, childNumbersToIntArray(propTx.keyPaths.get(scriptPubKey)));
+            childNumbers.add(getChildNumber(propTx.keyPaths.get(scriptPubKey)));
 
         }
 
-        String serializedTx = android.util.Base64.encodeToString(tx.bitcoinSerialize(), android.util.Base64.NO_WRAP);
-        txSigRequest.setPartialTx(serializedTx);
+        LOGGER.debug("Finished signing of transaction {}", tx.getHashAsString());
 
-        if (tx.isTimeLocked()) {
-            // refund transaction
-            launchRefundTxRequest(tx, txSigRequest);
+        if (WalletService.isNfcMode() && !tx.isTimeLocked()) {
+            // nfc transaction: we don't need to send it to the server, we just broadcast an intent to the receiver(s)
+            //context.sendBroadcast(HalfSignedTxReceiver.createIntent(txSigRequest));
+            WalletService.sigReq = new HalfSignedTransaction(tx, childNumbers);
         } else {
 
-            if(WalletService.isNfcMode()) {
-                // nfc transaction: we don't need to send it to the server, we just broadcast an intent to the receiver(s)
-                //context.sendBroadcast(HalfSignedTxReceiver.createIntent(txSigRequest));
-                WalletService.sigReq = txSigRequest;
+            // create the server signature request transfer object
+            ServerSignatureRequestTransferObject txSigRequest = new ServerSignatureRequestTransferObject();
+            String serializedTx = android.util.Base64.encodeToString(tx.bitcoinSerialize(), android.util.Base64.NO_WRAP);
+            txSigRequest.setPartialTx(serializedTx);
+            txSigRequest.setChildNumbers(childNumbers);
+
+            if (tx.isTimeLocked()) {
+                // refund transaction
+                launchRefundTxRequest(tx, txSigRequest);
             } else {
                 // normal transaction
                 launchServerRequest(tx, txSigRequest);
             }
         }
 
+
         return true;
     }
 
-    private int[] childNumbersToIntArray(List<ChildNumber> childNumbers) {
-        int[] path = new int[childNumbers.size()];
-        for (int i = 0; i < childNumbers.size(); i++) {
-            path[i] = childNumbers.get(i).getI();
-        }
-        return path;
+    private int getChildNumber(List<ChildNumber> childNumbers) {
+        // we don't need master/account key
+        return childNumbers.get(2).getI();
     }
 
     private void launchServerRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest) {
