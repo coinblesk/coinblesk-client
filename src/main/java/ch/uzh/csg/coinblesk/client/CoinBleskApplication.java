@@ -1,5 +1,7 @@
 package ch.uzh.csg.coinblesk.client;
 
+import android.provider.Settings;
+
 import com.activeandroid.ActiveAndroid;
 
 import org.slf4j.Logger;
@@ -9,9 +11,13 @@ import ch.uzh.csg.coinblesk.client.exchange.ExchangeManager;
 import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
+import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.storage.PersistentStorageHandler;
 import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.util.LoggingConfig;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
+import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.nfclib.NfcSetup;
 
 /**
@@ -24,7 +30,6 @@ public class CoinBleskApplication extends com.activeandroid.app.Application {
     private StorageHandler mStorageHandler;
     private RequestFactory requestFactory;
     private ExchangeManager merchantModeManager;
-    private NfcSetup initiator;
 
     @Override
     public void onCreate() {
@@ -38,6 +43,42 @@ public class CoinBleskApplication extends com.activeandroid.app.Application {
         merchantModeManager = new ExchangeManager(this);
 
         LOGGER.info("CoinBlesk is starting...");
+
+        // check if this is a new installation
+        if (!getStorageHandler().hasUserData()) {
+            //its new, so create a wallet and set a default username
+            final String androidId = Settings.Secure.getString(getApplicationContext().getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
+            //TODO: make this setting available in the menu
+            getStorageHandler().setUsername("Coinblesk User " + androidId);
+            requestSetup(new RequestCompleteListener<SetupRequestObject>() {
+                @Override
+                public void onTaskComplete(SetupRequestObject response) {
+                    if (response.isSuccessful()) {
+                        LOGGER.debug("set bitcoinnet and serverwatching key");
+                        getStorageHandler().setBitcoinNetAndServerWatchingKey(response.getBitcoinNet(), response.getServerWatchingKey());
+                        getStorageHandler().setStorageFailed(false);
+                    } else {
+                        getStorageHandler().setStorageFailed(true);
+                    }
+                    //now we continue in onServiceConnected, where we dismiss the loading dialog
+                }
+            });
+        } else {
+            getStorageHandler().setStorageFailed(false);
+        }
+
+    }
+
+    private void requestSetup(final RequestCompleteListener<SetupRequestObject> cro) {
+
+        RequestTask<TransferObject, SetupRequestObject> task = getRequestFactory().setupRequest(new RequestCompleteListener<SetupRequestObject>() {
+            @Override
+            public void onTaskComplete(SetupRequestObject response) {
+                cro.onTaskComplete(response);
+            }
+        }, this);
+        task.execute();
     }
 
     public StorageHandler getStorageHandler() {
@@ -67,11 +108,4 @@ public class CoinBleskApplication extends com.activeandroid.app.Application {
         return merchantModeManager;
     }
 
-    public void setInitiator(NfcSetup initiator) {
-        this.initiator = initiator;
-    }
-
-    public NfcSetup getInitiator() {
-        return initiator;
-    }
 }
