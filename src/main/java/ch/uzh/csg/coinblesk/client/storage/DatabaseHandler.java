@@ -42,6 +42,6 @@ public class DatabaseHandler {
     }
 
     public void deleteAddressBookEntry(PublicKey pubKey) {
-        new Delete().from(AddressBookEntry.class).where("PublicKey = ?", pubKey).execute();
+        new Delete().from(AddressBookEntry.class).where("PublicKey = ?", publicKeySerializer.serialize(pubKey)).execute();
     }
 }
