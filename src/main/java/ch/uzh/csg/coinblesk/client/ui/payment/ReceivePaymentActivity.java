@@ -143,17 +143,33 @@ public class ReceivePaymentActivity extends PaymentActivity {
         }
 
         try {
-            initiator.stopInitiating(this);
+            getCoinBleskApplication().getInitiator().stopInitiating(this);
 
         } catch (Exception e) {
             LOGGER.error("FAIL:", e);
         }
 
         try {
-            initiator.startInitiating(this);
+            getCoinBleskApplication().getInitiator().startInitiating(this);
         } catch (NfcLibException e) {
             LOGGER.debug("NFC failed: ", e);
         }
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getCoinBleskApplication().getInitiator().stopInitiating(this);
+
+
+
+
+
+
+
+
+
 
     }
 
@@ -183,8 +199,8 @@ public class ReceivePaymentActivity extends PaymentActivity {
 
                 try {
                     // reset NFC state
-                    initiator.stopInitiating(ReceivePaymentActivity.this);
-                    initiator.startInitiating(ReceivePaymentActivity.this);
+                    getCoinBleskApplication().getInitiator().stopInitiating(ReceivePaymentActivity.this);
+                    getCoinBleskApplication().getInitiator().startInitiating(ReceivePaymentActivity.this);
                 } catch (NfcLibException e) {
                     LOGGER.debug("NFC failed: ", e);
                 }

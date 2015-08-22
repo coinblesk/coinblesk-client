@@ -24,6 +24,9 @@
         android:name="android.hardware.bluetooth_le"
         android:required="false" />
 
+    <uses-feature android:name="android.hardware.usb.host"
+        android:required="false" />
+
     <application
         android:name=".CoinBleskApplication"
         android:allowBackup="true"

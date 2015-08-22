@@ -65,8 +65,8 @@ public abstract class PaymentActivity extends WalletActivity {
     private boolean destroyed = false;
     protected boolean paymentAccepted = false;
 
-    private static NfcPaymentListener listener;
-    protected static NfcSetup initiator;
+    private NfcPaymentListener listener;
+    //protected NfcSetup initiator;
 
     private PaymentRequestReceiver paymentRequestReceiver;
     private HalfSignedTxReceiver halfSignedTxReceiver;
@@ -340,7 +340,7 @@ public abstract class PaymentActivity extends WalletActivity {
      */
     protected void initializeNFC() throws Exception {
 
-        initiator = new NfcSetup(new NfcInitiatorHandler() {
+        NfcSetup initiator = new NfcSetup(new NfcInitiatorHandler() {
 
             State current = State.INIT;
             KeyPair keyPair;
@@ -462,12 +462,10 @@ public abstract class PaymentActivity extends WalletActivity {
                                     } else {
                                         LOGGER.debug("No active payment request: Abort");
                                         listener.onPaymentError("No active payment request");
-                                        result2.set(new byte[0]);
                                     }
                                 } catch (Exception e) {
                                     LOGGER.error("Sending payment request failed", e);
                                     listener.onPaymentError(e.getMessage());
-                                    result2.set(new byte[0]);
                                 }
                             }
                         });
@@ -742,6 +740,8 @@ public abstract class PaymentActivity extends WalletActivity {
                 LOGGER.info("received NFC message: {}", s);
             }
         }, this);
+
+        getCoinBleskApplication().setInitiator(initiator);
 
     }
 
