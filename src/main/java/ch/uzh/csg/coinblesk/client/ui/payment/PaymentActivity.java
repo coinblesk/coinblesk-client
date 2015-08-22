@@ -17,8 +17,6 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Base64;
 
-import com.google.common.primitives.Ints;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +25,7 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.concurrent.atomic.AtomicReference;
 
+import ch.uzh.csg.coinblesk.JsonConverter;
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
