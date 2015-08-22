@@ -85,7 +85,7 @@ public interface StorageHandler {
 
     void sentClientWatchingKey(boolean b);
 
-    void setStorageHandlerCallback(StorageHandlerCallback storageHandlerCallback);
+    void addStorageHandlerListener(StorageHandlerListener storageHandlerListener);
 
     void setStorageFailed(boolean failed);
 }

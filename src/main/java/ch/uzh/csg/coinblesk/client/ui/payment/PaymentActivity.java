@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Base64;
+import android.widget.Toast;
 
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
@@ -37,6 +38,8 @@ import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequestReceiver;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandlerListener;
 import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
 import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
@@ -66,10 +69,18 @@ public abstract class PaymentActivity extends WalletActivity {
     protected boolean paymentAccepted = false;
 
     private NfcPaymentListener listener;
-    //protected NfcSetup initiator;
+    private NfcSetup initiator;
 
     private PaymentRequestReceiver paymentRequestReceiver;
     private HalfSignedTxReceiver halfSignedTxReceiver;
+
+    public PaymentActivity() {
+
+    }
+
+    public NfcSetup getInitiator() {
+        return initiator;
+    }
 
 
     public class DefaultNfcListener extends NfcPaymentListener {
@@ -97,6 +108,23 @@ public abstract class PaymentActivity extends WalletActivity {
         registerReceiver(halfSignedTxReceiver, new IntentFilter(HalfSignedTxReceiver.ACTION));
 
         checkNfc(this);
+        try {
+            PaymentActivity.this.initiator = initializeNFC();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initiator.enable(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        initiator.disable(this);
     }
 
     @Override
@@ -313,8 +341,6 @@ public abstract class PaymentActivity extends WalletActivity {
                         }).start();
                     }
                 });
-
-                alert.show();
             }
         });
 
@@ -328,7 +354,7 @@ public abstract class PaymentActivity extends WalletActivity {
     /**
      * Initializes NFC adapter and receiver payment information.
      */
-    protected void initializeNFC() throws Exception {
+    protected NfcSetup initializeNFC() throws Exception {
 
         NfcSetup initiator = new NfcSetup(new NfcInitiatorHandler() {
 
@@ -731,7 +757,7 @@ public abstract class PaymentActivity extends WalletActivity {
             }
         }, this);
 
-        getCoinBleskApplication().setInitiator(initiator);
+        return initiator;
 
     }
 

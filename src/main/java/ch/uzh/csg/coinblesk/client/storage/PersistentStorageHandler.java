@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.List;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
@@ -23,7 +24,7 @@ public class PersistentStorageHandler implements StorageHandler {
 
     private CoinBleskCloudData data;
     private DatabaseHandler db;
-    private StorageHandlerCallback storageHandlerCallback = null;
+    private List<StorageHandlerListener> storageHandlerListener = new ArrayList<StorageHandlerListener>();
     private boolean storageFailed = false;
 
 
@@ -68,9 +69,11 @@ public class PersistentStorageHandler implements StorageHandler {
     public void setBitcoinNetAndServerWatchingKey(BitcoinNet bitcoinNet, String serverWatchingKey) {
         data.setBitcoinNet(bitcoinNet.toString());
         data.setServerWatchingKey(serverWatchingKey);
-        if(storageHandlerCallback != null) {
-            storageHandlerCallback.storageHandlerSet(this);
-            storageHandlerCallback = null;
+        synchronized (storageHandlerListener) {
+            for (StorageHandlerListener listener : storageHandlerListener) {
+                listener.storageHandlerSet(this);
+            }
+            storageHandlerListener.clear();
         }
     }
 
@@ -154,25 +157,31 @@ public class PersistentStorageHandler implements StorageHandler {
     }
 
     @Override
-    public void setStorageHandlerCallback(StorageHandlerCallback storageHandlerCallback) {
+    public void addStorageHandlerListener(StorageHandlerListener storageHandlerListener) {
         if(data.getServerWatchingKey() != null && data.getBitcoinNet() != null) {
-            storageHandlerCallback.storageHandlerSet(this);
+            storageHandlerListener.storageHandlerSet(this);
         } else if(storageFailed) {
-            storageHandlerCallback.failed();
+            storageHandlerListener.failed();
         } else {
-            this.storageHandlerCallback = storageHandlerCallback;
+            synchronized (storageHandlerListener) {
+                this.storageHandlerListener.add(storageHandlerListener);
+            }
         }
     }
 
     @Override
     public void setStorageFailed(boolean failed) {
         this.storageFailed = failed;
-        if(storageHandlerCallback != null && failed) {
-            storageHandlerCallback.failed();
-            storageHandlerCallback = null;
-        } else if(storageHandlerCallback != null && !failed) {
-            storageHandlerCallback.storageHandlerSet(this);
-            storageHandlerCallback = null;
+
+        synchronized (storageHandlerListener) {
+             for (StorageHandlerListener listener : storageHandlerListener) {
+                 if(failed) {
+                      listener.failed();
+                 } else {
+                     listener.storageHandlerSet(this);
+                 }
+             }
+                storageHandlerListener.clear();;
         }
     }
 

@@ -19,7 +19,7 @@ public class MemoryStorageHandler implements StorageHandler {
     private BitcoinNet bitcoinNet;
     private String serverWatchingKey;
     private boolean hasSentClientWatchingKey;
-    private StorageHandlerCallback storageHandlerCallback = null;
+    private StorageHandlerListener storageHandlerListener = null;
     private boolean storageFailed = false;
 
     @Override
@@ -55,8 +55,8 @@ public class MemoryStorageHandler implements StorageHandler {
     public void setBitcoinNetAndServerWatchingKey(BitcoinNet bitcoinNet, String serverWatchingKey) {
         this.bitcoinNet = bitcoinNet;
         this.serverWatchingKey = serverWatchingKey;
-        if(storageHandlerCallback != null) {
-            storageHandlerCallback.storageHandlerSet(this);
+        if(storageHandlerListener != null) {
+            storageHandlerListener.storageHandlerSet(this);
         }
     }
 
@@ -134,23 +134,17 @@ public class MemoryStorageHandler implements StorageHandler {
     }
 
     @Override
-    public void setStorageHandlerCallback(StorageHandlerCallback storageHandlerCallback) {
-        if(getServerWatchingKey() != null && getBitcoinNet() != null) {
-            storageHandlerCallback.storageHandlerSet(this);
-        } else if(storageFailed) {
-            storageHandlerCallback.failed();
-        } else {
-            this.storageHandlerCallback = storageHandlerCallback;
-        }
+    public void addStorageHandlerListener(StorageHandlerListener storageHandlerListener) {
+
     }
 
     @Override
     public void setStorageFailed(boolean failed) {
         this.storageFailed = failed;
-        if(storageHandlerCallback != null && failed) {
-            storageHandlerCallback.failed();
-        } else if(storageHandlerCallback != null && !failed) {
-            storageHandlerCallback.storageHandlerSet(this);
+        if(storageHandlerListener != null && failed) {
+            storageHandlerListener.failed();
+        } else if(storageHandlerListener != null && !failed) {
+            storageHandlerListener.storageHandlerSet(this);
         }
     }
 }
