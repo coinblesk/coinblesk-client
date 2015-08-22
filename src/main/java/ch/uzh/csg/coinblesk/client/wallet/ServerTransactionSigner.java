@@ -92,9 +92,8 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                 LOGGER.warn("No redeem data found for input {}", i);
                 continue;
             }
-
-            childNumbers.add(getChildNumber(propTx.keyPaths.get(scriptPubKey)));
             accountNumbers.add(getAccountNumber(propTx.keyPaths.get(scriptPubKey)));
+            childNumbers.add(getChildNumber(propTx.keyPaths.get(scriptPubKey)));
 
         }
 

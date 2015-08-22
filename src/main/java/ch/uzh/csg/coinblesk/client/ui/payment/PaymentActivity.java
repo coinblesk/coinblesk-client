@@ -17,6 +17,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Base64;
 
+import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 
 import org.slf4j.Logger;
@@ -489,6 +490,7 @@ public abstract class PaymentActivity extends WalletActivity {
 
                         ServerSignatureRequestTransferObject serverSigReq = new ServerSignatureRequestTransferObject();
                         serverSigReq.setPartialTx(Base64.encodeToString(halfSignedTx, Base64.NO_WRAP));
+                        serverSigReq.setAccountNumbers(Bytes.asList(accountNumbers));
                         serverSigReq.setChildNumbers(Ints.asList(childNumbers));
 
                         LOGGER.debug("Sending signature request to server with half signed tx to server");
