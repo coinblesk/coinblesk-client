@@ -8,10 +8,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.graphics.Color;
-import android.graphics.drawable.AnimationDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +30,9 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.bitcoinj.core.AddressFormatException;
+import org.bitcoinj.core.InsufficientMoneyException;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -44,13 +47,7 @@ import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
-import ch.uzh.csg.coinblesk.customserialization.DecoderFactory;
-import ch.uzh.csg.coinblesk.customserialization.PaymentResponse;
-import ch.uzh.csg.coinblesk.customserialization.ServerPaymentRequest;
-import ch.uzh.csg.coinblesk.customserialization.ServerPaymentResponse;
-import ch.uzh.csg.coinblesk.customserialization.ServerResponseStatus;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
-import ch.uzh.csg.coinblesk.util.Converter;
 
 /**
  * This is the UI to send a payment directly to a known receiver without the use of NFC communication.
@@ -63,17 +60,16 @@ public class SendPaymentActivity extends WalletActivity {
     private BigDecimal exchangeRate;
     private EditText sendAmount;
     private TextView descriptionOfInputUnit;
-    AnimationDrawable nfcActivityAnimation;
     private Button sendButton;
     private Button addressBookButton;
-    public static EditText receiverUsernameEditText;
+    private static TextView receiverUsernameTextView;
+    private static AddressBookEntry selectedUser;
 
     private MenuItem menuWarning;
     private MenuItem offlineMode;
     private MenuItem sessionCountdownMenuItem;
     private MenuItem sessionRefreshMenuItem;
     private TextView sessionCountdown;
-    private CountDownTimer timer;
 
     protected static final String INPUT_UNIT_CHF = "CHF";
 
@@ -107,24 +103,7 @@ public class SendPaymentActivity extends WalletActivity {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
-
         launchExchangeRateRequest();
-
-//        menuWarning.setEnabled(true);
-//        menuWarning.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-//            public boolean onMenuItemClick(MenuItem item) {
-//                launchExchangeRateRequest();
-//                return false;
-//            }
-//        });
-//
-//        sessionRefreshMenuItem.setEnabled(true);
-//        sessionRefreshMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-//            public boolean onMenuItemClick(MenuItem item) {
-//                launchExchangeRateRequest();
-//                return false;
-//            }
-//        });
     }
 
     @Override
@@ -144,8 +123,6 @@ public class SendPaymentActivity extends WalletActivity {
     protected void initializeMenuItems(Menu menu) {
         menuWarning = menu.findItem(R.id.action_warning);
         offlineMode = menu.findItem(R.id.menu_offlineMode);
-//        TextView offlineModeTV = (TextView) offlineMode.getActionView();
-//        offlineModeTV.setText(getResources().getString(R.string.menu_offlineModeText));
 
         //setup timer
         sessionCountdownMenuItem = menu.findItem(R.id.menu_session_countdown);
@@ -206,48 +183,26 @@ public class SendPaymentActivity extends WalletActivity {
         balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
     }
 
-    private void launchTransactionRequest(ServerPaymentRequest serverPaymentRequest) {
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    private void onTaskCompletTransaction(byte[] serverPaymentResponseBytes) {
+    private void onPaymentComplete(boolean success, String user, BigDecimal amount, @Nullable String errorMsg) {
         dismissProgressDialog();
-        ServerPaymentResponse serverPaymentResponse = null;
-        try {
-            serverPaymentResponse = DecoderFactory.decode(ServerPaymentResponse.class, serverPaymentResponseBytes);
-        } catch (Exception e) {
-            displayResponse(getResources().getString(R.string.error_transaction_failed));
-            return;
-        }
 
-        PaymentResponse paymentResponsePayer = serverPaymentResponse.getPaymentResponsePayer();
         //verification of server response not needed as no interaction with selling partner
-        if (paymentResponsePayer.getStatus() == ServerResponseStatus.SUCCESS) {
+        if (success) {
             //update textviews
-            receiverUsernameEditText.setText("");
+            receiverUsernameTextView.setText("");
             sendAmount.setText("");
             refreshCurrencyTextViews();
-            BigDecimal balance = getWalletService().getBalance().subtract(Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount()));
+            BigDecimal balance = getWalletService().getBalance().subtract(amount);
             CurrencyViewHandler.setBTC((TextView) findViewById(R.id.sendPayment_balance), balance, getBaseContext());
             TextView balanceTv = (TextView) findViewById(R.id.sendPayment_balance);
             balanceTv.append(" (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, balance) + ")");
-            BigDecimal amountBtc = Converter.getBigDecimalFromLong(paymentResponsePayer.getAmount());
 
             String s = String.format(getResources().getString(R.string.payment_notification_success_payer),
-                    CurrencyViewHandler.formatBTCAsString(amountBtc, this) + " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBtc) + ")",
-                    paymentResponsePayer.getUsernamePayee());
+                    CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, amount, SendPaymentActivity.this),
+                    user);
             showDialog(getResources().getString(R.string.payment_success), R.drawable.ic_payment_succeeded, s);
-
-//            boolean saved = getCoinBleskApplication().getStorageHandler().addAddressBookEntry(serverPaymentResponse.getPaymentResponsePayer().getUsernamePayee());
-//            if (!saved) {
-//                displayResponse(getResources().getString(R.string.error_xmlSave_failed));
-//            }
-        } else if (paymentResponsePayer.getStatus() == ServerResponseStatus.DUPLICATE_REQUEST) {
-            showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, getResources().getString(R.string.transaction_duplicate_error));
-        } else if (paymentResponsePayer.getReason().equals("BALANCE")) {
-            showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, getResources().getString(R.string.sendPayment_balance_error));
         } else {
-            showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, getResources().getString(R.string.transaction_server_rejected));
+            showDialog(getResources().getString(R.string.payment_failure), R.drawable.ic_payment_failed, errorMsg);
         }
     }
 
@@ -338,7 +293,7 @@ public class SendPaymentActivity extends WalletActivity {
         sendAmount.setFocusable(false);
 
         descriptionOfInputUnit = (TextView) findViewById(R.id.sendPayment_enterAmountIn);
-        receiverUsernameEditText = (EditText) findViewById(R.id.sendPayment_enterReceiver);
+        receiverUsernameTextView = (EditText) findViewById(R.id.sendPayment_receiver);
 
         Spinner spinner = (Spinner) findViewById(R.id.sendPayment_currencySpinner);
         spinner.setAdapter(new MyAdapter(this, R.layout.spinner_currency, currencies));
@@ -365,13 +320,11 @@ public class SendPaymentActivity extends WalletActivity {
     }
 
     private void showConfirmationDialog() {
-        String username;
-        String amount;
         String message;
-        if (!receiverUsernameEditText.getText().toString().isEmpty() && !(amountBTC == null || amountBTC.compareTo(BigDecimal.ZERO) == 0)) {
-            username = receiverUsernameEditText.getText().toString();
-            amount = CurrencyViewHandler.formatBTCAsString(amountBTC, this) + " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBTC) + ")";
-            message = String.format(getString(R.string.sendPayment_dialog_message), amount, username);
+
+        if (selectedUser != null && amountBTC != null && amountBTC.compareTo(BigDecimal.ZERO) != 0) {
+            String amount = CurrencyViewHandler.formatBTCAsString(amountBTC, this) + " (" + CurrencyViewHandler.getAmountInCHFAsString(exchangeRate, amountBTC) + ")";
+            message = String.format(getString(R.string.sendPayment_dialog_message), amount, selectedUser.getName());
         } else {
             displayResponse(getString(R.string.fill_necessary_fields));
             return;
@@ -396,38 +349,30 @@ public class SendPaymentActivity extends WalletActivity {
     }
 
     private void createTransaction() {
-        //TODO
-//		if (!receiverUsernameEditText.getText().toString().isEmpty() && !(amountBTC == null || amountBTC.compareTo(BigDecimal.ZERO) == 0)) {
-//			if(receiverUsernameEditText.getText().toString().equals(ClientController.getStorageHandler().getUserAccount().getUsername())){
-//				displayResponse(getResources().getString(R.string.sendPayment_error_user));
-//				return;
-//			}
-//			try {
-//				PaymentRequest paymentRequestPayer = new PaymentRequest(
-//						PKIAlgorithm.DEFAULT,
-//						ckp.getKeyNumber(),
-//						ClientController.getStorageHandler().getUserAccount().getUsername(),
-//						receiverUsernameEditText.getText().toString(),
-//						Currency.BTC,
-//						Converter.getLongFromBigDecimal(amountBTC),
-//						Currency.CHF,
-//						Converter.getLongFromBigDecimal(amountCHF),
-//						System.currentTimeMillis());
-//
-//				paymentRequestPayer.sign(KeyHandler.decodePrivateKey(ckp.getPrivateKey()));
-//				ServerPaymentRequest serverPaymentRequest = new ServerPaymentRequest(paymentRequestPayer);
-//				launchTransactionRequest(serverPaymentRequest);
-//			} catch (Exception e) {
-//				displayResponse(getResources().getString(R.string.sendPayment_error));
-//			}
-//		} else {
-//			displayResponse(getResources().getString(R.string.fill_necessary_fields));
-//		}
+
+        showLoadingProgressDialog();
+
+        AsyncTask<Void, Void, Void> payOutTask = new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    getWalletService().createPayment(selectedUser.getBitcoinAddress(), amountBTC);
+                    onPaymentComplete(true, selectedUser.getName(), amountBTC, null);
+                } catch (AddressFormatException e) {
+                    onPaymentComplete(false, selectedUser.getName(), amountBTC, getString(R.string.payOut_error_address));
+                } catch (InsufficientMoneyException e) {
+                    onPaymentComplete(false, selectedUser.getName(), amountBTC, getString(R.string.payOut_error_balance));
+                }
+                return null;
+            }
+        };
+
+        payOutTask.execute();
     }
 
     /**
-     * Creates a dialog which shows all entries from addressbook. Selected item
-     * will be written to SendPaymentActivity.receiverUsernameEditText.
+     * Creates a dialog which shows all entries from addressbook.
      */
     public static class AddressBookDialog extends DialogFragment {
 
@@ -442,7 +387,7 @@ public class SendPaymentActivity extends WalletActivity {
             LinearLayout linearLayout = new LinearLayout(getActivity().getApplicationContext());
             linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-            for(AddressBookEntry addressBookEntry : receiverEntries) {
+            for(final AddressBookEntry addressBookEntry : receiverEntries) {
                 final TextView entry = new TextView(getActivity().getApplicationContext());
                 final String username = addressBookEntry.getName();
 
@@ -459,7 +404,8 @@ public class SendPaymentActivity extends WalletActivity {
                 entry.setClickable(true);
                 entry.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
-                        SendPaymentActivity.receiverUsernameEditText.setText(username);
+                        receiverUsernameTextView.setText(username);
+                        selectedUser = addressBookEntry;
                         dismiss();
                     }
                 });

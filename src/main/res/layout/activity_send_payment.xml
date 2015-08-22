@@ -128,30 +128,40 @@
                     android:layout_alignLeft="@+id/sendPayment_amountText"
                     android:layout_below="@+id/sendPayment_amountText" />
 
-                <EditText
-                    android:id="@+id/sendPayment_enterReceiver"
+                <TextView
+                    android:id="@+id/sendPayment_recipient"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@id/sendPayment_currencySpinner"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/receivePayment_recipient" />
+
+                <TextView
+                    android:id="@+id/sendPayment_receiver"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_below="@+id/sendPayment_CHFinBTC"
-                    android:layout_marginTop="25dp"
-                    android:layout_toLeftOf="@+id/sendPayment_addressBookButton"
-                    android:hint="@string/sendPayment_enterUsernameReceiver" />
+                    android:layout_marginTop="15dp"
+                    android:text="@string/sendPayment_pleaseSelectReceiver"
+                    android:textSize="16sp" />
 
                 <Button
                     android:id="@+id/sendPayment_addressBookButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/sendPayment_enterReceiver"
-                    android:layout_alignParentRight="true"
-                    android:text="Addressbook" />
+                    android:text="Addressbook"
+                    android:layout_marginTop="15dp"
+                    android:layout_below="@+id/sendPayment_receiver"
+                    />
 
                 <Button
                     android:id="@+id/sendPayment_sendButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/sendPayment_enterReceiver"
-                    android:layout_marginTop="10dp"
+                    android:layout_below="@+id/sendPayment_addressBookButton"
+                    android:layout_marginTop="6dp"
                     android:text="@string/sendPayment_sendButton" />
             </RelativeLayout>
 

@@ -97,6 +97,7 @@
     <string name="receivePayment_exchangeRate">Exchange Rate: </string>
     <string name="receivePayment_enter">Enter amount in</string>
     <string name="receivePayment_currency">Currency:</string>
+    <string name="receivePayment_recipient">Recipient:</string>
     <string name="receivePayment_amount_hint">Enter amount</string>
     <string name="no_connection_server">No connection to server!\nYou are in offline mode.</string>
     <string name="receivePayment_fee">Including fee of</string>
@@ -104,7 +105,7 @@
 
     <!-- Send Payment Strings -->
     <string name="sendPayment_title">Send</string>
-    <string name="sendPayment_enterUsernameReceiver">Enter Username Receiver</string>
+    <string name="sendPayment_pleaseSelectReceiver">Select a Receiver from the Address Book</string>
     <string name="sendPayment_sendButton">Send</string>
     <string name="sendPayment_balanceTitle">Balance:</string>
     <string name="sendPayment_selectReceiver">Select receiver</string>

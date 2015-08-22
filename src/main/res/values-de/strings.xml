@@ -117,6 +117,7 @@
     <string name="receivePayment_exchangeRate">Wechselkurs: </string>
     <string name="receivePayment_enter">Betrag in </string>
     <string name="receivePayment_currency">Währung:</string>
+    <string name="receivePayment_recipient">Empfänger:</string>
     <string name="receivePayment_amount_hint">Betrag eingeben</string>
     <string name="no_connection_server">Keine Serververbindung!\nSie sind im Offline-Modus.</string>
     <string name="receivePayment_fee">Inklusive Gebühr von </string>
@@ -124,7 +125,7 @@
 
     <!-- Send Payment Strings -->
     <string name="sendPayment_title">Senden</string>
-    <string name="sendPayment_enterUsernameReceiver">Benutzername Empfänger eingeben</string>
+    <string name="sendPayment_pleaseSelectReceiver">Benutzername des Empfängers wählen</string>
     <string name="sendPayment_sendButton">Senden</string>
     <string name="sendPayment_balanceTitle">Kontostand:</string>
     <string name="sendPayment_selectReceiver">Empfänger auswählen</string>

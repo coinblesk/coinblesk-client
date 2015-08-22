@@ -489,7 +489,7 @@ public abstract class PaymentActivity extends WalletActivity {
                         serverSigReq.setPartialTx(Base64.encodeToString(halfSignedTx, Base64.NO_WRAP));
                         serverSigReq.setChildNumbers(Ints.asList(childNumbers));
 
-                        LOGGER.debug("Sending signature request to server: {}", serverSigReq);
+                        LOGGER.debug("Sending signature request to server with half signed tx to server");
 
                         signTask = getCoinBleskApplication().getRequestFactory().payOutRequest(new RequestCompleteListener<SignedTxTransferObject>() {
                             @Override
