@@ -479,7 +479,7 @@ public abstract class PaymentActivity extends WalletActivity {
                                         final byte[] fullySignedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
                                         listener.onPaymentReceived(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
                                         LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", fullySignedTx.length);
-                                        responseMsg = PaymentProtocol.fullTransaction(fullySignedTx, new int[]{333,233}).toBytes(keyPair.getPrivate());
+                                        responseMsg = PaymentProtocol.fullTransaction(fullySignedTx, new byte[] {1, 2}, new int[]{333,233}).toBytes(keyPair.getPrivate());
                                         listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
                                         getWalletService().commitAndBroadcastTx(fullySignedTx, true);
 
@@ -612,7 +612,7 @@ public abstract class PaymentActivity extends WalletActivity {
                                                 byte[] halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
                                                 String username = getCoinBleskApplication().getStorageHandler().getUsername();
                                                 LOGGER.debug("Sending partially signed transaction over NFC, total size of message is {} bytes", halfSignedTx.length);
-                                                byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), username, new byte[6], halfSignedTx, new int[]{333,233}).toBytes(keyPair.getPrivate());
+                                                byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), username, new byte[6], halfSignedTx,  new byte[] {1, 2}, new int[]{333,233}).toBytes(keyPair.getPrivate());
                                                 responseLater.response(response);
                                                 listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
                                             } else {
