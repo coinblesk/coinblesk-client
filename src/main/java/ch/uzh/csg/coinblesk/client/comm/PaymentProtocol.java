@@ -287,7 +287,7 @@ final public class PaymentProtocol {
                     throw new RuntimeException("childpaths need to be same length");
                 }
 
-                data = new byte[HEADER_LENGTH+fullSignedTransactionLen + 2 + BT_LENGTH + CHILD_PATH_LENGTH + (4 * childPathLen2)];
+                data = new byte[HEADER_LENGTH+fullSignedTransactionLen + 2 + BT_LENGTH + CHILD_PATH_LENGTH + (5 * childPathLen2)];
                 data[offset++] = header;
                 //transaction
                 offset = encodeShort((short) fullSignedTransactionLen, data, offset);
@@ -706,7 +706,4 @@ final public class PaymentProtocol {
         return g.generateKeyPair();
     }
 
-    public Type type() {
-        return type;
-    }
 }
