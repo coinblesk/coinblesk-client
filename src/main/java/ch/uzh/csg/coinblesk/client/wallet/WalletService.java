@@ -604,7 +604,7 @@ public class WalletService extends android.app.Service {
      *                     of the raw transaction.
      * @return true if the transaction was signed by the server
      */
-    public boolean isTxSignedByServer(byte[] rawTx, int[] childNumbers) {
+    public boolean isTxSignedByServer(byte[] rawTx, byte[] accountNumbers, int[] childNumbers) {
 
         Transaction tx = new Transaction(getNetworkParams(bitcoinNet), rawTx);
 
@@ -616,7 +616,7 @@ public class WalletService extends android.app.Service {
             TransactionInput txIn = tx.getInputs().get(i);
 
             // Master and account keys are always 0: M/0H/0/childNumbers[i]
-            List<ChildNumber> path = Lists.newArrayList(new ChildNumber(0, true), new ChildNumber(0), new ChildNumber(childNumbers[i]));
+            List<ChildNumber> path = Lists.newArrayList(new ChildNumber(0, true), new ChildNumber(accountNumbers[i]), new ChildNumber(childNumbers[i]));
 
             DeterministicKey pubKeyServer = getServerKeyChain().getKeyByPath(path, true);
 

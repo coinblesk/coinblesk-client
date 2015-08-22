@@ -165,15 +165,17 @@ public class WalletServiceTest {
                 System.out.println("Unsigned transaction: " + unsignedTx);
 
                 int[] childNumbers = new int[input.getChildNumbers().size()];
+                byte[] accountNumbers = new byte[input.getChildNumbers().size()];
                 for(int i = 0; i < input.getChildNumbers().size(); i++) {
                     childNumbers[i] = input.getChildNumbers().get(i);
+                    accountNumbers[i] = input.getAccountNumbers().get(i);
                 }
-                Assert.assertFalse(walletService.isTxSignedByServer(unsignedTx.unsafeBitcoinSerialize(), childNumbers));
+                Assert.assertFalse(walletService.isTxSignedByServer(unsignedTx.unsafeBitcoinSerialize(), accountNumbers, childNumbers));
                 // sign the client's transaction
                 Transaction tx = serverKeyChain.getServerSignature(input);
                 System.out.println("Signed transaction: " + unsignedTx);
 
-                Assert.assertTrue(walletService.isTxSignedByServer(tx.unsafeBitcoinSerialize(), childNumbers));
+                Assert.assertTrue(walletService.isTxSignedByServer(tx.unsafeBitcoinSerialize(), accountNumbers, childNumbers));
 
                 SignedTxTransferObject response = new SignedTxTransferObject();
                 response.setSuccessful(true);
