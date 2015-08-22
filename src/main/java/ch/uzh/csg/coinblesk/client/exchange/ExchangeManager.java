@@ -205,7 +205,6 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
 
     public void getExchangeRate(final RequestCompleteListener<ExchangeRateTransferObject> rcl) {
 
-
         // fail immediately if no internet connection is available
         if (!ConnectionCheck.isNetworkAvailable(context)) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
