@@ -6,11 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.exchange.ExchangeManager;
+import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.storage.PersistentStorageHandler;
 import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.util.LoggingConfig;
+import ch.uzh.csg.nfclib.NfcSetup;
 
 /**
  * Entry point for the CoinBlesk app. Everything that needs to be set up before the app starts should be done here.
@@ -22,6 +24,7 @@ public class CoinBleskApplication extends com.activeandroid.app.Application {
     private StorageHandler mStorageHandler;
     private RequestFactory requestFactory;
     private ExchangeManager merchantModeManager;
+    private NfcSetup initiator;
 
     @Override
     public void onCreate() {
@@ -64,4 +67,11 @@ public class CoinBleskApplication extends com.activeandroid.app.Application {
         return merchantModeManager;
     }
 
+    public void setInitiator(NfcSetup initiator) {
+        this.initiator = initiator;
+    }
+
+    public NfcSetup getInitiator() {
+        return initiator;
+    }
 }
