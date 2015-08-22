@@ -2,6 +2,8 @@ package ch.uzh.csg.coinblesk.client.exchange;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
@@ -181,7 +183,14 @@ public class Exchange {
                     // found in cache: execute listener
                     exchangeRateObj.setExchangeRate(exchangeRateAndCurrency.currency, exchangeRateAndCurrency.exchangeRate.multiply(exchangeRate).toString());
                     exchangeRateObj.setSuccessful(true);
-                    cro.onTaskComplete(exchangeRateObj);
+
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            cro.onTaskComplete(exchangeRateObj);
+                        }
+                    });
+
                     return;
                 }
 

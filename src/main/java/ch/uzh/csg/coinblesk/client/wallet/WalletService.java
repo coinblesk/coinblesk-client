@@ -615,7 +615,7 @@ public class WalletService extends android.app.Service {
         for (int i = 0; i < tx.getInputs().size(); i++) {
             TransactionInput txIn = tx.getInputs().get(i);
 
-            // Master and account keys are always 0: M/0H/0/childNumbers[i]
+            // Master and account keys are always 0: M/0H/{0,1}/childNumbers[i]
             List<ChildNumber> path = Lists.newArrayList(new ChildNumber(0, true), new ChildNumber(accountNumbers[i]), new ChildNumber(childNumbers[i]));
 
             DeterministicKey pubKeyServer = getServerKeyChain().getKeyByPath(path, true);
