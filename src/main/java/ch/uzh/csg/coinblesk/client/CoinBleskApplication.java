@@ -18,7 +18,6 @@ import ch.uzh.csg.coinblesk.client.util.LoggingConfig;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
-import ch.uzh.csg.nfclib.NfcSetup;
 
 /**
  * Entry point for the CoinBlesk app. Everything that needs to be set up before the app starts should be done here.

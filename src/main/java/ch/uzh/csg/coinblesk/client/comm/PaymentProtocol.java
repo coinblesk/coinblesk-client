@@ -698,12 +698,15 @@ final public class PaymentProtocol {
         return offset;
     }
 
-    public static KeyPair generateKeys()
-            throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        final ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("brainpoolp256r1");
-        final KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "SC");
-        g.initialize(ecSpec, new SecureRandom());
-        return g.generateKeyPair();
+    public static KeyPair generateKeys() {
+        try {
+            final ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("brainpoolp256r1");
+            final KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "SC");
+            g.initialize(ecSpec, new SecureRandom());
+            return g.generateKeyPair();
+        } catch (NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

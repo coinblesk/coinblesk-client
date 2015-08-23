@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
@@ -32,7 +32,7 @@ import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 
-public class RestoreOrNewActivity extends WalletActivity {
+public class RestoreOrNewActivity extends BaseActivity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestoreOrNewActivity.class);
 

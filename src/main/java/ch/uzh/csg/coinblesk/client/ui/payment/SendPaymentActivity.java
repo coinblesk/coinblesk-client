@@ -41,7 +41,7 @@ import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
@@ -52,7 +52,7 @@ import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 /**
  * This is the UI to send a payment directly to a known receiver without the use of NFC communication.
  */
-public class SendPaymentActivity extends WalletActivity {
+public class SendPaymentActivity extends BaseActivity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SendPaymentActivity.class);
 

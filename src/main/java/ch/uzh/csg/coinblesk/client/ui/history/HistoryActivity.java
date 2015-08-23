@@ -10,14 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.wallet.TransactionHistory;
 
 /**
  * This class is a UI class, showing the history of transactions of the
  * authenticated user.
  */
-public class HistoryActivity extends WalletActivity {
+public class HistoryActivity extends BaseActivity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoryActivity.class);
 

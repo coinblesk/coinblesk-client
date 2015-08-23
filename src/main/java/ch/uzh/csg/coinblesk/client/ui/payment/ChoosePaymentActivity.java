@@ -7,13 +7,13 @@ import android.view.View;
 import android.widget.Button;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 
 /**
  * Activity for selecting which kind of payment shall be initialized.
  */
-public class ChoosePaymentActivity extends WalletActivity {
+public class ChoosePaymentActivity extends BaseActivity {
     private Button requestPaymentBtn;
     private Button sendPaymentBtn;
     private Button requestPaymentNoNfcBtn;

@@ -9,7 +9,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.ui.adressbook.AddressBookActivity;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
 import ch.uzh.csg.coinblesk.client.ui.payment.ChoosePaymentActivity;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
@@ -22,7 +21,7 @@ import ch.uzh.csg.coinblesk.client.R;
  * This class represents the navigation drawer. The methods from
  * {@link BaseActivity} are not inherited but overridden.
  */
-public class DrawerItemClickListener extends WalletActivity implements OnItemClickListener {
+public class DrawerItemClickListener extends BaseActivity implements OnItemClickListener {
 	private View view;
 	private ProgressDialog dialog;
 

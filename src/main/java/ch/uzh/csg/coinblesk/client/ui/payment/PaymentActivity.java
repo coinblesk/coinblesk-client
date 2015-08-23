@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -15,7 +17,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.util.Base64;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.primitives.Bytes;
@@ -27,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
@@ -42,9 +50,12 @@ import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.storage.StorageHandlerListener;
 import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
 import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
+import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
+import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.client.wallet.HalfSignedTransaction;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
@@ -53,13 +64,13 @@ import ch.uzh.csg.coinblesk.responseobject.SignedTxTransferObject;
 import ch.uzh.csg.comm.NfcInitiatorHandler;
 import ch.uzh.csg.comm.NfcResponseHandler;
 import ch.uzh.csg.comm.ResponseLater;
-import ch.uzh.csg.nfclib.NfcSetup;
+import ch.uzh.csg.nfclib.NfcInitiatorSetup;
 
 /**
  * This is the abstract base class of the payment activities (receive and pay).
  * Common behavior is implemented here.
  */
-public abstract class PaymentActivity extends WalletActivity {
+public abstract class PaymentActivity extends BaseActivity {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PaymentActivity.class);
 
@@ -69,28 +80,12 @@ public abstract class PaymentActivity extends WalletActivity {
     protected boolean paymentAccepted = false;
 
     private NfcPaymentListener listener;
-    private NfcSetup initiator;
+    private NfcInitiatorHandler handler;
+    private NfcInitiatorSetup initiator;
 
     private PaymentRequestReceiver paymentRequestReceiver;
     private HalfSignedTxReceiver halfSignedTxReceiver;
 
-    public PaymentActivity() {
-
-    }
-
-    public NfcSetup getInitiator() {
-        return initiator;
-    }
-
-
-    public class DefaultNfcListener extends NfcPaymentListener {
-        @Override
-        public void onPaymentFinish(boolean success) {
-            super.onPaymentFinish(success);
-            paymentRequestReceiver.inactivatePaymentRequest();
-            dismissNfcInProgressDialog();
-        }
-    }
 
     public interface UserPaymentConfirmation {
         void onDecision(boolean accepted);
@@ -107,24 +102,33 @@ public abstract class PaymentActivity extends WalletActivity {
         this.halfSignedTxReceiver = new HalfSignedTxReceiver();
         registerReceiver(halfSignedTxReceiver, new IntentFilter(HalfSignedTxReceiver.ACTION));
 
-        checkNfc(this);
         try {
-            PaymentActivity.this.initiator = initializeNFC();
+            listener = initNfcListener();
+            handler = initializeNFC(listener);
+            initiator = new NfcInitiatorSetup(handler, getApplicationContext());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        checkNfc(this);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        initiator.enable(this);
+    protected void onStart() {
+        super.onStart();
+        LOGGER.debug("paymenta acitivity start");
+        //this must be in start as the permission dialog would call resume/pause
+        initiator.startInitiating(this);
     }
 
+
+
     @Override
-    protected void onPause() {
-        super.onPause();
-        initiator.disable(this);
+    protected void onStop() {
+        super.onStop();
+        LOGGER.debug("paymenta acitivity stop");
+        //this must be in start as the permission dialog would call resume/pause
+        initiator.stopInitiating(this);
     }
 
     @Override
@@ -132,55 +136,6 @@ public abstract class PaymentActivity extends WalletActivity {
         super.onDestroy();
         unregisterReceiver(paymentRequestReceiver);
         unregisterReceiver(halfSignedTxReceiver);
-    }
-
-    /**
-     * Starts the NFC progress dialog. As long as the dialog is running other
-     * touch actions are ignored.
-     *
-     * @param isInProgress determines if NFC is already inProgress or
-     *                     needs to be established first
-     */
-    protected void showNfcProgressDialog(final boolean isInProgress) {
-        runOnUiThread(new Runnable() {
-            public void run() {
-                getNfcInProgressDialog(isInProgress).show();
-            }
-        });
-    }
-
-    public void setNfcPaymentListener(NfcPaymentListener listener) {
-        this.listener = listener;
-    }
-
-    /**
-     * Closes the progress dialog.
-     */
-    public void dismissNfcInProgressDialog() {
-        if (progressDialog != null && !destroyed) {
-            progressDialog.dismiss();
-        }
-    }
-
-    private ProgressDialog getNfcInProgressDialog(boolean isInProgress) {
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setCancelable(false);
-            progressDialog.setIndeterminate(true);
-            progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.animation_nfc_in_progress));
-        }
-        if (isInProgress) {
-            progressDialog.setMessage(getResources().getString(R.string.nfc_in_progress_dialog));
-        } else {
-            progressDialog.setMessage(getResources().getString(R.string.establishNfcConnectionInfo));
-        }
-
-        return progressDialog;
     }
 
     /**
@@ -213,16 +168,6 @@ public abstract class PaymentActivity extends WalletActivity {
                 alert.show();
             }
         });
-    }
-
-    private void playSound() {
-        try {
-            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-            r.play();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -266,85 +211,9 @@ public abstract class PaymentActivity extends WalletActivity {
         alertbox.show();
     }
 
-    /**
-     * Check whether to accept or reject a payment. If the receiver is not trusted, the user
-     * will be asked whether to send the payment or not
-     *
-     * @param satoshis     the amount in satoshis
-     * @param receiver     the user name of the receiver
-     * @param remotePubKey the public key of the receiver
-     * @param confirmation callback for the decision
-     */
-    private void checkAccept(final long satoshis, final String receiver, PublicKey remotePubKey, final UserPaymentConfirmation confirmation) {
-        // check whether to auto accept the payment or not
-        BigDecimal amount = BitcoinUtils.satoshiToBigDecimal(satoshis);
-        AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
-        if (entry == null || !entry.isTrusted()) {
-            // for debugging
-            if (entry == null) {
-                LOGGER.debug("User {} was not found in the address book", receiver);
-            } else {
-                LOGGER.debug("User {} is not trusted", receiver);
-            }
-            showConfirmationDialog(amount, receiver, confirmation);
-        } else {
-            BigDecimal autoAcceptAmount = new BigDecimal(PreferenceManager.getDefaultSharedPreferences(PaymentActivity.this).getString("auto_accept_amount", "0"));
-            if (autoAcceptAmount.compareTo(amount) > 0) {
-                LOGGER.debug("Auto-accepting payment of {} BTC. Auto accept amount is {} BTC", amount, autoAcceptAmount);
-                confirmation.onDecision(true);
-            } else {
-                LOGGER.debug("Amount of {} exceeds the auto-accept amount of {}. Asking user for confirmation.", amount, autoAcceptAmount);
-                // ask the user
-                showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, confirmation);
-            }
-        }
-    }
 
-    private void showConfirmationDialog(final BigDecimal amount, final String user, final UserPaymentConfirmation confirmation) {
 
-        getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
-            @Override
-            public void onTaskComplete(ExchangeRateTransferObject response) {
 
-                String amountString;
-                if (response.isSuccessful()) {
-                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
-                    amountString = CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, amount, PaymentActivity.this);
-                } else {
-                    amountString = amount.toString();
-                }
-
-                String message = String.format(getString(R.string.sendPayment_dialog_message), amountString, user);
-
-                final AlertDialog.Builder alert = new AlertDialog.Builder(PaymentActivity.this);
-                alert.setTitle(getString(R.string.sendPayment_dialog_title));
-                alert.setMessage(message);
-
-                alert.setPositiveButton(getString(R.string.sendPayment_dialog_confirm), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                confirmation.onDecision(true);
-                            }
-                        }).start();
-                    }
-                });
-
-                alert.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                confirmation.onDecision(false);
-                            }
-                        }).start();
-                    }
-                });
-            }
-        });
-
-    }
 
 
     enum State {
@@ -354,9 +223,9 @@ public abstract class PaymentActivity extends WalletActivity {
     /**
      * Initializes NFC adapter and receiver payment information.
      */
-    protected NfcSetup initializeNFC() throws Exception {
+    protected NfcInitiatorHandler initializeNFC(final NfcPaymentListener listener) {
 
-        NfcSetup initiator = new NfcSetup(new NfcInitiatorHandler() {
+        return new NfcInitiatorHandler() {
 
             State current = State.INIT;
             KeyPair keyPair;
@@ -598,167 +467,178 @@ public abstract class PaymentActivity extends WalletActivity {
                 }
 
             }
-        }, new NfcResponseHandler() {
+        };
+    }
 
-            KeyPair keyPair;
+    abstract protected  NfcPaymentListener initNfcListener();
 
-            // payment details
-            private PublicKey remotePubKey;
-            private long satoshis;
-            private String receiver;
-            private byte[] btcAddress;
+    private NfcPaymentListener initNfcListener1() {
+        return new NfcPaymentListener() {
 
-            {
-                // initialize key pair
-                KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
-                if (keyPair == null) {
-                    this.keyPair = PaymentProtocol.generateKeys();
-                    getCoinBleskApplication().getStorageHandler().setKeyPair(this.keyPair);
+            private boolean paymentSent = false;
+            private boolean paymentSuccess = false;
+
+            @Override
+            public void onPaymentFinish(boolean success) {
+
+                paymentRequestReceiver.inactivatePaymentRequest();
+                //dismissNfcInProgressDialog();
+
+                // redraw the history
+                createHistoryViews();
+
+                if(paymentSent && !paymentSuccess) {
+                    String msg = getString(R.string.error_no_confirmation);
+                    showDialog(msg, false);
+                }
+
+                // reset state
+                paymentSent = false;
+                paymentSuccess = false;
+            }
+
+            @Override
+            public void onPaymentReceived(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
+                super.onPaymentReceived(amount, senderPubKey, senderUserName);
+                showSuccessDialog(false, amount, senderUserName);
+            }
+
+            @Override
+            public void onPaymentSent(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
+                super.onPaymentSent(amount, senderPubKey, senderUserName);
+                paymentSent = true;
+            }
+
+            @Override
+            public void onPaymentSuccess(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
+                super.onPaymentSent(amount, senderPubKey, senderUserName);
+                showSuccessDialog(true, amount, senderUserName);
+                paymentSuccess = true;
+            }
+
+            @Override
+            public void onPaymentError(String msg) {
+                showErrorDialog();
+            }
+        };
+    }
+
+    /**
+     * Shows a dialog indicating if transaction was successful or not.
+     *
+     * @param isSending (isSending = true if initiator sends bitcoins, false if initiator requests bitcoins)
+     */
+    private void showSuccessDialog(final boolean isSending, final BigDecimal amountBtc, final String user) {
+        //dismissNfcInProgressDialog();
+
+        getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
+            @Override
+            public void onTaskComplete(ExchangeRateTransferObject response) {
+                String amountString;
+                if (response.isSuccessful()) {
+                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
+                    amountString = CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, amountBtc, PaymentActivity.this);
                 } else {
-                    this.keyPair = keyPair;
-                }
-            }
-
-            @Override
-            public byte[] handleMessageReceived(final byte[] bytes, final ResponseLater responseLater) throws Exception {
-                //get 1st message request / get 1st message send
-                //2nd return partially signed transaction
-                // request: BTC from message, public key, signed, username
-                // send: BTC entered by receiver, public key, signed, username
-                //4th (optional check if signed by server), get ok, reply
-                //5th reply ok, public key, signed
-
-                //remotePubKey = protocol.publicKey();
-                PaymentProtocol.Type type = PaymentProtocol.type(bytes);
-                LOGGER.debug("received nfc message {}", type.toString());
-
-                switch (type) {
-                    case PAYMENT_REQUEST:
-
-                        // create the half signed transaction
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                PaymentProtocol protocol = null;
-                                try {
-                                    protocol = PaymentProtocol.fromBytes(bytes, null);
-                                } catch (Exception e) {
-                                    LOGGER.error("Fail: ", e);
-                                    listener.onPaymentError("NFC communication failed");
-                                    return;
-                                }
-
-                                satoshis = protocol.satoshis();
-                                btcAddress = protocol.sendTo();
-                                remotePubKey = protocol.publicKey();
-                                receiver = protocol.user();
-
-                                checkAccept(satoshis, receiver, remotePubKey, new UserPaymentConfirmation() {
-                                    @Override
-                                    public void onDecision(boolean accepted) {
-                                        try {
-                                            if (accepted) {
-                                                // the user accepted the payment
-                                                HalfSignedTransaction halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
-                                                String username = getCoinBleskApplication().getStorageHandler().getUsername();
-                                                LOGGER.debug("Sending partially signed transaction over NFC, total size of message is {} bytes", halfSignedTx.getHalfSignedTx().length);
-                                                byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), username, new byte[6], halfSignedTx.getHalfSignedTx(), halfSignedTx.getAccountNumbers(), halfSignedTx.getChildNumbers()).toBytes(keyPair.getPrivate());
-                                                responseLater.response(response);
-                                                listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
-                                            } else {
-                                                // user rejected the payment
-                                                byte[] response = PaymentProtocol.paymentNok().toBytes(keyPair.getPrivate());
-                                                responseLater.response(response);
-                                                listener.onPaymentFinish(true);
-                                            }
-                                        } catch (Exception e) {
-                                            LOGGER.error("Fail: ", e);
-                                            listener.onPaymentError("NFC communication failed");
-                                        }
-                                    }
-                                });
-
-                            }
-                        }).start();
-
-                        return null;
-                    case FULL_TRANSACTION:
-
-                        // get the fully signed tx, commit and broadcast it
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                try {
-                                    final PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
-                                    byte[] signedTx = protocol.fullySignedTransaction();
-                                    LOGGER.debug("Broadcasting fully signed transaction and commit it to wallet");
-
-                                    final String txId = getWalletService().commitAndBroadcastTx(signedTx, true);
-                                    byte[] data = PaymentProtocol.paymentOk().toBytes(keyPair.getPrivate());
-                                    responseLater.response(data);
-                                    listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
-
-                                    // save transaction metadata and address book entry in background....
-                                    AsyncTask<Void, Void, Void> saveMetadataTask = new AsyncTask<Void, Void, Void>() {
-                                        @Override
-                                        protected Void doInBackground(Void... params) {
-                                            // save transaction metadata
-                                            TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
-                                            txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
-                                            txMetaData.setReceiver(receiver);
-                                            txMetaData.setSender("You");
-                                            txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_OUT);
-                                            getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
-                                            LOGGER.debug("Saved transaction meta data");
-
-                                            // save (or update)  user in address book
-                                            AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
-                                            entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
-                                            entry.setName(receiver);
-                                            entry.setBitcoinAddress(BitcoinUtils.getAddressFromScriptHash(btcAddress, getWalletService().getBitcoinNet()));
-                                            getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
-                                            LOGGER.debug("Saved address book entry");
-
-                                            listener.onPaymentFinish(true);
-
-                                            return null;
-                                        }
-                                    };
-                                    saveMetadataTask.execute();
-
-                                } catch (Exception e) {
-                                    LOGGER.error("Failed to commit and broadcast transaction", e);
-
-                                }
-                            }
-                        }).start();
-
-                        return null;
-
-                    case SERVER_NOK:
-                        LOGGER.debug("Received NOK from other client...");
-                        listener.onPaymentError("The other client refused the payment.");
-
+                    amountString = CurrencyViewHandler.formatBTCAsString(amountBtc, PaymentActivity.this);
                 }
 
-                return new byte[0];
+                String msg;
+                if (isSending) {
+                    msg = String.format(getResources().getString(R.string.payment_notification_success_payer),
+                            CurrencyViewHandler.formatBTCAsString(amountBtc, PaymentActivity.this) + amountString, user);
+                } else {
+                    msg = String.format(getResources().getString(R.string.payment_notification_success_payee),
+                            CurrencyViewHandler.formatBTCAsString(amountBtc, PaymentActivity.this) + amountString, user);
+                }
+                showDialog(msg, true);
+            }
+        });
+
+
+    }
+
+    private void createHistoryViews() {
+
+        AsyncTask<Void, Void, List<TransactionMetaData>> getTransactionHistoryTask = new AsyncTask<Void, Void, List<TransactionMetaData>>() {
+            @Override
+            protected List<TransactionMetaData> doInBackground(Void... params) {
+                int numTransaction = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(PaymentActivity.this).getString("numberOfLastTransactions", "3"));
+                return getWalletService().getTransactionHistory(numTransaction).getAllTransactions();
             }
 
             @Override
-            public void handleFailed(String s) {
-                LOGGER.error("NFC connection failed: {}", s);
+            protected void onPostExecute(final List<TransactionMetaData> history) {
+                createHistoryViews(history, null);
+
+                // create history with current exchange rate
+                if (ConnectionCheck.isNetworkAvailable(PaymentActivity.this)) {
+                    getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
+                        @Override
+                        public void onTaskComplete(ExchangeRateTransferObject response) {
+                            if (response.isSuccessful()) {
+                                BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
+                                createHistoryViews(history, exchangeRate);
+                            }
+                        }
+                    });
+                }
             }
+        };
+        getTransactionHistoryTask.execute();
 
-            @Override
-            public void handleStatus(String s) {
-                LOGGER.info("received NFC message: {}", s);
+    }
+
+    private void createHistoryViews(List<TransactionMetaData> history, @Nullable BigDecimal exchangeRate) {
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mainActivity_history);
+        linearLayout.removeAllViews();
+        for (int i = 0; i < getNumberOfLastTransactions(); i++) {
+            if (i < history.size()) {
+                TextView tView = new TextView(getApplicationContext());
+                tView.setGravity(Gravity.LEFT);
+                tView.setTextColor(Color.DKGRAY);
+                int drawable = getImage(history.get(i));
+                tView.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
+                tView.setText(HistoryTransactionFormatter.formatHistoryTransaction(history.get(i), exchangeRate, getApplicationContext()));
+                tView.setClickable(true);
+                if (i % 2 == 0) {
+                    tView.setBackgroundColor(Color.LTGRAY);
+                }
+                tView.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Intent intent = new Intent(PaymentActivity.this, HistoryActivity.class);
+                        Bundle b = new Bundle();
+                        intent.putExtras(b);
+                        startActivity(intent);
+                    }
+                });
+                linearLayout.addView(tView);
             }
-        }, this);
+        }
+    }
 
-        return initiator;
+    private int getImage(TransactionMetaData tx) {
+        switch (tx.getType()) {
+            case PAY_IN:
+            case COINBLESK_PAY_IN:
+                return R.drawable.ic_pay_in;
+            case PAY_IN_UNVERIFIED:
+                return R.drawable.ic_pay_in_un;
+            case PAY_OUT:
+            case COINBLESK_PAY_OUT:
+                return R.drawable.ic_pay_out;
+            default:
+                throw new IllegalArgumentException("Unknown transaction type " + tx.getType());
+        }
+    }
 
+    private int getNumberOfLastTransactions() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String value = sharedPref.getString("numberOfLastTransactions", "3");
+        return Integer.parseInt(value);
+    }
+
+    private void showErrorDialog() {
+        showDialog(getResources().getString(R.string.error_transaction_failed), false);
     }
 
 

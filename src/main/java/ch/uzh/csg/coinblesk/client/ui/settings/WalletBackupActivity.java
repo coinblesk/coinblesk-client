@@ -11,7 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.util.Mailer;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.client.wallet.RefundTx;
@@ -20,7 +20,7 @@ import ch.uzh.csg.coinblesk.client.wallet.RefundTx;
  * This class is the view that informs the user about the involved parties to
  * build this application.
  */
-public class WalletBackupActivity extends WalletActivity {
+public class WalletBackupActivity extends BaseActivity {
 
     private TextView mTextWalletSeed;
     private ProgressBar mProgressBar;
