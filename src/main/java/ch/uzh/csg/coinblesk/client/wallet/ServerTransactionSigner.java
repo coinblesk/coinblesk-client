@@ -138,18 +138,24 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
         RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> payOutRequestTask = requestFactory.payOutRequest(new RequestCompleteListener<SignedTxTransferObject>() {
             public void onTaskComplete(SignedTxTransferObject response) {
 
-                // we notify the listeners with the partial transaction here. We don't need the
-                // fully signed transaction, the server will broadcast it, and we can commit it to the
-                // wallet even if it's not fully signed.
-                notifyListeners(tx, response.isSuccessful());
-
-                if (response.isSuccessful() && tx.getMemo() != DefaultTransactionMemos.REDEPOSIT_TX_MEMO) {
-                    LOGGER.info("Transaction signing and broadcast was successful");
-                    Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
+                if(response.isSuccessful()) {
+                    // TODO: We only need the signatures of the server here. So much optimization potential
+                    byte[] rawSignedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
+                    Transaction signedTx = new Transaction(tx.getParams(), rawSignedTx);
+                    signedTx.setMemo(tx.getMemo()); // memo is not in the bitcoin serialized tx
+                    notifyListeners(signedTx, true);
+                    if (tx.getMemo() != DefaultTransactionMemos.REDEPOSIT_TX_MEMO) {
+                        LOGGER.info("Transaction signing and broadcast was successful");
+                        Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
+                    }
                 } else {
                     LOGGER.error("Transaction failed: " + response.getMessage());
+                    notifyListeners(tx, false);
                     Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
                 }
+
+
+
 
             }
         }, txSigRequest, context);
@@ -165,6 +171,7 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                 Transaction refundTx = null;
                 if (response.isSuccessful()) {
                     refundTx = new Transaction(tx.getParams(), Base64.decode(response.getRefundTx(), Base64.NO_WRAP));
+                    refundTx.setMemo(tx.getMemo());
                     LOGGER.info("Refund tx request was successful");
                 } else {
                     LOGGER.error("Refund tx request failed: " + response.getMessage());

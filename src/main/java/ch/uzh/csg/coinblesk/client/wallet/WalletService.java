@@ -23,6 +23,7 @@ import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.core.Wallet.BalanceType;
 import org.bitcoinj.crypto.ChildNumber;
@@ -465,13 +466,17 @@ public class WalletService extends android.app.Service {
             return req.tx.getHashAsString(); // we are not responsible for sending the tx to the server....
 
         for (TransactionInput txIn : req.tx.getInputs()) {
-            if (txIn.getConnectedOutput().getScriptPubKey().isPayToScriptHash()) {
-                // at least one input needs to be signed by the server,
-                // which means that we are not responsible for broadcasting the transaction
+            try {
+                txIn.verify();
+            } catch (VerificationException e) {
+                // the inputs are not fully signed yet
                 return req.tx.getHashAsString();
             }
         }
 
+        // inputs are fully signed. This case should only occur if the refund transaction was broadcast,
+        // and the user's funds sent to a personal address.
+        LOGGER.debug("Broadcasting fully signed transaction {}", req.tx.getHashAsString());
         getAppKit().peerGroup().broadcastTransaction(req.tx);
         getAppKit().wallet().maybeCommitTx(req.tx);
 
@@ -501,17 +506,16 @@ public class WalletService extends android.app.Service {
         }
     }
 
-    public String createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
+    public void createPayment(String address, BigDecimal amount) throws AddressFormatException, InsufficientMoneyException {
         NetworkParameters params = getNetworkParams(bitcoinNet);
         Address btcAddress = new Address(params, address);
-        return createPayment(btcAddress, BitcoinUtils.bigDecimalToCoin(amount), false);
+        createPayment(btcAddress, BitcoinUtils.bigDecimalToCoin(amount), false);
     }
 
     /**
      * Broadcasts the stored refund transaction.
      */
     public void broadcastRefundTx() {
-
 
         byte[] serializedRefundTx = Base64.decode(storage.getRefundTx(), Base64.NO_WRAP);
         Transaction refundTx = new Transaction(getNetworkParams(bitcoinNet), serializedRefundTx);

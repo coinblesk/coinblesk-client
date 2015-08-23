@@ -12,7 +12,6 @@ import org.robolectric.annotation.Config;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,7 +39,6 @@ public class DatabaseHandlerTest {
         metaData.setSender("sender");
         metaData.setReceiver("receiver");
         metaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_IN);
-        metaData.setTimestamp(new Date());
 
         db.saveTransactionMetaData(metaData);
 
@@ -48,7 +46,6 @@ public class DatabaseHandlerTest {
 
         Assert.assertNotNull(restoredMetaData);
         Assert.assertEquals(metaData.getType(), restoredMetaData.getType());
-        Assert.assertEquals(metaData.getTimestamp(), restoredMetaData.getTimestamp());
         Assert.assertEquals(metaData.getSender(), restoredMetaData.getSender());
 
     }
@@ -91,6 +88,17 @@ public class DatabaseHandlerTest {
     }
 
     @Test
+    public void testDeleteAddressBookEntry() throws Exception {
+
+        AddressBookEntry entry = createEntry(false);
+        db.saveAddressBookEntry(entry);
+        Assert.assertEquals(1, db.getAddressBook().size());
+        db.deleteAddressBookEntry(entry.getPublicKey());
+        Assert.assertEquals(0, db.getAddressBook().size());
+
+    }
+
+    @Test
     public void testDeleteUnfavoredEntries() throws Exception {
 
         int nrOfUnfavoredEntries = 5;
@@ -108,7 +116,6 @@ public class DatabaseHandlerTest {
         Assert.assertEquals(nrOfFavoredEntries + nrOfUnfavoredEntries, db.getAddressBook().size());
         db.removeAllUntrustedAddressBookEntries();
         Assert.assertEquals(nrOfFavoredEntries, db.getAddressBook().size());
-
 
     }
 
