@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import ch.uzh.csg.coinblesk.Currency;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
@@ -138,40 +139,10 @@ public class ReceivePaymentActivity extends PaymentActivity {
             receiveAmountTextView = (TextView) findViewById(R.id.receivePayment_amount);
             initializeCalculator();
         }
-
-        try {
-            getInitiator().stopInitiating(this);
-
-        } catch (Exception e) {
-            LOGGER.error("FAIL:", e);
-        }
-
-        try {
-            getInitiator().startInitiating(this);
-        } catch (NfcLibException e) {
-            LOGGER.debug("NFC failed: ", e);
-        }
-
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        getInitiator().stopInitiating(this);
-
-
-
-
-
-
-
-
-
-
-    }
-
-    private void initNfcListener() {
-        setNfcPaymentListener(new DefaultNfcListener() {
+    protected NfcPaymentListener initNfcListener() {
+        return new NfcPaymentListener() {
 
             @Override
             public void onPaymentError(String msg) {
@@ -193,22 +164,13 @@ public class ReceivePaymentActivity extends PaymentActivity {
             @Override
             public void onPaymentFinish(boolean success) {
                 super.onPaymentFinish(success);
-
-                try {
-                    // reset NFC state
-                    getInitiator().stopInitiating(ReceivePaymentActivity.this);
-                    getInitiator().startInitiating(ReceivePaymentActivity.this);
-                } catch (NfcLibException e) {
-                    LOGGER.debug("NFC failed: ", e);
-                }
-
                 // reset UI
                 resetNfc();
                 enableMensaButtons();
                 clearPaymentInfos();
 
             }
-        });
+        };
     }
 
     @Override
@@ -238,7 +200,6 @@ public class ReceivePaymentActivity extends PaymentActivity {
             getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
                 public void onTaskComplete(final ExchangeRateTransferObject response) {
                     dismissProgressDialog();
-                    dismissNfcInProgressDialog();
                     if (response.isSuccessful()) {
                         exchangeRate = new BigDecimal(response.getExchangeRate(Currency.CHF));
 

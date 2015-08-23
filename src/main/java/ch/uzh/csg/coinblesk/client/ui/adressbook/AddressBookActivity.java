@@ -18,13 +18,13 @@ import android.widget.Toast;
 
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 
 /**
  * Activity for showing and modifying address book contacts. 
  *
  */
-public class AddressBookActivity extends WalletActivity {
+public class AddressBookActivity extends BaseActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

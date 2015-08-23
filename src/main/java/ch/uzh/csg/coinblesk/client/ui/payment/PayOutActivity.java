@@ -25,7 +25,7 @@ import java.math.BigDecimal;
 import ch.uzh.csg.coinblesk.Currency;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
@@ -35,7 +35,7 @@ import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
  * This class is a view to send bitcoins from the system to the inserted
  * bitcoin-address.
  */
-public class PayOutActivity extends WalletActivity {
+public class PayOutActivity extends BaseActivity {
     public static BigDecimal exchangeRate;
     private BigDecimal payOutAmount;
     private Button payOutBtn;

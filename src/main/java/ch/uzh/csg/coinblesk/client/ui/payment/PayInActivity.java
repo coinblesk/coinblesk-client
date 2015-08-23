@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.ui.baseactivities.WalletActivity;
+import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Mailer;
 
@@ -39,7 +39,7 @@ import ch.uzh.csg.coinblesk.client.util.Mailer;
  * This class is the view for pay ins. It displays the bitcoin address where a
  * user has to transfer bitcoins to in order to pay in into our system.
  */
-public class PayInActivity extends WalletActivity {
+public class PayInActivity extends BaseActivity {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PayInActivity.class);
 
