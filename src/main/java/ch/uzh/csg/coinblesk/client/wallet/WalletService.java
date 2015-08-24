@@ -861,6 +861,12 @@ public class WalletService extends android.app.Service {
         return walletBinder;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LOGGER.debug("Wallet service was stopped");
+    }
+
     /**
      * Blocking stop of the wallet
      */
