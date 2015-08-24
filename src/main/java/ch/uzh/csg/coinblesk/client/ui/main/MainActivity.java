@@ -109,6 +109,7 @@ public class MainActivity extends BaseActivity {
     private TextView mBlockchainSyncStatusText;
 
     private NfcPaymentListener listener;
+    private NfcResponseHandler responseHandler;
     private NfcResponderSetup responder;
     private BTResponderSetup btResponder;
 
@@ -127,13 +128,25 @@ public class MainActivity extends BaseActivity {
         initializeGui();
         initClickListener();
         listener = initNfcListener();
-        NfcResponseHandler responseHandler = initNfcResponder(listener);
+        responseHandler = initNfcResponder(listener);
         responder = new NfcResponderSetup(responseHandler);
 
         // initialize key pair
         KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
         btResponder = new BTResponderSetup(Utils.byteArrayToUUID(keyPair.getPublic().getEncoded(), 0));
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         btResponder.advertise(responseHandler, this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        btResponder.stopAdvertise();
     }
 
     @Override

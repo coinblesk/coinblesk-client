@@ -105,6 +105,8 @@ public abstract class PaymentActivity extends BaseActivity {
             throw new RuntimeException(e);
         }
         localPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
+        btInitiator = new BTInitiatorSetup(handler, PaymentActivity.this,
+                Utils.hashToUUID(localPair.getPublic().getEncoded()));
 
         checkNfc(this);
     }
@@ -252,9 +254,7 @@ public abstract class PaymentActivity extends BaseActivity {
             @Override
             public void setUUID(byte[] bytes) {
                 try {
-                    btInitiator = new BTInitiatorSetup(this, PaymentActivity.this,
-                            Utils.hashToUUID(localPair.getPublic().getEncoded()), Utils.byteArrayToUUID(bytes, 0));
-                    btInitiator.scanLeDevice(PaymentActivity.this);
+                    btInitiator.scanLeDevice(PaymentActivity.this, Utils.byteArrayToUUID(bytes, 0));
                     LOGGER.debug("initiate BT");
                 } catch (Throwable t) {
                     t.printStackTrace();
