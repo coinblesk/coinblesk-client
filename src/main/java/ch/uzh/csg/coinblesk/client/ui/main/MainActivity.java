@@ -48,6 +48,7 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.List;
 
+import ch.uzh.csg.btlib.BTResponderSetup;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.comm.PaymentProtocol;
@@ -76,6 +77,7 @@ import ch.uzh.csg.coinblesk.responseobject.TransferObject;
 import ch.uzh.csg.coinblesk.responseobject.WatchingKeyTransferObject;
 import ch.uzh.csg.comm.NfcResponseHandler;
 import ch.uzh.csg.comm.ResponseLater;
+import ch.uzh.csg.comm.Utils;
 import ch.uzh.csg.nfclib.NfcResponderSetup;
 
 
@@ -108,6 +110,7 @@ public class MainActivity extends BaseActivity {
 
     private NfcPaymentListener listener;
     private NfcResponderSetup responder;
+    private BTResponderSetup btResponder;
 
     private ProgressDialog progressDialog;
 
@@ -124,7 +127,13 @@ public class MainActivity extends BaseActivity {
         initializeGui();
         initClickListener();
         listener = initNfcListener();
-        responder = initNfcResponder(listener);
+        NfcResponseHandler responseHandler = initNfcResponder(listener);
+        responder = new NfcResponderSetup(responseHandler);
+
+        // initialize key pair
+        KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
+        btResponder = new BTResponderSetup(Utils.byteArrayToUUID(keyPair.getPublic().getEncoded(), 0));
+        btResponder.advertise(responseHandler, this);
     }
 
     @Override
@@ -669,10 +678,10 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    private NfcResponderSetup initNfcResponder(final NfcPaymentListener listener) {
-        return new NfcResponderSetup(new NfcResponseHandler() {
+    private NfcResponseHandler initNfcResponder(final NfcPaymentListener listener) {
+        return new NfcResponseHandler() {
 
-            KeyPair keyPair;
+            private final KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
 
             // payment details
             private PublicKey remotePubKey;
@@ -680,15 +689,9 @@ public class MainActivity extends BaseActivity {
             private String receiver;
             private byte[] btcAddress;
 
-            {
-                // initialize key pair
-                KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
-                if (keyPair == null) {
-                    this.keyPair = PaymentProtocol.generateKeys();
-                    getCoinBleskApplication().getStorageHandler().setKeyPair(this.keyPair);
-                } else {
-                    this.keyPair = keyPair;
-                }
+            @Override
+            public byte[] getUUID() {
+                return PaymentProtocol.encodePublicKey(keyPair.getPublic());
             }
 
             @Override
@@ -840,7 +843,7 @@ public class MainActivity extends BaseActivity {
             public void handleStatus(String s) {
                 LOGGER.info("received NFC message: {}", s);
             }
-        });
+        };
     }
 
 

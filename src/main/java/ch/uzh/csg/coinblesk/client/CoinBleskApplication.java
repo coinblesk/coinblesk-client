@@ -7,6 +7,9 @@ import com.activeandroid.ActiveAndroid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.KeyPair;
+
+import ch.uzh.csg.coinblesk.client.comm.PaymentProtocol;
 import ch.uzh.csg.coinblesk.client.exchange.ExchangeManager;
 import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
@@ -65,6 +68,13 @@ public class CoinBleskApplication extends com.activeandroid.app.Application {
             });
         } else {
             getStorageHandler().setStorageFailed(false);
+        }
+
+        // initialize key pair
+        KeyPair keyPair = getStorageHandler().getKeyPair();
+        if (keyPair == null) {
+            keyPair = PaymentProtocol.generateKeys();
+            getStorageHandler().setKeyPair(keyPair);
         }
 
     }
