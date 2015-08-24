@@ -108,5 +108,18 @@ public class TransactionMetaData extends Model {
         this.type = this.type != null ? this.type : type;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("TransactionMetaData[type=");
+        sb.append(getType());
+        sb.append(", sender=");
+        sb.append(getSender());
+        sb.append("receiver=");
+        sb.append(getReceiver());
+        sb.append("]");
+        return sb.toString();
+    }
+
 
 }

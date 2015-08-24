@@ -8,9 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -23,7 +20,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
@@ -46,8 +42,6 @@ import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequestReceiver;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
-import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
-import ch.uzh.csg.coinblesk.client.storage.StorageHandlerListener;
 import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
 import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
@@ -57,13 +51,10 @@ import ch.uzh.csg.coinblesk.client.util.Constants;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.HistoryTransactionFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
-import ch.uzh.csg.coinblesk.client.wallet.HalfSignedTransaction;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.SignedTxTransferObject;
 import ch.uzh.csg.comm.NfcInitiatorHandler;
-import ch.uzh.csg.comm.NfcResponseHandler;
-import ch.uzh.csg.comm.ResponseLater;
 import ch.uzh.csg.nfclib.NfcInitiatorSetup;
 
 /**
@@ -401,7 +392,7 @@ public abstract class PaymentActivity extends BaseActivity {
                                         LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", fullySignedTx.length);
                                         responseMsg = PaymentProtocol.fullTransaction(fullySignedTx, accountNumbers, childNumbers).toBytes(keyPair.getPrivate());
                                         listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
-                                        getWalletService().commitAndBroadcastTx(fullySignedTx, true);
+                                        getWalletService().commitAndBroadcastTx(fullySignedTx);
 
 
                                         // save transaction metadata and address book entry in the background....

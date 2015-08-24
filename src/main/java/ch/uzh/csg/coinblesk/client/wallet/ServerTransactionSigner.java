@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Base64;
 import android.widget.Toast;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.bitcoinj.core.ScriptException;
@@ -143,7 +144,9 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                     byte[] rawSignedTx = Base64.decode(response.getSignedTx(), Base64.NO_WRAP);
                     Transaction signedTx = new Transaction(tx.getParams(), rawSignedTx);
                     signedTx.setMemo(tx.getMemo()); // memo is not in the bitcoin serialized tx
+
                     notifyListeners(signedTx, true);
+
                     if (tx.getMemo() != DefaultTransactionMemos.REDEPOSIT_TX_MEMO) {
                         LOGGER.info("Transaction signing and broadcast was successful");
                         Toast.makeText(context, R.string.payment_success, Toast.LENGTH_LONG).show();
@@ -154,15 +157,16 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                     Toast.makeText(context, R.string.payment_failure, Toast.LENGTH_LONG).show();
                 }
 
-
-
-
             }
         }, txSigRequest, context);
         payOutRequestTask.execute();
     }
 
     private void launchRefundTxRequest(final Transaction tx, ServerSignatureRequestTransferObject txSigRequest) {
+
+        LOGGER.debug("Sending refund transaction signature request to the server:\n{}", tx);
+        LOGGER.debug("Transaction memo is {}", tx.getMemo());
+
         RequestFactory requestFactory = ((CoinBleskApplication) context.getApplicationContext()).getRequestFactory();
         RequestTask<ServerSignatureRequestTransferObject, RefundTxTransferObject> refundRequestTask = requestFactory.refundTxRequest(new RequestCompleteListener<RefundTxTransferObject>() {
             @Override
@@ -171,6 +175,10 @@ public class ServerTransactionSigner extends StatelessTransactionSigner {
                 Transaction refundTx = null;
                 if (response.isSuccessful()) {
                     refundTx = new Transaction(tx.getParams(), Base64.decode(response.getRefundTx(), Base64.NO_WRAP));
+
+                    Preconditions.checkState(refundTx.isTimeLocked());
+                    Preconditions.checkState(tx.getMemo().equals(DefaultTransactionMemos.REFUND_TX_MEMO));
+
                     refundTx.setMemo(tx.getMemo());
                     LOGGER.info("Refund tx request was successful");
                 } else {
