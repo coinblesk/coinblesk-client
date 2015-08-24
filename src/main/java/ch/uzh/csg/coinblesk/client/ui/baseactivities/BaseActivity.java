@@ -13,6 +13,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -65,10 +66,11 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
         startWalletService();
     }
+
 
     private void startWalletService() {
         final Intent serviceIntent = new Intent(this, WalletService.class);
@@ -88,16 +90,17 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
     protected void onPause() {
         super.onPause();
         dismissProgressDialog();
-        if(isBound) {
-            unbindService(this);
-            isBound = false;
-        }
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         destroyed = true;
+        if(isBound) {
+            unbindService(this);
+            isBound = false;
+        }
     }
 
 
