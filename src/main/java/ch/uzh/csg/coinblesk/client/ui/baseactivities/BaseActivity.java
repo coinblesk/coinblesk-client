@@ -13,7 +13,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PersistableBundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -26,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
-import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.ui.fragments.CustomDialogFragment;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
@@ -66,11 +64,10 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onCreate(savedInstanceState, persistentState);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         startWalletService();
     }
-
 
     private void startWalletService() {
         final Intent serviceIntent = new Intent(this, WalletService.class);
