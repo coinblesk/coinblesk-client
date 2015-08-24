@@ -13,12 +13,12 @@ public class Constants {
 	/**
 	 * The base URL of the server.
 	 */
-	public static final String BASE_URL = "http://192.168.1.209:8080/coinblesk-server";
+	public static final String BASE_URL = "http://192.168.1.129:8080/coinblesk";
 
 	/**
 	 * Amount of confirmations a transaction needs to be considered as confirmed
 	 */
-	public static final int MIN_CONFIRMATIONS = 4;
+	public static final int MIN_CONFIRMATIONS = 0;
 	
 	public static final String BTC = "-1";
 	public static final String MILI_BTC = "0";
@@ -26,13 +26,16 @@ public class Constants {
 
 	/**
 	 * Decimal points of CHF amounts
+	 * Decimal points of CHF amounts
+	 * Decimal points of CHF amounts
+	 * Decimal points of CHF amounts
 	 */
 	public static final int SCALE_CHF = 2;
 
 	/**
 	 * Decimal points of BTC amounts
 	 */
-	public static final int SCALE_BTC = 8;
+	public static final int SCALE_BTC = 6;
 
 
 	public static BigDecimal inputValueCalculator = BigDecimal.ZERO;

@@ -37,7 +37,6 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.util.concurrent.Service;
 
@@ -45,10 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.util.List;
 
@@ -769,9 +765,22 @@ public class MainActivity extends BaseActivity {
                                 try {
                                     final PaymentProtocol protocol = PaymentProtocol.fromBytes(bytes, null);
                                     byte[] signedTx = protocol.fullySignedTransaction();
-                                    LOGGER.debug("Broadcasting fully signed transaction and commit it to wallet");
+                                    byte[] accountNumbers = protocol.accountNumbers();
+                                    int[] childNumbers = protocol.childNumbers();
 
-                                    final String txId = getWalletService().commitAndBroadcastTx(signedTx, true);
+                                    if(!getWalletService().isTxSignedByServer(signedTx, accountNumbers, childNumbers)) {
+                                        LOGGER.warn("transaction was not signed by the server. Aborting...");
+                                        byte[] response = PaymentProtocol.paymentNok().toBytes(keyPair.getPrivate());
+                                        responseLater.response(response);
+                                        listener.onPaymentError("Could not verify server signature");
+                                        listener.onPaymentFinish(false);
+                                        return;
+                                    }
+
+                                    LOGGER.debug("Broadcasting fully signed transaction and commit it to wallet");
+                                    final String txId = getWalletService().commitAndBroadcastTx(signedTx);
+
+
                                     byte[] data = PaymentProtocol.paymentOk().toBytes(keyPair.getPrivate());
                                     responseLater.response(data);
                                     listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
