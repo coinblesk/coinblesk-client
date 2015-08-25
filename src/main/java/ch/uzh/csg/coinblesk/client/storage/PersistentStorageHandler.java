@@ -5,6 +5,7 @@ import android.content.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -105,6 +106,17 @@ public class PersistentStorageHandler implements StorageHandler {
     @Override
     public void clear() {
         data.clear();
+    }
+
+    @Override
+    public BigDecimal getBitcoinBuffer() {
+        BigDecimal buffer = data.getBitcoinBuffer();
+        return buffer == null ? BigDecimal.ZERO : buffer;
+    }
+
+    @Override
+    public void setBitcoinBuffer(BigDecimal buffer) {
+        data.setBitcoinBuffer(buffer);
     }
 
     @Override

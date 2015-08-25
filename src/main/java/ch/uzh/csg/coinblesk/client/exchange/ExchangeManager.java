@@ -18,7 +18,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
@@ -48,10 +50,10 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
         primaryExchangeKeys.add("primary_exchange_api_secret");
 
         this.secondaryExchangeKeys = new HashSet<>();
-        secondaryExchangeKeys.add("primary_exchange");
-        secondaryExchangeKeys.add("primary_exchange_username");
-        secondaryExchangeKeys.add("primary_exchange_api_key");
-        secondaryExchangeKeys.add("primary_exchange_api_secret");
+        secondaryExchangeKeys.add("secondary_exchange");
+        secondaryExchangeKeys.add("secondary_exchange_username");
+        secondaryExchangeKeys.add("secondary_exchange_api_key");
+        secondaryExchangeKeys.add("secondary_exchange_api_secret");
 
         // add default exchange without credentials for exchange rate
         addExchange(new Exchange(Exchange.KRAKEN));
@@ -73,29 +75,46 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
         exchanges.add(exchange);
     }
 
-
+    /**
+     * @param exchangeIterator iterator pointing to the set up exchanges
+     * @param amount the amount to sell in bitcoins
+     * @throws IOException
+     */
     private void sell(final Iterator<Exchange> exchangeIterator, final BigDecimal amount) throws IOException {
 
         if (!exchangeIterator.hasNext()) {
             LOGGER.warn("All exchanges failed!");
-            Toast.makeText(context, context.getString(R.string.merchantMode_toast_sellingFailed), Toast.LENGTH_LONG);
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, context.getString(R.string.merchantMode_toast_sellingFailed), Toast.LENGTH_LONG);
+                }
+            });
+
             return;
         }
 
-        exchangeIterator.next().sell(amount, new Exchange.TradePlacedListener() {
+        // add the amount to the bitcoin buffer
+        final StorageHandler storage = ((CoinBleskApplication) context).getStorageHandler();
+        BigDecimal amountToSell = storage.getBitcoinBuffer().add(amount);
+
+        storage.setBitcoinBuffer(amountToSell);
+
+        exchangeIterator.next().sell(amountToSell, new Exchange.TradePlacedListener() {
             @Override
             public void onSuccess() {
                 // great, nothing to do...
-                LOGGER.info("Selling bitcoins succeeded");
+                LOGGER.info("Selling bitcoins succeeded. Resetting bitcoin buffer...");
+                storage.setBitcoinBuffer(BigDecimal.ZERO);
             }
 
             @Override
             public void onFail(String msg) {
                 try {
-                    LOGGER.error("Failed selling bitcoins: {}", msg);
+                    LOGGER.warn("Failed selling bitcoins: {}", msg);
                     sell(exchangeIterator, amount);
                 } catch (IOException e) {
-                    LOGGER.error("failed selling BTC", e);
+                    LOGGER.warn("failed selling BTC", e);
                 }
             }
         });
@@ -169,7 +188,7 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
         boolean secondaryExchangeSetUp = true;
         for (String pref : primaryExchangeKeys) {
             if(!sharedPreferences.contains(pref)) {
-                secondaryExchangeSetUp = false;
+                primaryExchangeSetUp = false;
                 break;
             }
         }
@@ -185,6 +204,9 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
         } else if (secondaryExchangeSetUp) {
             addExchange(createExchange(sharedPreferences, false));
         }
+
+        merchantModeActivated = primaryExchangeSetUp || secondaryExchangeSetUp;
+
     }
 
     private void getExchangeRate(final Iterator<Exchange> exchangeIterator, final RequestCompleteListener<ExchangeRateTransferObject> rcl) {

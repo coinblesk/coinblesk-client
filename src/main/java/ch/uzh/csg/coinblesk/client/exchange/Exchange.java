@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
 import ch.uzh.csg.coinblesk.Currency;
@@ -71,6 +73,9 @@ public class Exchange {
 
     private Cache<String, SymbolAndExchangeRate> forexCache;
     private Cache<String, BigDecimal> exchangeRateCache;
+
+    // Bitcoin exchanges don't allow selling too small amounts of bitcoins. We therefore need
+    private BigDecimal currentBuffer;
 
     public Exchange(String exchange) {
 
@@ -130,12 +135,13 @@ public class Exchange {
                     @Override
                     protected Void doInBackground(final BigDecimal... amount) {
 
-                        Preconditions.checkState(amount.length == 1, "Amount not speciefied for sell order.");
+                        Preconditions.checkState(amount.length == 1, "Amount not specified for sell order.");
 
                         // we are placing a sell order at the price (currrentAsk - 5%). This will make sure that the trade is executed,
                         // while making sure we will never lose sell for less than 95% of our expected value. This means that in
                         // theory it is possible that a trade never gets executed, if the market suddenly crashes.
-                        BigDecimal limitPrice = exchangeRate.multiply(new BigDecimal("0.95"));
+                        // The price needs to be rounded to 2 decimal places or else an error is thrown
+                        BigDecimal limitPrice = exchangeRate.multiply(new BigDecimal("0.95")).round(new MathContext(2, RoundingMode.HALF_UP));
 
                         try {
                             LimitOrder order = new LimitOrder.Builder(Order.OrderType.ASK, CurrencyPair.BTC_USD).tradableAmount(amount[0]).limitPrice(limitPrice).build();
@@ -280,7 +286,9 @@ public class Exchange {
      * @return true if the exchange was set up with credentials, meaning trading is possible.
      */
     public boolean hasCredentials() {
-        return exchange.getExchangeSpecification() != null;
+        return exchange.getExchangeSpecification().getUserName() != null &&
+                exchange.getExchangeSpecification().getApiKey() != null &&
+                exchange.getExchangeSpecification().getSecretKey() != null;
     }
 
     /**

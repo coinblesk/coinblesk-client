@@ -9,6 +9,7 @@ import android.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -45,6 +46,7 @@ public class CoinBleskCloudData  extends BackupAgentHelper {
     public static final String USERNAME = "username";
     public static final String PRIV_KEY = "private-key";
     public static final String PUB_KEY = "public-key";
+    public static final String BITCOIN_BUFFER = "bitcoin-buffer";
 
     private SharedPreferences prefs;
 
@@ -167,4 +169,12 @@ public class CoinBleskCloudData  extends BackupAgentHelper {
     }
 
 
+    public BigDecimal getBitcoinBuffer() {
+        String buffer = prefs.getString(BITCOIN_BUFFER, null);
+        return buffer == null ? null : new BigDecimal(buffer);
+    }
+
+    public void setBitcoinBuffer(BigDecimal bitcoinBuffer) {
+        prefs.edit().putString(BITCOIN_BUFFER, bitcoinBuffer.toString()).commit();
+    }
 }
