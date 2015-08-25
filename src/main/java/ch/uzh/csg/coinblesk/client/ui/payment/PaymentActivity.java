@@ -3,6 +3,8 @@ package ch.uzh.csg.coinblesk.client.ui.payment;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -113,8 +115,8 @@ public abstract class PaymentActivity extends BaseActivity {
         checkNfc(this);
         Pair<BluetoothManager,BluetoothAdapter> pair = BTUtils.checkBT(this);
         if(pair != null) {
-            btInitiator = BTInitiatorSetup.init(handler, PaymentActivity.this,
-                    Utils.hashToUUID(localPair.getPublic().getEncoded()), pair.second);
+            byte[] macAddress = BTUtils.btAddress(pair.second);
+            btInitiator = BTInitiatorSetup.init(initiator.getNfcInitiator(), PaymentActivity.this, pair.second);
         }
     }
 
@@ -266,6 +268,10 @@ public abstract class PaymentActivity extends BaseActivity {
             public void setUUID(byte[] bytes) {
                 try {
                     if(btInitiator!=null) {
+                        byte[] macAdress = new byte[6];
+                        System.arraycopy(bytes, 0, macAdress, 0, 6);
+                        BluetoothDevice device = btInitiator.getRemoteDevice(macAdress);
+                        //btInitiator.connect(PaymentActivity.this, device, Utils.byteArrayToUUID(bytes, 0));
                         btInitiator.scanLeDevice(PaymentActivity.this, Utils.byteArrayToUUID(bytes, 0));
                         LOGGER.debug("initiate BT");
                     }
