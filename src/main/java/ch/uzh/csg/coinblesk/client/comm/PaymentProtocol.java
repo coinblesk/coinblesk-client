@@ -1,5 +1,6 @@
 package ch.uzh.csg.coinblesk.client.comm;
 
+import org.bitcoinj.core.ECKey;
 import org.spongycastle.jce.ECNamedCurveTable;
 import org.spongycastle.jce.spec.ECParameterSpec;
 
@@ -21,11 +22,16 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
+
+import ch.uzh.csg.comm.Utils;
 
 /**
  * Created by tbocek on 14.07.15.
  */
 final public class PaymentProtocol {
+
+
 
     public enum Type{
         PAYMENT_REQUEST, PAYMENT_REQUEST_RESPONSE,
@@ -700,13 +706,18 @@ final public class PaymentProtocol {
 
     public static KeyPair generateKeys() {
         try {
-            final ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("brainpoolp256r1");
+            final ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
             final KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "SC");
             g.initialize(ecSpec, new SecureRandom());
             return g.generateKeyPair();
         } catch (NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static byte[] encodePublicKey(PublicKey publicKey) {
+        UUID u =  Utils.hashToUUID(publicKey.getEncoded());
+        return Utils.uuidToByteArray(u);
     }
 
 }

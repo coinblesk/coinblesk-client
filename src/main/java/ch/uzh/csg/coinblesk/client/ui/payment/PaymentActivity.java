@@ -33,6 +33,7 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import ch.uzh.csg.btlib.BTInitiatorSetup;
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
@@ -55,6 +56,7 @@ import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.ServerSignatureRequestTransferObject;
 import ch.uzh.csg.coinblesk.responseobject.SignedTxTransferObject;
 import ch.uzh.csg.comm.NfcInitiatorHandler;
+import ch.uzh.csg.comm.Utils;
 import ch.uzh.csg.nfclib.NfcInitiatorSetup;
 
 /**
@@ -73,6 +75,8 @@ public abstract class PaymentActivity extends BaseActivity {
     private NfcPaymentListener listener;
     private NfcInitiatorHandler handler;
     private NfcInitiatorSetup initiator;
+    private BTInitiatorSetup btInitiator;
+    private KeyPair localPair;
 
     private PaymentRequestReceiver paymentRequestReceiver;
     private HalfSignedTxReceiver halfSignedTxReceiver;
@@ -100,6 +104,9 @@ public abstract class PaymentActivity extends BaseActivity {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        localPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
+        btInitiator = new BTInitiatorSetup(handler, PaymentActivity.this,
+                Utils.hashToUUID(localPair.getPublic().getEncoded()));
 
         checkNfc(this);
     }
@@ -245,6 +252,16 @@ public abstract class PaymentActivity extends BaseActivity {
             }
 
             @Override
+            public void setUUID(byte[] bytes) {
+                try {
+                    btInitiator.scanLeDevice(PaymentActivity.this, Utils.byteArrayToUUID(bytes, 0));
+                    LOGGER.debug("initiate BT");
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+
+            @Override
             public void handleFailed(String s) {
                 LOGGER.error("NFC communication failed: {}", s);
                 current = State.INIT;
@@ -267,6 +284,7 @@ public abstract class PaymentActivity extends BaseActivity {
                 if (protocol.type() == PaymentProtocol.Type.PAYMENT_REQUEST_RESPONSE) {
                     //this is the half signed transaction
                     remotePubKey = protocol.publicKey();
+
                     halfSignedTx = protocol.halfSignedTransaction();
                     accountNumbers = protocol.accountNumbers();
                     childNumbers = protocol.childNumbers();
