@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.xeiam.xchange.ExchangeSpecification;
@@ -17,7 +18,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
@@ -42,14 +42,12 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
         this.context = context;
 
         this.primaryExchangeKeys = new HashSet<>();
-        primaryExchangeKeys.add("merchant_mode");
         primaryExchangeKeys.add("primary_exchange");
         primaryExchangeKeys.add("primary_exchange_username");
         primaryExchangeKeys.add("primary_exchange_api_key");
         primaryExchangeKeys.add("primary_exchange_api_secret");
 
         this.secondaryExchangeKeys = new HashSet<>();
-        secondaryExchangeKeys.add("merchant_mode");
         secondaryExchangeKeys.add("primary_exchange");
         secondaryExchangeKeys.add("primary_exchange_username");
         secondaryExchangeKeys.add("primary_exchange_api_key");
@@ -57,6 +55,8 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
 
         // add default exchange without credentials for exchange rate
         addExchange(new Exchange(Exchange.KRAKEN));
+
+        updateExchanges(PreferenceManager.getDefaultSharedPreferences(context));
     }
 
     /**
@@ -159,23 +159,31 @@ public class ExchangeManager implements SharedPreferences.OnSharedPreferenceChan
 
     private void updateExchanges(SharedPreferences sharedPreferences) {
 
+        if(!sharedPreferences.getBoolean("merchant_mode", false)) {
+            LOGGER.debug("Merchant mode is not activated.");
+            return;
+        }
+
         // check if settings complete
         boolean primaryExchangeSetUp = true;
         boolean secondaryExchangeSetUp = true;
         for (String pref : primaryExchangeKeys) {
-            primaryExchangeSetUp &= sharedPreferences.contains(pref);
+            if(!sharedPreferences.contains(pref)) {
+                secondaryExchangeSetUp = false;
+                break;
+            }
         }
         for (String pref : secondaryExchangeKeys) {
-            secondaryExchangeSetUp &= sharedPreferences.contains(pref);
+            if(!sharedPreferences.contains(pref)) {
+                secondaryExchangeSetUp = false;
+                break;
+            }
         }
 
-        // create exchanges (if the settings are complete)
-        CoinBleskApplication application = (CoinBleskApplication) context.getApplicationContext();
-
         if(primaryExchangeSetUp) {
-            application.getMerchantModeManager().addExchange(createExchange(sharedPreferences, true));
-        } else if (secondaryExchangeSetUp){
-            application.getMerchantModeManager().addExchange(createExchange(sharedPreferences, false));
+            addExchange(createExchange(sharedPreferences, true));
+        } else if (secondaryExchangeSetUp) {
+            addExchange(createExchange(sharedPreferences, false));
         }
     }
 

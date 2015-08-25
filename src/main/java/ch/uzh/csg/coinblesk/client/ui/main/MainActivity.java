@@ -43,6 +43,7 @@ import android.widget.TextView;
 
 import com.google.common.util.concurrent.Service;
 
+import org.bitcoinj.core.InsufficientMoneyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -774,6 +775,9 @@ public class MainActivity extends BaseActivity {
                                                 responseLater.response(response);
                                                 listener.onPaymentFinish(true);
                                             }
+                                        } catch (InsufficientMoneyException e) {
+                                            LOGGER.error("Fail: ", e);
+                                            listener.onPaymentError("No enough bitcoins");
                                         } catch (Exception e) {
                                             LOGGER.error("Fail: ", e);
                                             listener.onPaymentError("NFC communication failed");
