@@ -11,13 +11,11 @@ import java.security.KeyPair;
 
 import ch.uzh.csg.coinblesk.client.comm.PaymentProtocol;
 import ch.uzh.csg.coinblesk.client.exchange.ExchangeManager;
-import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.request.DefaultRequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestFactory;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.storage.PersistentStorageHandler;
 import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
-import ch.uzh.csg.coinblesk.client.util.LoggingConfig;
 import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.responseobject.SetupRequestObject;
 import ch.uzh.csg.coinblesk.responseobject.TransferObject;
@@ -36,7 +34,6 @@ public class CoinBleskApplication extends com.activeandroid.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LoggingConfig.configure();
 
         ActiveAndroid.initialize(this);
 

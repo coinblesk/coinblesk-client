@@ -2,6 +2,8 @@ package ch.uzh.csg.coinblesk.client.ui.payment;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +18,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Base64;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -34,6 +37,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import ch.uzh.csg.btlib.BTInitiatorSetup;
+import ch.uzh.csg.btlib.BTLEController;
+import ch.uzh.csg.btlib.BTUtils;
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
@@ -105,10 +110,12 @@ public abstract class PaymentActivity extends BaseActivity {
             throw new RuntimeException(e);
         }
         localPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
-        btInitiator = new BTInitiatorSetup(handler, PaymentActivity.this,
-                Utils.hashToUUID(localPair.getPublic().getEncoded()));
-
         checkNfc(this);
+        Pair<BluetoothManager,BluetoothAdapter> pair = BTUtils.checkBT(this);
+        if(pair != null) {
+            btInitiator = BTInitiatorSetup.init(handler, PaymentActivity.this,
+                    Utils.hashToUUID(localPair.getPublic().getEncoded()), pair.second);
+        }
     }
 
     @Override
@@ -215,7 +222,7 @@ public abstract class PaymentActivity extends BaseActivity {
 
 
     enum State {
-        INIT, FIRST, SECOND
+        INIT, FIRST_SENT, FIRST_RECEIVED, SECOND
     }
 
     /**
@@ -225,18 +232,22 @@ public abstract class PaymentActivity extends BaseActivity {
 
         return new NfcInitiatorHandler() {
 
-            State current = State.INIT;
-            KeyPair keyPair;
-            PublicKey remotePubKey;
-            byte[] halfSignedTx;
+            private State current = State.INIT;
+            private KeyPair keyPair;
+            private PublicKey remotePubKey;
+            private byte[] halfSignedTx;
             int[] childNumbers;
-            byte[] accountNumbers;
-            String user;
-            RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> signTask;
-            AtomicReference<byte[]> result = new AtomicReference<>();
+            private byte[] accountNumbers;
+            private String user;
+            private RequestTask<ServerSignatureRequestTransferObject, SignedTxTransferObject> signTask;
+            private AtomicReference<byte[]> result = new AtomicReference<>();
 
-            Thread t;
-            AtomicReference<byte[]> result2 = new AtomicReference<>();
+            private Thread t;
+            private AtomicReference<byte[]> result2 = new AtomicReference<>();
+
+            private BTLEController btleController;
+            private boolean nfcCommPresent = false;
+            private boolean btCommPresent = false;
 
             private PaymentRequest paymentRequest;
 
@@ -254,17 +265,46 @@ public abstract class PaymentActivity extends BaseActivity {
             @Override
             public void setUUID(byte[] bytes) {
                 try {
-                    btInitiator.scanLeDevice(PaymentActivity.this, Utils.byteArrayToUUID(bytes, 0));
-                    LOGGER.debug("initiate BT");
+                    if(btInitiator!=null) {
+                        btInitiator.scanLeDevice(PaymentActivity.this, Utils.byteArrayToUUID(bytes, 0));
+                        LOGGER.debug("initiate BT");
+                    }
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }
             }
 
             @Override
+            public void btleDiscovered(BTLEController btleController) {
+                LOGGER.debug("btleDiscovered");
+                btCommPresent = true;
+                this.btleController = btleController;
+                if(!nfcCommPresent) {
+                    if(current == State.FIRST_SENT) {
+                        btleController.startBTLE();
+                    }
+                }
+            }
+
+            @Override
+            public void nfcTagFound() {
+                LOGGER.debug("tag found, current {}", current);
+                nfcCommPresent = true;
+            }
+
+            @Override
+            public void nfcTagLost() {
+                LOGGER.debug("tag lost, check BT, current {}", current);
+                nfcCommPresent = false;
+                if(btleController != null && current == State.FIRST_SENT) {
+                    btleController.startBTLE();
+                }
+            }
+
+            @Override
             public void handleFailed(String s) {
                 LOGGER.error("NFC communication failed: {}", s);
-                current = State.INIT;
+                //current = State.INIT;
             }
 
             @Override
@@ -289,7 +329,7 @@ public abstract class PaymentActivity extends BaseActivity {
                     accountNumbers = protocol.accountNumbers();
                     childNumbers = protocol.childNumbers();
                     user = protocol.user();
-                    current = State.FIRST;
+                    current = State.FIRST_RECEIVED;
                     return;
                 }
 
@@ -329,8 +369,11 @@ public abstract class PaymentActivity extends BaseActivity {
                 switch (current) {
                     case INIT:
                         if (result2.get() != null) {
-                            current = State.FIRST;
-                            return result2.get();
+                            byte[] retVal = result2.get();
+                            result2.set(null);
+                            current = State.FIRST_SENT;
+                            LOGGER.debug("Set state to {}", current);
+                            return retVal;
                         }
                         if (t != null) {
                             return null;
@@ -351,7 +394,6 @@ public abstract class PaymentActivity extends BaseActivity {
 
                                         byte[] retVal = PaymentProtocol.paymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
                                         result2.set(retVal);
-
                                         listener.onPaymentRequestSent(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()));
                                     } else {
                                         LOGGER.debug("No active payment request: Abort");
@@ -366,8 +408,9 @@ public abstract class PaymentActivity extends BaseActivity {
                         t.start();
 
                         return null;
-
-                    case FIRST:
+                    case FIRST_SENT:
+                        return null;
+                    case FIRST_RECEIVED:
 
                         if (result.get() != null) {
                             current = State.SECOND;

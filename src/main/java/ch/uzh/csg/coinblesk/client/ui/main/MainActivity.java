@@ -2,6 +2,8 @@ package ch.uzh.csg.coinblesk.client.ui.main;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,6 +23,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -49,6 +52,7 @@ import java.security.PublicKey;
 import java.util.List;
 
 import ch.uzh.csg.btlib.BTResponderSetup;
+import ch.uzh.csg.btlib.BTUtils;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.comm.PaymentProtocol;
@@ -121,6 +125,7 @@ public class MainActivity extends BaseActivity {
         showLoadingProgressDialog();
         setContentView(R.layout.activity_main);
 
+
         setScreenOrientation();
         isPortrait = getResources().getBoolean(R.bool.small_device);
 
@@ -133,20 +138,26 @@ public class MainActivity extends BaseActivity {
 
         // initialize key pair
         KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
-        btResponder = new BTResponderSetup(Utils.byteArrayToUUID(keyPair.getPublic().getEncoded(), 0));
-
+        Pair<BluetoothManager,BluetoothAdapter> pair = BTUtils.checkBT(this);
+        if(pair != null) {
+            btResponder = BTResponderSetup.init(Utils.hashToUUID(keyPair.getPublic().getEncoded()), pair.first, pair.second);
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        btResponder.advertise(responseHandler, this);
+        if(btResponder != null) {
+            btResponder.advertise(responseHandler, this);
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        btResponder.stopAdvertise();
+        if(btResponder != null) {
+            btResponder.stopAdvertise();
+        }
     }
 
     @Override
@@ -740,6 +751,9 @@ public class MainActivity extends BaseActivity {
                                 satoshis = protocol.satoshis();
                                 btcAddress = protocol.sendTo();
                                 remotePubKey = protocol.publicKey();
+                                if(btResponder != null) {
+                                    btResponder.setRemoteUUID(Utils.hashToUUID(remotePubKey.getEncoded()));
+                                }
                                 receiver = protocol.user();
 
                                 checkAccept(satoshis, receiver, remotePubKey, new PaymentActivity.UserPaymentConfirmation() {
