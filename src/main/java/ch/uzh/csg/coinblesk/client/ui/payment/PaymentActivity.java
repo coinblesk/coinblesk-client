@@ -459,14 +459,14 @@ public abstract class PaymentActivity extends BaseActivity {
                                         LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", fullySignedTx.length);
                                         responseMsg = PaymentProtocol.fullTransaction(fullySignedTx, accountNumbers, childNumbers).toBytes(keyPair.getPrivate());
                                         listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
-                                        getWalletService().commitAndBroadcastTx(fullySignedTx);
 
-
-                                        // save transaction metadata and address book entry in the background....
-                                        AsyncTask<Void, Void, Void> saveMetadataTask = new AsyncTask<Void, Void, Void>() {
+                                        // add transaction to the wallet, save transaction metadata and address book entry in the background....
+                                        AsyncTask<Void, Void, Void> postPaymentTask = new AsyncTask<Void, Void, Void>() {
                                             @Override
                                             protected Void doInBackground(Void... params) {
+
                                                 BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
+
                                                 // tx meta data
                                                 String txId = BitcoinUtils.getTxHash(fullySignedTx, bitcoinNet);
                                                 TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
@@ -485,10 +485,13 @@ public abstract class PaymentActivity extends BaseActivity {
                                                 getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
                                                 LOGGER.debug("Saved address book entry");
 
+                                                getWalletService().commitAndBroadcastTx(fullySignedTx);
+                                                LOGGER.debug("added transaction to the wallet");
+
                                                 return null;
                                             }
                                         };
-                                        saveMetadataTask.execute();
+                                        postPaymentTask.execute();
 
                                     } else {
                                         LOGGER.warn("Server didn't sign the transaction: {}", response.getMessage());

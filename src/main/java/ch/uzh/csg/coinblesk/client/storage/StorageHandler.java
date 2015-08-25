@@ -1,5 +1,6 @@
 package ch.uzh.csg.coinblesk.client.storage;
 
+import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.List;
@@ -14,6 +15,7 @@ import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 public interface StorageHandler {
 
     String getUsername();
+
     void setUsername(String username);
 
     BitcoinNet getBitcoinNet();
@@ -45,7 +47,7 @@ public interface StorageHandler {
      * This method returns sets block number from which the a earlier generated refund transaction
      * becomes valid and ready to spend. This means that the server can no longer guarantee that
      * the client doesn't double-spend.
-     * <p>
+     * <p/>
      * Usually this is set after a redeposit or new wallet setup, after the refund transaction
      * has been signed by the server.
      */
@@ -63,14 +65,33 @@ public interface StorageHandler {
      */
     void clear();
 
-    public void saveAddressBookEntry(AddressBookEntry entry);
-    public AddressBookEntry getAddressBookEntry(PublicKey publicKey);
+    /**
+     * Only relevant for merchant mode. Exchanges don't allow selling too small amounts. Therefore
+     * we need to keep track of the amount of collected bitcoins, such that as soon as we
+     * exceed the required amount allowed to sell on the exchange, we create a sell order.
+     *
+     * @return the current bitcoin buffer. 0 if buffer has never been set.
+     */
+    BigDecimal getBitcoinBuffer();
 
-    public void saveTransactionMetaData(TransactionMetaData txMetaData);
-    public TransactionMetaData getTransactionMetaData(String txId);
+    /**
+     * Only relevant for merchant mode. Exchanges don't allow selling too small amounts. Therefore
+     * we need to keep track of the amount of collected bitcoins, such that as soon as we
+     * exceed the required amount allowed to sell on the exchange, we create a sell order.
+     */
+    void setBitcoinBuffer(BigDecimal buffer);
 
-    public KeyPair getKeyPair();
-    public void setKeyPair(KeyPair keyPair);
+    void saveAddressBookEntry(AddressBookEntry entry);
+
+    AddressBookEntry getAddressBookEntry(PublicKey publicKey);
+
+    void saveTransactionMetaData(TransactionMetaData txMetaData);
+
+    TransactionMetaData getTransactionMetaData(String txId);
+
+    KeyPair getKeyPair();
+
+    void setKeyPair(KeyPair keyPair);
 
     void removeAllUntrustedAddressBookEntries();
 
@@ -79,6 +100,7 @@ public interface StorageHandler {
     void deleteAddressBookEntry(PublicKey pubKey);
 
     String getServerWatchingKey();
+
     void setBitcoinNetAndServerWatchingKey(BitcoinNet bitcoinNet, String serverWatchingKey);
 
     boolean hasSentClientWatchingKey();

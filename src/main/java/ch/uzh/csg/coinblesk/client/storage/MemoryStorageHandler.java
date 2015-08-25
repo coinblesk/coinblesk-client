@@ -1,5 +1,6 @@
 package ch.uzh.csg.coinblesk.client.storage;
 
+import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.List;
@@ -87,6 +88,16 @@ public class MemoryStorageHandler implements StorageHandler {
 
     @Override
     public void clear() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public BigDecimal getBitcoinBuffer() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public void setBitcoinBuffer(BigDecimal buffer) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

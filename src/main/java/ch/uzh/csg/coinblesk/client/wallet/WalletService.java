@@ -800,6 +800,8 @@ public class WalletService extends android.app.Service {
      */
     public String commitAndBroadcastTx(byte[] txBytes) {
 
+        Context.propagate(new Context(getNetworkParams(bitcoinNet)));
+
         Transaction tx = new Transaction(getNetworkParams(bitcoinNet), txBytes);
         tx.setMemo(DefaultTransactionMemos.SERVER_SIGNED_TX);
 
