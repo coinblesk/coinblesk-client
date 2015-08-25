@@ -256,7 +256,7 @@ public class Exchange {
             protected BigDecimal doInBackground(Void... params) {
                 try {
                     return exchange.getPollingMarketDataService().getTicker(pair).getBid();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LOGGER.error("failed to get exchange rate from {}: {}", getExchangeId(), e);
                 }
                 return null;
