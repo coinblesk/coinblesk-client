@@ -4,7 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SendRequestReceiver extends BroadcastReceiver {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SendRequestReceiver.class);
 
     public static final String ACTION = "ch.uzh.coinblesk.SEND_REQUEST";
 
@@ -15,6 +20,7 @@ public class SendRequestReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        LOGGER.debug("Received send request broadcast");
         activeSendRequest = SendRequest.fromIntent(intent);
     }
 

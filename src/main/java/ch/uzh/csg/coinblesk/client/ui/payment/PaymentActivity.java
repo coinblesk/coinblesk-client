@@ -1,9 +1,7 @@
 package ch.uzh.csg.coinblesk.client.ui.payment;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
@@ -51,6 +49,7 @@ import ch.uzh.csg.coinblesk.client.payment.HalfSignedTxReceiver;
 import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequestReceiver;
+import ch.uzh.csg.coinblesk.client.payment.SendRequest;
 import ch.uzh.csg.coinblesk.client.payment.SendRequestReceiver;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
@@ -79,15 +78,11 @@ public abstract class PaymentActivity extends BaseActivity {
     private final static Logger LOGGER = LoggerFactory.getLogger(PaymentActivity.class);
 
     protected boolean isSeller;
-    private ProgressDialog progressDialog;
-    private boolean destroyed = false;
-    protected boolean paymentAccepted = false;
 
     private NfcPaymentListener listener;
     private NfcInitiatorHandler handler;
     private NfcInitiatorSetup initiator;
     private BTInitiatorSetup btInitiator;
-    private KeyPair localPair;
 
     private PaymentRequestReceiver paymentRequestReceiver;
     private SendRequestReceiver sendRequestReceiver;
@@ -123,13 +118,12 @@ public abstract class PaymentActivity extends BaseActivity {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        localPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
         checkNfc(this);
         Pair<BluetoothManager,BluetoothAdapter> pair = BTUtils.checkBT(this);
         if(pair != null) {
             byte[] macAddress = BTUtils.btAddress(pair.second);
             btInitiator = BTInitiatorSetup.init(initiator.getNfcInitiator(), PaymentActivity.this, pair.second);
-
+        }
     }
 
     @Override
@@ -144,7 +138,7 @@ public abstract class PaymentActivity extends BaseActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        LOGGER.debug("paymenta acitivity stop");
+        LOGGER.debug("payment acitivity stop");
         //this must be in start as the permission dialog would call resume/pause
         initiator.stopInitiating(this);
     }
@@ -153,6 +147,7 @@ public abstract class PaymentActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(paymentRequestReceiver);
+        unregisterReceiver(sendRequestReceiver);
         unregisterReceiver(halfSignedTxReceiver);
     }
 
@@ -335,14 +330,14 @@ public abstract class PaymentActivity extends BaseActivity {
 
                 LOGGER.debug("received nfc message {}, current state is {}", protocol.type().toString(), current.toString());
 
-                if (protocol.type() == PaymentProtocol.Type.PAYMENT_REQUEST_RESPONSE) {
+                if (protocol.type() == PaymentProtocol.Type.PAYMENT_SEND_RESPONSE) {
                     // bitcoin address to send the coins to
                     remoteBtcAddr = protocol.sendTo();
-                    current = State.HALF_SIGNED_RECEIVED;
+                    current = State.ADDRESS_RECEIVED;
                     return;
                 }
 
-                if (protocol.type() == PaymentProtocol.Type.PAYMENT_SEND_RESPONSE) {
+                if (protocol.type() == PaymentProtocol.Type.PAYMENT_REQUEST_RESPONSE) {
                     //this is the half signed transaction
                     remotePubKey = protocol.publicKey();
 
@@ -455,7 +450,6 @@ public abstract class PaymentActivity extends BaseActivity {
                         }
 
                         signTaskStarted = true;
-                        byte[] responseMsg = null;
 
                         AsyncTask<Void, Void, HalfSignedTransaction> createTxTask = new AsyncTask<Void, Void, HalfSignedTransaction>() {
                             @Override
@@ -481,48 +475,19 @@ public abstract class PaymentActivity extends BaseActivity {
                                     public void onTransactionSigned(final byte[] fullySignedTx) {
 
                                         try {
-
                                             responseMsg = PaymentProtocol.fullTransaction(fullySignedTx, halfSignedTx.getAccountNumbers(), halfSignedTx.getChildNumbers()).toBytes(keyPair.getPrivate());
                                             result.set(responseMsg);
-                                            listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(sendRequestReceiver.getActiveSendRequest().getSatoshi()), remotePubKey, user);
-                                            listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
+                                            SendRequest sendRequest = sendRequestReceiver.getActiveSendRequest();
+                                            listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(sendRequest.getSatoshi()), remotePubKey, user);
+                                            listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(sendRequest.getSatoshi()), remotePubKey, user);
 
-                                            // add transaction to the wallet, save transaction metadata and address book entry in the background....
-                                            AsyncTask<Void, Void, Void> postPaymentTask = new AsyncTask<Void, Void, Void>() {
-                                                @Override
-                                                protected Void doInBackground(Void... params) {
+                                            String you = "You"; // TODO
+                                            String remoteAddr = BitcoinUtils.getAddressFromScriptHash(remoteBtcAddr, getWalletService().getBitcoinNet());
+                                            postPayment(fullySignedTx, user, you, remotePubKey, remoteAddr, true);
 
-                                                    BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
-
-                                                    // tx meta data
-                                                    String txId = BitcoinUtils.getTxHash(fullySignedTx, bitcoinNet);
-                                                    TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
-                                                    txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
-                                                    txMetaData.setReceiver(user);
-                                                    txMetaData.setSender("You");
-                                                    txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_OUT);
-                                                    getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
-                                                    LOGGER.debug("Saved transaction meta data");
-
-                                                    // save (or update)  user in address book
-                                                    AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
-                                                    entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
-                                                    entry.setName(user);
-                                                    entry.setBitcoinAddress(BitcoinUtils.getAddressFromScriptHash(remoteBtcAddr, getWalletService().getBitcoinNet()));
-                                                    getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
-                                                    LOGGER.debug("Saved address book entry");
-
-                                                    getWalletService().commitAndBroadcastTx(fullySignedTx);
-                                                    LOGGER.debug("added transaction to the wallet");
-
-                                                    return null;
-                                                }
-                                            };
-                                            postPaymentTask.execute();
                                         } catch (Exception e) {
                                             listener.onPaymentError(e.getMessage());
                                         }
-
                                     }
 
                                     @Override
@@ -583,38 +548,12 @@ public abstract class PaymentActivity extends BaseActivity {
                                     result.set(responseMsg);
                                     listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
 
-                                    // add transaction to the wallet, save transaction metadata and address book entry in the background....
-                                    AsyncTask<Void, Void, Void> postPaymentTask = new AsyncTask<Void, Void, Void>() {
-                                        @Override
-                                        protected Void doInBackground(Void... params) {
+                                    String you = "You"; // TODO: load from xml
+                                    String bitcoinAddress = BitcoinUtils.getSenderAddressFromP2SHTx(fullySignedTx, getWalletService().getBitcoinNet());
 
-                                            BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
+                                    postPayment(fullySignedTx, you, user, remotePubKey, bitcoinAddress, false);
 
-                                            // tx meta data
-                                            String txId = BitcoinUtils.getTxHash(fullySignedTx, bitcoinNet);
-                                            TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
-                                            txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
-                                            txMetaData.setReceiver("You");
-                                            txMetaData.setSender(user);
-                                            txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_IN);
-                                            getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
-                                            LOGGER.debug("Saved transaction meta data");
 
-                                            // save (or update)  user in address book
-                                            AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
-                                            entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
-                                            entry.setName(user);
-                                            entry.setBitcoinAddress(BitcoinUtils.getSenderAddressFromP2SHTx(fullySignedTx, bitcoinNet));
-                                            getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
-                                            LOGGER.debug("Saved address book entry");
-
-                                            getWalletService().commitAndBroadcastTx(fullySignedTx);
-                                            LOGGER.debug("added transaction to the wallet");
-
-                                            return null;
-                                        }
-                                    };
-                                    postPaymentTask.execute();
                                 } catch (Exception e) {
                                     listener.onPaymentError(e.getMessage());
                                 }
@@ -643,6 +582,45 @@ public abstract class PaymentActivity extends BaseActivity {
         };
     }
 
+
+    /**
+     * Saves transaction meta data and address book entry
+     */
+    private void postPayment(final byte[] signedTx, final String receiver, final String sender, final PublicKey remotePubKey, final String bitcoinAddress, final boolean sendingMode) {
+
+        // add transaction to the wallet, save transaction metadata and address book entry in the background....
+        AsyncTask<Void, Void, Void> postPaymentTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
+
+                // tx meta data
+                String txId = BitcoinUtils.getTxHash(signedTx, bitcoinNet);
+                TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
+                txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
+                txMetaData.setReceiver(sendingMode ? receiver : sender);
+                txMetaData.setSender(sendingMode ? receiver : sender);
+                txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_IN);
+                getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
+                LOGGER.debug("Saved transaction meta data");
+
+                // save (or update)  user in address book
+                AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
+                entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
+                entry.setName(sendingMode ? receiver : sender);
+                entry.setBitcoinAddress(bitcoinAddress);
+                getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
+                LOGGER.debug("Saved address book entry");
+
+                getWalletService().commitAndBroadcastTx(signedTx);
+                LOGGER.debug("added transaction to the wallet");
+
+                return null;
+            }
+        };
+        postPaymentTask.execute();
+    }
 
     private void createPayment(final byte[] halfSignedTx, final byte[] accountNumbers, final int[] childNumbers, final TransactionSignedListener signedListener) {
 

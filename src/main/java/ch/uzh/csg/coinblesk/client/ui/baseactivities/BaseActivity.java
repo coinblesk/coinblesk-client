@@ -1,10 +1,12 @@
 package ch.uzh.csg.coinblesk.client.ui.baseactivities;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
@@ -13,6 +15,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -23,11 +26,21 @@ import android.widget.Toast;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.security.PublicKey;
+
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
+import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
+import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
 import ch.uzh.csg.coinblesk.client.ui.fragments.CustomDialogFragment;
+import ch.uzh.csg.coinblesk.client.ui.payment.PaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
+import ch.uzh.csg.coinblesk.client.util.Constants;
+import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
+import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.client.wallet.WalletService;
+import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
 
 /**
  * The class BaseActivity is the abstract base class for all
@@ -257,6 +270,90 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    /**
+     * Check whether to accept or reject a payment. If the receiver is not trusted, the user
+     * will be asked whether to send the payment or not
+     *
+     * @param satoshis     the amount in satoshis
+     * @param receiver     the user name of the receiver
+     * @param remotePubKey the public key of the receiver
+     * @param confirmation callback for the decision
+     */
+    protected void checkAccept(final long satoshis, final String receiver, PublicKey remotePubKey, final PaymentActivity.UserPaymentConfirmation confirmation) {
+        // check whether to auto accept the payment or not
+        BigDecimal amount = BitcoinUtils.satoshiToBigDecimal(satoshis);
+        AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
+        if (entry == null || !entry.isTrusted()) {
+            // for debugging
+            if (entry == null) {
+                LOGGER.debug("User {} was not found in the address book", receiver);
+            } else {
+                LOGGER.debug("User {} is not trusted", receiver);
+            }
+            showConfirmationDialog(amount, receiver, confirmation);
+        } else {
+            BigDecimal autoAcceptAmount = new BigDecimal(PreferenceManager.getDefaultSharedPreferences(BaseActivity.this).getString("auto_accept_amount", "0"));
+            if (autoAcceptAmount.compareTo(amount) > 0) {
+                LOGGER.debug("Auto-accepting payment of {} BTC. Auto accept amount is {} BTC", amount, autoAcceptAmount);
+                confirmation.onDecision(true);
+            } else {
+                LOGGER.debug("Amount of {} exceeds the auto-accept amount of {}. Asking user for confirmation.", amount, autoAcceptAmount);
+                // ask the user
+                showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, confirmation);
+            }
+        }
+    }
+
+
+    private void showConfirmationDialog(final BigDecimal amount, final String user, final PaymentActivity.UserPaymentConfirmation confirmation) {
+
+        getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
+            @Override
+            public void onTaskComplete(ExchangeRateTransferObject response) {
+
+                String amountString;
+                if (response.isSuccessful()) {
+                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
+                    amountString = CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, amount, BaseActivity.this);
+                } else {
+                    amountString = amount.toString();
+                }
+
+                String message = String.format(getString(R.string.sendPayment_dialog_message), amountString, user);
+
+                final AlertDialog.Builder alert = new AlertDialog.Builder(BaseActivity.this);
+                alert.setTitle(getString(R.string.sendPayment_dialog_title));
+                alert.setMessage(message);
+
+                alert.setPositiveButton(getString(R.string.sendPayment_dialog_confirm), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                confirmation.onDecision(true);
+                            }
+                        }).start();
+                    }
+                });
+
+                alert.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                confirmation.onDecision(false);
+                            }
+                        }).start();
+                    }
+                });
+
+                alert.show();
+            }
+        });
+
     }
 
 }
