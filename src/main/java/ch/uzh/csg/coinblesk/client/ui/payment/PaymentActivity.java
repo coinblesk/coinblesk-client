@@ -3,6 +3,8 @@ package ch.uzh.csg.coinblesk.client.ui.payment;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -123,11 +125,11 @@ public abstract class PaymentActivity extends BaseActivity {
         }
         localPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
         checkNfc(this);
-        Pair<BluetoothManager, BluetoothAdapter> pair = BTUtils.checkBT(this);
-        if (pair != null) {
-            btInitiator = BTInitiatorSetup.init(handler, PaymentActivity.this,
-                    Utils.hashToUUID(localPair.getPublic().getEncoded()), pair.second);
-        }
+        Pair<BluetoothManager,BluetoothAdapter> pair = BTUtils.checkBT(this);
+        if(pair != null) {
+            byte[] macAddress = BTUtils.btAddress(pair.second);
+            btInitiator = BTInitiatorSetup.init(initiator.getNfcInitiator(), PaymentActivity.this, pair.second);
+
     }
 
     @Override
@@ -273,7 +275,11 @@ public abstract class PaymentActivity extends BaseActivity {
             @Override
             public void setUUID(byte[] bytes) {
                 try {
-                    if (btInitiator != null) {
+                    if(btInitiator!=null) {
+                        byte[] macAdress = new byte[6];
+                        System.arraycopy(bytes, 0, macAdress, 0, 6);
+                        BluetoothDevice device = btInitiator.getRemoteDevice(macAdress);
+                        //btInitiator.connect(PaymentActivity.this, device, Utils.byteArrayToUUID(bytes, 0));
                         btInitiator.scanLeDevice(PaymentActivity.this, Utils.byteArrayToUUID(bytes, 0));
                         LOGGER.debug("initiate BT");
                     }
@@ -287,8 +293,8 @@ public abstract class PaymentActivity extends BaseActivity {
                 LOGGER.debug("btleDiscovered");
                 btCommPresent = true;
                 this.btleController = btleController;
-                if (!nfcCommPresent) {
-                    if (current == State.FIRST_SENT) {
+                if(!nfcCommPresent) {
+                    if(current == State.FIRST_SENT) {
                         btleController.startBTLE();
                     }
                 }
@@ -304,7 +310,7 @@ public abstract class PaymentActivity extends BaseActivity {
             public void nfcTagLost() {
                 LOGGER.debug("tag lost, check BT, current {}", current);
                 nfcCommPresent = false;
-                if (btleController != null && current == State.FIRST_SENT) {
+                if(btleController != null && current == State.FIRST_SENT) {
                     btleController.startBTLE();
                 }
             }
@@ -421,8 +427,6 @@ public abstract class PaymentActivity extends BaseActivity {
                                         LOGGER.debug("No active payment request: Abort");
                                         listener.onPaymentError("No active payment request");
                                     }
-
-
                                 } catch (Exception e) {
                                     LOGGER.error("Sending payment request failed", e);
                                     listener.onPaymentError(e.getMessage());

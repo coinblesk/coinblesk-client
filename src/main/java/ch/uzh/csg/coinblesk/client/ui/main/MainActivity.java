@@ -114,7 +114,7 @@ public class MainActivity extends BaseActivity {
     private TextView mBlockchainSyncStatusText;
 
     private NfcPaymentListener listener;
-    private NfcResponseHandler responseHandler;
+    //private NfcResponseHandler responseHandler;
     private NfcResponderSetup responder;
     private BTResponderSetup btResponder;
 
@@ -134,14 +134,15 @@ public class MainActivity extends BaseActivity {
         initializeGui();
         initClickListener();
         listener = initNfcListener();
-        responseHandler = initNfcResponder(listener);
+        NfcResponseHandler responseHandler = initNfcResponder(listener);
         responder = new NfcResponderSetup(responseHandler);
 
         // initialize key pair
         KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
         Pair<BluetoothManager,BluetoothAdapter> pair = BTUtils.checkBT(this);
         if(pair != null) {
-            btResponder = BTResponderSetup.init(Utils.hashToUUID(keyPair.getPublic().getEncoded()), pair.first, pair.second);
+            byte[] macAddress = BTUtils.btAddress(pair.second);
+            btResponder = BTResponderSetup.init(Utils.hashToUUID(keyPair.getPublic().getEncoded(), macAddress), pair.first, pair.second);
         }
     }
 
@@ -149,7 +150,7 @@ public class MainActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         if(btResponder != null) {
-            btResponder.advertise(responseHandler, this);
+            btResponder.advertise(responder.getNfcResponder(), this);
         }
     }
 
@@ -716,7 +717,11 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public byte[] getUUID() {
-                return PaymentProtocol.encodePublicKey(keyPair.getPublic());
+                if(btResponder != null) {
+                    return Utils.uuidToByteArray(btResponder.getLocalUUID());
+                } else {
+                    return new byte[16];
+                }
             }
 
             @Override
@@ -766,9 +771,9 @@ public class MainActivity extends BaseActivity {
                                 satoshis = protocol.satoshis();
                                 btcAddress = protocol.sendTo();
                                 remotePubKey = protocol.publicKey();
-                                if(btResponder != null) {
-                                    btResponder.setRemoteUUID(Utils.hashToUUID(remotePubKey.getEncoded()));
-                                }
+                                //if(btResponder != null) {
+                                //    btResponder.setRemoteUUID(Utils.hashToUUID(remotePubKey.getEncoded()));
+                                //}
                                 receiver = protocol.user();
 
                                 checkAccept(satoshis, receiver, remotePubKey, new PaymentActivity.UserPaymentConfirmation() {
