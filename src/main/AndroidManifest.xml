@@ -172,6 +172,11 @@
             android:exported="true" >
         </receiver>
         <receiver
+            android:name=".payment.SendRequestReceiver"
+            android:enabled="true"
+            android:exported="true" >
+        </receiver>
+        <receiver
             android:name=".payment.HalfSignedTxReceiver"
             android:enabled="true"
             android:exported="true" >

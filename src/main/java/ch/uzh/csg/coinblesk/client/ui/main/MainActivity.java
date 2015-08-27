@@ -733,8 +733,22 @@ public class MainActivity extends BaseActivity {
                 LOGGER.debug("received nfc message {}", type.toString());
 
                 switch (type) {
+                    case PAYMENT_SEND:
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String username = getCoinBleskApplication().getStorageHandler().getUsername();
+                                byte[] btcAddressBytes = BitcoinUtils.addressToBytes(getWalletService().getBitcoinAddress(), getWalletService().getBitcoinNet());
+                                try {
+                                    byte[] retVal = PaymentProtocol.paymentSendResponse(keyPair.getPublic(), username, new byte[6], btcAddressBytes).toBytes(keyPair.getPrivate());
+                                    responseLater.response(retVal);
+                                } catch (Exception e) {
+                                    LOGGER.error("Fail: ", e);
+                                    listener.onPaymentError("NFC communication failed");
+                                }
+                            }
+                        });
                     case PAYMENT_REQUEST:
-
                         // create the half signed transaction
                         new Thread(new Runnable() {
                             @Override

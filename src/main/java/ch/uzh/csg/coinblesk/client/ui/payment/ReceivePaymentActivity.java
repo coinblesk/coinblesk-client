@@ -12,7 +12,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.method.DigitsKeyListener;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -41,6 +40,7 @@ import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.payment.PaymentRequest;
+import ch.uzh.csg.coinblesk.client.payment.SendRequest;
 import ch.uzh.csg.coinblesk.client.ui.main.MainActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
 import ch.uzh.csg.coinblesk.client.util.Constants;
@@ -48,7 +48,6 @@ import ch.uzh.csg.coinblesk.client.util.RequestCompleteListener;
 import ch.uzh.csg.coinblesk.client.util.formatter.CurrencyFormatter;
 import ch.uzh.csg.coinblesk.client.wallet.BitcoinUtils;
 import ch.uzh.csg.coinblesk.responseobject.ExchangeRateTransferObject;
-import ch.uzh.csg.comm.NfcLibException;
 
 /**
  * This is the UI to receive a payment - i.e. to be the seller in a transaction or to actively send bitcoins by NFC.
@@ -73,9 +72,6 @@ public class ReceivePaymentActivity extends PaymentActivity {
     AnimationDrawable nfcActivityAnimation;
     private boolean isSendingMode;
 
-    private MenuItem menuWarning;
-    private MenuItem sessionCountdownMenuItem;
-    private MenuItem sessionRefreshMenuItem;
     private static boolean isPortrait = false;
 
     protected static final String INPUT_UNIT_CHF = "CHF";
@@ -283,13 +279,21 @@ public class ReceivePaymentActivity extends PaymentActivity {
         refreshCurrencyTextViews();
 
         if (amountBTC.compareTo(BigDecimal.ZERO) > 0) {
-            String address = getWalletService().getBitcoinAddress();
-            String user = getCoinBleskApplication().getStorageHandler().getUsername();
-            Preconditions.checkState(BitcoinUtils.isP2SHAddress(address, getCoinBleskApplication().getStorageHandler().getBitcoinNet()), "NFC payments to non-P2SH addresses is not currently supported.");
+            if(!isSendingMode) {
+                // payment request
+                String address = getWalletService().getBitcoinAddress();
+                String user = getCoinBleskApplication().getStorageHandler().getUsername();
+                Preconditions.checkState(BitcoinUtils.isP2SHAddress(address, getCoinBleskApplication().getStorageHandler().getBitcoinNet()), "NFC payments to non-P2SH addresses is not currently supported.");
+                Intent paymentRequestIntent = PaymentRequest.create(amountBTC, user, address).getIntent();
+                sendBroadcast(paymentRequestIntent);
+                showNfcInstructions();
+            } else {
+                // send request
+                Intent sendRequestIntent = SendRequest.create(amountBTC).getIntent();
+                sendBroadcast(sendRequestIntent);
+                showNfcInstructions();
+            }
 
-            Intent paymentRequestIntent = PaymentRequest.create(amountBTC, user, address).getIntent();
-            sendBroadcast(paymentRequestIntent);
-            showNfcInstructions();
         } else {
             hideNfcInstructions();
         }
