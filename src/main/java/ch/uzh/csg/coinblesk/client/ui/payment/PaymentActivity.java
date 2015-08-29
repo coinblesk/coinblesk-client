@@ -269,16 +269,9 @@ public abstract class PaymentActivity extends BaseActivity {
 
             @Override
             public void setUUID(byte[] bytes) {
-                try {
-                    if(btInitiator!=null) {
-                        byte[] macAdress = new byte[6];
-                        System.arraycopy(bytes, 0, macAdress, 0, 6);
-                        BluetoothDevice device = btInitiator.getRemoteDevice(macAdress);
-                        btInitiator.scanLeDevice(PaymentActivity.this, Utils.byteArrayToUUID(bytes, 0));
-                        LOGGER.debug("initiate BT");
-                    }
-                } catch (Throwable t) {
-                    t.printStackTrace();
+                if(btInitiator!=null) {
+                    btInitiator.scanLeDevice(PaymentActivity.this, Utils.byteArrayToUUID(bytes, 0));
+                    LOGGER.debug("initiate BT");
                 }
             }
 
@@ -337,6 +330,7 @@ public abstract class PaymentActivity extends BaseActivity {
                 }
 
                 if (protocol.type() == PaymentProtocol.Type.PAYMENT_REQUEST_RESPONSE) {
+                    result2.set(null);
                     //this is the half signed transaction
                     remotePubKey = protocol.publicKey();
 
@@ -385,7 +379,6 @@ public abstract class PaymentActivity extends BaseActivity {
                     case INIT:
                         if (result2.get() != null) {
                             byte[] retVal = result2.get();
-                            result2.set(null);
                             current = State.FIRST_SENT;
                             LOGGER.debug("Set state to {}", current);
                             return retVal;
@@ -431,7 +424,9 @@ public abstract class PaymentActivity extends BaseActivity {
 
                         return null;
                     case FIRST_SENT:
-                        return null;
+                        byte[] retVal = result2.get();
+                        LOGGER.debug("Set in first set");
+                        return retVal;
                     case ADDRESS_RECEIVED:
 
                         // received half signed transaction from other party

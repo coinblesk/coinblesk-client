@@ -714,8 +714,8 @@ final public class PaymentProtocol {
         }
     }
 
-    public static byte[] encodePublicKey(PublicKey publicKey, byte[] macAddress) {
-        UUID u =  Utils.hashToUUID(publicKey.getEncoded(), macAddress);
+    public static byte[] encodePublicKey(PublicKey publicKey) {
+        UUID u =  Utils.hashToUUID(publicKey.getEncoded());
         return Utils.uuidToByteArray(u);
     }
 

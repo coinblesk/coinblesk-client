@@ -141,9 +141,8 @@ public class MainActivity extends BaseActivity {
         KeyPair keyPair = getCoinBleskApplication().getStorageHandler().getKeyPair();
         Pair<BluetoothManager,BluetoothAdapter> pair = BTUtils.checkBT(this);
         if(pair != null) {
-            byte[] macAddress = BTUtils.btAddress(pair.second);
             if(BTUtils.btlePeripheralSupport(pair.second)) {
-                btResponder = BTResponderSetup.init(Utils.hashToUUID(keyPair.getPublic().getEncoded(), macAddress), pair.first, pair.second);
+                btResponder = BTResponderSetup.init(Utils.hashToUUID(keyPair.getPublic().getEncoded()), pair.first, pair.second);
             }
         }
     }
