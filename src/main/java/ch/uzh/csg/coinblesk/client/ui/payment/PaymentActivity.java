@@ -271,7 +271,6 @@ public abstract class PaymentActivity extends BaseActivity {
                         byte[] macAdress = new byte[6];
                         System.arraycopy(bytes, 0, macAdress, 0, 6);
                         BluetoothDevice device = btInitiator.getRemoteDevice(macAdress);
-                        //btInitiator.connect(PaymentActivity.this, device, Utils.byteArrayToUUID(bytes, 0));
                         btInitiator.scanLeDevice(PaymentActivity.this, Utils.byteArrayToUUID(bytes, 0));
                         LOGGER.debug("initiate BT");
                     }
