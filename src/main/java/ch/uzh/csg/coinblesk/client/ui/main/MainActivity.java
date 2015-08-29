@@ -592,87 +592,6 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    /**
-     * Check whether to accept or reject a payment. If the receiver is not trusted, the user
-     * will be asked whether to send the payment or not
-     *
-     * @param satoshis     the amount in satoshis
-     * @param receiver     the user name of the receiver
-     * @param remotePubKey the public key of the receiver
-     * @param confirmation callback for the decision
-     */
-    private void checkAccept(final long satoshis, final String receiver, PublicKey remotePubKey, final PaymentActivity.UserPaymentConfirmation confirmation) {
-        // check whether to auto accept the payment or not
-        BigDecimal amount = BitcoinUtils.satoshiToBigDecimal(satoshis);
-        AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
-        if (entry == null || !entry.isTrusted()) {
-            // for debugging
-            if (entry == null) {
-                LOGGER.debug("User {} was not found in the address book", receiver);
-            } else {
-                LOGGER.debug("User {} is not trusted", receiver);
-            }
-            showConfirmationDialog(amount, receiver, confirmation);
-        } else {
-            BigDecimal autoAcceptAmount = new BigDecimal(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("auto_accept_amount", "0"));
-            if (autoAcceptAmount.compareTo(amount) > 0) {
-                LOGGER.debug("Auto-accepting payment of {} BTC. Auto accept amount is {} BTC", amount, autoAcceptAmount);
-                confirmation.onDecision(true);
-            } else {
-                LOGGER.debug("Amount of {} exceeds the auto-accept amount of {}. Asking user for confirmation.", amount, autoAcceptAmount);
-                // ask the user
-                showConfirmationDialog(BitcoinUtils.satoshiToBigDecimal(satoshis), receiver, confirmation);
-            }
-        }
-    }
-
-    private void showConfirmationDialog(final BigDecimal amount, final String user, final PaymentActivity.UserPaymentConfirmation confirmation) {
-
-        getCoinBleskApplication().getMerchantModeManager().getExchangeRate(new RequestCompleteListener<ExchangeRateTransferObject>() {
-            @Override
-            public void onTaskComplete(ExchangeRateTransferObject response) {
-
-                String amountString;
-                if (response.isSuccessful()) {
-                    BigDecimal exchangeRate = new BigDecimal(response.getExchangeRate(Constants.CURRENCY));
-                    amountString = CurrencyViewHandler.getAmountInCHFandBTC(exchangeRate, amount, MainActivity.this);
-                } else {
-                    amountString = amount.toString();
-                }
-
-                String message = String.format(getString(R.string.sendPayment_dialog_message), amountString, user);
-
-                final AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-                alert.setTitle(getString(R.string.sendPayment_dialog_title));
-                alert.setMessage(message);
-
-                alert.setPositiveButton(getString(R.string.sendPayment_dialog_confirm), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                confirmation.onDecision(true);
-                            }
-                        }).start();
-                    }
-                });
-
-                alert.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                confirmation.onDecision(false);
-                            }
-                        }).start();
-                    }
-                });
-
-                alert.show();
-            }
-        });
-
-    }
 
     /**
      * Displays a custom dialog with a given message and an image indicating if task was successful or not.
@@ -716,6 +635,7 @@ public class MainActivity extends BaseActivity {
             private long satoshis;
             private String receiver;
             private byte[] btcAddress;
+            private boolean isSending = false;
 
             @Override
             public byte[] getUUID() {
@@ -740,8 +660,25 @@ public class MainActivity extends BaseActivity {
                 LOGGER.debug("received nfc message {}", type.toString());
 
                 switch (type) {
+                    case PAYMENT_SEND:
+                        isSending = false;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String username = getCoinBleskApplication().getStorageHandler().getUsername();
+                                byte[] btcAddressBytes = BitcoinUtils.addressToBytes(getWalletService().getBitcoinAddress(), getWalletService().getBitcoinNet());
+                                try {
+                                    byte[] retVal = PaymentProtocol.paymentSendResponse(keyPair.getPublic(), username, new byte[6], btcAddressBytes).toBytes(keyPair.getPrivate());
+                                    responseLater.response(retVal);
+                                } catch (Exception e) {
+                                    LOGGER.error("Fail: ", e);
+                                    listener.onPaymentError("NFC communication failed");
+                                }
+                            }
+                        }).start();
+                        return null;
                     case PAYMENT_REQUEST:
-
+                        isSending = true;
                         // create the half signed transaction
                         new Thread(new Runnable() {
                             @Override
@@ -824,35 +761,13 @@ public class MainActivity extends BaseActivity {
 
                                     byte[] data = PaymentProtocol.paymentOk().toBytes(keyPair.getPrivate());
                                     responseLater.response(data);
-                                    listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
+
+                                    if(isSending) {
+                                        listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
+                                    }
 
                                     // save transaction metadata and address book entry in background....
-                                    AsyncTask<Void, Void, Void> saveMetadataTask = new AsyncTask<Void, Void, Void>() {
-                                        @Override
-                                        protected Void doInBackground(Void... params) {
-                                            // save transaction metadata
-                                            TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
-                                            txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
-                                            txMetaData.setReceiver(receiver);
-                                            txMetaData.setSender("You");
-                                            txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_OUT);
-                                            getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
-                                            LOGGER.debug("Saved transaction meta data");
-
-                                            // save (or update)  user in address book
-                                            AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
-                                            entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
-                                            entry.setName(receiver);
-                                            entry.setBitcoinAddress(BitcoinUtils.getAddressFromScriptHash(btcAddress, getWalletService().getBitcoinNet()));
-                                            getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
-                                            LOGGER.debug("Saved address book entry");
-
-                                            listener.onPaymentFinish(true);
-
-                                            return null;
-                                        }
-                                    };
-                                    saveMetadataTask.execute();
+                                    saveMetaData(signedTx, receiver, remotePubKey, BitcoinUtils.getAddressFromScriptHash(btcAddress, getWalletService().getBitcoinNet()));
 
                                 } catch (Exception e) {
                                     LOGGER.error("Failed to commit and broadcast transaction", e);
@@ -884,6 +799,38 @@ public class MainActivity extends BaseActivity {
         };
     }
 
+    /**
+     * Saves transaction meta data and address book entry
+     */
+    private void saveMetaData(final byte[] signedTx, final String receiver, final PublicKey remotePubKey, final String bitcoinAddress) {
+
+        // save transaction metadata and address book entry in background....
+        AsyncTask<Void, Void, Void> saveMetadataTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                // save transaction metadata
+                String txId = BitcoinUtils.getTxHash(signedTx, getCoinBleskApplication().getStorageHandler().getBitcoinNet());
+                TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
+                txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
+                txMetaData.setReceiver(receiver);
+                txMetaData.setSender("You");
+                txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_OUT);
+                getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
+                LOGGER.debug("Saved transaction meta data");
+
+                // save (or update)  user in address book
+                AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
+                entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
+                entry.setName(receiver);
+                entry.setBitcoinAddress(bitcoinAddress);
+                getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
+                LOGGER.debug("Saved address book entry");
+
+                return null;
+            }
+        };
+        saveMetadataTask.execute();
+    }
 
     private NfcPaymentListener initNfcListener() {
         return new NfcPaymentListener() {

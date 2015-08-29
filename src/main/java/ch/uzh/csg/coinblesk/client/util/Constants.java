@@ -26,9 +26,6 @@ public class Constants {
 
 	/**
 	 * Decimal points of CHF amounts
-	 * Decimal points of CHF amounts
-	 * Decimal points of CHF amounts
-	 * Decimal points of CHF amounts
 	 */
 	public static final int SCALE_CHF = 2;
 

@@ -1,6 +1,5 @@
 package ch.uzh.csg.coinblesk.client.comm;
 
-import org.bitcoinj.core.ECKey;
 import org.spongycastle.jce.ECNamedCurveTable;
 import org.spongycastle.jce.spec.ECParameterSpec;
 
