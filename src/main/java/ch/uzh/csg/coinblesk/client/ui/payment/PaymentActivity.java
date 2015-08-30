@@ -254,6 +254,8 @@ public abstract class PaymentActivity extends BaseActivity {
             private boolean nfcCommPresent = false;
             private boolean btCommPresent = false;
 
+            private long performance = 0;
+
             private PaymentRequest paymentRequest;
 
             {
@@ -285,6 +287,11 @@ public abstract class PaymentActivity extends BaseActivity {
                         btleController.startBTLE();
                     }
                 }
+            }
+
+            @Override
+            public void btTagLost() {
+                LOGGER.debug("bt tag lost, current");
             }
 
             @Override
@@ -346,6 +353,7 @@ public abstract class PaymentActivity extends BaseActivity {
                     // payment rejected by counterparty
                     listener.onPaymentRejected();
                     listener.onPaymentFinish(true);
+                    System.err.println("**PERFORMANCE, complete f " + (System.currentTimeMillis() - performance));
                 }
 
                 protocol = PaymentProtocol.fromBytes(bytes, remotePubKey);
@@ -354,6 +362,7 @@ public abstract class PaymentActivity extends BaseActivity {
                     LOGGER.info("NFC payment complete!");
                     current = State.INIT;
                     listener.onPaymentFinish(true);
+                    System.err.println("**PERFORMANCE, complete t " + (System.currentTimeMillis() - performance));
                 }
 
             }
@@ -377,15 +386,18 @@ public abstract class PaymentActivity extends BaseActivity {
 
                 switch (current) {
                     case INIT:
+
                         if (result2.get() != null) {
                             byte[] retVal = result2.get();
                             current = State.FIRST_SENT;
                             LOGGER.debug("Set state to {}", current);
+                            System.err.println("**PERFORMANCE, init done3: " + (System.currentTimeMillis() - performance));
                             return retVal;
                         }
                         if (t != null) {
                             return null;
                         }
+                        performance = System.currentTimeMillis();
                         t = new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -405,11 +417,13 @@ public abstract class PaymentActivity extends BaseActivity {
                                         byte[] retVal = PaymentProtocol.paymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
                                         result2.set(retVal);
                                         listener.onPaymentRequestSent(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()));
+                                        System.err.println("**PERFORMANCE, init done1: " + (System.currentTimeMillis() - performance));
                                     } else if (sendRequestReceiver.hasActiveSendRequest()) {
                                         // send request
                                         LOGGER.debug("Active send request. Sending username to other device");
                                         byte[] retVal = PaymentProtocol.paymentSend(keyPair.getPublic(), getCoinBleskApplication().getStorageHandler().getUsername(), new byte[6]).toBytes(keyPair.getPrivate());
                                         result2.set(retVal);
+                                        System.err.println("**PERFORMANCE, init done2: " + (System.currentTimeMillis() - performance));
                                     } else {
                                         LOGGER.debug("No active payment request: Abort");
                                         listener.onPaymentError("No active payment request");
@@ -424,17 +438,20 @@ public abstract class PaymentActivity extends BaseActivity {
 
                         return null;
                     case FIRST_SENT:
+                        System.err.println("**PERFORMANCE, first send start: " + (System.currentTimeMillis() - performance));
                         byte[] retVal = result2.get();
                         LOGGER.debug("Set in first set");
+                        System.err.println("**PERFORMANCE, first send done: " + (System.currentTimeMillis() - performance));
                         return retVal;
                     case ADDRESS_RECEIVED:
-
+                        System.err.println("**PERFORMANCE, address received start: " + (System.currentTimeMillis() - performance));
                         // received half signed transaction from other party
 
                         if (result.get() != null) {
                             current = State.SECOND;
                             LOGGER.debug("returning NFC response of size {}", result.get().length);
                             signTaskStarted = false;
+                            System.err.println("**PERFORMANCE, address received done: " + (System.currentTimeMillis() - performance));
                             return result.get();
                         }
 
@@ -467,9 +484,9 @@ public abstract class PaymentActivity extends BaseActivity {
 
                                     @Override
                                     public void onTransactionSigned(final byte[] fullySignedTx) {
-
                                         try {
                                             responseMsg = PaymentProtocol.fullTransaction(fullySignedTx, halfSignedTx.getAccountNumbers(), halfSignedTx.getChildNumbers()).toBytes(keyPair.getPrivate());
+                                            System.err.println("**PERFORMANCE, address received done2: " + (System.currentTimeMillis() - performance));
                                             result.set(responseMsg);
                                             SendRequest sendRequest = sendRequestReceiver.getActiveSendRequest();
                                             listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(sendRequest.getSatoshi()), remotePubKey, user);
@@ -502,13 +519,14 @@ public abstract class PaymentActivity extends BaseActivity {
 
 
                     case HALF_SIGNED_RECEIVED:
-
+                        System.err.println("**PERFORMANCE, half signed start: " + (System.currentTimeMillis() - performance));
                         // received half signed transaction from other party
 
                         if (result.get() != null) {
                             current = State.SECOND;
                             LOGGER.debug("returning NFC response of size {}", result.get().length);
                             signTaskStarted = false;
+                            System.err.println("**PERFORMANCE, half signed done: " + (System.currentTimeMillis() - performance));
                             return result.get();
                         }
 
@@ -539,6 +557,7 @@ public abstract class PaymentActivity extends BaseActivity {
                                     listener.onPaymentReceived(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
                                     LOGGER.debug("Sending server request OK to other client, with fully signed tx. The transaction is {} bytes in size.", fullySignedTx.length);
                                     responseMsg = PaymentProtocol.fullTransaction(fullySignedTx, accountNumbers, childNumbers).toBytes(keyPair.getPrivate());
+                                    System.err.println("**PERFORMANCE, half signed done2: " + (System.currentTimeMillis() - performance));
                                     result.set(responseMsg);
                                     listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(paymentRequest.getSatoshi()), remotePubKey, user);
 

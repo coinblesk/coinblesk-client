@@ -635,6 +635,7 @@ public class MainActivity extends BaseActivity {
             private String receiver;
             private byte[] btcAddress;
             private boolean isSending = false;
+            private long performance;
 
             @Override
             public byte[] getUUID() {
@@ -660,6 +661,7 @@ public class MainActivity extends BaseActivity {
 
                 switch (type) {
                     case PAYMENT_SEND:
+                        System.err.println("**PERFORMANCE, payment send start: "+(System.currentTimeMillis() - performance));
                         isSending = false;
                         new Thread(new Runnable() {
                             @Override
@@ -669,6 +671,7 @@ public class MainActivity extends BaseActivity {
                                 try {
                                     byte[] retVal = PaymentProtocol.paymentSendResponse(keyPair.getPublic(), username, new byte[6], btcAddressBytes).toBytes(keyPair.getPrivate());
                                     responseLater.response(retVal);
+                                    System.err.println("**PERFORMANCE, payment send done: " + (System.currentTimeMillis() - performance));
                                 } catch (Exception e) {
                                     LOGGER.error("Fail: ", e);
                                     listener.onPaymentError("NFC communication failed");
@@ -677,6 +680,8 @@ public class MainActivity extends BaseActivity {
                         }).start();
                         return null;
                     case PAYMENT_REQUEST:
+                        performance = System.currentTimeMillis();
+                        System.err.println("**PERFORMANCE, payment request start: "+(System.currentTimeMillis() - performance));
                         isSending = true;
                         // create the half signed transaction
                         new Thread(new Runnable() {
@@ -712,11 +717,13 @@ public class MainActivity extends BaseActivity {
                                                 byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), username, new byte[6], halfSignedTx.getHalfSignedTx(), halfSignedTx.getAccountNumbers(), halfSignedTx.getChildNumbers()).toBytes(keyPair.getPrivate());
                                                 responseLater.response(response);
                                                 listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
+                                                System.err.println("**PERFORMANCE, payment request done: " + (System.currentTimeMillis() - performance));
                                             } else {
                                                 // user rejected the payment
                                                 byte[] response = PaymentProtocol.paymentNok().toBytes(keyPair.getPrivate());
                                                 responseLater.response(response);
                                                 listener.onPaymentFinish(true);
+                                                System.err.println("**PERFORMANCE, payment request done: " + (System.currentTimeMillis() - performance));
                                             }
                                         } catch (InsufficientMoneyException e) {
                                             LOGGER.error("Fail: ", e);
@@ -733,7 +740,7 @@ public class MainActivity extends BaseActivity {
 
                         return null;
                     case FULL_TRANSACTION:
-
+                        System.err.println("**PERFORMANCE, full transaction start: "+(System.currentTimeMillis() - performance));
                         // get the fully signed tx, commit and broadcast it
                         new Thread(new Runnable() {
                             @Override
@@ -767,6 +774,7 @@ public class MainActivity extends BaseActivity {
 
                                     // save transaction metadata and address book entry in background....
                                     saveMetaData(signedTx, receiver, remotePubKey, BitcoinUtils.getAddressFromScriptHash(btcAddress, getWalletService().getBitcoinNet()));
+                                    System.err.println("**PERFORMANCE, full transaction done: " + (System.currentTimeMillis() - performance));
 
                                 } catch (Exception e) {
                                     LOGGER.error("Failed to commit and broadcast transaction", e);
@@ -778,9 +786,10 @@ public class MainActivity extends BaseActivity {
                         return null;
 
                     case SERVER_NOK:
+                        System.err.println("**PERFORMANCE, server nok start: "+(System.currentTimeMillis() - performance));
                         LOGGER.debug("Received NOK from other client...");
                         listener.onPaymentError("The other client refused the payment.");
-
+                        System.err.println("**PERFORMANCE, server nok stop: " + (System.currentTimeMillis() - performance));
                 }
 
                 return new byte[0];
