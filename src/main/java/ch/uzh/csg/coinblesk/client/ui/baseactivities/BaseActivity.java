@@ -13,6 +13,7 @@ import android.content.pm.ActivityInfo;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -29,10 +30,12 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.security.PublicKey;
 
+import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
 import ch.uzh.csg.coinblesk.client.CoinBleskApplication;
 import ch.uzh.csg.coinblesk.client.CurrencyViewHandler;
 import ch.uzh.csg.coinblesk.client.R;
 import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
+import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.ui.fragments.CustomDialogFragment;
 import ch.uzh.csg.coinblesk.client.ui.payment.PaymentActivity;
 import ch.uzh.csg.coinblesk.client.util.ConnectionCheck;
@@ -354,6 +357,51 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
             }
         });
 
+    }
+
+
+    /**
+     * Saves transaction meta data and address book entry after a successful payment
+     * @param isSending true if the user SENT bitcoins, false if the user received bitcoins
+     * @param signedTx the fully signed, raw bitcoin transaction
+     * @param remoteUser the username of the other party
+     * @param remotePubKey the public key of the other party
+     * @param bitcoinAddress the bitcoin address of the other party
+     */
+    protected void postPayment(final boolean isSending, final byte[] signedTx, final String remoteUser, final PublicKey remotePubKey, final String bitcoinAddress) {
+
+        // add transaction to the wallet, save transaction metadata and address book entry in the background....
+        AsyncTask<Void, Void, Void> postPaymentTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                BitcoinNet bitcoinNet = getWalletService().getBitcoinNet();
+
+                // tx meta data
+                String txId = BitcoinUtils.getTxHash(signedTx, bitcoinNet);
+                TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
+                txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
+                txMetaData.setReceiver(isSending ? remoteUser : TransactionMetaData.SELF);
+                txMetaData.setSender(isSending ? TransactionMetaData.SELF : remoteUser);
+                txMetaData.setType(isSending ? TransactionMetaData.TransactionType.COINBLESK_PAY_OUT : TransactionMetaData.TransactionType.COINBLESK_PAY_IN);
+                getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
+                LOGGER.debug("Saved transaction meta data");
+
+                // save (or update)  user in address book
+                AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
+                entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
+                entry.setName(remoteUser);
+                entry.setBitcoinAddress(bitcoinAddress);
+                getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
+                LOGGER.debug("Saved address book entry");
+
+                getWalletService().commitAndBroadcastTx(signedTx);
+                LOGGER.debug("added transaction to the wallet");
+
+                return null;
+            }
+        };
+        postPaymentTask.execute();
     }
 
 }

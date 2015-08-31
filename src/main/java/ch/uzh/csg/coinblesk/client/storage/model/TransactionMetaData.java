@@ -13,6 +13,11 @@ import java.util.Date;
 @Table(name = "TransactionMetaData")
 public class TransactionMetaData extends Model {
 
+    /**
+     * Placeholder for the user itself. When saving e.g. a received payment, the receiver of the payment is SELF.
+     */
+    public static final String SELF = "SELF";
+
     // do not delete! this default constructor is required
     public TransactionMetaData() {
         super();

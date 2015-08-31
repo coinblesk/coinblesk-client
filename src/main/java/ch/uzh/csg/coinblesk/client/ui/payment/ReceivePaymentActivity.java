@@ -141,30 +141,25 @@ public class ReceivePaymentActivity extends PaymentActivity {
         return new NfcPaymentListener() {
 
             @Override
-            public void onPaymentError(String msg) {
-                showErrorDialog(isSendingMode, msg);
-            }
-
-            @Override
-            public void onPaymentRejected() {
-                super.onPaymentRejected();
-                showErrorDialog(isSendingMode, getString(R.string.transaction_rejected));
-            }
-
-            @Override
             public void onPaymentReceived(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
-                super.onPaymentReceived(amount, senderPubKey, senderUserName);
+                paymentRequestReceiver.inactivatePaymentRequest();
                 showSuccessDialog(false, amount, senderUserName);
             }
 
             @Override
-            public void onPaymentFinish(boolean success) {
-                super.onPaymentFinish(success);
-                // reset UI
-                resetNfc();
-                enableMensaButtons();
-                clearPaymentInfos();
+            public void onPaymentSent(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
+                sendRequestReceiver.inactivateSendRequest();
+                showSuccessDialog(true, amount, senderUserName);
+            }
 
+            @Override
+            public void onPaymentError(String msg) {
+                showErrorDialog();
+            }
+
+            @Override
+            public void onPaymentRejected(String user) {
+                super.onPaymentRejected(user);
             }
         };
     }
@@ -430,10 +425,9 @@ public class ReceivePaymentActivity extends PaymentActivity {
     /**
      * Shows a dialog indicating that the NFC payment failed
      *
-     * @param isSending (isSending = true if initiator sends bitcoins, false if initiator requests bitcoins)
      */
-    private void showErrorDialog(boolean isSending, String msg) {
-        showDialog(msg, false);
+    private void showErrorDialog() {
+        showDialog(getResources().getString(R.string.error_transaction_failed), false);
     }
 
     //Tablet View, define more or adapt buttons for quickly entering fixed prices as in shops etc. here and in sw720dp\activity_receive_payment

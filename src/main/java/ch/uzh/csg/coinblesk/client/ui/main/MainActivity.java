@@ -61,7 +61,6 @@ import ch.uzh.csg.coinblesk.client.payment.NfcPaymentListener;
 import ch.uzh.csg.coinblesk.client.request.RequestTask;
 import ch.uzh.csg.coinblesk.client.storage.StorageHandler;
 import ch.uzh.csg.coinblesk.client.storage.StorageHandlerListener;
-import ch.uzh.csg.coinblesk.client.storage.model.AddressBookEntry;
 import ch.uzh.csg.coinblesk.client.storage.model.TransactionMetaData;
 import ch.uzh.csg.coinblesk.client.ui.baseactivities.BaseActivity;
 import ch.uzh.csg.coinblesk.client.ui.history.HistoryActivity;
@@ -334,6 +333,7 @@ public class MainActivity extends BaseActivity {
                 if (syncProgress.isFinished()) {
                     mProgressBar.setVisibility(View.GONE);
                     mBlockchainSyncStatusText.setVisibility(View.GONE);
+                    createHistoryViews();
                     return;
                 } else if(syncProgress.getProgress() <= 0) {
                     mProgressBar.setVisibility(View.GONE);
@@ -427,8 +427,11 @@ public class MainActivity extends BaseActivity {
         getWalletService().addBitcoinListener(this.getClass(), new WalletListener() {
             @Override
             public void onWalletChange() {
-                createHistoryViews();
-                displayUserBalance();
+                // show user balance and history view only if wallet is not currently downloading the blockchain
+                if (getWalletService().getSyncProgress() != null && (getWalletService().getSyncProgress().isFinished() || getWalletService().getSyncProgress().getProgress() < 0)) {
+                    createHistoryViews();
+                    displayUserBalance();
+                }
             }
         });
     }
@@ -595,7 +598,7 @@ public class MainActivity extends BaseActivity {
     /**
      * Displays a custom dialog with a given message and an image indicating if task was successful or not.
      *
-     * @param message      to be displayed to the receiver
+     * @param message      to be displayed to the remoteUser
      * @param isSuccessful boolean to indicate if task was successful
      */
     protected void showDialog(String message, boolean isSuccessful) {
@@ -631,8 +634,8 @@ public class MainActivity extends BaseActivity {
 
             // payment details
             private PublicKey remotePubKey;
+            private String remoteUser;
             private long satoshis;
-            private String receiver;
             private byte[] btcAddress;
             private boolean isSending = false;
             private long performance;
@@ -651,7 +654,7 @@ public class MainActivity extends BaseActivity {
                 //get 1st message request / get 1st message send
                 //2nd return partially signed transaction
                 // request: BTC from message, public key, signed, username
-                // send: BTC entered by receiver, public key, signed, username
+                // send: BTC entered by remoteUser, public key, signed, username
                 //4th (optional check if signed by server), get ok, reply
                 //5th reply ok, public key, signed
 
@@ -666,6 +669,18 @@ public class MainActivity extends BaseActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
+
+                                PaymentProtocol protocol = null;
+                                try {
+                                    protocol = PaymentProtocol.fromBytes(bytes, null);
+                                } catch (Exception e) {
+                                    LOGGER.error("Fail: ", e);
+                                    listener.onPaymentError("NFC communication failed");
+                                    return;
+                                }
+                                remotePubKey = protocol.publicKey();
+                                remoteUser = protocol.user();
+
                                 String username = getCoinBleskApplication().getStorageHandler().getUsername();
                                 byte[] btcAddressBytes = BitcoinUtils.addressToBytes(getWalletService().getBitcoinAddress(), getWalletService().getBitcoinNet());
                                 try {
@@ -700,12 +715,9 @@ public class MainActivity extends BaseActivity {
                                 satoshis = protocol.satoshis();
                                 btcAddress = protocol.sendTo();
                                 remotePubKey = protocol.publicKey();
-                                //if(btResponder != null) {
-                                //    btResponder.setRemoteUUID(Utils.hashToUUID(remotePubKey.getEncoded()));
-                                //}
-                                receiver = protocol.user();
+                                remoteUser = protocol.user();
 
-                                checkAccept(satoshis, receiver, remotePubKey, new PaymentActivity.UserPaymentConfirmation() {
+                                checkAccept(satoshis, remoteUser, remotePubKey, new PaymentActivity.UserPaymentConfirmation() {
                                     @Override
                                     public void onDecision(boolean accepted) {
                                         try {
@@ -716,13 +728,11 @@ public class MainActivity extends BaseActivity {
                                                 LOGGER.debug("Sending partially signed transaction over NFC, total size of message is {} bytes", halfSignedTx.getHalfSignedTx().length);
                                                 byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), username, new byte[6], halfSignedTx.getHalfSignedTx(), halfSignedTx.getAccountNumbers(), halfSignedTx.getChildNumbers()).toBytes(keyPair.getPrivate());
                                                 responseLater.response(response);
-                                                listener.onPaymentSent(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
                                                 System.err.println("**PERFORMANCE, payment request done: " + (System.currentTimeMillis() - performance));
                                             } else {
                                                 // user rejected the payment
                                                 byte[] response = PaymentProtocol.paymentNok().toBytes(keyPair.getPrivate());
                                                 responseLater.response(response);
-                                                listener.onPaymentFinish(true);
                                                 System.err.println("**PERFORMANCE, payment request done: " + (System.currentTimeMillis() - performance));
                                             }
                                         } catch (InsufficientMoneyException e) {
@@ -756,29 +766,32 @@ public class MainActivity extends BaseActivity {
                                         LOGGER.warn("transaction was not signed by the server. Aborting...");
                                         byte[] response = PaymentProtocol.paymentNok().toBytes(keyPair.getPrivate());
                                         responseLater.response(response);
-                                        listener.onPaymentError("Could not verify server signature");
-                                        listener.onPaymentFinish(false);
+                                        listener.onPaymentError(getString(R.string.error_invalid_server_signature));
                                         return;
                                     }
 
                                     LOGGER.debug("Broadcasting fully signed transaction and commit it to wallet");
-                                    final String txId = getWalletService().commitAndBroadcastTx(signedTx);
-
+                                    getWalletService().commitAndBroadcastTx(signedTx);
 
                                     byte[] data = PaymentProtocol.paymentOk().toBytes(keyPair.getPrivate());
                                     responseLater.response(data);
 
+                                    // save transaction metadata and address book entry ....
+                                    String remoteBtcAddress;
                                     if(isSending) {
-                                        listener.onPaymentSuccess(BitcoinUtils.satoshiToBigDecimal(satoshis), remotePubKey, receiver);
+                                        remoteBtcAddress = BitcoinUtils.getAddressFromScriptHash(btcAddress, getWalletService().getBitcoinNet());
+                                        listener.onPaymentSent(getWalletService().getAmountSentToMe(signedTx), remotePubKey, remoteUser);
+                                    } else {
+                                        remoteBtcAddress = BitcoinUtils.getSenderAddressFromP2SHTx(signedTx, getWalletService().getBitcoinNet());
+                                        listener.onPaymentReceived(getWalletService().getAmountSentToMe(signedTx), remotePubKey, remoteUser);
                                     }
+                                    postPayment(isSending, signedTx, remoteUser, remotePubKey, remoteBtcAddress);
 
-                                    // save transaction metadata and address book entry in background....
-                                    saveMetaData(signedTx, receiver, remotePubKey, BitcoinUtils.getAddressFromScriptHash(btcAddress, getWalletService().getBitcoinNet()));
                                     System.err.println("**PERFORMANCE, full transaction done: " + (System.currentTimeMillis() - performance));
 
                                 } catch (Exception e) {
                                     LOGGER.error("Failed to commit and broadcast transaction", e);
-
+                                    listener.onPaymentError("Error processing transaction");
                                 }
                             }
                         }).start();
@@ -786,7 +799,7 @@ public class MainActivity extends BaseActivity {
                         return null;
 
                     case SERVER_NOK:
-                        System.err.println("**PERFORMANCE, server nok start: "+(System.currentTimeMillis() - performance));
+                        System.err.println("**PERFORMANCE, server nok start: " + (System.currentTimeMillis() - performance));
                         LOGGER.debug("Received NOK from other client...");
                         listener.onPaymentError("The other client refused the payment.");
                         System.err.println("**PERFORMANCE, server nok stop: " + (System.currentTimeMillis() - performance));
@@ -807,86 +820,25 @@ public class MainActivity extends BaseActivity {
         };
     }
 
-    /**
-     * Saves transaction meta data and address book entry
-     */
-    private void saveMetaData(final byte[] signedTx, final String receiver, final PublicKey remotePubKey, final String bitcoinAddress) {
-
-        // save transaction metadata and address book entry in background....
-        AsyncTask<Void, Void, Void> saveMetadataTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                // save transaction metadata
-                String txId = BitcoinUtils.getTxHash(signedTx, getCoinBleskApplication().getStorageHandler().getBitcoinNet());
-                TransactionMetaData txMetaData = getCoinBleskApplication().getStorageHandler().getTransactionMetaData(txId);
-                txMetaData = txMetaData != null ? txMetaData : new TransactionMetaData(txId);
-                txMetaData.setReceiver(receiver);
-                txMetaData.setSender("You");
-                txMetaData.setType(TransactionMetaData.TransactionType.COINBLESK_PAY_OUT);
-                getCoinBleskApplication().getStorageHandler().saveTransactionMetaData(txMetaData);
-                LOGGER.debug("Saved transaction meta data");
-
-                // save (or update)  user in address book
-                AddressBookEntry entry = getCoinBleskApplication().getStorageHandler().getAddressBookEntry(remotePubKey);
-                entry = entry != null ? entry : new AddressBookEntry(remotePubKey);
-                entry.setName(receiver);
-                entry.setBitcoinAddress(bitcoinAddress);
-                getCoinBleskApplication().getStorageHandler().saveAddressBookEntry(entry);
-                LOGGER.debug("Saved address book entry");
-
-                return null;
-            }
-        };
-        saveMetadataTask.execute();
-    }
-
     private NfcPaymentListener initNfcListener() {
         return new NfcPaymentListener() {
 
-            private boolean paymentSent = false;
-            private boolean paymentSuccess = false;
-
-            @Override
-            public void onPaymentFinish(boolean success) {
-
-                //paymentRequestReceiver.inactivatePaymentRequest();
-                //dismissNfcInProgressDialog();
-
-                // redraw the history
-                createHistoryViews();
-
-                if(paymentSent && !paymentSuccess) {
-                    String msg = getString(R.string.error_no_confirmation);
-                    showDialog(msg, false);
-                }
-
-                // reset state
-                paymentSent = false;
-                paymentSuccess = false;
-            }
-
             @Override
             public void onPaymentReceived(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
-                super.onPaymentReceived(amount, senderPubKey, senderUserName);
                 showSuccessDialog(false, amount, senderUserName);
+                createHistoryViews();
             }
 
             @Override
             public void onPaymentSent(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
-                super.onPaymentSent(amount, senderPubKey, senderUserName);
-                paymentSent = true;
-            }
-
-            @Override
-            public void onPaymentSuccess(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
-                super.onPaymentSent(amount, senderPubKey, senderUserName);
                 showSuccessDialog(true, amount, senderUserName);
-                paymentSuccess = true;
+                createHistoryViews();
             }
 
             @Override
             public void onPaymentError(String msg) {
                 showErrorDialog();
+                createHistoryViews();
             }
         };
     }
