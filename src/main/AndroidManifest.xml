@@ -142,11 +142,11 @@
                 android:value=".ui.main.MainActivity" />
         </activity>
 
-        <receiver
+        <remoteUser
             android:name=".wallet.BlockChainSyncAlarmReceiver"
             android:enabled="true"
             android:exported="true" >
-        </receiver>
+        </remoteUser>
 
         <service android:name=".wallet.WalletService" />
 
@@ -166,21 +166,21 @@
                 android:value="true" />
         </service>
 
-        <receiver
+        <remoteUser
             android:name=".payment.PaymentRequestReceiver"
             android:enabled="true"
             android:exported="true" >
-        </receiver>
-        <receiver
+        </remoteUser>
+        <remoteUser
             android:name=".payment.SendRequestReceiver"
             android:enabled="true"
             android:exported="true" >
-        </receiver>
-        <receiver
+        </remoteUser>
+        <remoteUser
             android:name=".payment.HalfSignedTxReceiver"
             android:enabled="true"
             android:exported="true" >
-        </receiver>
+        </remoteUser>
     </application>
 
 </manifest>

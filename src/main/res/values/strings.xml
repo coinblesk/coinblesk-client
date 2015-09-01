@@ -108,7 +108,7 @@
     <string name="sendPayment_pleaseSelectReceiver">Select a Receiver from the Address Book</string>
     <string name="sendPayment_sendButton">Send</string>
     <string name="sendPayment_balanceTitle">Balance:</string>
-    <string name="sendPayment_selectReceiver">Select receiver</string>
+    <string name="sendPayment_selectReceiver">Select remoteUser</string>
     <string name="sendPayment_error">Problems occurred while sending your transaction. Please try again later.</string>
     <string name="sendPayment_error_user">Error. You can not send a transaction to yourself.</string>
     <string name="sendPayment_dialog_title">Confirm Transaction</string>
@@ -226,7 +226,7 @@
     <string name="profileEditPasswordBtn">Change your password</string>
     <string name="profileEditDeletedUserAccountBtn">Delete Account</string>
     <string name="delete_dialog_title">Confirm delete</string>
-    <string name="delete_dialog_message">Are you sure to delete your receiver account?</string>
+    <string name="delete_dialog_message">Are you sure to delete your remoteUser account?</string>
 
     <!-- Update Account Strings -->
     <!-- E-Mail -->
@@ -325,7 +325,7 @@
     <!-- Choose Payment Method -->
     <string name="choosePayment_sendPaymentBtnText">Send Bitcoins</string>
     <string name="choosePayment_requestPaymentBtnText">Request Bitcoins</string>
-    <string name="choosePayment_requestPaymentNoNfcBtnText">Send Bitcoins directly to known receiver\n(without NFC contact)</string>
+    <string name="choosePayment_requestPaymentNoNfcBtnText">Send Bitcoins directly to known remoteUser\n(without NFC contact)</string>
 
     <!-- Address Book Strings -->
     <string name="addressBook_title">Address Book</string>
@@ -353,6 +353,7 @@
     <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting CoinBlesk app preferences in Android Settings.</string>
     <string name="error_transaction_failed">Transmission error: Please check your history to verify if the transaction was successful or not.</string>
     <string name="error_no_confirmation">Payment was sent, but no confirmation was received. Check your history to verify if the transaction was successful or not.</string>
+    <string name="error_invalid_server_signature">The server signature could not be verified. Please try again.</string>
     <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
     <string name="exchangeRate_error">Current exchange rate is not available at the moment.</string>
     <string name="transaction_rejected">Payer has rejected the payment.</string>
@@ -369,7 +370,7 @@
     <string name="nfc_enable_message">To use this application you need to enable NFC (Near Field Communication) in your device settings.</string>
     <string name="nfc_enable_button">Open Device Settings</string>
     <string name="nfc_enable_button_abort">Close Information</string>
-	<string name="nfc_no_adapter">This device has no NFC Adapter. A usage of CoinBlesk is therefore not possible.</string>
+	<string name="nfc_no_adapter">This device has no NFC Adapter. The usage of CoinBlesk is therefore not possible.</string>
 
     <!--Bitcoin Wallet Strings-->
     <string name="main_loadingWallet">Loading wallet...</string>

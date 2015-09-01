@@ -42,6 +42,9 @@ import org.bitcoinj.script.Script;
 import org.bitcoinj.store.UnreadableWalletException;
 import org.bitcoinj.utils.Threading;
 import org.bitcoinj.wallet.DeterministicKeyChain;
+import org.bitcoinj.wallet.DeterministicSeed;
+import org.bitcoinj.wallet.KeyChain;
+import org.bitcoinj.wallet.KeyChainGroup;
 import org.bitcoinj.wallet.WalletTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -710,17 +713,17 @@ public class WalletService extends android.app.Service {
 
             Preconditions.checkState(!unspents.isEmpty(), "Cannot create refund transaction without any unspent transactions.");
 
-            for(Transaction tx : getAppKit().wallet().getTransactions(true)) {
-                if(InstantTransactionSelector.get().shouldSelect(tx)) {
-                    for(TransactionOutput txOut : tx.getOutputs()) {
-                        if(txOut.isMine(getAppKit().wallet())) {
+            for (Transaction tx : getAppKit().wallet().getTransactions(true)) {
+                if (InstantTransactionSelector.get().shouldSelect(tx)) {
+                    for (TransactionOutput txOut : tx.getOutputs()) {
+                        if (txOut.isMine(getAppKit().wallet())) {
                             req.tx.addInput(txOut);
                         }
                     }
                 }
             }
 
-            if(req.tx.getInputs().isEmpty()) {
+            if (req.tx.getInputs().isEmpty()) {
                 LOGGER.debug("No unspent output found with enough confirmations. Abort creating refund txransaction");
                 return;
             }
@@ -837,15 +840,24 @@ public class WalletService extends android.app.Service {
     }
 
     /**
+     * Returns the amount of bitcoins sent to the user's wallet
+     *
+     * @param rawTx the raw transaction that sends bitcoins to the user
+     * @return the amount of bitcoins sent to the user
+     */
+    public BigDecimal getAmountSentToMe(byte[] rawTx) {
+        Transaction tx = new Transaction(getNetworkParams(bitcoinNet), rawTx);
+        return BitcoinUtils.coinToBigDecimal(tx.getValueSentToMe(getAppKit().wallet()));
+    }
+
+    /**
      * @return A private, non-multi sig address. Private address are used to create
      * refund-transactions.
      */
     public String getPrivateAddress() {
-        //TODO: restore this if married wallet out of sync error still happens
-//        DeterministicSeed seed = getAppKit().wallet().getActiveKeychain().getSeed();
-//        KeyChainGroup kcg = new KeyChainGroup(getNetworkParams(bitcoinNet), seed);
-//        return kcg.getActiveKeyChain().getKey(KeyChain.KeyPurpose.RECEIVE_FUNDS).toAddress(getNetworkParams(bitcoinNet)).toString();
-        return "mhUnoDdqHJic8qTjDKYXcQhqBidUAjYQSp";
+        DeterministicSeed seed = getAppKit().wallet().getActiveKeychain().getSeed();
+        KeyChainGroup kcg = new KeyChainGroup(getNetworkParams(bitcoinNet), seed);
+        return kcg.getActiveKeyChain().getKey(KeyChain.KeyPurpose.RECEIVE_FUNDS).toAddress(getNetworkParams(bitcoinNet)).toString();
     }
 
     /**
