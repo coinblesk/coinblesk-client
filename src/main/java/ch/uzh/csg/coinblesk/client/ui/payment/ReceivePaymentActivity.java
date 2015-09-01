@@ -262,7 +262,7 @@ public class ReceivePaymentActivity extends PaymentActivity {
     }
 
     /**
-     * Creates PaymentInfos necessary for initializeNFC. Only transaction amount > 0 are accepted.
+     * Creates PaymentInfos necessary for initializeNFC. Only transaction amount > 0 are accepted.fee
      */
     private void initializePayment() {
         receiveAmount = Constants.inputValueCalculator.toPlainString();
@@ -279,6 +279,13 @@ public class ReceivePaymentActivity extends PaymentActivity {
                 String address = getWalletService().getBitcoinAddress();
                 String user = getCoinBleskApplication().getStorageHandler().getUsername();
                 Preconditions.checkState(BitcoinUtils.isP2SHAddress(address, getCoinBleskApplication().getStorageHandler().getBitcoinNet()), "NFC payments to non-P2SH addresses is not currently supported.");
+
+                // add the fee to the total amount
+                if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("include_fee", false)) {
+                    double feeMultiplier = 1.0 + Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(this).getString("fee_amount", "0")) / 100;
+                    amountBTC = amountBTC.multiply(BigDecimal.valueOf(feeMultiplier));
+                }
+
                 Intent paymentRequestIntent = PaymentRequest.create(amountBTC, user, address).getIntent();
                 sendBroadcast(paymentRequestIntent);
                 showNfcInstructions();
