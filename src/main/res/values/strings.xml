@@ -158,7 +158,7 @@
     <string name="setting_payOut_day_sunday">Sunday</string>
     <string name="setting_payOut_time_title">Select Time</string>
     <string name="payOut_title">Pay Out</string>
-    <string name="payOut_info">Info: To make sure your pay out will be accepted and implemented in the blockchain, a fee of currently 0.0001 BTC is deducted.</string>
+    <string name="payOut_info">Info: To make sure your pay out will be accepted and registered in the blockchain, a small fee is deducted from the transaction.</string>
     <string name="payOut_BalanceText">Current Balance:</string>
     <string name="PayOut_AmountText">PayOut Amount:</string>
     <string name="payOut_AddressText">PayOut Address:</string>

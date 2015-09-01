@@ -168,7 +168,7 @@
     <string name="setting_payOut_day_sunday">Sonntag</string>
     <string name="setting_payOut_time_title">Zeit auswählen</string>
     <string name="payOut_title">Auszahlen</string>
-    <string name="payOut_info">Info: Um sicherzugehen dass ihre Auszahlung akzeptiert und in die Blockchain aufgenommen wird, verwenden wir eine Gebühr von momentan 0.0001 BTC.</string>
+    <string name="payOut_info">Info: Um sicherzugehen dass ihre Auszahlung akzeptiert und in der Blockchain registriert wird, wird eine kleine Gebühr von der Zahlung abgezogen.</string>
     <string name="payOut_BalanceText">Aktueller Kontostand: </string>
     <string name="PayOut_AmountText">Betrag: </string>
     <string name="payOut_AddressText">BTC-Adresse: </string>

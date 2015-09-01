@@ -30,6 +30,7 @@ import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.core.Wallet.BalanceType;
+import org.bitcoinj.core.Wallet.SendRequest;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.TransactionSignature;
@@ -434,7 +435,7 @@ public class WalletService extends android.app.Service {
 
         try {
             Address btcAddress = new Address(params, getBitcoinAddress());
-            Wallet.SendRequest req = Wallet.SendRequest.emptyWallet(btcAddress);
+            SendRequest req = SendRequest.emptyWallet(btcAddress);
             req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
             req.memo = DefaultTransactionMemos.REDEPOSIT_TX_MEMO;
             getAppKit().wallet().completeTx(req);
@@ -504,8 +505,7 @@ public class WalletService extends android.app.Service {
     private void createPayment(Address address, Coin amount) throws AddressFormatException, InsufficientMoneyException {
 
         // create the send request
-        Wallet.SendRequest req = Wallet.SendRequest.to(address, amount);
-        req.fee = BitcoinUtils.bigDecimalToCoin(Constants.DEFAULT_FEE);
+        SendRequest req = SendRequest.to(address, amount);
         req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
         req.coinSelector = InstantTransactionSelector.get();
         req.tx.getConfidence().setSource(TransactionConfidence.Source.SELF);
@@ -561,13 +561,32 @@ public class WalletService extends android.app.Service {
     }
 
     /**
+     * @return The maximum amount of bitcoins to send from this wallet,
+     * taking the fee into consideration.
+     */
+    public BigDecimal getMaxSendAmount() {
+        // create a send request emptying the wallet, but without signing the transactions. From
+        // the value that is sent to us equals out total amount available for spending.
+        SendRequest req = SendRequest.forTx(new Transaction(getNetworkParams(bitcoinNet)));
+        req.tx.addOutput(Coin.ZERO, getAppKit().wallet().currentAddress(KeyChain.KeyPurpose.RECEIVE_FUNDS));
+        req.emptyWallet = true;
+        req.signInputs = false;
+        try {
+            getAppKit().wallet().completeTx(req);
+        } catch (InsufficientMoneyException e) {
+            // cannot happen
+        }
+        return BitcoinUtils.coinToBigDecimal(req.tx.getValueSentToMe(getAppKit().wallet()));
+    }
+
+    /**
      * Broadcasts the stored refund transaction.
      */
     public void broadcastRefundTx() {
 
         byte[] serializedRefundTx = Base64.decode(storage.getRefundTx(), Base64.NO_WRAP);
         Transaction refundTx = new Transaction(getNetworkParams(bitcoinNet), serializedRefundTx);
-        Wallet.SendRequest req = Wallet.SendRequest.forTx(refundTx);
+        SendRequest req = SendRequest.forTx(refundTx);
 
         try {
             getAppKit().wallet().completeTx(req);
@@ -702,9 +721,9 @@ public class WalletService extends android.app.Service {
 
         try {
             Address privateAddr = new Address(getNetworkParams(bitcoinNet), getPrivateAddress());
-            Wallet.SendRequest req = Wallet.SendRequest.to(privateAddr, getAppKit().wallet().getBalance(InstantTransactionSelector.get()).subtract(BitcoinUtils.bigDecimalToCoin(Constants.DEFAULT_FEE)));
-            req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
+            SendRequest req = SendRequest.emptyWallet(privateAddr);
             req.coinSelector = InstantTransactionSelector.get();
+            req.missingSigsMode = Wallet.MissingSigsMode.USE_OP_ZERO;
 
             // collect all unspents
             List<Transaction> unspents = new ArrayList<>();

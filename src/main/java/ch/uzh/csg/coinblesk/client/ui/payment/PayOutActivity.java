@@ -48,8 +48,6 @@ public class PayOutActivity extends BaseActivity {
     private TextView chfBalance;
     private TextView chfAmount;
 
-    private boolean walletConnected = false;
-
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         super.onServiceConnected(name, service);
@@ -109,13 +107,9 @@ public class PayOutActivity extends BaseActivity {
 
         allBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (walletConnected) {
-                    BigDecimal balance = getWalletService().getBalance();
-                    BigDecimal amount = CurrencyViewHandler.getBTCAmountInDefinedUnit(balance, getApplicationContext());
-
-                    // TODO: Subtract fee
-                    payoutAmountEditText.setText(amount.toPlainString());
-                }
+                BigDecimal balance = getWalletService().getMaxSendAmount();
+                BigDecimal amount = CurrencyViewHandler.getBTCAmountInDefinedUnit(balance, getApplicationContext());
+                payoutAmountEditText.setText(amount.toPlainString());
             }
         });
         allBtn.setEnabled(true);
@@ -218,7 +212,6 @@ public class PayOutActivity extends BaseActivity {
     }
 
     private void updateBalance() {
-        // TODO: distinguish between unconfirmed and confirmed balance
         BigDecimal balance = getWalletService().getUnconfirmedBalance();
 
         CurrencyViewHandler.setBTC(btcBalance, balance, this);
