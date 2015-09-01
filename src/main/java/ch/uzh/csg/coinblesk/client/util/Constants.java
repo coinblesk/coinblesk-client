@@ -13,7 +13,10 @@ public class Constants {
 	/**
 	 * The base URL of the server.
 	 */
+	//testserver
 	public static final String BASE_URL = "http://bitcoin-clone1.csg.uzh.ch/ws/server";
+	//production
+	//public static final String BASE_URL = "https://bitcoin.csg.uzh.ch/ws2/server";
 
 	/**
 	 * Amount of confirmations a transaction needs to be considered as confirmed
