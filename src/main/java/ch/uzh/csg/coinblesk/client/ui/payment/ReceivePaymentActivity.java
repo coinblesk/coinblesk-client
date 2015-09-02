@@ -146,6 +146,9 @@ public class ReceivePaymentActivity extends PaymentActivity {
                 showSuccessDialog(false, amount, senderUserName);
                 clearPaymentInfos();
                 hideNfcInstructions();
+                //if(btInitiator!=null) {
+                //    btInitiator.close();
+                //}
             }
 
             @Override
@@ -154,19 +157,27 @@ public class ReceivePaymentActivity extends PaymentActivity {
                 showSuccessDialog(true, amount, senderUserName);
                 clearPaymentInfos();
                 hideNfcInstructions();
+                //if(btInitiator!=null) {
+                //    btInitiator.close();
+                //}
             }
 
             @Override
             public void onPaymentError(String msg) {
                 showErrorDialog();
                 hideNfcInstructions();
+                //if(btInitiator!=null) {
+                //    btInitiator.close();
+                //}
             }
 
             @Override
             public void onPaymentRejected(String user) {
                 super.onPaymentRejected(user);
                 hideNfcInstructions();
-
+                //if(btInitiator!=null) {
+                //    btInitiator.close();
+                //}
             }
         };
     }

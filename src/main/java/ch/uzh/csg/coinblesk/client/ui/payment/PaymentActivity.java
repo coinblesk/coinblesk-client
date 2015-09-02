@@ -64,7 +64,7 @@ public abstract class PaymentActivity extends BaseActivity {
     private NfcPaymentListener listener;
     protected PaymentNfcInitiatorHandler handler;
     protected NfcInitiatorSetup initiator;
-    private BTInitiatorSetup btInitiator;
+    protected BTInitiatorSetup btInitiator;
 
     protected PaymentRequestReceiver paymentRequestReceiver;
     protected SendRequestReceiver sendRequestReceiver;
@@ -235,9 +235,10 @@ public abstract class PaymentActivity extends BaseActivity {
 
         private boolean isSending = false;
 
+        private Thread t2;
+
         private PaymentRequest paymentRequest;
         private SendRequest sendRequest;
-        private byte[] currentUUID = null;
 
         {
             // initialize key pair
@@ -251,9 +252,9 @@ public abstract class PaymentActivity extends BaseActivity {
         }
 
         @Override
-        public void setUUID(final byte[] bytes) {
-            if(btInitiator!=null && !btCommPresent && currentUUID!=null && !Arrays.equals(currentUUID, bytes)) {
-                currentUUID = bytes;
+        public void setUUID(final byte[] bytes, boolean first) {
+            if(btInitiator!=null && !btInitiator.isOpen()) {
+                LOGGER.debug("startup scanninng done");
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -261,18 +262,39 @@ public abstract class PaymentActivity extends BaseActivity {
                         LOGGER.debug("initiate BT");
                     }
                 }).start();
+            } else {
+                LOGGER.debug("no start scanning");
             }
-            LOGGER.debug("setUUID done");
+
         }
 
         @Override
-        public void btTagFound(BTLEController btleController) {
-            LOGGER.debug("btleDiscovered");
+        public void protocolDone() {
+            LOGGER.debug("protocol done");
+            if(btInitiator != null) {
+                btInitiator.close();
+            }
+        }
+
+        @Override
+        public void btTagFound(final BTLEController btleController) {
+            LOGGER.debug("bt tag found");
             btCommPresent = true;
             this.btleController = btleController;
             if(!nfcCommPresent) {
                 if(current == State.FIRST_SENT) {
-                    btleController.startBTLE();
+                    t2 = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(250);
+                            } catch (InterruptedException e) {
+                                return;
+                            }
+                            btleController.startBTLE();
+                        }
+                    });
+                    t2.start();
                 }
             }
         }
@@ -285,16 +307,35 @@ public abstract class PaymentActivity extends BaseActivity {
 
         @Override
         public void nfcTagFound() {
-            LOGGER.debug("tag found, current {}", current);
+            if(t2!=null) {
+                t2.interrupt();
+                t2=null;
+            }
+            if(btInitiator != null) {
+                btInitiator.close();
+            }
+
+            LOGGER.debug("nfc tag found, current {}", current);
             nfcCommPresent = true;
         }
 
         @Override
         public void nfcTagLost() {
-            LOGGER.debug("tag lost, check BT, current {}", current);
+            LOGGER.debug("nfc tag lost, check BT, current {}", current);
             nfcCommPresent = false;
-            if(btleController != null && current == State.FIRST_SENT) {
-                btleController.startBTLE();
+            if(btleController != null && btInitiator!=null && btInitiator.isOpen() && current == State.FIRST_SENT) {
+                t2 = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(250);
+                        } catch (InterruptedException e) {
+                            return;
+                        }
+                        btleController.startBTLE();
+                    }
+                });
+                t2.start();
             }
         }
 
