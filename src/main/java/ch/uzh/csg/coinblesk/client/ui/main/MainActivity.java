@@ -805,13 +805,36 @@ public class MainActivity extends BaseActivity {
                         System.err.println("**PERFORMANCE, server nok stop: " + (System.currentTimeMillis() - performance));
                 }
 
-                return new byte[0];
+                //return new byte[0];
+                return null;
             }
 
             @Override
             public void handleFailed(String s) {
+                //responder.getNfcResponder().reset();
                 LOGGER.error("NFC connection failed: {}", s);
             }
+
+            @Override
+            public void nfcTagLost() {
+                LOGGER.debug("nfcTagLost");
+            }
+
+            @Override
+            public void btTagFound() {
+                LOGGER.debug("btTagFound");
+            }
+
+            @Override
+            public void btTagLost() {
+                LOGGER.debug("btTagLost");
+            }
+
+            @Override
+            public void nfcTagFound() {
+                LOGGER.debug("nfcTagFound");
+            }
+
 
             @Override
             public void handleStatus(String s) {

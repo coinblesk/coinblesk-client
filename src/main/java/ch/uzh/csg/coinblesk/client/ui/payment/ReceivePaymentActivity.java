@@ -144,22 +144,29 @@ public class ReceivePaymentActivity extends PaymentActivity {
             public void onPaymentReceived(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
                 paymentRequestReceiver.inactivatePaymentRequest();
                 showSuccessDialog(false, amount, senderUserName);
+                clearPaymentInfos();
+                hideNfcInstructions();
             }
 
             @Override
             public void onPaymentSent(BigDecimal amount, PublicKey senderPubKey, String senderUserName) {
                 sendRequestReceiver.inactivateSendRequest();
                 showSuccessDialog(true, amount, senderUserName);
+                clearPaymentInfos();
+                hideNfcInstructions();
             }
 
             @Override
             public void onPaymentError(String msg) {
                 showErrorDialog();
+                hideNfcInstructions();
             }
 
             @Override
             public void onPaymentRejected(String user) {
                 super.onPaymentRejected(user);
+                hideNfcInstructions();
+
             }
         };
     }
@@ -265,6 +272,8 @@ public class ReceivePaymentActivity extends PaymentActivity {
      * Creates PaymentInfos necessary for initializeNFC. Only transaction amount > 0 are accepted.
      */
     private void initializePayment() {
+        initiator.startInitiating();
+        handler.reset();
         receiveAmount = Constants.inputValueCalculator.toPlainString();
         if (isPortrait) {
             receiveAmountEditText.setText(receiveAmount);
