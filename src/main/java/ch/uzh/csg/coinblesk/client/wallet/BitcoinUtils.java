@@ -10,12 +10,17 @@ import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.Utils;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.params.UnitTestParams;
+import org.bitcoinj.store.UnreadableWalletException;
+import org.bitcoinj.wallet.DeterministicSeed;
+import org.bitcoinj.wallet.KeyChain;
+import org.bitcoinj.wallet.MarriedKeyChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
+import ch.uzh.csg.coinblesk.client.util.Constants;
 
 /**
  * Created by rvoellmy on 5/16/15.
@@ -154,6 +160,7 @@ public class BitcoinUtils {
 
     /**
      * Converts a byte array to hex
+     *
      * @param bytes
      * @return
      */
@@ -176,6 +183,7 @@ public class BitcoinUtils {
     /**
      * This Method takes the first input of a transaction and "extracts" the
      * P2SH address of the sender out of it.
+     *
      * @return the bitcoin address of the sender of a P2SH spending transaction.
      */
     public static String getSenderAddressFromP2SHTx(byte[] rawTx, BitcoinNet bitcoinNet) {
@@ -184,6 +192,34 @@ public class BitcoinUtils {
         byte[] redeemScript = tx.getInput(0).getScriptSig().getChunks().get(tx.getInput(0).getScriptSig().getChunks().size() - 1).data;
         byte[] hash160 = Utils.sha256hash160(redeemScript);
         return Address.fromP2SHHash(params, hash160).toString();
+    }
+
+    /**
+     * Creates a P2SH address from a private seed and the public server seed.
+     *
+     * @param mnemonic          the private mnemonic
+     * @param serverWatchingKey the public watching key of the server
+     * @return a P2SH address
+     */
+    public static String getP2SHAddressFromSeed(String mnemonic, String serverWatchingKey, BitcoinNet bitcoinNet) throws MnemonicException {
+
+        try {
+            DeterministicKey serverKey = DeterministicKey.deserializeB58(serverWatchingKey, getNetworkParameters(bitcoinNet));
+            DeterministicSeed seed = new DeterministicSeed(mnemonic, null, "", Constants.EARLIEST_COINBLESK_KEY);
+
+            // marry this clients wallet to the server wallet
+            MarriedKeyChain marriedKeyChain = MarriedKeyChain.builder()
+                    .seed(seed)
+                    .followingKeys(serverKey)
+                    .threshold(2)
+                    .build();
+
+            return marriedKeyChain.freshOutputScript(KeyChain.KeyPurpose.RECEIVE_FUNDS).getToAddress(getNetworkParameters(bitcoinNet)).toString();
+
+        } catch (UnreadableWalletException e) {
+            throw new MnemonicException();
+        }
+
     }
 
 }

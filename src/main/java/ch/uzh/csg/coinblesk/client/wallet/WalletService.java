@@ -240,6 +240,9 @@ public class WalletService extends android.app.Service {
     public Service restoreWalletFromSeed(StorageHandler storage, String mnemonic, Long creationTime) throws UnreadableWalletException {
         Preconditions.checkNotNull(storage, "Storage handler cannot be null.");
 
+        LOGGER.debug("Shutting down wallet app kit");
+        clientWalletKit.stopAsync().awaitTerminated();
+
         LOGGER.debug("Restoring wallet from mnemonic seed");
         bitcoinNet = storage.getBitcoinNet();
 

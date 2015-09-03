@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 import ch.uzh.csg.btlib.BTInitiatorSetup;

@@ -320,6 +320,13 @@
     <string name="settings_exchange_username">Exchange Username or Account Number</string>
     <string name="settings_exchange_api_key">Exchange API Key</string>
     <string name="settings_exchange_api_secret">Exchange API Secret</string>
+    <string name="settings_walletRestoreTitle">Wallet Restore</string>
+    <string name="settings_walletRestoreSeedHint">Enter wallet backup phrase here...</string>
+    <string name="settings_walletRestoreExplanation">To restore a CoinBlesk wallet, enter the backup phrase in the field below and press the "Restore Wallet" button. All bitcoins on this wallet will be automatically transferred to the restored wallet. Please be aware that restoring the wallet may require several hours to complete.</string>
+    <string name="settings_walletBackupRestoreWalletButtonText">Restore Wallet</string>
+    <string name="settings_walletBackupRestoreFailedToast">Wallet restore failed...</string>
+
+
 
 
     <!-- Choose Payment Method -->
@@ -399,6 +406,7 @@
 
     <!-- Generic Strings -->
     <string name="email_address_not_valid">E-Mail address is not valid.</string>
+    <string name="seed_not_valid">Backup phrase is not valid.</string>
     <string name="no_email_client_installed">No email client found on device</string>
 
 </resources>

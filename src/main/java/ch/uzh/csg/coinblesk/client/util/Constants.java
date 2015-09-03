@@ -14,9 +14,10 @@ public class Constants {
 	 * The base URL of the server.
 	 */
 	//testserver
-	public static final String BASE_URL = "http://bitcoin-clone1.csg.uzh.ch/ws/server";
+	//public static final String BASE_URL = "http://bitcoin-clone1.csg.uzh.ch/ws/server";
 	//production
-	//public static final String BASE_URL = "https://bitcoin.csg.uzh.ch/ws2/server";
+	public static final String BASE_URL = "https://bitcoin.csg.uzh.ch/ws2/server";
+
 
 	/**
 	 * Amount of confirmations a transaction needs to be considered as confirmed
@@ -54,6 +55,6 @@ public class Constants {
 	 * This will speed up blockchain synchronization significantly, as we don't have
 	 * to download block earlier than this date.
 	 */
-	public static long EARLIEST_COINBLESK_KEY = 1427846400;
+	public static long EARLIEST_COINBLESK_KEY = 1441065600; // Sep 01 2015
 
 }

@@ -5,10 +5,12 @@ import junit.framework.TestCase;
 
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.NetworkParameters;
 
 import java.math.BigDecimal;
 
 import ch.uzh.csg.coinblesk.bitcoin.BitcoinNet;
+import ch.uzh.csg.coinblesk.client.testutils.BitcoinTestUtils;
 
 /**
  * Created by rvoellmy on 7/26/15.
@@ -44,6 +46,15 @@ public class BitcoinUtilsTest extends TestCase {
     public void testCoinToBigDecimal() {
         BigDecimal fiftyBtc = BitcoinUtils.coinToBigDecimal(Coin.FIFTY_COINS);
         Assert.assertEquals(0, fiftyBtc.compareTo(new BigDecimal("50")));
+    }
+
+    public void testGetP2SHAddressFromSeed() throws Exception {
+        NetworkParameters params = BitcoinUtils.getNetworkParameters(BITCOIN_NET);
+        String mnemonic = BitcoinTestUtils.getRandomMnemonic();
+        String watchingKey = BitcoinTestUtils.getRandomWatchingKey(params);
+
+        String addr = BitcoinUtils.getP2SHAddressFromSeed(mnemonic, watchingKey, BITCOIN_NET);
+        Assert.assertTrue(BitcoinUtils.isP2SHAddress(addr, BITCOIN_NET));
     }
 
 
