@@ -19,8 +19,6 @@ public class PaymentRequestReceiver extends BroadcastReceiver {
     }
 
     public PaymentRequest getActivePaymentRequest() {
-        PaymentRequest activePaymentRequest = this.activePaymentRequest;
-        this.activePaymentRequest = null;
         return activePaymentRequest;
     }
 

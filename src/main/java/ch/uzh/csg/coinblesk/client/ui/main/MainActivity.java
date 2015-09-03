@@ -47,9 +47,14 @@ import org.bitcoinj.core.InsufficientMoneyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.List;
 
 import ch.uzh.csg.btlib.BTResponderSetup;
@@ -737,9 +742,22 @@ public class MainActivity extends BaseActivity {
                                             }
                                         } catch (InsufficientMoneyException e) {
                                             LOGGER.error("Fail: ", e);
+                                            try {
+                                                byte[] response = PaymentProtocol.paymentNok().toBytes(keyPair.getPrivate());
+                                                responseLater.response(response);
+                                            } catch (Exception e1) {
+                                                e1.printStackTrace();
+                                            }
                                             listener.onPaymentError("No enough bitcoins");
                                         } catch (Exception e) {
                                             LOGGER.error("Fail: ", e);
+                                            try {
+                                                byte[] response = PaymentProtocol.paymentNok().toBytes(keyPair.getPrivate());
+                                                responseLater.response(response);
+                                            } catch (Exception e1) {
+                                                e1.printStackTrace();
+                                            }
+
                                             listener.onPaymentError("NFC communication failed");
                                         }
                                     }
@@ -805,13 +823,36 @@ public class MainActivity extends BaseActivity {
                         System.err.println("**PERFORMANCE, server nok stop: " + (System.currentTimeMillis() - performance));
                 }
 
-                return new byte[0];
+                //return new byte[0];
+                return null;
             }
 
             @Override
             public void handleFailed(String s) {
+                //responder.getNfcResponder().reset();
                 LOGGER.error("NFC connection failed: {}", s);
             }
+
+            @Override
+            public void nfcTagLost() {
+                LOGGER.debug("nfcTagLost");
+            }
+
+            @Override
+            public void btTagFound() {
+                LOGGER.debug("btTagFound");
+            }
+
+            @Override
+            public void btTagLost() {
+                LOGGER.debug("btTagLost");
+            }
+
+            @Override
+            public void nfcTagFound() {
+                LOGGER.debug("nfcTagFound");
+            }
+
 
             @Override
             public void handleStatus(String s) {
