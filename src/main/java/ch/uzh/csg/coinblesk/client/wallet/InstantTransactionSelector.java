@@ -33,7 +33,6 @@ public class InstantTransactionSelector extends DefaultCoinSelector {
         boolean isSelfCreated = tx.getConfidence().getSource() == TransactionConfidence.Source.SELF;
         LOGGER.trace("Selecting transaction {}: HasMinConf={}, isServerSigned={}, isSelfSigned={}", tx.getHashAsString(), hasMinConf, isServerSigned, isSelfCreated);
 
-
         return hasMinConf || isServerSigned || isSelfCreated;
     }
 

@@ -409,4 +409,6 @@
     <string name="seed_not_valid">Backup phrase is not valid.</string>
     <string name="no_email_client_installed">No email client found on device</string>
 
+    <string name="nfc_contact_established">NFC contact established</string>
+
 </resources>

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Base64;
 import android.util.Pair;
+import android.widget.Toast;
 
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
@@ -316,7 +317,13 @@ public abstract class PaymentActivity extends BaseActivity {
 
             LOGGER.debug("nfc tag found, current {}", current);
             nfcCommPresent = true;
-        }
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(PaymentActivity.this, R.string.nfc_contact_established, Toast.LENGTH_SHORT).show();
+                }
+            });        }
 
         @Override
         public void nfcTagLost() {

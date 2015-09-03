@@ -40,6 +40,7 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.util.concurrent.Service;
 
@@ -47,14 +48,9 @@ import org.bitcoinj.core.InsufficientMoneyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PublicKey;
-import java.security.SignatureException;
 import java.util.List;
 
 import ch.uzh.csg.btlib.BTResponderSetup;
@@ -851,6 +847,13 @@ public class MainActivity extends BaseActivity {
             @Override
             public void nfcTagFound() {
                 LOGGER.debug("nfcTagFound");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, R.string.nfc_contact_established, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             }
 
 
