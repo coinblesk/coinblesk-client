@@ -338,6 +338,7 @@ public class WalletService extends android.app.Service {
             LOGGER.debug("Transaction Memo: {}, Transaction Source: {}", tx.getMemo(), tx.getConfidence().getSource());
             LOGGER.debug("HEX encoded: {}:", BitcoinUtils.bytesToHex(tx.unsafeBitcoinSerialize()));
         }
+        LOGGER.debug("Current block height: {}", getAppKit().chain().getBestChainHeight());
     }
 
     private Service init(StorageHandler storage, @Nullable String mnemonic, @Nullable Long creationTime) {
