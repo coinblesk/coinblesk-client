@@ -14,15 +14,15 @@ public class Constants {
 	 * The base URL of the server.
 	 */
 	//testserver
-	//public static final String BASE_URL = "http://bitcoin-clone1.csg.uzh.ch/ws/server";
+	public static final String BASE_URL = "http://bitcoin-clone1.csg.uzh.ch/ws/server";
 	//production
-	public static final String BASE_URL = "https://bitcoin.csg.uzh.ch/ws2/server";
+	//public static final String BASE_URL = "https://bitcoin.csg.uzh.ch/ws2/server";
 
 
 	/**
 	 * Amount of confirmations a transaction needs to be considered as confirmed
 	 */
-	public static final int MIN_CONFIRMATIONS = 0;
+	public static final int MIN_CONFIRMATIONS = 4;
 	
 	public static final String BTC = "-1";
 	public static final String MILI_BTC = "0";
