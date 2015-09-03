@@ -5,12 +5,12 @@
     <aid-group
         android:category="other"
         android:description="@string/servicedesc" >
-        <aid-filter android:name="F0F00777FF5500" />
-        <aid-filter android:name="F0F00777FF5536" />
-        <aid-filter android:name="F0F00777FF55F5" />
-        <aid-filter android:name="F0F00777FF5400" />
-        <aid-filter android:name="F0F00777FF5436" />
-        <aid-filter android:name="F0F00777FF54F5" />
+        <aid-filter android:name="F0F00777FF6500" />
+        <aid-filter android:name="F0F00777FF6536" />
+        <aid-filter android:name="F0F00777FF65F5" />
+        <aid-filter android:name="F0F00777FF6400" />
+        <aid-filter android:name="F0F00777FF6436" />
+        <aid-filter android:name="F0F00777FF64F5" />
     </aid-group>
 
 </host-apdu-service>

@@ -35,11 +35,6 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <!--Cloud Backup-->
-        <meta-data
-            android:name="com.google.android.backup.api_key"
-            android:value="AEdPqrEAAAAIHYaIPvfcNV9O6jA91IszSWW63KdHhty9CN3QLQ" />
-
         <!--ORM-->
         <meta-data android:name="AA_DB_NAME" android:value="coinblesk.db" />
         <meta-data
