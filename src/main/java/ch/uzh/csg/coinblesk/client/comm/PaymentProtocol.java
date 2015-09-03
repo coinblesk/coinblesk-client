@@ -63,10 +63,6 @@ final public class PaymentProtocol {
     private long satoshis;
     final private static int AMOUNT_LENGTH = 8;
 
-    //fix - 48bit -6bytes
-    private byte[] btAddress;
-    final private static int BT_LENGTH = 6;
-
     //variable -4 bytes child path,
     private byte[] accountNumbers;
     private int[] childNumbers;
@@ -112,10 +108,6 @@ final public class PaymentProtocol {
     public long satoshis() {
         return satoshis;
     }
-
-    public byte[] btAddress() {
-        return btAddress;
-    }
     
     public boolean isVerified() {
     	return signatureVerified;
@@ -149,7 +141,7 @@ final public class PaymentProtocol {
                 	throw new RuntimeException("user is too large");
                 }
             	
-                data = new byte[HEADER_LENGTH + publicKeyLen1 + 1 +SENDTO_LENGTH + AMOUNT_LENGTH + BT_LENGTH + userLen1 + 1];
+                data = new byte[HEADER_LENGTH + publicKeyLen1 + 1 +SENDTO_LENGTH + AMOUNT_LENGTH + userLen1 + 1];
                 data[offset++] = header;
 
                 //public key
@@ -160,9 +152,6 @@ final public class PaymentProtocol {
                 data[offset++] = (byte) userLen1;
                 System.arraycopy(userEncoded1,0,data, offset, userLen1);
                 offset += userLen1;
-                //bluetooth
-                System.arraycopy(btAddress,0,data, offset, BT_LENGTH);
-                offset += BT_LENGTH;
 
                 //amount
                 offset = encodeLong(satoshis, data, offset);
@@ -185,7 +174,7 @@ final public class PaymentProtocol {
                     throw new RuntimeException("user is too large");
                 }
 
-                data = new byte[HEADER_LENGTH + publicKeyLen2 + 1 + BT_LENGTH + userLen2 + 1];
+                data = new byte[HEADER_LENGTH + publicKeyLen2 + 1 + userLen2 + 1];
                 data[offset++] = header;
 
                 //public key
@@ -196,9 +185,6 @@ final public class PaymentProtocol {
                 data[offset++] = (byte) userLen2;
                 System.arraycopy(userEncoded2,0,data, offset, userLen2);
                 offset += userLen2;
-                //bluetooth
-                System.arraycopy(btAddress,0,data, offset, BT_LENGTH);
-                offset += BT_LENGTH;
 
                 break;
 
@@ -222,7 +208,7 @@ final public class PaymentProtocol {
                     throw new RuntimeException("childpaths need to be same length");
                 }
 
-                data = new byte[HEADER_LENGTH + halfSignedTransactionLen + CHILD_PATH_LENGTH + (5 * accountNumbersLen) + 2 + userLen3 + 1 + publicKeyLen3 + 1 + BT_LENGTH];
+                data = new byte[HEADER_LENGTH + halfSignedTransactionLen + CHILD_PATH_LENGTH + (5 * accountNumbersLen) + 2 + userLen3 + 1 + publicKeyLen3 + 1];
                 data[offset++] = header;
 
                 //public key
@@ -234,9 +220,6 @@ final public class PaymentProtocol {
                 data[offset++] = (byte) userLen3;
                 System.arraycopy(userEncoded3, 0, data, offset, userLen3);
                 offset += userLen3;
-                //bluetooth
-                System.arraycopy(btAddress,0,data, offset, BT_LENGTH);
-                offset += BT_LENGTH;
 
                 //transaction
                 offset = encodeShort(halfSignedTransactionLen, data, offset);
@@ -262,7 +245,7 @@ final public class PaymentProtocol {
                     throw new RuntimeException("user is too large");
                 }
 
-                data = new byte[HEADER_LENGTH + userLen4 + 1 + publicKeyLen4 + 1 + SENDTO_LENGTH+BT_LENGTH];
+                data = new byte[HEADER_LENGTH + userLen4 + 1 + publicKeyLen4 + 1 + SENDTO_LENGTH];
                 data[offset++] = header;
 
                 //public key
@@ -274,10 +257,6 @@ final public class PaymentProtocol {
                 data[offset++] = (byte) userLen4;
                 System.arraycopy(userEncoded4, 0, data, offset, userLen4);
                 offset += userLen4;
-
-                //bluetooth
-                System.arraycopy(btAddress,0,data, offset, BT_LENGTH);
-                offset += BT_LENGTH;
 
                 //BTC address
                 System.arraycopy(sendTo, 0, data, offset, SENDTO_LENGTH);
@@ -292,7 +271,7 @@ final public class PaymentProtocol {
                     throw new RuntimeException("childpaths need to be same length");
                 }
 
-                data = new byte[HEADER_LENGTH+fullSignedTransactionLen + 2 + BT_LENGTH + CHILD_PATH_LENGTH + (5 * childNumbersLen)];
+                data = new byte[HEADER_LENGTH+fullSignedTransactionLen + 2 + CHILD_PATH_LENGTH + (5 * childNumbersLen)];
                 data[offset++] = header;
                 //transaction
                 offset = encodeShort((short) fullSignedTransactionLen, data, offset);
@@ -364,11 +343,6 @@ final public class PaymentProtocol {
                 offset += userLen1;
                 final String user1 = new String(userEncoded1, "UTF-8");
                 paymentMessage.user = user1;
-                //bluetooth
-                final byte[] btAddress1 = new byte[BT_LENGTH];
-                System.arraycopy(data,offset,btAddress1, 0, BT_LENGTH);
-                offset += BT_LENGTH;
-                paymentMessage.btAddress = btAddress1;
 
                 //amount
                 final long satoshi = decodeLong(data, offset);
@@ -401,11 +375,6 @@ final public class PaymentProtocol {
                 offset += userLen2;
                 final String user2 = new String(userEncoded2, "UTF-8");
                 paymentMessage.user = user2;
-                //bluetooth
-                final byte[] btAddress2 = new byte[BT_LENGTH];
-                System.arraycopy(data,offset,btAddress2, 0, BT_LENGTH);
-                offset += BT_LENGTH;
-                paymentMessage.btAddress = btAddress2;
                 break;
             case PAYMENT_REQUEST_RESPONSE:
                 //public key
@@ -426,11 +395,6 @@ final public class PaymentProtocol {
                 offset += userLen3;
                 final String user3 = new String(userEncoded3, "UTF-8");
                 paymentMessage.user = user3;
-                //bluetooth
-                final byte[] btAddress3 = new byte[BT_LENGTH];
-                System.arraycopy(data,offset,btAddress3, 0, BT_LENGTH);
-                offset += BT_LENGTH;
-                paymentMessage.btAddress = btAddress3;
                 //transaction
                 final short transactionLen1 = decodeShort(data,offset);
                 offset += 2;
@@ -468,11 +432,6 @@ final public class PaymentProtocol {
                 offset += userLen4;
                 final String user4 = new String(userEncoded4, "UTF-8");
                 paymentMessage.user = user4;
-                //bluetooth
-                final byte[] btAddress4 = new byte[BT_LENGTH];
-                System.arraycopy(data,offset,btAddress4, 0, BT_LENGTH);
-                offset += BT_LENGTH;
-                paymentMessage.btAddress = btAddress4;
                 //address
                 final byte[] sendTo2 = new byte[SENDTO_LENGTH];
                 System.arraycopy(data, offset, sendTo2, 0, SENDTO_LENGTH);
@@ -524,7 +483,7 @@ final public class PaymentProtocol {
         final PaymentProtocol p = (PaymentProtocol) o;
         return Objects.equals(type, p.type) && Objects.equals(publicKey, p.publicKey) && Objects.equals(user, p.user)
                 && Arrays.equals(halfSignedTransaction, p.halfSignedTransaction) && Arrays.equals(fullySignedTransaction, p.fullySignedTransaction)
-                && Arrays.equals(sendTo, p.sendTo) && Arrays.equals(btAddress, p.btAddress) && satoshis == p.satoshis
+                && Arrays.equals(sendTo, p.sendTo) && satoshis == p.satoshis
                 && Arrays.equals(accountNumbers, p.accountNumbers) && Arrays.equals(childNumbers, p.childNumbers);
     }
 
@@ -532,7 +491,7 @@ final public class PaymentProtocol {
     public int hashCode() {
         return Objects.hashCode(type) ^ Objects.hashCode(publicKey) ^ Objects.hashCode(user)
                 ^ Arrays.hashCode(halfSignedTransaction) ^ Arrays.hashCode(fullySignedTransaction)
-                ^ Arrays.hashCode(sendTo) ^ Arrays.hashCode(btAddress) ^ (int) (satoshis ^ (satoshis >>> 32));
+                ^ Arrays.hashCode(sendTo) ^ (int) (satoshis ^ (satoshis >>> 32));
     }
 
     private static boolean verify(final PublicKey publicKey, final byte[] data, int offset) throws InvalidKeyException, SignatureException, NoSuchProviderException, NoSuchAlgorithmException {
@@ -556,61 +515,52 @@ final public class PaymentProtocol {
         return ecdsaSign.sign();
     }
 
-    public static PaymentProtocol paymentRequest(final PublicKey publicKey, final String user, final byte[] btAddress, final long satoshis, final byte[] sendTo) {
+    public static PaymentProtocol paymentRequest(final PublicKey publicKey, final String user, final long satoshis, final byte[] sendTo) {
     	if(publicKey == null) {
     		throw new RuntimeException("public key cannot be null");
     	}
     	if(user == null) {
     		throw new RuntimeException("user cannot be null");
     	}
-    	if(btAddress.length != BT_LENGTH) {
-    		throw new RuntimeException("wrong length of the bluetooth address");
-    	}
+
     	if(sendTo.length != SENDTO_LENGTH) {
     		throw new RuntimeException("wrong length of the receiving address");
     	}
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.PAYMENT_REQUEST);
         paymentMessage.publicKey = publicKey;
         paymentMessage.user = user;
-        paymentMessage.btAddress =btAddress;
         paymentMessage.satoshis = satoshis;
         paymentMessage.sendTo = sendTo;
         return paymentMessage;
     }
 
-    public static PaymentProtocol paymentRequestResponse(final PublicKey publicKey, final String user, final byte[] btAddress, final byte[] halfSignedTransaction, final byte[] accountNumbers, final int[] childNumbers) {
+    public static PaymentProtocol paymentRequestResponse(final PublicKey publicKey, final String user, final byte[] halfSignedTransaction, final byte[] accountNumbers, final int[] childNumbers) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.PAYMENT_REQUEST_RESPONSE);
         paymentMessage.publicKey = publicKey;
         paymentMessage.user = user;
-        paymentMessage.btAddress = btAddress;
         paymentMessage.halfSignedTransaction = halfSignedTransaction;
         paymentMessage.accountNumbers = accountNumbers;
         paymentMessage.childNumbers = childNumbers;
         return paymentMessage;
     }
 
-    public static PaymentProtocol paymentSend(final PublicKey publicKey, final String user, final byte[] btAddress) {
+    public static PaymentProtocol paymentSend(final PublicKey publicKey, final String user) {
         if(publicKey == null) {
             throw new RuntimeException("public key cannot be null");
         }
         if(user == null) {
             throw new RuntimeException("user cannot be null");
         }
-        if(btAddress.length != BT_LENGTH) {
-            throw new RuntimeException("wrong length of the bluetooth address");
-        }
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.PAYMENT_SEND);
         paymentMessage.publicKey = publicKey;
         paymentMessage.user = user;
-        paymentMessage.btAddress = btAddress;
         return paymentMessage;
     }
 
-    public static PaymentProtocol paymentSendResponse(final PublicKey publicKey, final String user, final byte[] btAddress, final byte[] sendTo) {
+    public static PaymentProtocol paymentSendResponse(final PublicKey publicKey, final String user, final byte[] sendTo) {
         final PaymentProtocol paymentMessage = new PaymentProtocol(Type.PAYMENT_SEND_RESPONSE);
         paymentMessage.publicKey = publicKey;
         paymentMessage.user = user;
-        paymentMessage.btAddress = btAddress;
         paymentMessage.sendTo = sendTo;
         return paymentMessage;
     }

@@ -401,6 +401,8 @@ public abstract class PaymentActivity extends BaseActivity {
             }
 
             if (protocol.type() == PaymentProtocol.Type.PAYMENT_NOK) {
+                LOGGER.info("NFC payment complete, but not successful");
+                current = State.SECOND;
                 // payment rejected by counterparty
                 listener.onPaymentRejected(user);
                 System.err.println("**PERFORMANCE, complete f " + (System.currentTimeMillis() - performance));
@@ -475,14 +477,14 @@ public abstract class PaymentActivity extends BaseActivity {
 
                                     LOGGER.debug("Sending payment request for {} satoshi to receiver {} (address: {})", satoshi, user, address);
 
-                                    byte[] retVal = PaymentProtocol.paymentRequest(keyPair.getPublic(), user, new byte[6], satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
+                                    byte[] retVal = PaymentProtocol.paymentRequest(keyPair.getPublic(), user, satoshi, BitcoinUtils.addressToBytes(address, bitcoinNet)).toBytes(keyPair.getPrivate());
                                     result2.set(retVal);
                                     System.err.println("**PERFORMANCE, init done1: " + (System.currentTimeMillis() - performance));
                                 } else if (sendRequestReceiver.hasActiveSendRequest()) {
                                     // send request
                                     sendRequest = sendRequestReceiver.getActiveSendRequest();
                                     LOGGER.debug("Active send request. Sending username to other device");
-                                    byte[] retVal = PaymentProtocol.paymentSend(keyPair.getPublic(), getCoinBleskApplication().getStorageHandler().getUsername(), new byte[6]).toBytes(keyPair.getPrivate());
+                                    byte[] retVal = PaymentProtocol.paymentSend(keyPair.getPublic(), getCoinBleskApplication().getStorageHandler().getUsername()).toBytes(keyPair.getPrivate());
                                     result2.set(retVal);
                                     System.err.println("**PERFORMANCE, init done2: " + (System.currentTimeMillis() - performance));
                                 } else {

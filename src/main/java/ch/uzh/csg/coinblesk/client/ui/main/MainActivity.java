@@ -689,7 +689,7 @@ public class MainActivity extends BaseActivity {
                                 String username = getCoinBleskApplication().getStorageHandler().getUsername();
                                 byte[] btcAddressBytes = BitcoinUtils.addressToBytes(getWalletService().getBitcoinAddress(), getWalletService().getBitcoinNet());
                                 try {
-                                    byte[] retVal = PaymentProtocol.paymentSendResponse(keyPair.getPublic(), username, new byte[6], btcAddressBytes).toBytes(keyPair.getPrivate());
+                                    byte[] retVal = PaymentProtocol.paymentSendResponse(keyPair.getPublic(), username, btcAddressBytes).toBytes(keyPair.getPrivate());
                                     responseLater.response(retVal);
                                     System.err.println("**PERFORMANCE, payment send done: " + (System.currentTimeMillis() - performance));
                                 } catch (Exception e) {
@@ -731,7 +731,7 @@ public class MainActivity extends BaseActivity {
                                                 HalfSignedTransaction halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
                                                 String username = getCoinBleskApplication().getStorageHandler().getUsername();
                                                 LOGGER.debug("Sending partially signed transaction over NFC, total size of message is {} bytes", halfSignedTx.getHalfSignedTx().length);
-                                                byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), username, new byte[6], halfSignedTx.getHalfSignedTx(), halfSignedTx.getAccountNumbers(), halfSignedTx.getChildNumbers()).toBytes(keyPair.getPrivate());
+                                                byte[] response = PaymentProtocol.paymentRequestResponse(keyPair.getPublic(), username, halfSignedTx.getHalfSignedTx(), halfSignedTx.getAccountNumbers(), halfSignedTx.getChildNumbers()).toBytes(keyPair.getPrivate());
                                                 responseLater.response(response);
                                                 System.err.println("**PERFORMANCE, payment request done: " + (System.currentTimeMillis() - performance));
                                             } else {
