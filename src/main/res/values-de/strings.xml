@@ -5,57 +5,18 @@
     <string name="app_name">CoinBlesk</string>
 
     <!-- Name of Activities -->
-    <string name="title_activity_login">CoinBlesk</string>
-    <string name="title_activity_reset_password">Passwort zurücksetzen</string>
-    <string name="title_activity_registration">Registrierung</string>
     <string name="title_activity_main">Kontoübersicht</string>
     <string name="title_activity_history">Verlauf</string>
     <string name="title_activity_receive_payment">Bitcoins verlangen</string>
     <string name="title_activity_send_payment">Bitcoins senden</string>
     <string name="title_activity_pay_in">Bitcoins Einzahlen</string>
     <string name="title_activity_pay_out">Bitcoins Auszahlen</string>
-    <string name="title_activity_profile_account">Profil</string>
-    <string name="title_activity_edit_email_account_profile">Emailadresse ändern</string>
-    <string name="title_activity_edit_passwotrd_account_profile">Passwort ändern</string>
     <string name="title_activity_about">Über </string>
     <string name="title_activity_wallet_backup">Wallet Backup</string>
-    <string name="title_activity_setting_pay_out_rules">Auszahlungs Regeln</string>
     <string name="title_activity_choose_payment">Zahlungsweise auswählen</string>
     <string name="title_activity_address_book">Adressbuch</string>
 
-    <!-- Login Strings -->
-    <string name="loginUsernameEditText">Benutzername</string>
-    <string name="loginPasswordEditText">Passwort</string>
-    <string name="loginPasswordOrUsernameForgottenTextView">Passwort/Benutzername vergessen</string>
-    <string name="loginSignUpBtn">Registrieren</string>
-    <string name="loginSignInBtn">Anmelden</string>
-    <string name="enter_username_password">Bitte geben Sie Benutzername und Passwort ein</string>
-    <string name="establish_internet_connection">Bitte schalten Sie die Internetverbindung ein um fortzufahren.</string>
-    <string name="invalid_password">Falsches Passwort.</string>
-    <string name="invalid_client_version_title">Update verfügbar</string>
-    <string name="invalid_client_version">Bitte updaten Sie diese App. Diese Version is veraltet und wird nicht mehr unterstützt.</string>
 
-    <!-- Reset Password Activity -->
-    <string name="resetPW_descriptionTextView">Um Ihr Passwort zurückzusetzen geben Sie bitte ihre registrierte Email Adresse ein und klicken Sie auf "Passwort zurücksetzen".</string>
-    <string name="resetPW_emailEditText">Email Adresse eingeben</string>
-    <string name="resetPW_resetButton">Passwort zurücksetzen</string>
-
-    <!-- Registration Strings -->
-    <string name="signUpEditUsernameText">Benutzername</string>
-    <string name="signUpEditEmailText">Email Adresse</string>
-    <string name="signUpEditPasswordText">Passwort</string>
-    <string name="signUpEditConfirmPasswordText">Passwort bestätigen</string>
-    <string name="signUpTermOfUseTextView">AGB lesen</string>
-    <string name="signUpCheckBox">Ich stimme den AGBs zu</string>
-    <string name="signUpAgreeBtn">Registrieren</string>
-    <string name="registration_field_not_empty">Bitte alle Felder ausfüllen.</string>
-    <string name="email_address_not_valid">E-Mail Adresse ist nicht gültig.</string>
-    <string name="registration_password_lenght_error">Passwort ungültig. Bitte verwenden Sie ein Passwort mit 4 bis 20 Zeichen.</string>
-    <string name="registration_username_error">Benutzername ungültig. \nNur Buchstaben und Nummern mit minimal 4 Zeichen sind erlaubt.</string>
-    <string name="registration_tou_not_accepted">Bitte lesen und akzeptieren Sie die AGB.</string>
-    <string name="registration_password_not_equal">Passwörter stimmen nicht überein. Bitte erneut versuchen.</string>
-    <string name="registration_successful"> Bitte prüfen Sie ihre Emails um ihr Konto zu aktivieren. Ihr Konto wurde erfolgreich erstellt. Ohne Aktivierung können Sie sich nicht anmelden.</string>
-    
     <!-- Popup Window -->
     <string name="termOfUseTitleView">Allgemeine Geschäfts- und Nutzungsbedingungen</string>
     <string name="termOfUseTextView">Diese Applikation wurde als Teil eines Masterprojektes am Institut für Informatik an der 
@@ -65,10 +26,8 @@
         \nUniversität Zürich, 2014\n\nQuellen:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics\nSmartphone Grundlage für animierte NFC Grafik:Smartphone by Matthieu Mercier from The Noun Project
 	</string>
     <string name="termOfUseImageCloseBtn">AGBs schliessen</string>
-    <string name="createAccountSuccessful">Bestätigung der Registrierung</string>
 
     <!-- Main View Strings -->
-    <string name="mainActivityTextView">Übersicht</string>
     <string name="payButton">Neue Transaktion erstellen</string>
     <string name="lastFewTransactionsTitle">Ihre letzten %1$s Transaktionen:</string>
     <string name="mainActivity_processTransactionTitle">Transaktion ausführen</string>
@@ -85,18 +44,6 @@
         <item>Adressbuch</item>
     </string-array>
 
-    <!-- History Strings -->
-    <string name="recent_payments">Verlauf</string>
-    <string name="history_activity_no_transactions_text">Es wurde noch keine Transaktionen getätigt.</string>
-    <string name="history_activity_get_by_email">Klicken Sie um eine komplette Liste all ihrer Transaktionen als Email zu erhalten.</string>
-
-    <string-array name="history_filter">
-        <item>Transaktionen</item>
-        <item>Einzahlungen</item>
-        <item>Einzahlungen (unbestätigt)</item>
-        <item>Auszahlungen</item>
-    </string-array>
-
     <!-- Abstract Payment -->
     <string name="payment_failure">Transaktion fehlgeschlagen</string>
     <string name="payment_success">Transaktion erfolgreich</string>
@@ -110,7 +57,6 @@
     <string name="payPayment_amountBTCTitle">Betrag:</string>
     <string name="payPayment_accept">Zahlung akzeptieren</string>
     <string name="payPayment_reject">Zahlung zurückweisen</string>
-    <string name="payPayment_toggleText">Automatisch alle Zahlungen akzeptieren</string>
 
     <!-- Receive Payment Strings -->
     <string name="receivePayment_charge">Verlangen</string>
@@ -129,12 +75,9 @@
     <string name="sendPayment_sendButton">Senden</string>
     <string name="sendPayment_balanceTitle">Kontostand:</string>
     <string name="sendPayment_selectReceiver">Empfänger auswählen</string>
-    <string name="sendPayment_error">Probleme beim Erstellen der Transaktion. Bitte versuchen Sie es später erneut.</string>
-    <string name="sendPayment_error_user">Fehler. Sie können keine Transaktion an sich selber versenden.</string>
     <string name="sendPayment_dialog_title">Transaktion überprüfen</string>
     <string name="sendPayment_dialog_message">Durch Ihre Bestätigung werden %1$s an %2$s gesendet.</string>
     <string name="sendPayment_dialog_confirm">Senden</string>
-    <string name="sendPayment_balance_error">Ihr Konto verfügt nicht über eine genügende Deckung zur Zahlung dieses Betrags.</string>
 
 
     <!-- Payment Notifications -->
@@ -153,7 +96,6 @@
     <string name="payIn_addressTitle">Bitcoin Adresse:</string>
     <string name="payIn_showQR">QR Code anzeigen</string>
     <string name="payIn_closeQR">Schliessen</string>
-    <string name="payIn_qr_error">Probleme beim Erstellen des QR Codes.</string>
 
     <!-- PayOut Strings -->
     <string name="setting_payOut_balance_title">Kontostand Limite in Bitcoins</string>
@@ -180,106 +122,27 @@
     <string name="payOut_ButtonScanQRText">Scan QR</string>
     <string name="payOut_NoQRCode">Bitcoin Adresse konnte nicht gescannt werden.</string>
     <string name="payOut_enterAmount">Betrag eingeben</string>
-    <string name="payOut_successful">Ihre Auszahlung von %1$s wurde erfolgreich ans Bitcoin Netzwerk gesendet.</string>
     <string name="payOut_error_balance">Auszahlung nicht erfolgreich. Ihr Kontostand ist tiefer als ihr gewünschter Auszahlungsbetrag.</string>
     <string name="payOut_error_address">Auszahlung nicht erfolgreich. Die Bitcoin Adresse ist ungültig.</string>
     <string name="payOut_error_enterBitcoinAddress">Bitte geben Sie eine Bitcoin Adresse ein.</string>
     <string name="payOut_error_enterAmount">Bitte geben Sie einen Betrag ein.</string>
 
-
-    <!-- Payou out Rules -->
-    <string name="insert_payout_address">Bitte Auszahlungs-Adresse eingeben!</string>
-    <string name="insert_min_amount">Bitte eine Kontostand-Limite von mindesetens 0.0001 BTC eingeben!</string>
-    <string name="at_least_one_day">Bite mindestens einen Tag auswählen!</string>
-    <string name="at_least_one_time">Bitte mindestens eine Zeit auswählen!</string>
-    <string name="defined_rules_title">"Auszahlungs Regeln"</string>
-    <string name="defined_successfully">Regeln wurden erfolgreich erstellt</string>
-    <string name="reset_pay_out_rules">Auszahlungs-Regeln zurückgesetzt</string>
-    <string name="display_day_time_rule">Tag/Zeit Regel </string>
-    <string name="display_address">Auszahlungs-Adresse: </string>
-    <string name="display_time">Zeit: </string>
-    <string name="display_sunday">Tag: Sonntag - </string>
-    <string name="display_monday">Tag: Montag - </string>
-    <string name="display_tuesday">Tag: Dienstag - </string>
-    <string name="display_wednesday">Tag: Mittwoch - </string>
-    <string name="display_thursday">Tag: Donnerstag - </string>
-    <string name="display_friday">Tag: Freitag - </string>
-    <string name="display_saturday">Tag: Samstag - </string>
-    <string name="display_default_day">Tag - </string>
-    <string name="display_balance_rule">Kontostand Regel</string>
-    <string name="display_balance">Kontostand: </string>
-    <!-- Payout Rule on item select -->
-    <string name="display_time_slots">Sie können nicht mehr als 4 Zeiten auswählen!</string>
-    <string name="display_already_selected">Diese Zeit wurde bereits ausgewählt!</string>
-
-    <!-- Spinner -->
-    <string-array name="settingPayOut_array">
-        <item>Kontostand</item>
-        <item>Tag/Zeit</item>
-    </string-array>
-
-    <string name="spinner_simple_textView">Regel</string>
-    <string name="settingPayOut_addressTitle">Auszahlungs-Adresse eingeben:</string>
-    <string name="settingPayOut_addressInput">Bitcoin Adresse</string>
-    <string name="settingPayOut_ruleTitle">Regel auswählen:</string>
-    <string name="settingPayOut_store_Btn">Speichern</string>
-    <string name="settingPayOut_created_rules_Title">Momentane Regeln:</string>
-    <string name="settingPayOut_reset_Btn">Zurücksetzen</string>
-
-    <!-- User Profile Strings -->
-    <string name="profileUsernameTitle">Benutzername:</string>
-    <string name="profileUsernameText"></string>
-    <string name="profileEmailTitle">E-Mail:</string>
-    <string name="profileEmailText"></string>
-    <string name="profileEditEmailBtn">Email-Adresse bearbeiten</string>
-    <string name="profilePasswordTitle">Passwort</string>
-    <string name="profileEditPasswordBtn">Passwort ändern</string>
-    <string name="profileEditDeletedUserAccountBtn">Benutzeraccount löschen</string>
-    <string name="delete_dialog_title">Löschen bestätigen</string>
-    <string name="delete_dialog_message">Sind sie sicher, dass Sie ihren Account löschen wollen?</string>
-
-    <!-- Update Account Strings -->
-    <!-- E-Mail -->
-    <string name="updateEmailTextView">Email-Adresse ändern:</string>
-    <string name="updateEmailBtn">Änderungen speichern</string>
-    <string name="email_address_invalid">Diese Email-Adresse ist ungültig. Bitte korrekt eingeben.</string>
-    <string name="same_email_address">Die neue Emailadresse muss sich von der alten unterscheiden. Bitte erneut versuchen.</string>
-    <!-- Password -->
-    <string name="updatePasswordTextView">Bitte ein neues Passwort eingeben:</string>
-    <string name="updatePasswordEditText">Passwort</string>
-    <string name="updatePasswordConfirmTextView">Passwort bestätigen:</string>
-    <string name="updatePasswordConfirmEditText">Passwort bestätigen</string>
-    <string name="updatePasswordBtn">Änderungen speichern</string>
-    <string name="updateAccount_successful">Ihr Konto wurde erfolgreich aktualisiert.</string>
-
     <!-- Icon & other Strings -->
-    <string name="action_settings">Einstellungen</string>
     <string name="drawer_open">Seitennavigation öffnen</string>
     <string name="drawer_close">Seitennavigation schliessen</string>
     <string name="action_warning">Keine Serververbindung! Verbinden Sie sich durch klicken von "Mit Server verbinden" in der Seitennavigation.</string>
-    <string name="menu_sessionCountdown"></string>
-    <string name="menu_refreshSession">Refresh Session</string>
-    <string name="date_time_set">Setzen</string>
     <string name="cancel">Abbrechen</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Ja</string>
     <string name="dialog_no">Nein</string>
-    <string name="dialog_close">Schliessen</string>
-    <string name="informationTextColor">#33b5e5</string>
     <string name="establishNfcConnectionInfo">Erstellen Sie nun den NFC Kontakt (Geräte zusammenhalten)</string>
     <string name="nfc_in_progress_dialog">Zahlung wird ausgeführt - NFC Kontakt halten</string>
     <string name="menu_offlineModeText">Offline Modus</string>
 
     <!-- Async Abstract Activity -->
     <string name="loading_progress_dialog">Laden. Bitte warten&#8230;</string>
-    <!-- Drawer Navigation -->
-    <string name="already_connected_to_server">Bereits mit Netzwerk verbunden!</string>
-
-    <!-- Menu information -->
-    <string name="optionMenu_offlineModeHint">Sie sind im Offline Modus. Um sich zum Server zu verbinden klicken Sie im Menü auf &quot;Mit Server verbinden&quot;.</string>
 
     <!-- APDU SERVICE -->
-    <string name="aiddescription">ch.uzh.csg.coinblesk</string>
     <string name="servicedesc">CoinBlesk Nfc</string>
 
     <!-- About Text -->
@@ -305,7 +168,6 @@
     <string name="firstTimeInfo_instruction_close">Information schliessen</string>
 
     <!-- Shared Preferences -->
-    <string name="stored_username"></string>
     <string name="sharedPreferences_isFirstTime"></string>
     <string name="sharedPreferences_username">Username wählen</string>
     <string name="sharedPreferences_usernameDescription">Dieser Username wird bei anderen CoinBlesk Benutzern angezeigt, wenn Zahlungen ausgeführt werden.</string>
@@ -319,7 +181,6 @@
     <string name="settings_autoAccept_editText_title">Automatisch akzeptieren Limite in BTC</string>
     <string name="settings_walletBackupSeedExplanation">Bitte schreiben Sie die folgenden 12 Wörter auf, und bewahren Sie sie auf. Mit diesen 12 Wörtern können Sie Ihre Wallet wieder herstellen, falls Sie ihr Gerät verlieren, oder falls Sie CoinBlesk auf einem neuen Gerät installieren wollen. ZEIGEN SIE DIESE 12 WÖRTER NIEMANDEM!</string>
     <string name="settings_walletBackupSeedTitle">Wallet Backup Wörter</string>
-    <string name="settings_walletBackupSeedCopyButtonText">In Zwischenablage kopieren</string>
     <string name="settings_walletBackupRefundTransactionTitle">Rückerstattungstransaktion</string>
     <string name="settings_walletBackupRefundTransactionButtonText">Rückerstattungstransaktion per Email senden</string>
     <string name="settings_walletBackupRefundTransactionExplanation"> Eine Rückerstattungstransaktion erlaubt es Ihnen, Ihre Bitcoins kontrolle über alle Ihre Bitcoins zu erlangen im Fall dass unser Server verschwinden würde.
@@ -334,41 +195,16 @@
     <string name="choosePayment_requestPaymentNoNfcBtnText">Bitcoins direkt an bekannten Empfänger senden\n(ohne NFC Kontakt)</string>
 
     <!-- Address Book Strings -->
-    <string name="addressBook_title">Adressbuch</string>
-    <string name="addressBook_addContactsButton">Kontakt hinzufügen</string>
     <string name="addressBook_removeAllUntrustedButton">Alle nicht favorisierten Kontakte entfernen</string>
     <string name="addressBook_dialogTitle">Wollen Sie wirklich den folgenden Kontakt entfernen?</string>
     <string name="addressBook_removeContact">Kontakt von favorisierten Kontakten entfernt.</string>
     <string name="addressBook_addContact">Kontakt zu favorisierten Kontakten hinzugefügt.</string>
-    <string name="addressBook_addContact_save">Speichern</string>
     <string name="addressBook_addContact_cancel">Abbrechen</string>
-    <string name="addressBook_addContact_title">Neuen Kontakt speichern</string>
-    <string name="addressBook_addContact_message">Geben Sie bitte den Benutzername des Konakts ein den sie gerne speichern möchten:</string>
      <string name="addressBook_removeAllUntrusted_question">Wollen Sie wirklich alle nicht favorisierten Kontakte von ihrem Addressbuch entfernen?</string>
 
-    <!-- History Transaction Strings -->
-    <string name="history_from">Von:</string>
-    <string name="history_to">An:</string>
-    <string name="history_amount">Betrag:</string>
-    <string name="history_payIn">Einzahlungs-Transaktion vom BTC Netzwerk:</string>
-    <string name="history_payInUn">Einzahlungs-Transaktion (unbestätigt):</string>
-    <string name="history_payOut">Auszahlungs-Transaktion:</string>
-    <string name="history_payOutTo">an Adresse:</string>
-
     <!-- Error Strings -->
-    <string name="error_xmlSave_failed">Lokale XML Datei konnte nicht gespeichert werden. Wenn dies öfters geschieht versuchen Sie das Problem durch löschen der CoinBlesk Applikationsdaten in den Android Einstellungen zu beheben.</string>
     <string name="error_transaction_failed">Übermittlungsfehler. Bitte prüfen Sie den Transaktionsverlauf um zu sehen ob ihre Transaktion erfolgreich war oder nicht.</string>
-    <string name="transaction_duplicate_error">Diese Transaktion wurde vom Server zurückgewiesen da eine Transaktion mit identischem Zeitstempel bereits verbucht wurde.</string>
-    <string name="exchangeRate_error">Der aktuelle Wechselkurs ist momentan nicht verfügbar.</string>
-    <string name="transaction_rejected">Zahlung wurde von Gegenpartei verweigert.</string>
-    <string name="transaction_rejected_payer">Sie haben die Zahlung verweigert.</string>
-    <string name="session_expired">Session ist abgelaufen!</string>
     <string name="unexcepted_error">Ein unerwarteter Fehler trat auf. Bitte versuchen Sie es erneut.</string>
-    <string name="transaction_server_rejected">Die Transaktion wurde vom Server zurückgewiesen. Bitte versuchen Sie es erneut.</string>
-    <string name="transaction_server_rejected_balance">Die Transaktion wurde vom Server zurückgewiesen. Käufer hat ungenügende Kontendeckung.</string>
-    <string name="error_nfc_initializing">Fehler bei Initialisierung von NFC. Zahlungen können eventuell nicht durchgeführt werden.</string>
-    <string name="error_login">Falscher Benutzername, falsches Passwort oder Emailadresse wurde nicht verifiziert.</string>
-    <string name="error_no_connection_before_login">Verbindung zum Server konnte nicht hergestellt werden.\nBitte überprüfen Sie ihre Internetverbindung.</string>
     <!-- NFC Activation -->
     <string name="nfc_enable_title">NFC Information</string>
     <string name="nfc_enable_message">Um diese Applikation benutzen zu können müssen Sie NFC (Near Field Communication) in den Geräte-Einstellungen aktivieren.</string>
@@ -379,11 +215,46 @@
     <!--Bitcoin Wallet Strings-->
     <string name="main_loadingWallet">Wallet wird geladen...</string>
     <string name="main_bitcoinSynchronizing">Synchronisierung mit dem Bitcoin Netzwerk... (%1$s%%)</string>
-    <string name="restoreOrNew_title">Wallet Setup</string>
 
     <!--Restore or Create New Wallet-->
     <string name="restoreOrCreate_passphrase_placeholder">Backup Wörter eingeben...</string>
-    <string name="restoreOrCreate_toast_restoreFailed">Wallet Wiederherstellung fehlgeschlagen. Sind Sie sicher, dass Sie die Wörter richtig eingegeben haben?</string>
+
+    <string name="establish_internet_connection">Bitte schalten Sie die Internetverbindung ein um fortzufahren.</string>
+    <string name="error_invalid_server_signature">Die Unterschrift des Servers konnte nicht verifiziert werden. Bitte probieren Sie es nochmals.</string>
+    <string name="merchantMode_toast_merchantModeActiveButNoExchanges">Der Verkäfermodus funktioniert nur, wenn mindestens eine Bitcoinbörse richtig konfiguriert wurde.</string>
+    <string name="merchantMode_toast_sellingFailed">Bitcoinverkauf ist fehlgeschlagen</string>
+    <string name="nfc_contact_established">NFC Kontakt hergestellt</string>
+    <string name="no_email_client_installed">Kein Emailprogramm gefunden auf dem Gerät</string>
+    <string name="payIn_bitcoinAddressEmailBody">Dies ist Ihre CoinBlesk Adresse: %1$s \n\nSie können diese problemlos allen Personen mitteilen, ohne dass Ihre Bitcoins dadurch gefährded sind.</string>
+    <string name="payIn_bitcoinAddressEmailSubject">Ihre CoinBlesk Bitcoin Adresse</string>
+    <string name="pref_description_merchant_mode">Im Verkäufermodus werden alle Bitcoins, die Sie empfangen, automatisch gegen traditionelle Währungen getauscht. Bitcoins zu senden ist allerdings nicht mehr möglich, wenn der Verkäufermodus aktiviert ist. Ein BitStamp oder Kraken Account wird benötigt um den Verkäufermodus zu aktivieren.</string>
+    <string name="pref_header_merchant">Verkäufer Einstellungen</string>
+    <string name="pref_title_merchant_mode">Verkäufermodus aktivieren</string>
+    <string name="pref_title_primary_exchange">Primäre Bitcoinbörse auswählen</string>
+    <string name="pref_title_secondary_exchange">Sekundäre Bitcoinbörse auswählen</string>
+    <string name="refundTxMail_ending">Vielen Dank, für Ihr Vertrauen in CoinBlesk.</string>
+    <string name="refundTxMail_explanation">Unten sehen Sie Ihre Rückerstattungstransaktion. Sie wird gültig ungefähr %1$s. Sie können die Transaktion kopieren und versenden unter z.B. https://blockchain.info/pushtx. Nachdem die Transaktion versendet wurde, können Sie Ihre Bitcoins in einer anderen Wallet, y.B. Electrum, mit dem Backup-Satz importieren. Sie können Ihren Backup-Satz finden unter Einstellungen->Wallet Backup. /n             Wichtig: Sie können mit der Transaktion nur Bitcoins wiederherstellen bis zum jetzigen Zeitpunkt. Wenn Sie mit der CoinBlesk App nach dem jetzigen Zeitpunkt Bitcoins senden oder empfangen, ist die Rückerstattungstransaktion nicht mehr gültig.</string>
+    <string name="refundTxMail_noRefundTxYet">Es wurde noch keine Rückerstattungstransaktion generiert.</string>
+    <string name="refundTxMail_salutation">Sehr geehrte(r) %1$s,</string>
+    <string name="refundTxMail_subject">CoinBlesk Rückerstattungstransaktion</string>
+    <string name="restoreOrNew_username_placeholder">Bitte geben Sie einen Benutzernamen ein</string>
+    <string name="seed_not_valid">Backup-Satz ist nicht gültig.</string>
+    <string name="settings_exchange_api_key">Börsen API Key</string>
+    <string name="settings_exchange_api_secret">Börsen API Secret</string>
+    <string name="settings_exchange_primary">Primäre Bitcoinbörse</string>
+    <string name="settings_exchange_secondary">Sekundäre Bitcoinbörse</string>
+    <string name="settings_exchange_username">Börsen Benutzername oder Kontonummer</string>
+    <string name="settings_walletBackupRestoreFailedToast">Wallet Wiederherstellung fehlgeschlagen</string>
+    <string name="settings_walletBackupRestoreWalletButtonText">Wallet wiederherstellen</string>
+    <string name="settings_walletRestoreExplanation">Um eine CoinBlesk Wallet wiederherzustellen, geben Sie bitten den Backup-Satz in das Feld unten ein und klicken Sie auf den "Wallet wiederherstellen" Knopf. Alle Bitcoins dieser Wallet werden automatisch auf die wiederhergestellte Wallet transferiert. Bitte beachten Sie, dass es mehrere Stunden dauern kann, um eine Wallet wiederherzustellen.</string>
+    <string name="settings_walletRestoreSeedHint">Bitte Wallet Backup-Satz hier eingeben.</string>
+    <string name="settings_walletRestoreTitle">Wallet Wiederherstellung</string>
+    <string name="spinner_simple_textView">Regel</string>
+    <string name="transaction_coinblesk_instant_pay_in">CoinBlesk Soforttransaktion. Sie haben %1$s von %2$s erhalten.</string>
+    <string name="transaction_pay_in">Sie haben %1$s vom Bitcoin Netzwerk erhalten</string>
+    <string name="transaction_pay_in_unverified">Sie haben %1$s vom Bitcoin Netzwerk erhalten (%2$s Bestätigungen)</string>
+    <string name="transaction_pay_out">Sie haben %1$s an %2$ gesendet</string>
+    <string name="transaction_pay_out_receiver_unknown">Sie haben %1$s gesendet</string>
 
 
 </resources>

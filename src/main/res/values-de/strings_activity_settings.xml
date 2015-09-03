@@ -24,7 +24,6 @@
 
     <!-- Payment settings -->
     <string name="pref_header_payments">Zahlungen</string>
-    <string name="pref_title_payout_rule">Auszahlungs-Regeln erfassen</string>
 	<string name="pref_description_include_fee">Aktiviere Transaktions-Gebühr bei Erhalt von Zahlungen</string>
     <string name="pref_title_include_fee">Transaktions-Gebühr</string>
     <string name="pref_title_fee_amount">Gebühr in Prozent (%)</string>

@@ -24,7 +24,6 @@
 
     <!-- Payment settings -->
     <string name="pref_header_payments">Payment</string>
-    <string name="pref_title_payout_rule">Define pay out rules</string>
 	<string name="pref_description_include_fee">Activate transaction fee when receiving a payment</string>
     <string name="pref_title_include_fee">Transaction Fee</string>
     <string name="pref_title_fee_amount">Fee Amount in Perecentage (%)</string>

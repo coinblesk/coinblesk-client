@@ -5,36 +5,18 @@
     <string name="app_name">CoinBlesk</string>
 
     <!-- Name of Activities -->
-    <string name="title_activity_login">CoinBlesk</string>
-    <string name="title_activity_reset_password">Reset Password</string>
-    <string name="title_activity_registration">Registration</string>
-    <string name="title_activity_main">Account Overview</string>
     <string name="title_activity_history">History</string>
     <string name="title_activity_receive_payment">Request Bitcoins</string>
     <string name="title_activity_send_payment">Send Bitcoins</string>
     <string name="title_activity_pay_in">Pay In</string>
     <string name="title_activity_pay_out">Pay Out</string>
-    <string name="title_activity_profile_account">Profile</string>
-    <string name="title_activity_edit_email_account_profile">Update E-Mail</string>
-    <string name="title_activity_edit_passwotrd_account_profile">Update Password</string>
     <string name="title_activity_about">About</string>
     <string name="title_activity_wallet_backup">Wallet Backup</string>
-    <string name="title_activity_setting_pay_out_rules">Pay out Rules</string>
     <string name="title_activity_choose_payment">Choose Payment Method</string>
     <string name="title_activity_address_book">Address Book</string>
 
     <!-- Login Strings -->
-    <string name="loginUsernameEditText">Enter your username</string>
-    <string name="loginPasswordEditText">Enter your password</string>
-    <string name="loginPasswordOrUsernameForgottenTextView">Forgot username or password</string>
-    <string name="loginSignUpBtn">Sign up</string>
-    <string name="loginSignInBtn">Sign in</string>
-    <string name="enter_username_password">Please enter a username and a password</string>
     <string name="establish_internet_connection">Please establish a internet connection to proceed.</string>
-    <string name="invalid_password">Invalid password</string>
-    <string name="invalid_client_version_title">Update available</string>
-    <string name="invalid_client_version">Please update this app. This version is outdated and is no longer supported.</string>
-
 
     <!-- Popup Window -->
     <string name="termOfUseTitleView">Terms and Conditions</string>
@@ -45,10 +27,8 @@
          \nUniversity of Zurich, 2014\n\nReferences:\nLogo: https://en.bitcoin.it/wiki/Promotional_graphics\nSmartphone Base for animated NFC image: Smartphone by Matthieu Mercier from The Noun Project
 	</string>
     <string name="termOfUseImageCloseBtn">Close terms of use</string>
-    <string name="createAccountSuccessful">Registration confirmation</string>
 
     <!-- Main View Strings -->
-    <string name="mainActivityTextView">Overview</string>
     <string name="payButton">Create new Transaction</string>
     <string name="lastFewTransactionsTitle">Your last %1$s transactions:</string>
     <string name="mainActivity_processTransactionTitle">Process Transaction</string>
@@ -67,15 +47,6 @@
     </string-array>
 
     <!-- History Strings -->
-    <string name="recent_payments">History</string>
-    <string name="history_activity_no_transactions_text">There are no transactions to display.</string>
-    <string name="history_activity_get_by_email">Click to receive the complete list of transactions by email.</string>
-
-    <string-array name="history_filter">
-        <item>Pay In</item>
-        <item>Pay In (unconfirmed)</item>
-        <item>Pay Out</item>
-    </string-array>
 
     <!-- Abstract Payment -->
     <string name="payment_failure">Payment failed</string>
@@ -90,7 +61,6 @@
     <string name="payPayment_amountBTCTitle">Amount:</string>
     <string name="payPayment_accept">Accept Payment</string>
     <string name="payPayment_reject">Reject Payment</string>
-    <string name="payPayment_toggleText">Accept automatically</string>
 
     <!-- Receive Payment Strings -->
     <string name="receivePayment_charge">Request</string>
@@ -109,12 +79,9 @@
     <string name="sendPayment_sendButton">Send</string>
     <string name="sendPayment_balanceTitle">Balance:</string>
     <string name="sendPayment_selectReceiver">Select remoteUser</string>
-    <string name="sendPayment_error">Problems occurred while sending your transaction. Please try again later.</string>
-    <string name="sendPayment_error_user">Error. You can not send a transaction to yourself.</string>
     <string name="sendPayment_dialog_title">Confirm Transaction</string>
     <string name="sendPayment_dialog_message">By your confirmation %1$s are sent to %2$s.</string>
     <string name="sendPayment_dialog_confirm">Send</string>
-    <string name="sendPayment_balance_error">Your account has not enough funds to do this transaction.</string>
 
     <!-- Payment Notifications -->
     <string name="payment_notification_success_payer">You paid %1$s to %2$s</string>
@@ -140,7 +107,6 @@
     <string name="payIn_addressTitle">Bitcoin Address:</string>
     <string name="payIn_showQR">Show QR Code</string>
     <string name="payIn_closeQR">Close</string>
-	<string name="payIn_qr_error">Error: Can\'t create QR code.</string>
     <string name="payIn_bitcoinAddressEmailBody">This is your CoinBlesk Bitcoin address: %1$s \n\nIt is safe to share this address with anyone.</string>
     <string name="payIn_bitcoinAddressEmailSubject">Your CoinBlesk Bitcoin Address</string>
 
@@ -170,105 +136,29 @@
     <string name="payOut_ButtonScanQRText">Scan QR</string>
     <string name="payOut_NoQRCode">Bitcoin address could not be scanned.</string>
     <string name="payOut_enterAmount">Enter amount</string>
-	<string name="payOut_successful">Your PayOut transaction of %1$s was successfully sent to the Bitcoin network.</string>
     <string name="payOut_error_balance">Couldn\'t pay out the desired amount. Your balance is lower than your specified PayOut amount.</string>
     <string name="payOut_error_address">Couldn\'t pay out the desired amount. The BTC Address is invalid.</string>
     <string name="payOut_error_enterBitcoinAddress">Please enter a Bitcoin address</string>
     <string name="payOut_error_enterAmount">Please enter an amount</string>
 
-    <!-- Payou out Rules -->
-    <string name="insert_payout_address">Please insert a pay out address!</string>
-    <string name="insert_min_amount">Please insert a balance amount with a minimum of 0.0001 BTC!</string>
-    <string name="at_least_one_day">Please select at least one day for a pay out!</string>
-    <string name="at_least_one_time">Please select at least a time for a pay out!</string>
-    <string name="defined_rules_title">"Payout Rules"</string>
-    <string name="defined_successfully">Rules have beend defined successfully</string>
-    <string name="reset_pay_out_rules">Rules have been reset</string>
-    <string name="display_day_time_rule">Day and Time rule</string>
-    <string name="display_address">Pay out address: </string>
-    <string name="display_time">Time: </string>
-    <string name="display_sunday">Day: Sunday - </string>
-    <string name="display_monday">Day: Monday - </string>
-    <string name="display_tuesday">Day: Tuesday - </string>
-    <string name="display_wednesday">Day: Wednesday - </string>
-    <string name="display_thursday">Day: Thursday - </string>
-    <string name="display_friday">Day: Friday - </string>
-    <string name="display_saturday">Day: Saturday - </string>
-    <string name="display_default_day">Day - </string>
-    <string name="display_balance_rule">Balance rule</string>
-    <string name="display_balance">Balance: </string>
-
-    <!-- Payout Rule on item select -->
-    <string name="display_time_slots">You can\'t define more than four time slots!</string>
-    <string name="display_already_selected">This time is already selected!</string>
-
-    <!-- Spinner -->
-    <string-array name="settingPayOut_array">
-        <item>Balance</item>
-        <item>Day and Time</item>
-    </string-array>
-
     <string name="spinner_simple_textView">Rule</string>
-    <string name="settingPayOut_addressTitle">Insert payout address:</string>
-    <string name="settingPayOut_addressInput">Bitcoin address</string>
-    <string name="settingPayOut_ruleTitle">Select Rule:</string>
-    <string name="settingPayOut_store_Btn">Save</string>
-    <string name="settingPayOut_created_rules_Title">Existing Rules:</string>
-    <string name="settingPayOut_reset_Btn">Reset</string>
-
-    <!-- User Profile Strings -->
-    <string name="profileUsernameTitle">Username:</string>
-    <string name="profileUsernameText"></string>
-    <string name="profileEmailTitle">E-Mail:</string>
-    <string name="profileEmailText"></string>
-    <string name="profileEditEmailBtn">Edit your e-mail address</string>
-    <string name="profilePasswordTitle">Password</string>
-    <string name="profileEditPasswordBtn">Change your password</string>
-    <string name="profileEditDeletedUserAccountBtn">Delete Account</string>
-    <string name="delete_dialog_title">Confirm delete</string>
-    <string name="delete_dialog_message">Are you sure to delete your remoteUser account?</string>
-
-    <!-- Update Account Strings -->
-    <!-- E-Mail -->
-    <string name="updateEmailTextView">Change e-mail address:</string>
-    <string name="updateEmailBtn">Submit Change</string>
-    <string name="email_address_invalid">This email address is invalid! Please enter again</string>
-    <string name="same_email_address">The new email address has to be different! Please try again</string>
-    <!-- Password -->
-    <string name="updatePasswordTextView">Please insert a new password:</string>
-    <string name="updatePasswordEditText">password</string>
-    <string name="updatePasswordConfirmTextView">Please confirm the password:</string>
-    <string name="updatePasswordConfirmEditText">confirmpassword</string>
-    <string name="updatePasswordBtn">Submit Change</string>
-    <string name="updateAccount_successful">Your account has successfully been updated.</string>
 
     <!-- Icon & other Strings -->
-    <string name="action_settings">Settings</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="action_warning">No connection! Connect by selecting "Connect to Server"</string>
-    <string name="menu_sessionCountdown"></string>
-    <string name="menu_refreshSession">Refresh Session</string>
-    <string name="date_time_set">Set</string>
     <string name="cancel">Cancel</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
-    <string name="dialog_close">Close</string>
     <string name="establishNfcConnectionInfo">Establish NFC connection now (Hold devices together)</string>
     <string name="nfc_in_progress_dialog">Payment in progress - Keep NFC connection</string>
     <string name="menu_offlineModeText">Offline Mode</string>
 
     <!-- Async Abstract Activity -->
     <string name="loading_progress_dialog">Loading. Please wait&#8230;</string>
-    <!-- Drawer Navigation -->
-    <string name="already_connected_to_server">You are already connected!</string>
-
-    <!-- Menu information -->
-    <string name="optionMenu_offlineModeHint">You are in offline mode. To reconnect open menu and click &quot;Reconnect to server&quot;.</string>
 
     <!-- APDU SERVICE -->
-    <string name="aiddescription">ch.uzh.csg.coinblesk</string>
     <string name="servicedesc">CoinBlesk Nfc</string>
 
     <!-- About Text -->
@@ -295,7 +185,7 @@
     <string name="firstTimeInfo_instruction_close">Close Information</string>
 
     <!-- Shared Preferences -->
-    <string name="sharedPreferences_isFirstTime">isFirstTime</string>
+    <string name="sharedPreferences_isFirstTime" translatable="false">isFirstTime</string>
     <string name="sharedPreferences_username">Set Your Username</string>
     <string name="sharedPreferences_usernameDescription">Other CoinBlesk users will see this username when they receive bitcoins from you.</string>
     <string name="sharedPreferences_numberOfLastTransactionsTitle">Number of last transactions</string>
@@ -308,7 +198,6 @@
     <string name="settings_autoAccept_editText_title">Auto accept limit in BTC</string>
     <string name="settings_walletBackupSeedExplanation">To backup your wallet, please write down the following 12 words. If you lose your device, or you want to install CoinBlesk on a new device, you have to enter these 12 words in order to get access to your bitcoins. DO NOT SHARE THESE WORDS WITH ANYONE!</string>
     <string name="settings_walletBackupSeedTitle">Wallet Backup Phrase</string>
-    <string name="settings_walletBackupSeedCopyButtonText">Copy to Clipboard</string>
     <string name="settings_walletBackupRefundTransactionTitle">Refund Transaction</string>
     <string name="settings_walletBackupRefundTransactionButtonText">Email Refund Transaction</string>
     <string name="settings_walletBackupRefundTransactionExplanation">A refund transaction allows you to claim your bitcoins even if our server vanishes completely.
@@ -335,43 +224,19 @@
     <string name="choosePayment_requestPaymentNoNfcBtnText">Send Bitcoins directly to known remoteUser\n(without NFC contact)</string>
 
     <!-- Address Book Strings -->
-    <string name="addressBook_title">Address Book</string>
-    <string name="addressBook_addContactsButton">Add Contact</string>
     <string name="addressBook_removeAllUntrustedButton">Remove all unfavored contacts</string>
     <string name="addressBook_dialogTitle">Do you really want to remove the following contact?</string>
     <string name="addressBook_removeContact">Contact removed from favorite contacts.</string>
     <string name="addressBook_addContact">Contact added to favorite contacts.</string>
-    <string name="addressBook_addContact_save">Save</string>
     <string name="addressBook_addContact_cancel">Cancel</string>
-    <string name="addressBook_addContact_title">Save new contact</string>
-    <string name="addressBook_addContact_message">Please enter the username of the contact you would like to save:</string>
     <string name="addressBook_removeAllUntrusted_question">Do you really want to remove all unfavored contacts from your address book?</string>
 
     <!-- History Transaction Strings -->
-    <string name="history_from">From:</string>
-    <string name="history_to">To:</string>
-    <string name="history_amount">Amount:</string>
-    <string name="history_payIn">PayIn Transaction from BTC network:</string>
-    <string name="history_payInUn">PayIn (unconfirmed) from BTC network:</string>
-    <string name="history_payOut">PayOut Transaction:</string>
-    <string name="history_payOutTo">to address:</string>
 
     <!-- Error Strings -->
-    <string name="error_xmlSave_failed">Couldn\'t save to local XML file. If this occurs often try to resolve by deleting CoinBlesk app preferences in Android Settings.</string>
     <string name="error_transaction_failed">Transmission error: Please check your history to verify if the transaction was successful or not.</string>
-    <string name="error_no_confirmation">Payment was sent, but no confirmation was received. Check your history to verify if the transaction was successful or not.</string>
     <string name="error_invalid_server_signature">The server signature could not be verified. Please try again.</string>
-    <string name="transaction_duplicate_error">This transaction has been refused by the server as a transaction with the same timestamp has already been booked.</string>
-    <string name="exchangeRate_error">Current exchange rate is not available at the moment.</string>
-    <string name="transaction_rejected">Payer has rejected the payment.</string>
-    <string name="transaction_rejected_payer">You have rejected the payment.</string>
-    <string name="session_expired">Session expired!</string>
     <string name="unexcepted_error">An unexpected error occurred. Please try again</string>
-    <string name="transaction_server_rejected">The server rejected the transaction. Please try again.</string>
-    <string name="transaction_server_rejected_balance">The server rejected the transaction. Payer has insufficient funds.</string>
-    <string name="error_nfc_initializing">Error occurred while preparing for NFC Payments. Payments eventually can\'t be done properly.</string>
-     <string name="error_login">Wrong username, wrong password or unverified email address.</string>
-     <string name="error_no_connection_before_login">No connection to server.\nPlease check your internet connection.</string>
      <!-- NFC Activation -->
     <string name="nfc_enable_title">NFC Information</string>
     <string name="nfc_enable_message">To use this application you need to enable NFC (Near Field Communication) in your device settings.</string>
@@ -382,13 +247,10 @@
     <!--Bitcoin Wallet Strings-->
     <string name="main_loadingWallet">Loading wallet...</string>
     <string name="main_bitcoinSynchronizing">Synchronizing with Bitcoin network... (%1$s%%)</string>
-    <string name="restoreOrNew_title">Wallet Setup</string>
 
     <!--Restore or Create New Wallet-->
     <string name="restoreOrNew_username_placeholder">Please enter a Username...</string>
-    <string name="restoreOrNew_usernameMissing_toast">Please enter a Username</string>
     <string name="restoreOrCreate_passphrase_placeholder">Enter Backup Phrase...</string>
-    <string name="restoreOrCreate_toast_restoreFailed">Failed to restore wallet. Are you sure you entered the backup phrase correctly?</string>
 
     <!--Refund transaction-->
     <string name="refundTxMail_salutation">Dear %1$s,</string>
@@ -405,7 +267,6 @@
 
 
     <!-- Generic Strings -->
-    <string name="email_address_not_valid">E-Mail address is not valid.</string>
     <string name="seed_not_valid">Backup phrase is not valid.</string>
     <string name="no_email_client_installed">No email client found on device</string>
 
