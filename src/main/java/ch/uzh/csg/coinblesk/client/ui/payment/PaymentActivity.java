@@ -318,8 +318,12 @@ public abstract class PaymentActivity extends BaseActivity {
             LOGGER.debug("nfc tag found, current {}", current);
             nfcCommPresent = true;
 
-            Toast.makeText(PaymentActivity.this, R.string.nfc_contact_established, Toast.LENGTH_SHORT).show();
-        }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(PaymentActivity.this, R.string.nfc_contact_established, Toast.LENGTH_SHORT).show();
+                }
+            });        }
 
         @Override
         public void nfcTagLost() {

@@ -847,7 +847,13 @@ public class MainActivity extends BaseActivity {
             @Override
             public void nfcTagFound() {
                 LOGGER.debug("nfcTagFound");
-                Toast.makeText(MainActivity.this, R.string.nfc_contact_established, Toast.LENGTH_SHORT).show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, R.string.nfc_contact_established, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             }
 
 
