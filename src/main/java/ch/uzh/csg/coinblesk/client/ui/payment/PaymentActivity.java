@@ -321,7 +321,13 @@ public abstract class PaymentActivity extends BaseActivity {
         @Override
         public void nfcTagLost() {
             LOGGER.debug("nfc tag lost, check BT, current {}", current);
+            if(btInitiator!=null) {
+                LOGGER.debug("nfc tag lost, check BT, open {}", btInitiator.isOpen());
+            }
+
+
             nfcCommPresent = false;
+
             if(btleController != null && btInitiator!=null && btInitiator.isOpen() && current == State.FIRST_SENT) {
                 t2 = new Thread(new Runnable() {
                     @Override
