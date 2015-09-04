@@ -123,6 +123,9 @@ public abstract class PaymentActivity extends BaseActivity {
         LOGGER.debug("payment acitivity stop");
         //this must be in start as the permission dialog would call resume/pause
         initiator.stop(this);
+        if(btInitiator != null) {
+            btInitiator.close();
+        }
     }
 
     @Override
@@ -227,13 +230,14 @@ public abstract class PaymentActivity extends BaseActivity {
         private Thread t;
         private AtomicReference<byte[]> result2 = new AtomicReference<>();
 
-        private BTLEController btleController;
+
         private boolean nfcCommPresent = false;
         private boolean btCommPresent = false;
 
         private long performance = 0;
 
         private boolean isSending = false;
+        private volatile BTLEController btleController;
 
         private Thread t2;
 
@@ -251,9 +255,14 @@ public abstract class PaymentActivity extends BaseActivity {
             }
         }
 
+        public PaymentNfcInitiatorHandler() {
+            LOGGER.debug("new PaymentNfcInitiatorHandler created");
+        }
+
+
         @Override
         public void setUUID(final byte[] bytes, boolean first) {
-            if(btInitiator!=null && !btInitiator.isOpen()) {
+            if(btInitiator!=null && !btInitiator.isOpen() && !isEmpty(bytes)) {
                 LOGGER.debug("startup scanninng done");
                 new Thread(new Runnable() {
                     @Override
@@ -268,6 +277,15 @@ public abstract class PaymentActivity extends BaseActivity {
 
         }
 
+        private boolean isEmpty(byte[] bytes) {
+            for(int i=0;i<bytes.length;i++) {
+                if(bytes[i] != 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         @Override
         public void protocolDone() {
             LOGGER.debug("protocol done");
@@ -278,7 +296,7 @@ public abstract class PaymentActivity extends BaseActivity {
 
         @Override
         public void btTagFound(final BTLEController btleController) {
-            LOGGER.debug("bt tag found");
+            LOGGER.debug("bt tag found {}", btleController);
             btCommPresent = true;
             this.btleController = btleController;
             if(!nfcCommPresent) {
@@ -312,7 +330,7 @@ public abstract class PaymentActivity extends BaseActivity {
                 t2=null;
             }
             if(btInitiator != null) {
-                btInitiator.close();
+                btInitiator.softClose();
             }
 
             LOGGER.debug("nfc tag found, current {}", current);
@@ -331,17 +349,19 @@ public abstract class PaymentActivity extends BaseActivity {
             if(btInitiator!=null) {
                 LOGGER.debug("nfc tag lost, check BT, open {}", btInitiator.isOpen());
             }
-
+            LOGGER.debug("nfc tag lost, check btleController {}", btleController);
 
             nfcCommPresent = false;
 
             if(btleController != null && btInitiator!=null && btInitiator.isOpen() && current == State.FIRST_SENT) {
+                LOGGER.debug("going to start BTLE");
                 t2 = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             Thread.sleep(250);
                         } catch (InterruptedException e) {
+                            LOGGER.debug("interrupt");
                             return;
                         }
                         btleController.startBTLE();
@@ -365,11 +385,14 @@ public abstract class PaymentActivity extends BaseActivity {
             //initiator.getNfcInitiator().reset();
             reset();
             LOGGER.error("NFC communication failed: {}", s);
+            LOGGER.debug("lost1, check btleController {}", btleController);
         }
 
         @Override
         public void handleStatus(String s) {
-            LOGGER.error("NFC communication status: {}", s);
+
+            LOGGER.debug("NFC communication status: {}", s);
+            LOGGER.debug("lost1, check btleController {}", btleController);
         }
 
         @Override
@@ -445,7 +468,7 @@ public abstract class PaymentActivity extends BaseActivity {
 
         @Override
         public boolean hasMoreMessages() {
-            return current != State.SECOND;
+            return current != State.SECOND || nfcCommPresent;
         }
 
         @Override
@@ -501,8 +524,8 @@ public abstract class PaymentActivity extends BaseActivity {
                                     result2.set(retVal);
                                     System.err.println("**PERFORMANCE, init done2: " + (System.currentTimeMillis() - performance));
                                 } else {
-                                    LOGGER.debug("No active payment request: Abort");
-                                    listener.onPaymentError("No active payment request");
+                                    LOGGER.debug("No active payment request: keep polling");
+                                    //listener.onPaymentError("No active payment request");
                                 }
                             } catch (Exception e) {
                                 LOGGER.error("Sending payment request failed", e);
@@ -656,7 +679,9 @@ public abstract class PaymentActivity extends BaseActivity {
                     });
 
                     return null;
-
+                case SECOND:
+                    //just loop
+                    return null;
                 default:
                     throw new RuntimeException("Should never be reached");
             }

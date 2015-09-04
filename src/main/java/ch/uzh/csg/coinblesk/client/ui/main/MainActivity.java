@@ -265,12 +265,6 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        // do nothing...
-        // prevents going back to the RestoreOrNewActivity from the home screen...
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
@@ -722,6 +716,7 @@ public class MainActivity extends BaseActivity {
                                     @Override
                                     public void onDecision(boolean accepted) {
                                         try {
+                                            showNFCDialog(bt);
                                             if (accepted) {
                                                 // the user accepted the payment
                                                 HalfSignedTransaction halfSignedTx = getWalletService().createNfcPayment(btcAddress, satoshis);
@@ -834,26 +829,30 @@ public class MainActivity extends BaseActivity {
                 LOGGER.debug("nfcTagLost");
             }
 
+            boolean bt = false;
+
             @Override
             public void btTagFound() {
                 LOGGER.debug("btTagFound");
+                bt = true;
             }
 
             @Override
             public void btTagLost() {
                 LOGGER.debug("btTagLost");
+                bt = false;
             }
 
             @Override
             public void nfcTagFound() {
                 LOGGER.debug("nfcTagFound");
+                hideNFCDialog();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(MainActivity.this, R.string.nfc_contact_established, Toast.LENGTH_SHORT).show();
                     }
                 });
-
             }
 
 

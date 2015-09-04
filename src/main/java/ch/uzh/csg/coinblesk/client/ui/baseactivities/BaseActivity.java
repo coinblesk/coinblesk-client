@@ -310,6 +310,37 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
         }
     }
 
+    private AlertDialog d = null;
+
+    public void showNFCDialog(boolean bt) {
+        if(bt) {
+            return;
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final AlertDialog.Builder alert = new AlertDialog.Builder(BaseActivity.this);
+                alert.setTitle("Hold to NFC");
+                alert.setMessage("Hold to NFC");
+
+                alert.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        d = null;
+                    }
+                });
+
+                d = alert.show();
+            }
+        });
+
+    }
+
+    public void hideNFCDialog() {
+        if (d != null) {
+            d.dismiss();
+            d = null;
+        }
+    }
 
     private void showConfirmationDialog(final BigDecimal amount, final String user, final PaymentActivity.UserPaymentConfirmation confirmation) {
 

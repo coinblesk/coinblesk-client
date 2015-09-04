@@ -253,7 +253,7 @@
     <string name="transaction_coinblesk_instant_pay_in">CoinBlesk Soforttransaktion. Sie haben %1$s von %2$s erhalten.</string>
     <string name="transaction_pay_in">Sie haben %1$s vom Bitcoin Netzwerk erhalten</string>
     <string name="transaction_pay_in_unverified">Sie haben %1$s vom Bitcoin Netzwerk erhalten (%2$s Bestätigungen)</string>
-    <string name="transaction_pay_out">Sie haben %1$s an %2$ gesendet</string>
+    <string name="transaction_pay_out">Sie haben %1$s an %2$s gesendet</string>
     <string name="transaction_pay_out_receiver_unknown">Sie haben %1$s gesendet</string>
 
 
